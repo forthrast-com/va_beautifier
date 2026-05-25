@@ -122,11 +122,12 @@ fn_index = {(fn['part'], fn['chapter'], fn['number']): fn for fn in footnotes}
 def _desc_line(ln):
     """Render a single front-matter line: title-case the all-caps source,
     preserving Roman numerals (POPE LEO XIV, POPE PAUL VI) via the
-    title_case helper. `cap_last=False` because each visual line is a
-    fragment of a longer subtitle phrase — capitalising a trailing
-    small word ("in The") looks wrong. Wrap in inline-block so the
-    centred line still reflows as one unit at narrow widths."""
-    return f'<span style="display:inline-block">{e(title_case(ln, cap_last=False))}</span>'
+    title_case helper. `small_words=True` because each visual line is a
+    fragment of a longer subtitle phrase — a line that *starts* with
+    "of the Holy Father" should keep the leading "of" lowercase.
+    Wrap in inline-block so the centred line still reflows as one unit
+    at narrow widths."""
+    return f'<span style="display:inline-block">{e(title_case(ln, small_words=True))}</span>'
 
 
 def _desc_block(text, cls, *, break_before_on=False):

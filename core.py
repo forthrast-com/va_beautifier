@@ -110,15 +110,23 @@ _SMALL = {'a', 'an', 'the', 'and', 'but', 'or', 'nor', 'for', 'yet', 'so',
 _ROMAN = re.compile(r'^[IVXLCDM]{2,}$')
 
 
-def title_case(s, *, cap_last=True):
+def title_case(s, *, cap_last=True, small_words=False):
     """Dumb title case: capitalise every word, force small words ("of",
-    "the", "in"…) to lowercase regardless of position, and preserve
-    Roman numerals. `cap_last` is accepted for back-compat but now no-op
-    — small words are always lowercase even at end-of-line."""
+    "the", "in"…) to lowercase, and preserve Roman numerals.
+
+    With `small_words=False` (default), the *first* word is always
+    capitalised — even if it's a small word — so chapter and section
+    titles like "A Dynamic Approach Faithful to the Gospel" keep their
+    leading article. With `small_words=True`, small words stay lowercase
+    everywhere, suitable for fragments like "of the Holy Father" sitting
+    inside a centred multi-line subtitle.
+
+    `cap_last` is accepted for back-compat but is a no-op — trailing
+    small words always stay lowercase."""
     del cap_last  # always treated as dumb-title-case
     words = s.split()
     result = []
-    for word in words:
+    for i, word in enumerate(words):
         # Strip surrounding punctuation for the Roman test so "VI," still
         # registers as a numeral.
         core = word.strip('.,;:!?"\'’“”()[]')
@@ -131,7 +139,7 @@ def title_case(s, *, cap_last=True):
             parts = lo.split(sep)
             parts[0] = parts[0].capitalize()
             result.append(sep.join(parts))
-        elif lo in _SMALL:
+        elif lo in _SMALL and (small_words or i > 0):
             result.append(lo)
         else:
             result.append(lo.capitalize())
