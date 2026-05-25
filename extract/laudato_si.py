@@ -40,6 +40,7 @@ RE_FOOTNOTE   = re.compile(r'^\[\s*(\d+)\s*\]\s+(.+)$', re.DOTALL)
 RE_SECTION_B  = re.compile(r'^([IVX]+)\s*\.\s+(.+)$')
 RE_CHAPTER_C  = re.compile(r'^CHAPTER\s+([A-Z]+)$')
 RE_INLINE_REF = re.compile(r'\[(\d{1,3})\]')
+RE_SPACE_BEFORE_REF = re.compile(r' +(\(\d{1,3}\))')
 
 CHAPTER_WORDS = {
     'ONE': 1, 'TWO': 2, 'THREE': 3, 'FOUR': 4, 'FIVE': 5, 'SIX': 6,
@@ -51,7 +52,8 @@ CHROME = ['script', 'style', 'meta', 'link', 'img', 'header',
 
 
 def _normalise_refs(text):
-    return RE_INLINE_REF.sub(r'(\1)', text)
+    text = RE_INLINE_REF.sub(r'(\1)', text)
+    return RE_SPACE_BEFORE_REF.sub(r'\1', text)
 
 
 def _br_lines(tag):

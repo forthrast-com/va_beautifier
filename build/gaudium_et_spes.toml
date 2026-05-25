@@ -709,7 +709,7 @@ break_after = false
 text = """
 Now many of our contemporaries seem to fear that a closer bond between human activity and religion will work against the independence of men, of societies, or of the sciences.
 
-If by the autonomy of earthly affairs we mean that created things and societies themselves enjoy their own laws and values which must be gradually deciphered, put to use, and regulated by men, then it is entirely right to demand that autonomy. Such is not merely required by modern man, but harmonizes also with the will of the Creator. For by the very circumstance of their having been created, all things are endowed with their own stability, truth, goodness, proper laws and order. Man must respect these as he isolates them by the appropriate methods of the individual sciences or arts. Therefore if methodical investigation within every branch of learning is carried out in a genuinely scientific manner and in accord with moral norms, it never truly conflicts with faith, for earthly matters and the concerns of faith derive from the same God. (6) Indeed whoever labors to penetrate the secrets of reality with a humble and steady mind, even though he is unaware of the fact, is nevertheless being led by the hand of God, who holds all things in existence, and gives them their identity. Consequently, we cannot but deplore certain habits of mind, which are sometimes found too among Christians, which do not sufficiently attend to the rightful independence of science and which, from the arguments and controversies they spark, lead many minds to conclude that faith and science are mutually opposed.(7)
+If by the autonomy of earthly affairs we mean that created things and societies themselves enjoy their own laws and values which must be gradually deciphered, put to use, and regulated by men, then it is entirely right to demand that autonomy. Such is not merely required by modern man, but harmonizes also with the will of the Creator. For by the very circumstance of their having been created, all things are endowed with their own stability, truth, goodness, proper laws and order. Man must respect these as he isolates them by the appropriate methods of the individual sciences or arts. Therefore if methodical investigation within every branch of learning is carried out in a genuinely scientific manner and in accord with moral norms, it never truly conflicts with faith, for earthly matters and the concerns of faith derive from the same God.(6) Indeed whoever labors to penetrate the secrets of reality with a humble and steady mind, even though he is unaware of the fact, is nevertheless being led by the hand of God, who holds all things in existence, and gives them their identity. Consequently, we cannot but deplore certain habits of mind, which are sometimes found too among Christians, which do not sufficiently attend to the rightful independence of science and which, from the arguments and controversies they spark, lead many minds to conclude that faith and science are mutually opposed.(7)
 
 But if the expression, the independence of temporal affairs, is taken to mean that created things do not depend on God, and that man can use them without any reference to their Creator, anyone who acknowledges God will see how false such a meaning is. For without the Creator the creature would disappear. For their part, however, all believers of whatever religion always hear His revealing voice in the discourse of creatures. When God is forgotten, however, the creature itself grows unintelligible."""
 
@@ -2099,14 +2099,14 @@ part = 1
 chapter = 1
 number = 22
 text = """
-Cf. Second Council of Constantinople, canon 7: "The divine Word was not changed into a human nature, nor was a human nature absorbed by the Word." Denzinger 219 (428); Cf. also Third Council of Constantinople: "For just as His most holy and immaculate human nature, though deified, was not destroyed (theotheisa ouk anerethe), but rather remained in its proper state and mode of being": Denzinger 291 (556); Cf. Council of Chalcedon:" to be acknowledged in two natures, without confusion change, division, or separation." Denzinger 148 (302)."""
+Cf. Second Council of Constantinople, canon 7: "The divine Word was not changed into a human nature, nor was a human nature absorbed by the Word." Denzinger 219(428); Cf. also Third Council of Constantinople: "For just as His most holy and immaculate human nature, though deified, was not destroyed (theotheisa ouk anerethe), but rather remained in its proper state and mode of being": Denzinger 291(556); Cf. Council of Chalcedon:" to be acknowledged in two natures, without confusion change, division, or separation." Denzinger 148(302)."""
 
 [[footnotes]]
 part = 1
 chapter = 1
 number = 23
 text = """
-Cf. Third Council of Constantinople: "and so His human will, though deified, is not destroyed": Denzinger 291 (556)."""
+Cf. Third Council of Constantinople: "and so His human will, though deified, is not destroyed": Denzinger 291(556)."""
 
 [[footnotes]]
 part = 1

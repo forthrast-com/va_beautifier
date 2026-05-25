@@ -26,6 +26,11 @@ RE_PART     = re.compile(r'^PART\s+([IVX]+)\s*$')
 RE_CHAPTER  = re.compile(r'^CHAPTER\s+([IVX]+)\s*$')
 RE_SECTION  = re.compile(r'^SECTION\s+(\d+|[IVX]+)\s*(.*)$', re.DOTALL)
 RE_PARA_NUM = re.compile(r'^\s*(\d+)\.\s+(.+)', re.DOTALL)
+RE_SPACE_BEFORE_REF = re.compile(r' +(\(\d{1,3}\))')
+
+
+def _tighten_refs(text):
+    return RE_SPACE_BEFORE_REF.sub(r'\1', text)
 
 CHAPTER_TITLES = {
     'THE DIGNITY OF THE HUMAN PERSON',
@@ -154,7 +159,7 @@ def _walk_body(body_soup):
             current = {
                 'number': int(m.group(1)),
                 **{k: state[k] for k in state},
-                'text': m.group(2).strip(),
+                'text': _tighten_refs(m.group(2).strip()),
             }
         elif current is not None and not any(
             text.startswith(h) for h in ['[', 'Print', 'Index']
@@ -166,7 +171,7 @@ def _walk_body(body_soup):
                 if not (isinstance(c, NavigableString) and not str(c).strip())
             )
             if not all_bold:
-                current['text'] += '\n\n' + text
+                current['text'] += '\n\n' + _tighten_refs(text)
 
     flush()
     return paragraphs
@@ -198,7 +203,7 @@ def _extract_footnotes(notes_html):
             footnotes.append({
                 'part': part, 'chapter': chapter,
                 'number': int(m.group(1)),
-                'text': m.group(2).strip(),
+                'text': _tighten_refs(m.group(2).strip()),
             })
     return footnotes
 
