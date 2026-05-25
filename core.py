@@ -4,6 +4,7 @@ Each `extract/<doc>.py` exposes:
 
     def extract() -> {
         'name':         str,        # display name, e.g. "Gaudium et Spes"
+        'source_url':   str,        # original Vatican HTML edition
         'desc':         str,        # multi-line description (may be '')
         'promulgation': str,        # multi-line promulgation (may be '')
         'paragraphs':   list[dict], # per-paragraph dicts (see schema below)
@@ -12,8 +13,8 @@ Each `extract/<doc>.py` exposes:
 
 Paragraph schema (all keys optional except number, text — defaults to 0 / ''):
 
-    number, part, part_title, chapter, chapter_title,
-    section, section_title, sub_heading, heading_la, text
+    number, part, part_title, chapter, chapter_title, chapter_subtitle,
+    section, section_title, sub_heading, heading_la, break_after, text
 
 Footnote schema:
 
@@ -28,8 +29,41 @@ from bs4 import NavigableString
 # ── text helpers ─────────────────────────────────────────────────────────────
 
 def clean_text(element):
-    text = element.get_text(separator=' ')
-    return re.sub(r'\s+', ' ', text).strip()
+    """Extract text, preserving `<br>` as `\\n` and `<a href>` as `[text](href)`.
+
+    Whitespace within a line is collapsed; line breaks survive. Poetic blocks
+    (canticle, prayers) use `<br>` for verse breaks. External hyperlinks in
+    the source (vatican.va doc cross-refs in body + footnotes) are kept as
+    markdown-style `[text](href)` markers for the renderer to convert back.
+
+    Anchors with an `href="#_ftn…"` (the source's footnote backrefs) get their
+    wrapper dropped — the bracketed text inside (e.g. `[1]`) is preserved so
+    the extractor's `[N]` → `(N)` normalisation still sees it.
+    """
+    chunks = []
+    for desc in element.descendants:
+        name = getattr(desc, 'name', None)
+        if name == 'br':
+            chunks.append('\n')
+        elif name == 'a' and desc.get('href'):
+            href = desc['href']
+            text = re.sub(r'\s+', ' ', desc.get_text(separator=' ')).strip()
+            if href.startswith('#_ftn'):
+                # Internal source-footnote anchor — keep just the text content.
+                if text:
+                    chunks.append(text)
+            elif text:
+                chunks.append(f'[{text}]({href})')
+        elif isinstance(desc, NavigableString):
+            # Children of an anchor we already captured — skip to avoid dupes.
+            parent_a = desc.find_parent('a')
+            if parent_a is not None and parent_a.get('href'):
+                continue
+            chunks.append(str(desc))
+    text = ''.join(chunks)
+    text = re.sub(r'[ \t]+', ' ', text)
+    text = re.sub(r' *\n *', '\n', text)
+    return text.strip()
 
 
 def only_child_is(tag, name):
@@ -97,16 +131,21 @@ _PARA_FIELDS = [
     ('part_title',    'str'),
     ('chapter',       'int'),
     ('chapter_title', 'str'),
+    ('chapter_subtitle', 'str'),
     ('section',       'int'),
     ('section_title', 'str'),
     ('sub_heading',   'str'),
     ('heading_la',    'str'),
+    ('break_after',   'bool'),
     ('text',          'mlstr'),
 ]
 
 
-def write_toml(path, *, name, desc='', promulgation='', paragraphs, footnotes, appendices=()):
+def write_toml(path, *, name, source_url='', desc='', promulgation='',
+               paragraphs, footnotes, appendices=()):
     out = [f'name = {_toml_str(name)}']
+    if source_url:
+        out.append(f'source_url = {_toml_str(source_url)}')
     if desc:
         out.append(f'desc = {_toml_multiline(desc)}')
     if promulgation:
@@ -120,6 +159,8 @@ def write_toml(path, *, name, desc='', promulgation='', paragraphs, footnotes, a
                 out.append(f'{key} = {p.get(key, 0)}')
             elif kind == 'str':
                 out.append(f'{key} = {_toml_str(p.get(key, ""))}')
+            elif kind == 'bool':
+                out.append(f'{key} = {str(p.get(key, False)).lower()}')
             else:  # mlstr
                 out.append(f'{key} = {_toml_multiline(p.get(key, ""))}')
         out.append('')

@@ -14,20 +14,25 @@
    ────────────────────────────────────────────────────────────────────── */
 
 :root {
+    color-scheme: light dark;     /* tells the browser native UI to render both modes */
+
     /* surface */
     --bg:           #faf9f7;
-    --surface:      #f0ece4;   /* drawer */
-    --surface-hi:   #f7f4ef;   /* drawer-row hover/active */
+    --surface:      hsl(var(--hue), 26%, 93%);   /* drawer */
+    --surface-hi:   hsl(var(--hue), 33%, 96%);   /* drawer-row hover/active */
+    --bar-bg:       hsl(var(--hue), 34%, 92%);   /* softly tinted bar */
 
     /* text */
     --fg:           #1a1a1a;
-    --fg-dim:       #555;      /* italic captions, sticky bar */
+    --fg-dim:       #555;      /* italic captions */
+    --fg-dim-bar:   #555;      /* sticky bar / corner title — overridden in dark to stay neutral */
     --fg-dimmer:    #888;      /* uppercase muted labels */
     --fg-faint:     #aaa;      /* faint chrome (para-num, dim segs) */
 
     /* rules */
-    --rule:         #ddd;
-    --rule-soft:    #ccc;
+    --rule:         hsl(var(--hue), 16%, 82%);
+    --rule-soft:    hsl(var(--hue), 18%, 75%);
+    --rule-tint:    hsl(var(--hue), 34%, 72%);
 
     /* accent palette is hue-derived. The base --hue lives as an inline
        `style="--hue: …"` attribute on the <html> tag, written per doc
@@ -46,74 +51,197 @@
     --para-size:    1.2rem;
 }
 
+/* Dark theme — applies when EITHER:
+   • the user picked Dark explicitly (data-theme="dark"), OR
+   • the user is on Auto (data-theme unset) and the OS prefers dark.
+   Both paths set the same variables; duplicated because @media can't share
+   declarations with a non-media selector. Light is forced via data-theme="light"
+   which beats the media query via specificity. */
 :root[data-theme="dark"] {
+    color-scheme: dark;
     --bg:           #16140f;
-    --surface:      #211e18;
-    --surface-hi:   #2a2620;
+    --surface:      hsl(var(--hue), 12%, 14%);
+    --surface-hi:   hsl(var(--hue), 15%, 18%);
+    --bar-bg:       hsl(var(--hue), 20%, 15%);
 
     --fg:           #e8e0d0;
     --fg-dim:       #b8b0a0;
+    --fg-dim-bar:   hsl(0, 0%, 70%);   /* bar/corner text — neutral so a coloured hue doesn't gild the chrome */
     --fg-dimmer:    #8a8275;
     --fg-faint:     #5a5550;
 
-    --rule:         #3a3530;
-    --rule-soft:    #4a4540;
+    --rule:         hsl(var(--hue), 12%, 25%);
+    --rule-soft:    hsl(var(--hue), 14%, 32%);
+    --rule-tint:    hsl(var(--hue), 24%, 42%);
 
-    /* dark accents — same hue rotation, lighter L for legibility. */
     --accent:        hsl(calc(var(--hue) -  7), 42%, 63%);
-    --accent-strong: hsl(calc(var(--hue) -  8), 48%, 68%);
-    --accent-darker: hsl(calc(var(--hue) -  6), 60%, 75%);
+    --accent-strong: hsl(calc(var(--hue) -  8), 55%, 70%);
+    --accent-darker: hsl(calc(var(--hue) -  6), 90%, 88%);
     --display:       hsl(calc(var(--hue) - 10), 55%, 61%);
 }
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --bg:           #16140f;
+        --surface:      hsl(var(--hue), 12%, 14%);
+        --surface-hi:   hsl(var(--hue), 15%, 18%);
+        --bar-bg:       hsl(var(--hue), 20%, 15%);
+
+        --fg:           #e8e0d0;
+        --fg-dim:       #b8b0a0;
+        --fg-dim-bar:   hsl(0, 0%, 70%);
+        --fg-dimmer:    #8a8275;
+        --fg-faint:     #5a5550;
+
+        --rule:         hsl(var(--hue), 12%, 25%);
+        --rule-soft:    hsl(var(--hue), 14%, 32%);
+        --rule-tint:    hsl(var(--hue), 24%, 42%);
+
+        --accent:        hsl(calc(var(--hue) -  7), 42%, 63%);
+        --accent-strong: hsl(calc(var(--hue) -  8), 55%, 70%);
+        --accent-darker: hsl(calc(var(--hue) -  6), 90%, 88%);
+        --display:       hsl(calc(var(--hue) - 10), 55%, 61%);
+    }
+}
+
+:root[data-theme="light"] { color-scheme: light; }
 
 :root[data-size="small"] { --para-size: 1.05rem; }
 :root[data-size="large"] { --para-size: 1.35rem; }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Font choice is a reader pref; the panel writes data-font="sans" to swap. */
+:root {
+    --font-body:    Georgia, serif;
+    --font-display: 'Palatino Linotype', Palatino, serif;
+}
+:root[data-font="sans"] {
+    --font-body:    -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+}
+
 body {
-    font-family: Georgia, serif;
+    font-family: var(--font-body);
     font-size: var(--para-size);
     line-height: 1.75;
     color: var(--fg);
     background: var(--bg);
     max-width: 780px;
-    margin-left: clamp(2rem, calc(50vw - 390px), 10rem);
-    margin-right: auto;
+    margin: 0 auto;          /* centred column */
     padding: 4rem 2rem 6rem;
     transition: background .2s, color .2s;
 }
-h1, h2, h3, h4 { font-family: 'Palatino Linotype', Palatino, serif; }
+h1, h2, h3, h4 { font-family: var(--font-display); }
+
+/* The body column's outer-left edge in viewport coords. The sticky bar
+   and the corner doc title both anchor against this so they line up
+   with the body text regardless of viewport width. */
+:root { --col-outer-left: max(0px, calc((100vw - 780px) / 2)); }
+
+/* The whole top-chrome region (bar + corner title + corner buttons) shares
+   one height so they vertically line up regardless of which one is tallest
+   at the moment. Bar's own content was swinging ~1rem depending on whether
+   #sticky-sub had text; locking the height stops that. */
+:root { --bar-h-fixed: 4rem; }
+
+/* ── doc title (top-left, permanent — supplements the sticky bar) ───────── */
+#doc-title-corner {
+    position: fixed;
+    top: 0;
+    left: 1.1rem;
+    height: var(--bar-h-fixed);
+    z-index: 82;     /* above the bar's bg */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: .15rem;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 2.05rem;
+    line-height: 1.15;
+    color: var(--fg-dim-bar);
+    pointer-events: none;
+    white-space: nowrap;
+}
 
 /* ── sticky heading bar ─────────────────────────────────────────────────── */
+/* padding-left puts the bar's first child (#sticky-text) at the body's
+   outer-left edge — i.e. the column's left edge. The inner #sticky-line
+   then offsets #sticky-num into the gutter and lands #sticky-label at the
+   body text's left edge.
+   padding-right leaves clearance for #bar-actions, which is a fixed sibling
+   anchored to the viewport's right edge (not a flex child of the bar). */
 #sticky-bar {
     position: fixed;
     top: 0; left: 0; right: 0;
     z-index: 80;
-    background: var(--bg);
-    border-bottom: 1px solid var(--rule);
-    /* left padding matches body margin-left (no body padding) so label aligns with body text */
-    padding: .55rem clamp(2rem, calc(50vw - 390px + 2rem), 12rem) .55rem clamp(2rem, calc(50vw - 390px), 10rem);
-    font-family: 'Palatino Linotype', Palatino, serif;
+    background: var(--bar-bg, var(--bg));
+    border-bottom: 1px solid var(--rule-tint);
+    padding-left: max(var(--col-outer-left), 2rem);   /* floor so heading clears the screen edge at narrow widths */
+    padding-right: 7.5rem;
+    height: var(--bar-h-fixed);
+    font-family: var(--font-display);
     font-size: 1.8rem;
-    color: var(--fg-dim);
+    color: var(--fg-dim-bar);
     display: flex;
-    align-items: baseline;
-    gap: .4rem;
+    align-items: center;
     overflow: hidden;
 }
+#sticky-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.2;
+    padding: .35rem 0;
+}
+/* num + label share a row; align-items: center so the smaller num's
+   vertical centre lands at the label's vertical centre. */
+#sticky-line {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    min-width: 0;
+}
 #sticky-num {
-    /* fills the body's 2rem left padding, sits in the gutter */
     width: 1.6rem;
-    text-align: right;
     flex-shrink: 0;
+    text-align: right;
     color: var(--fg-faint);
     font-size: .65em;
 }
 #sticky-label {
     flex: 1;
+    min-width: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+#sticky-sub {
+    display: block;
+    height: 1.2em;       /* fixed reserved line: text appearing must not shift the title */
+    flex-shrink: 0;
+    margin-top: .1rem;
+    padding-left: 2rem;  /* num width (1.6rem) + #sticky-line gap (.4rem) — lands under label, not num */
+    font-size: .48em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--fg-dimmer);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* At widths where #doc-title-corner is visible (>900px), begin the live
+   heading after its rendered right edge. JS publishes --title-clearance so
+   long document names and changed font metrics cannot overlap this content.
+   Below 900px the corner title is hidden, so the bar reclaims the gutter. */
+@media (min-width: 901px) {
+    #sticky-bar { padding-left: max(var(--col-outer-left), var(--title-clearance, 13rem)); }
 }
 
 /* ── document structure ─────────────────────────────────────────────────── */
@@ -121,6 +249,7 @@ h1.part-num      { font-size: 1rem; text-transform: uppercase; letter-spacing: .
 h1.part-title    { font-size: 1.6rem; margin: 1.5rem 0 1rem; }
 h2.chapter-num   { font-size: .9rem; text-transform: uppercase; letter-spacing: .15em; color: var(--fg-dimmer); margin: 2.5rem 0 .2rem; }
 h3.chapter-title { font-size: 1.3rem; margin: 0 0 1rem; }
+.chapter-subtitle { font-family: var(--font-display); font-size: 1.05rem; color: var(--fg-dim); margin: -.65rem 0 1rem; }
 h4.section-title { font-size: 1rem; font-style: italic; color: var(--fg-dim); margin: 2rem 0 .75rem; }
 h5.sub-heading   { font-size: 1rem; font-style: italic; font-weight: normal; color: var(--fg); margin: 1.75rem 0 .4rem; }
 .paragraph       { margin: 1.25rem 0; }
@@ -130,6 +259,12 @@ h5.sub-heading   { font-size: 1rem; font-style: italic; font-weight: normal; col
 .paragraph p     { margin-top: .6rem; }
 sup a            { color: var(--accent); text-decoration: none; font-size: .75em; }
 sup a:hover      { text-decoration: underline; }
+
+/* External hyperlinks preserved from source (vatican.va doc cross-refs).
+   Subtle by default — thin coloured underline, accent on hover — so they
+   don't compete with the body type. */
+a.ext-link       { color: inherit; text-decoration: underline; text-decoration-color: var(--rule-tint); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 
 /* ── chapter scroll indicator ───────────────────────────────────────────── */
 #ch-indicator {
@@ -172,9 +307,10 @@ sup a:hover      { text-decoration: underline; }
     position: fixed;
     top: var(--bar-h, 3rem); right: 0;
     width: 380px;
+    max-width: 66vw;          /* cap at 2/3 viewport so narrow screens stay legible */
     height: calc(100vh - var(--bar-h, 3rem));
     background: var(--surface);
-    border-left: 1px solid var(--rule-soft);
+    border-left: 1px solid var(--rule-tint);
     transform: translateX(100%);
     transition: transform .3s ease;
     display: flex;
@@ -186,45 +322,140 @@ sup a:hover      { text-decoration: underline; }
     left: -2rem;
     top: 50%;
     transform: translateY(-50%);
+    z-index: -1;            /* drawer edge paints above the projecting tab */
     writing-mode: vertical-rl;
     background: var(--surface);
-    border: 1px solid var(--rule-soft);
-    border-right: none;
+    border: 1px solid var(--rule-tint);
     padding: .6rem .4rem;
     cursor: pointer;
-    font-family: Georgia, serif;
+    font-family: var(--font-body);
     font-size: .8rem;
     color: var(--fg-dim);
     letter-spacing: .05em;
     user-select: none;
-    border-radius: 4px 0 0 4px;
+    border-radius: 4px;
 }
-#fn-tab:hover                   { color: var(--fg); }
+#fn-tab:hover                   { color: var(--accent); border-color: var(--accent); }
 #fn-content {
-    overflow-y: auto;
-    padding: 2rem 1.5rem;
     flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
 }
 #fn-content h2                  { font-size: 1.1rem; margin-bottom: 1.25rem; }
+.drawer-tabs {
+    display: flex;
+    gap: .25rem;
+    flex-shrink: 0;
+    padding: .75rem .75rem .6rem;
+    border-bottom: 1px solid var(--rule-tint);
+}
+.drawer-view-tab {
+    flex: 1;
+    border: 1px solid transparent;
+    background: transparent;
+    border-radius: 4px;
+    padding: .45rem .35rem;
+    color: var(--fg-dimmer);
+    font-family: var(--font-body);
+    font-size: .85rem;
+    cursor: pointer;
+}
+.drawer-view-tab:hover          { color: var(--fg); background: var(--surface-hi); }
+.drawer-view-tab.active {
+    color: var(--accent);
+    border-color: var(--rule-tint);
+    background: var(--surface-hi);
+}
+.drawer-view {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 1rem 2rem .5rem;
+}
+.drawer-view[hidden]            { display: none; }
+.toc-item {
+    display: flex;
+    align-items: start;
+    gap: .35rem;
+}
+.toc-item a                     { flex: 1; min-width: 0; }
+.bookmark-toggle {
+    position: relative;
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.4rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    opacity: 0;
+    color: var(--fg-dimmer);
+    transition: opacity .15s ease, color .15s ease;
+}
+.toc-item:hover .bookmark-toggle,
+.bookmark-toggle:focus-visible,
+.bookmark-toggle.saved          { opacity: 1; }
+.bookmark-toggle:hover,
+.bookmark-toggle.saved          { color: var(--accent); }
+.bookmark-toggle::before {
+    content: '';
+    position: absolute;
+    top: .12rem;
+    left: .28rem;
+    width: .7rem;
+    height: .9rem;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 15'%3E%3Cpath d='M2 1.5h8v12L6 10.5l-4 3z' fill='none' stroke='black' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 15'%3E%3Cpath d='M2 1.5h8v12L6 10.5l-4 3z' fill='none' stroke='black' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.bookmark-toggle.saved::before {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 15'%3E%3Cpath d='M2 1.5h8v12L6 10.5l-4 3z' fill='black'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 15'%3E%3Cpath d='M2 1.5h8v12L6 10.5l-4 3z' fill='black'/%3E%3C/svg%3E");
+}
+@media (hover: none) {
+    .bookmark-toggle            { opacity: 1; }
+}
+.bookmarks-empty {
+    color: var(--fg-dim);
+    font-size: .9rem;
+    line-height: 1.45;
+    padding: .75rem .5rem;
+}
+.bookmarks-empty p              { margin: 0 0 .65rem; }
+#bookmark-list .toc-item .bookmark-toggle { opacity: 1; }
 .fn-group                       { font-size: .75rem; text-transform: uppercase; letter-spacing: .1em; color: var(--fg-dimmer); margin: 1.5rem 0 .4rem; }
-.fn-list                        { list-style: none; padding-left: 0; font-size: 1rem; line-height: 1.55; }
-.fn-item                        { margin-bottom: .65rem; padding-left: 2rem; text-indent: -2rem; }
-.fn-item p                      { display: inline; }
-.fn-num-link                    { color: inherit; text-decoration: none; margin-right: .25rem; }
+.fn-list                        { list-style: none; margin-left: 0; padding-left: 0; font-size: 1rem; line-height: 1.55; }
+.fn-item {
+    display: grid;
+    grid-template-columns: 1.75rem 1fr;
+    column-gap: .65rem;
+    margin-bottom: .65rem;
+}
+.fn-num-link                    { text-align: right; color: var(--fg-faint); text-decoration: none; }
 .fn-num-link:hover              { color: var(--accent); text-decoration: underline; }
-.fn-item.fn-active              { background: var(--surface-hi); margin-left: -1.5rem; margin-right: -1.5rem; padding-left: calc(2rem + 1.5rem); padding-right: 1.5rem; }
+.fn-item p                      { margin: 0; grid-column: 2; }
+.fn-item p + p                  { margin-top: .35rem; }
+.fn-item.fn-active              { background: var(--surface-hi); margin: 0 -1rem 0 -.5rem; padding: .25rem 1rem .25rem .5rem; }
 .fn-ch-link                     { color: inherit; text-decoration: none; }
 .fn-ch-link:hover               { text-decoration: underline; }
-.sec-nav-item                   { margin: .6rem 0 .25rem .5rem; line-height: 1.25; }
-.sec-nav-link                   { color: var(--fg-dimmer); text-decoration: none; font-size: .85rem; font-style: italic; line-height: 1.25; }
+/* Hierarchy in the drawer is carried by indented vertical bars rather than
+   font weight/style alone — easier to scan when the list is long.
+     chapter:  uppercase bold (already on .fn-group)
+     section:  italic + bar at first indent
+     sub:      bar at second indent, no other ornament  */
+.sec-nav-item                   { margin: .5rem 0 .25rem 0; padding-left: .75rem; border-left: 2px solid var(--rule-tint); line-height: 1.25; }
+.sec-nav-link                   { color: var(--fg-dim); text-decoration: none; font-size: .85rem; font-style: italic; line-height: 1.25; }
 .sec-nav-link:hover             { color: var(--fg); text-decoration: underline; }
+.sub-nav-item                   { margin: .25rem 0 .15rem 0; padding-left: .75rem; border-left: 2px solid var(--rule); line-height: 1.2; }
+.sub-nav-link                   { color: var(--fg-dimmer); text-decoration: none; font-size: .8rem; line-height: 1.2; }
+.sub-nav-link:hover             { color: var(--fg); text-decoration: underline; }
 
 /* ── document title block ───────────────────────────────────────────────── */
 .doc-title {
     text-align: center;
     margin: 4rem 0 4rem;
     color: var(--display);
-    font-family: Georgia, serif;
+    font-family: var(--font-display);
 }
 .doc-desc {
     font-size: 1rem;
@@ -251,6 +482,12 @@ sup a:hover      { text-decoration: underline; }
 /* ── appendices (e.g. LS's closing prayers) ─────────────────────────────── */
 .appendix-block { margin: 4rem 0 0; }
 .appendix       { margin: 3rem 0; }
+.document-break {
+    border: 0;
+    border-top: 1px solid var(--rule-tint);
+    margin: 2.5rem auto;
+    width: min(10rem, 35%);
+}
 .appendix-title {
     font-size: 1.4rem;
     font-style: italic;
@@ -263,16 +500,21 @@ sup a:hover      { text-decoration: underline; }
     font-style: italic;
     color: var(--fg);
     margin-top: 1rem;
-    text-indent: 1.5rem;
 }
-.appendix p:first-of-type { text-indent: 0; }
 
-/* ── sticky-bar action buttons (home / info / aA) ───────────────────────── */
+/* ── corner action buttons (home / info / aA) ───────────────────────────── */
+/* Pulled out of the sticky bar so they sit stably at the far-right of the
+   bar regardless of bar reflow. Viewport-anchored (not column-anchored)
+   to live in the bar's right edge across all widths. */
 #bar-actions {
+    position: fixed;
+    top: 0;
+    right: .9rem;
+    height: var(--bar-h-fixed);
+    z-index: 85;
     display: flex;
+    align-items: center;
     gap: .35rem;
-    flex-shrink: 0;
-    align-self: center;
     font-family: system-ui, -apple-system, sans-serif;
 }
 #bar-actions button {
@@ -294,23 +536,57 @@ sup a:hover      { text-decoration: underline; }
 #action-prefs .a-small     { font-size: .7em; vertical-align: baseline; }
 #action-info               { font-style: italic; font-family: Georgia, serif; }
 
-/* Panel anchored to viewport top-right just below the sticky bar. The aA
-   button toggles `hidden` on it. */
-#prefs-panel {
+/* Panel anchored flush with the bar's bottom border, sharing the line — it
+   reads as something that "came down" from the aA button. The up-caret
+   (::before) sits above the panel's top edge as a visual link to the button. */
+#prefs-panel,
+#info-panel {
     position: fixed;
-    top: calc(var(--bar-h, 3rem) + .4rem);
-    right: .55rem;
-    width: 15rem;     /* explicit — flex/overflow combo clips content if we ask it to auto-size */
+    top: var(--bar-h-fixed);
+    right: .9rem;
+    width: 16rem;
     max-width: calc(100vw - 1rem);
     background: var(--bg);
     border: 1px solid var(--rule);
-    border-radius: 8px;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
     padding: .9rem 1.1rem;
-    box-shadow: 0 8px 28px rgba(0, 0, 0, .12);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, .14);
     z-index: 91;
     font-family: system-ui, -apple-system, sans-serif;
 }
-#prefs-panel[hidden] { display: none; }
+#prefs-panel[hidden],
+#info-panel[hidden] { display: none; }
+
+#info-panel {
+    right: 3.25rem;
+    width: 18rem;
+    font-size: .88rem;
+    line-height: 1.45;
+}
+#info-panel p { margin: 0 0 .7rem; }
+#info-panel p:last-child { margin-bottom: 0; }
+#info-panel .panel-title { font-weight: 600; color: var(--fg); }
+#info-panel a { color: var(--accent); }
+
+/* Caret centre at viewport-right − 1.9rem (= aA button centre, given
+   #bar-actions right:.9rem + half-button 1rem). Panel right is .9rem,
+   caret centre offset inside panel = .9 + caret-right + caret-half = 1.9
+   → caret-right = .575rem. */
+#prefs-panel::before,
+#info-panel::before {
+    content: '';
+    position: absolute;
+    top: -.45rem;
+    right: .575rem;
+    width: .85rem;
+    height: .85rem;
+    background: var(--bg);
+    border-top: 1px solid var(--rule);
+    border-left: 1px solid var(--rule);
+    transform: rotate(45deg);
+}
+
 .pref-row {
     display: flex;
     align-items: center;
@@ -324,14 +600,17 @@ sup a:hover      { text-decoration: underline; }
     border: 1px solid var(--rule);
     border-radius: 6px;
     overflow: hidden;
+    width: 10.5rem;          /* fixed so all rows' segment boxes line up */
 }
 .pref-segments button {
+    flex: 1;
     background: transparent;
     border: none;
     color: var(--fg-dim);
-    padding: .35rem .7rem;
+    padding: .35rem 0;
     cursor: pointer;
     font-family: inherit;
+    text-align: center;
     transition: background .15s, color .15s;
 }
 .pref-segments button + button { border-left: 1px solid var(--rule); }
@@ -342,33 +621,25 @@ sup a:hover      { text-decoration: underline; }
 .size-l { font-size: 1.15rem; }
 
 /* ── responsive ─────────────────────────────────────────────────────────── */
+/* Single mobile breakpoint: when the corner title would collide with the bar,
+   everything else that wants to compact does so too — one jump, not two. */
 @media (max-width: 900px) {
-    #fn-drawer { width: 280px; }
-}
-@media (max-width: 700px) {
-    #ch-indicator { display: none; }
-    body          { margin-left: auto; }
-    #sticky-bar   { font-size: 1.1rem; }
-    #sticky-num   { display: none; }
+    #doc-title-corner   { display: none; }
+    #ch-indicator       { left: 0; }
+    #ch-indicator .ch-bar { border-radius: 0 3px 3px 0; }   /* flush left edge */
+    /* minimap halved on mobile (drawer keeps its width — capped at 2/3 vw above) */
+    .ch-bar             { width: 3px; }
+    .ch-bar:hover       { width: 5px; }
+    .ch-bar.part-active { width: 5px; }
+    .ch-bar.active      { width: 7px; }
+    #sticky-bar         { font-size: 1.1rem; padding-right: 6.5rem; }
+    #sticky-num         { display: none; }
+    #sticky-sub         { padding-left: 0; font-size: .62em; }
+    #bar-actions        { right: .4rem; }
     #bar-actions button { width: 1.7rem; height: 1.7rem; font-size: .8rem; }
     #prefs-panel        { right: .4rem; padding: .7rem .85rem; }
+    #info-panel         { right: 2.75rem; padding: .7rem .85rem; }
     .pref-row           { gap: .75rem; margin: .4rem 0; }
-
-    /* LS gutter layout has nowhere to go on a phone — fall back to inline
-       bold-prefix like a normal book. The soft-anchor JS no-ops below 700px.
-       Inlining the first body <p> lets the number sit on the same line as
-       the start of the text instead of floating alone above it. */
-    .doc-laudato_si .paragraph         { position: static; }
-    .doc-laudato_si .paragraph::before { display: none; }
-    .doc-laudato_si .para-num {
-        position: static;
-        font-weight: bold;
-        color: inherit;
-        font-size: inherit;
-        text-align: left;
-    }
-    .doc-laudato_si .para-num::after            { content: '.'; }
-    .doc-laudato_si .paragraph p:first-of-type  { display: inline; margin-top: 0; }
 }
 
 /* The per-doc base hue lives as `<html style="--hue: …">` in the rendered
@@ -381,26 +652,30 @@ sup a:hover      { text-decoration: underline; }
    Pick a hue, set it in DOC_HUES, the recipe above does the rest. */
 
 /* ────────────────────────────────────────────────────────────────────────
-   .doc-laudato_si — per-document overrides
+   .doc-laudato_si, .doc-magnifica_humanitas — long modern documents
 
-   LS has no per-paragraph Latin micro-summary; the paragraph number lives
-   in the left margin with a vertical rule alongside (both hang off to the
-   left so body text occupies its normal column unchanged). The indicator
+   LS has no per-paragraph Latin micro-summary; on wide viewports the para
+   number lives in the left margin alongside a vertical rule (both hang
+   off to the left so body text keeps its normal column). On narrow
+   viewports the layout reverts to the inline `5.` prefix. The indicator
    is height-capped because LS is ~2.6× as long as GeS.
    ──────────────────────────────────────────────────────────────────────── */
 
-.doc-laudato_si .paragraph         { position: relative; margin: 1.75rem 0; }
-.doc-laudato_si .paragraph::before {
+.doc-laudato_si .paragraph,
+.doc-magnifica_humanitas .paragraph         { position: relative; margin: 1.75rem 0; }
+.doc-laudato_si .paragraph::before,
+.doc-magnifica_humanitas .paragraph::before {
     content: '';
     position: absolute;
     top: 0; bottom: 0;
     left: -1.25rem;
     width: 1px;
-    background: var(--rule);
+    background: var(--rule-tint);
 }
-.doc-laudato_si .para-num {
+.doc-laudato_si .para-num,
+.doc-magnifica_humanitas .para-num {
     position: absolute;
-    right: calc(100% + 2rem);   /* breathing room between rule and number */
+    right: calc(100% + 2rem);   /* in the gutter, breathing room from the rule */
     top: 50%;
     transform: translateY(-50%);
     color: var(--fg-faint);
@@ -409,14 +684,66 @@ sup a:hover      { text-decoration: underline; }
     text-align: right;
     will-change: top;
 }
-.doc-laudato_si .para-num::after { content: none; }
+.doc-laudato_si .para-num::after,
+.doc-magnifica_humanitas .para-num::after { content: none; }
+.doc-laudato_si #sticky-num,
+.doc-magnifica_humanitas #sticky-num {
+    transform: translateX(-.6rem);  /* centre chapter number above gutter rule */
+}
+
+/* MH uses a third visible level below chapters: section headings are the
+   document's subheads; italic headings nested inside them are sub-subheads. */
+.doc-magnifica_humanitas h3.chapter-title {
+    font-size: 1.55rem;
+    line-height: 1.25;
+}
+.doc-magnifica_humanitas .chapter-subtitle {
+    font-size: 1.12rem;
+}
+.doc-magnifica_humanitas h4.section-title {
+    font-size: 1.18rem;
+    font-style: normal;
+    font-weight: 600;
+    color: var(--fg);
+}
+.doc-magnifica_humanitas h5.sub-heading {
+    font-size: 1.1rem;
+    color: var(--fg-dim);
+}
+.doc-magnifica_humanitas .sec-nav-link {
+    font-style: normal;
+    font-weight: 600;
+    color: var(--fg);
+}
+/* Narrow viewport: gutter doesn't fit, revert to inline `5.` prefix. */
+@media (max-width: 900px) {
+    .doc-laudato_si .paragraph,
+    .doc-magnifica_humanitas .paragraph         { position: static; }
+    .doc-laudato_si .paragraph::before,
+    .doc-magnifica_humanitas .paragraph::before { display: none; }
+    .doc-laudato_si .para-num,
+    .doc-magnifica_humanitas .para-num {
+        position: static;
+        font-weight: bold;
+        color: inherit;
+        font-size: inherit;
+        text-align: left;
+    }
+    .doc-laudato_si .para-num::after,
+    .doc-magnifica_humanitas .para-num::after           { content: '.'; }
+    .doc-laudato_si .paragraph p:first-of-type,
+    .doc-magnifica_humanitas .paragraph p:first-of-type { display: inline; margin-top: 0; }
+}
 
 /* Indicator: explicit height (not max-height — flex children with basis 0
    collapse to nothing without it). Centred in the area below the sticky
    bar, not the full viewport. */
-.doc-laudato_si #ch-indicator {
-    height: calc(95vh - var(--bar-h, 3rem));
-    top:    calc(50% + var(--bar-h, 3rem) / 2);
+.doc-laudato_si #ch-indicator,
+.doc-magnifica_humanitas #ch-indicator {
+    height: calc(95vh - var(--bar-h, 4rem));
+    top:    calc(50% + var(--bar-h, 4rem) / 2);
 }
-.doc-laudato_si .ch-bar { flex: 1 1 0; min-height: 8px; height: auto; }
-.doc-laudato_si .ch-seg { flex: 1; height: auto; min-height: 1px; }
+.doc-laudato_si .ch-bar,
+.doc-magnifica_humanitas .ch-bar { flex: 1 1 0; min-height: 8px; height: auto; }
+.doc-laudato_si .ch-seg,
+.doc-magnifica_humanitas .ch-seg { flex: 1; height: auto; min-height: 1px; }

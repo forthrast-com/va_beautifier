@@ -18,6 +18,8 @@ EN_SRC = 'sources/gaudium_et_spes_en.html'
 LT_SRC = 'sources/gaudium_et_spes_lt.html'
 
 NAME = 'Gaudium et Spes'
+SOURCE_URL = ('https://www.vatican.va/archive/hist_councils/ii_vatican_council/'
+              'documents/vat-ii_const_19651207_gaudium-et-spes_en.html')
 
 
 RE_PART     = re.compile(r'^PART\s+([IVX]+)\s*$')
@@ -239,6 +241,7 @@ def extract():
 
     return {
         'name': NAME,
+        'source_url': SOURCE_URL,
         'desc': desc,
         'promulgation': promulgation,
         'paragraphs': paragraphs,

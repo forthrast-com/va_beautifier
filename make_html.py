@@ -14,6 +14,24 @@ JS_TEMPLATE = (ASSETS / 'scripts.js').read_text()
 # match 1-3 digits to avoid catching years/citations like "(1995)".
 INLINE_REF_RE = re.compile(r'\((\d{1,3})\)')
 
+# External hyperlinks come through clean_text as `[text](href)` markdown.
+# `[^)\s]+` for the href so a stray `)` in surrounding prose can't extend
+# the match — vatican.va URLs are paren-free.
+INLINE_LINK_RE = re.compile(r'\[([^\]]+)\]\(([^)\s]+)\)')
+
+# Cleanup for artefacts left when source <sup>/<sub> tags are stripped:
+# stripped tags leave a stray space between the word and the punctuation
+# (or numeric suffix) that was inside them. Use [ \t] (not \s) so we don't
+# eat poetic line breaks within a sub-paragraph.
+TIGHTEN = [
+    (re.compile(r'(\w)[ \t]+([.,;:!?])'),        r'\1\2'),    # "Ibid ." → "Ibid."
+    (re.compile(r'(\d)[ \t]+(st|nd|rd|th)\b'),  r'\1\2'),    # "35 th"  → "35th"
+]
+def tighten(text):
+    for pat, sub in TIGHTEN:
+        text = pat.sub(sub, text)
+    return text
+
 ap = argparse.ArgumentParser(description='Render a TOML intermediate to a single-file HTML edition.')
 ap.add_argument('doc', help='Doc slug (looks for {slug}.toml, writes {slug}.html)')
 args = ap.parse_args()
@@ -25,6 +43,7 @@ paragraphs   = data['paragraphs']
 footnotes    = data['footnotes']
 appendices   = data.get('appendices', [])
 doc_name     = data.get('name', args.doc)
+doc_source   = data.get('source_url', '')
 doc_desc     = data.get('desc', '')
 doc_promulg  = data.get('promulgation', '')
 
@@ -32,6 +51,7 @@ doc_promulg  = data.get('promulgation', '')
 # via an inline `style="--hue: …"` on the <html> tag. Default = warm gold.
 DOC_HUES = {
     'laudato_si': 140,   # botanical green for the ecology encyclical
+    'magnifica_humanitas': 230,  # indigo-blue for the technology encyclical
     # 'dilexit_nos': 8,  # red, when the doc lands
 }
 doc_hue = DOC_HUES.get(args.doc, 42)
@@ -56,13 +76,36 @@ def linkify_footnotes(text, part, chapter):
         return f'<sup><a href="#fn-{part}-{chapter}-{n}">{n}</a></sup>'
     return INLINE_REF_RE.sub(replace, text)
 
+def linkify_anchors(text):
+    """Convert `[text](href)` markdown back to anchor tags.
+
+    Run BEFORE linkify_footnotes so the URL's parens get consumed before the
+    footnote regex sees them and mistakes (e.g.) `(2021)` for a fn ref."""
+    def replace(m):
+        body, href = m.group(1), m.group(2)
+        return f'<a href="{href}" class="ext-link" target="_blank" rel="noopener">{body}</a>'
+    return INLINE_LINK_RE.sub(replace, text)
+
 def para_html(text, part=None, chapter=None):
-    """Convert paragraph text (double-newline separated) to <p> tags."""
-    parts = [p.strip() for p in text.split('\n\n') if p.strip()]
-    return '\n'.join(
-        f'<p>{linkify_footnotes(e(p), part, chapter) if part is not None else e(p)}</p>'
-        for p in parts
-    )
+    """Convert paragraph text to <p> tags.
+
+    `\\n\\n` separates sub-paragraphs (each becomes its own <p>).
+    `\\n` within a sub-paragraph is a poetic line break and becomes <br>
+    (the LS canticle + closing prayers use this).
+    """
+    text = tighten(text)
+    out = []
+    for sub in [p.strip() for p in text.split('\n\n') if p.strip()]:
+        lines = sub.split('\n')
+        rendered = []
+        for ln in lines:
+            ln = e(ln)
+            ln = linkify_anchors(ln)
+            if part is not None:
+                ln = linkify_footnotes(ln, part, chapter)
+            rendered.append(ln)
+        out.append('<p>' + '<br>'.join(rendered) + '</p>')
+    return '\n'.join(out)
 
 # footnotes indexed by (part, chapter, number)
 fn_index = {(fn['part'], fn['chapter'], fn['number']): fn for fn in footnotes}
@@ -91,6 +134,10 @@ seen_section     = object()
 seen_sub_heading = object()
 
 sections_for_drawer = []  # list of {id, label, chapter_label}
+subs_for_drawer    = []   # list of {id, label, part, chapter, section, first_para}
+para_to_sub_id     = {}   # para_num → sub id ('' if no sub-heading)
+_cur_sub_id        = ''   # tracks the currently active sub-heading as we walk
+_cur_sub_text      = ''   # the running sub-heading text (LS); GeS computes per-para
 
 # chapters collected for the scroll indicator: list of {id, label}
 indicator_chapters = []
@@ -107,7 +154,7 @@ para_ch_id: dict[int, str] = {}
 
 for p in paragraphs:
     part    = (p['part'], p['part_title'])
-    chapter = (p['chapter'], p['chapter_title'])
+    chapter = (p['chapter'], p['chapter_title'], p.get('chapter_subtitle', ''))
     section = (p['section'], p['section_title'])
 
     if part != seen_part:
@@ -144,6 +191,8 @@ for p in paragraphs:
         if p['chapter_title']:
             ch_num = f'{to_roman(p["part"])}.{p["chapter"]}' if p['part'] else f'{p["chapter"]}'
             html_parts.append(h('h3', 'chapter-title', p['chapter_title']).replace('<h3 ', f'<h3 data-sticky data-ch-num="{ch_num}" '))
+            if p.get('chapter_subtitle', ''):
+                html_parts.append(h('p', 'chapter-subtitle', p['chapter_subtitle']))
         seen_chapter     = chapter
         seen_section     = object()
         seen_sub_heading = object()
@@ -152,9 +201,12 @@ for p in paragraphs:
 
     if section != seen_section and p['section'] != 0:
         sec_id = f'sec-{p["part"]}-{p["chapter"]}-{p["section"]}'
-        label = f'Section {p["section"]}'
-        if p['section_title']:
-            label += f': {p["section_title"]}'
+        if args.doc == 'magnifica_humanitas':
+            label = p['section_title']
+        else:
+            label = f'Section {p["section"]}'
+            if p['section_title']:
+                label += f': {p["section_title"]}'
         ch_label = p['chapter_title'] or f'Part {to_roman(p["part"])}, Ch. {p["chapter"]}'
         sections_for_drawer.append({'id': sec_id, 'label': label, 'ch_label': ch_label,
                                      'part': p['part'], 'chapter': p['chapter'],
@@ -166,23 +218,47 @@ for p in paragraphs:
     sub = p.get('sub_heading', '')
     if sub != seen_sub_heading:
         if sub:
-            html_parts.append(h('h5', 'sub-heading', sub))
+            _cur_sub_id = f'sub-{p["number"]}'
+            _cur_sub_text = sub
+            subs_for_drawer.append({
+                'id': _cur_sub_id, 'label': sub,
+                'part': p['part'], 'chapter': p['chapter'], 'section': p['section'],
+                'first_para': p['number'],
+            })
+            html_parts.append(
+                h('h5', 'sub-heading', sub).replace('<h5 ', f'<h5 id="{_cur_sub_id}" ')
+            )
+        else:
+            _cur_sub_id = ''
+            _cur_sub_text = ''
         seen_sub_heading = sub
+    para_to_sub_id[p['number']] = _cur_sub_id
 
     # paragraph block
     num  = p['number']
     head = p.get('heading_la', '')
     body = para_html(p['text'], p['part'], p['chapter'])
 
-    # The period after the number is added by CSS for docs that want it
-    # (GeS inline-style); LS keeps the number naked in its gutter column.
+    # Per-doc sticky-bar sub-line. GeS prefers the larger structural unit
+    # (section title) and falls back to the paragraph's Latin micro-summary
+    # when not in a section. LS tracks sections; MH exposes its nested
+    # subheadings here.
+    if args.doc == 'gaudium_et_spes':
+        sub_text = (p['section_title'] if p['section'] else '') or head
+    elif args.doc == 'laudato_si':
+        sub_text = p['section_title'] if p['section'] else ''
+    else:
+        sub_text = _cur_sub_text
+
     html_parts.append(
-        f'<div class="paragraph" id="para-{num}">'
+        f'<div class="paragraph" id="para-{num}" data-sub-text="{e(sub_text)}">'
         f'<span class="para-num">{num}</span>'
         + (f' <em class="heading-la">{e(head)}</em>' if head else '')
         + f'\n{body}'
         f'</div>'
     )
+    if p.get('break_after', False):
+        html_parts.append('<hr class="document-break">')
 
 # (part, chapter) → first cid containing those paragraphs (for footnote links)
 part_chapter_to_cid: dict[tuple, str] = {}
@@ -191,19 +267,25 @@ for p in paragraphs:
     if key not in part_chapter_to_cid:
         part_chapter_to_cid[key] = para_ch_id[p['number']]
 
-# ── drawer: sections + footnotes interleaved by chapter ───────────────────────
+# ── drawer: sections + sub-headings + footnotes interleaved by chapter ──────
 
 secs_by_ch = defaultdict(list)
 for s in sections_for_drawer:
     secs_by_ch[(s['part'], s['chapter'])].append(s)
 
+subs_by_chsec: dict[tuple, list] = defaultdict(list)
+for sb in subs_for_drawer:
+    subs_by_chsec[(sb['part'], sb['chapter'], sb['section'])].append(sb)
+
 fns_by_ch = defaultdict(list)
 for fn in footnotes:
     fns_by_ch[(fn['part'], fn['chapter'])].append(fn)
 
-# Map (part, chapter, fn_number) → (section, para_number) via first paragraph that cites it
+# Map (part, chapter, fn_number) → (section, para_number, sub_id) via the
+# first paragraph that cites this footnote.
 fn_section: dict[tuple, int] = {}
 fn_para:    dict[tuple, int] = {}
+fn_sub:     dict[tuple, str] = {}
 for p in paragraphs:
     refs = INLINE_REF_RE.findall(p['text'])
     for r in refs:
@@ -211,6 +293,7 @@ for p in paragraphs:
         if key not in fn_section:
             fn_section[key] = p['section']
             fn_para[key]    = p['number']
+            fn_sub[key]     = para_to_sub_id.get(p['number'], '')
 
 # chapter order from document
 ch_order = []
@@ -218,58 +301,130 @@ seen_ch_order = set()
 for p in paragraphs:
     key = (p['part'], p['chapter'])
     if key not in seen_ch_order:
-        ch_order.append((key, p['part_title'] if p['part'] == 0 else
-                         (p['chapter_title'] or f'Part {to_roman(p["part"])}, Ch. {p["chapter"]}')))
+        if p['part'] == 0 and p['chapter'] == 0:
+            label = p['part_title']                     # preface / introduction
+        elif p['part'] == 0:
+            label = p['chapter_title'] or f'Chapter {p["chapter"]}'
+        else:
+            label = p['chapter_title'] or f'Part {to_roman(p["part"])}, Ch. {p["chapter"]}'
+        ch_order.append((key, label))
         seen_ch_order.add(key)
 
 def fn_item_html(part, chapter, fn):
     key  = (part, chapter, fn['number'])
     pnum = fn_para.get(key)
     href = f'#para-{pnum}' if pnum else ''
-    num  = f'<a href="{href}" class="fn-num-link">{fn["number"]}.</a>' if href else f'{fn["number"]}.'
+    if href:
+        num = f'<a href="{href}" class="fn-num-link">{fn["number"]}</a>'
+    else:
+        num = f'<span class="fn-num-link">{fn["number"]}</span>'
     body = para_html(fn['text'])
-    return f'<li id="fn-{part}-{chapter}-{fn["number"]}" class="fn-item">{num} {body}</li>'
+    return f'<li id="fn-{part}-{chapter}-{fn["number"]}" class="fn-item">{num}{body}</li>'
+
+# Per-doc drawer style. 'chapter' = chapter group headings + flat footnote
+# list (no section/sub nav lines). 'full' = chapter + section + sub-heading
+# navigation interleaved with footnotes (the default; LS now uses this too
+# since the vertical-bar hierarchy makes the three levels scannable).
+DOC_DRAWER_STYLE = {}
+drawer_style = DOC_DRAWER_STYLE.get(args.doc, 'full')
+
+def toc_item(tag, cls, link_cls, target, label):
+    return (
+        f'<{tag} class="{cls} toc-item" data-target="{target}" data-label="{e(label)}">'
+        f'<a href="#{target}" class="{link_cls}">{e(label)}</a>'
+        f'<button class="bookmark-toggle" type="button" data-bookmark-target="{target}" '
+        f'aria-label="Bookmark {e(label)}" aria-pressed="false"></button>'
+        f'</{tag}>'
+    )
 
 drawer_items = []
+toc_items = []
 for (part, chapter), ch_label in ch_order:
-    secs = secs_by_ch.get((part, chapter), [])
-    fns  = fns_by_ch.get((part, chapter), [])
-    if not secs and not fns:
-        continue
+    secs    = secs_by_ch.get((part, chapter), [])
+    fns     = fns_by_ch.get((part, chapter), [])
+    ch_subs = [sb for sb in subs_for_drawer
+               if sb['part'] == part and sb['chapter'] == chapter]
     cid = part_chapter_to_cid.get((part, chapter), '')
-    group_label = (ch_label or 'Preface / Introduction') if not part else f'Part {to_roman(part)}, Chapter {chapter}'
+    if part == 0 and chapter == 0:
+        group_label = ch_label or 'Preface / Introduction'
+    elif part == 0:
+        group_label = ch_label or f'Chapter {chapter}'
+    else:
+        group_label = ch_label or f'Part {to_roman(part)}, Chapter {chapter}'
+    toc_items.append(toc_item('h3', 'fn-group', 'fn-ch-link', cid, group_label))
+
+    for sb in subs_by_chsec.get((part, chapter, 0), []):
+        toc_items.append(toc_item('p', 'sub-nav-item', 'sub-nav-link', sb['id'], sb['label']))
+    for s in sorted(secs, key=lambda x: x['section']):
+        toc_items.append(toc_item('p', 'sec-nav-item', 'sec-nav-link', s['id'], s['label']))
+        for sb in subs_by_chsec.get((part, chapter, s['section']), []):
+            toc_items.append(toc_item('p', 'sub-nav-item', 'sub-nav-link', sb['id'], sb['label']))
+
+    if not secs and not fns and not ch_subs:
+        continue
     drawer_items.append(f'<h3 class="fn-group"><a href="#{cid}" class="fn-ch-link">{e(group_label)}</a></h3>')
 
-    if not secs:
-        # no sections — just emit footnotes
+    if drawer_style == 'chapter':
+        # Flat list of footnotes for this chapter, in number order.
         if fns:
             drawer_items.append('<ol class="fn-list">')
-            for fn in fns:
+            for fn in sorted(fns, key=lambda x: x['number']):
                 drawer_items.append(fn_item_html(part, chapter, fn))
             drawer_items.append('</ol>')
-    else:
-        # interleave: for each section emit its heading then its footnotes
-        # section 0 = footnotes before the first section heading
-        sec_nums = [0] + [s['section'] for s in sorted(secs, key=lambda s: s['section'])]
-        sec_meta = {0: None}
-        for s in secs:
-            sec_meta[s['section']] = s
+        continue
 
-        fns_by_sec: dict[int, list] = defaultdict(list)
-        for fn in fns:
-            sec = fn_section.get((part, chapter, fn['number']), 0)
-            fns_by_sec[sec].append(fn)
+    # Group footnotes by section. Section 0 holds anything before the
+    # first numbered section (or all of a chapter that has no sections).
+    fns_by_sec: dict[int, list] = defaultdict(list)
+    for fn in fns:
+        sec = fn_section.get((part, chapter, fn['number']), 0)
+        fns_by_sec[sec].append(fn)
 
-        for sec_num in sec_nums:
-            s = sec_meta.get(sec_num)
-            if s:
-                drawer_items.append(f'<p class="sec-nav-item"><a class="sec-nav-link" href="#{s["id"]}">{e(s["label"])}</a></p>')
-            sec_fns = fns_by_sec.get(sec_num, [])
-            if sec_fns:
+    sec_nums = [0] + [s['section'] for s in sorted(secs, key=lambda s: s['section'])]
+    sec_meta = {0: None}
+    for s in secs:
+        sec_meta[s['section']] = s
+
+    for sec_num in sec_nums:
+        s        = sec_meta.get(sec_num)
+        sec_subs = subs_by_chsec.get((part, chapter, sec_num), [])
+        sec_fns  = fns_by_sec.get(sec_num, [])
+        if not s and not sec_subs and not sec_fns:
+            continue
+
+        if s:
+            drawer_items.append(f'<p class="sec-nav-item"><a class="sec-nav-link" href="#{s["id"]}">{e(s["label"])}</a></p>')
+
+        # Bucket the section's footnotes by which sub-heading (if any)
+        # the citing paragraph fell under.
+        fns_by_sub: dict[str, list] = defaultdict(list)
+        for fn in sec_fns:
+            sid = fn_sub.get((part, chapter, fn['number']), '')
+            fns_by_sub[sid].append(fn)
+
+        # Footnotes not under any sub-heading come first (preserves
+        # current behaviour for sections without sub-headings).
+        if fns_by_sub.get(''):
+            drawer_items.append('<ol class="fn-list">')
+            for fn in fns_by_sub['']:
+                drawer_items.append(fn_item_html(part, chapter, fn))
+            drawer_items.append('</ol>')
+
+        # Then each sub-heading as a nav link, followed by its footnotes.
+        for sb in sec_subs:
+            drawer_items.append(f'<p class="sub-nav-item"><a class="sub-nav-link" href="#{sb["id"]}">{e(sb["label"])}</a></p>')
+            sub_fns = fns_by_sub.get(sb['id'], [])
+            if sub_fns:
                 drawer_items.append('<ol class="fn-list">')
-                for fn in sec_fns:
+                for fn in sub_fns:
                     drawer_items.append(fn_item_html(part, chapter, fn))
                 drawer_items.append('</ol>')
+
+for idx, app in enumerate(appendices):
+    toc_items.append(
+        toc_item('p', 'sec-nav-item', 'sec-nav-link',
+                 f'appendix-{idx + 1}', app['title'])
+    )
 
 # ── appendices (e.g. LS's two closing prayers) ───────────────────────────────
 
@@ -278,10 +433,7 @@ if appendices:
     parts = ['<section class="appendix-block">']
     for idx, app in enumerate(appendices):
         aid = f'appendix-{idx + 1}'
-        stanzas = '\n'.join(
-            f'<p>{e(stanza.strip())}</p>'
-            for stanza in app['text'].split('\n\n') if stanza.strip()
-        )
+        stanzas = para_html(app['text'])    # honours \n\n and \n the same way as body paragraphs
         parts.append(
             f'<div class="appendix" id="{aid}">'
             f'<h2 class="appendix-title" data-sticky>{e(app["title"])}</h2>'
@@ -295,13 +447,72 @@ if appendices:
 
 
 fn_drawer_html = '\n'.join(drawer_items)
+toc_drawer_html = '\n'.join(toc_items)
 
-# attach paragraph numbers to each chapter entry
+# Per-chapter indicator segments. By default each para is its own seg
+# ('paragraphs' mode); for long docs that's too dense, so we can switch
+# to 'sections' where each section is a single seg covering its para
+# range. The cur-para JS test (curPara within [first, last]) is the same
+# either way — JS doesn't know or care which mode.
+DOC_INDICATOR_LEVEL = {
+    'laudato_si': 'sections',   # 246 paras across 36 sections — much cleaner
+    'magnifica_humanitas': 'sections',
+}
+indicator_level = DOC_INDICATOR_LEVEL.get(args.doc, 'paragraphs')
+
 ch_paras: dict[str, list[int]] = {}
 for pnum, cid in para_ch_id.items():
     ch_paras.setdefault(cid, []).append(pnum)
+
+# Map each section id → its (first, last) paragraph range so we can
+# build section-mode segs without re-walking paragraphs.
+sec_paras: dict[str, list[int]] = defaultdict(list)
+for p in paragraphs:
+    if p['section']:
+        sid = f'sec-{p["part"]}-{p["chapter"]}-{p["section"]}'
+        sec_paras[sid].append(p['number'])
+
 for ch in indicator_chapters:
-    ch['paras'] = ch_paras.get(ch['id'], [])
+    paras = sorted(ch_paras.get(ch['id'], []))
+    ch_secs = [s for s in sections_for_drawer
+               if part_chapter_to_cid.get((s['part'], s['chapter'])) == ch['id']]
+
+    if indicator_level == 'sections' and ch_secs:
+        # Include any chapter opening before its first named section, then
+        # one segment per section in document order.
+        ch['segs'] = []
+        first_sec_para = min(
+            min(sec_paras[s['id']]) for s in ch_secs if sec_paras.get(s['id'])
+        )
+        leading = [p for p in paras if p < first_sec_para]
+        if leading:
+            ch['segs'].append({
+                'first': min(leading), 'last': max(leading),
+                'target': ch['id'], 'label': ch['label'],
+            })
+        for s in sorted(ch_secs, key=lambda x: x['section']):
+            sp = sec_paras.get(s['id'], [])
+            if sp:
+                ch['segs'].append({
+                    'first': min(sp), 'last': max(sp),
+                    'target': s['id'], 'label': s['label'],
+                })
+    elif indicator_level == 'sections' and paras:
+        # chapter has paragraphs but no sections (e.g. LS preface) —
+        # one seg covering the whole chapter
+        ch['segs'] = [{
+            'first': min(paras), 'last': max(paras),
+            'target': ch['id'], 'label': ch['label'],
+        }]
+    else:
+        # paragraphs mode — one seg per paragraph (the GeS default)
+        ch['segs'] = [{
+            'first': p, 'last': p,
+            'target': f'para-{p}', 'label': f'§{p}',
+        } for p in paras]
+
+    # JS still wants ch.paras for the para → chapter index lookup
+    ch['paras'] = paras
 
 indicator_json = json.dumps(indicator_chapters)
 
@@ -317,29 +528,48 @@ page = f"""<!DOCTYPE html>
 <title>{e(doc_name)}</title>
 <style>{CSS}</style>
 <script>
-  // Apply saved theme/size before paint to avoid a flash of the default light theme.
+  // Apply saved prefs before paint to avoid a flash of the default theme.
+  // 'auto' (or no value) for theme leaves the attr unset so the CSS
+  // prefers-color-scheme media query decides.
   try {{
     const p = JSON.parse(localStorage.getItem('va_reader_prefs') || '{{}}');
-    if (p.theme) document.documentElement.dataset.theme = p.theme;
-    if (p.size)  document.documentElement.dataset.size  = p.size;
+    if (p.theme === 'light' || p.theme === 'dark') document.documentElement.dataset.theme = p.theme;
+    if (p.size) document.documentElement.dataset.size = p.size;
+    if (p.font) document.documentElement.dataset.font = p.font;
   }} catch (e) {{}}
 </script>
 </head>
 <body class="doc-{args.doc}">
+<div id="doc-title-corner">{e(doc_name)}</div>
 <div id="sticky-bar">
-  <span id="sticky-num"></span>
-  <span id="sticky-label">{e(doc_name)}</span>
-  <div id="bar-actions">
-    <button id="action-home" aria-label="Home" title="Home">⌂</button>
-    <button id="action-info" aria-label="About this document" title="About">i</button>
-    <button id="action-prefs" aria-label="Reader settings" title="Reader settings"><span class="a-small">a</span>A</button>
-  </div>
+  <span id="sticky-text">
+    <span id="sticky-line">
+      <span id="sticky-num"></span>
+      <span id="sticky-label"></span>
+    </span>
+    <span id="sticky-sub"></span>
+  </span>
+</div>
+
+<div id="bar-actions">
+  <button id="action-home" aria-label="Home" title="Home">⌂</button>
+  <button id="action-info" aria-label="About this document" title="About">i</button>
+  <button id="action-prefs" aria-label="Reader settings" title="Reader settings"><span class="a-small">a</span>A</button>
+</div>
+
+<div id="info-panel" hidden>
+  <p class="panel-title">About this edition</p>
+  <p>Generated via templater scripts from Vatican HTML.</p>
+  {f'<p><a href="{e(doc_source)}" target="_blank" rel="noopener">Original Vatican document</a></p>' if doc_source else ''}
+  <p><a href="mailto:me@forthrast.com">me@forthrast.com</a><br>
+  <a href="https://bsky.app/profile/forthrast.com" target="_blank" rel="noopener">@forthrast.com on Bluesky</a></p>
 </div>
 
 <div id="prefs-panel" hidden>
   <div class="pref-row">
     <span class="pref-label">Theme</span>
     <div class="pref-segments">
+      <button data-pref="theme" data-value="auto"  title="Follow system">Auto</button>
       <button data-pref="theme" data-value="light">Light</button>
       <button data-pref="theme" data-value="dark">Dark</button>
     </div>
@@ -352,6 +582,13 @@ page = f"""<!DOCTYPE html>
       <button class="size-l" data-pref="size" data-value="large"  title="Large">A</button>
     </div>
   </div>
+  <div class="pref-row">
+    <span class="pref-label">Font</span>
+    <div class="pref-segments">
+      <button data-pref="font" data-value="serif">Serif</button>
+      <button data-pref="font" data-value="sans">Sans</button>
+    </div>
+  </div>
 </div>
 
 {title_block}
@@ -361,9 +598,26 @@ page = f"""<!DOCTYPE html>
 <nav id="ch-indicator"></nav>
 
 <aside id="fn-drawer">
-  <div id="fn-tab">Notes</div>
+  <div id="fn-tab">Index</div>
   <div id="fn-content">
-    {fn_drawer_html}
+    <div class="drawer-tabs" role="tablist" aria-label="Drawer view">
+      <button class="drawer-view-tab active" type="button" role="tab" aria-controls="drawer-toc" aria-selected="true" data-drawer-view="toc">Contents</button>
+      <button class="drawer-view-tab" type="button" role="tab" aria-controls="drawer-footnotes" aria-selected="false" data-drawer-view="footnotes">Footnotes</button>
+      <button class="drawer-view-tab" type="button" role="tab" aria-controls="drawer-bookmarks" aria-selected="false" data-drawer-view="bookmarks">Bookmarks</button>
+    </div>
+    <div id="drawer-toc" class="drawer-view active" role="tabpanel">
+      {toc_drawer_html}
+    </div>
+    <div id="drawer-footnotes" class="drawer-view" role="tabpanel" hidden>
+      {fn_drawer_html}
+    </div>
+    <div id="drawer-bookmarks" class="drawer-view" role="tabpanel" hidden>
+      <div class="bookmarks-empty">
+        <p>No bookmarks yet.</p>
+        <p>In Contents, hover over a heading and select its bookmark icon to save it here.</p>
+      </div>
+      <div id="bookmark-list"></div>
+    </div>
   </div>
 </aside>
 

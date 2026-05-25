@@ -7,13 +7,15 @@ Web/EPUB/PDF editions of Vatican documents. Currently rides on *Gaudium et Spes*
 The vatican.va edition is one long page of bare text. The points of difference:
 
 - **Sidebar footnotes** — notes open in a drawer beside the text, not dumped at the bottom
-- **TOC and navbar** — sticky chapter/section header, scroll indicator, jump-anywhere navigation
+- **Contents and navbar** — sticky chapter/section header, scroll indicator, bookmarks and jump-anywhere navigation
 - **Multiple formats** — web now, EPUB and PDF on the roadmap
 - **Reader toggles** — light/dark + text size, gear-icon popover top-right, persisted in `localStorage`. Driven by CSS custom properties on `:root` (write `data-theme` / `data-size` attrs, the variants override the defaults).
 
 ## Pipeline
 
     sources/*.html  ──(parse.py <slug>)──▶  <slug>.toml  ──(make_html.py <slug>)──▶  <slug>.html
+                                                │
+                                                └──(make_index.py)────────────▶  index.html
                                                 │
                                                 ├──(not yet)──▶  *.epub
                                                 └──(not yet)──▶  *.pdf
@@ -31,12 +33,13 @@ The TOML is the canonical intermediate. Downstream renderers consume TOML — ne
 
 ## TOML schema
 
-Top-level: `name`, `desc`, `promulgation` (multiline).
+Top-level: `name`, `source_url`, `desc`, `promulgation` (multiline).
 
-`[[paragraphs]]` — `number`, `part`, `part_title`, `chapter`, `chapter_title`, `section`, `section_title`, `sub_heading`, `heading_la`, `text` (multiline, `\n\n`-separated sub-paragraphs).
+`[[paragraphs]]` — `number`, `part`, `part_title`, `chapter`, `chapter_title`, `chapter_subtitle`, `section`, `section_title`, `sub_heading`, `heading_la`, `break_after`, `text` (multiline, `\n\n`-separated sub-paragraphs).
 
 - `sub_heading` is per-paragraph and optional (defaults to ''); LS uses it for topical headers within sections, GeS doesn't have any.
 - `heading_la` is a Latin micro-summary; GeS has one per paragraph, LS has none.
+- `break_after` marks a structural separator following a paragraph; LS uses it for the rule before its closing prayers.
 
 `[[footnotes]]` — `part`, `chapter`, `number`, `text`. Inline refs in paragraph text are canonical `(N)` for 1 ≤ N ≤ 999. Extractors normalise alternative source formats (LS's `[N]`) to this canonical form before emitting TOML.
 
@@ -69,13 +72,17 @@ JS publishes the sticky-bar's measured height to `--bar-h` so other layout (indi
 
 The web edition leans on UI affordances (sticky heading bar, scroll indicator, footnote drawer) that don't translate to EPUB/PDF — those want endnotes per section, real page breaks, no JS.
 
+The flat GitHub Pages site is deployed through `.github/workflows/pages.yml`;
+`CNAME` sets `docs.forthrast.com`, and only finished HTML files plus Pages
+metadata are published.
+
 ## Open work
 
 - **EPUB** — pandoc is in Home Manager; could consume the TOML directly or via an HTML intermediate.
 - **PDF** — typst is in Home Manager; natural fit, would consume TOML directly.
-- **Sub-heading anchors in the drawer** — LS has 9 named sub-headings; the footnote drawer lists chapters → sections → footnotes but not sub-headings. Worth surfacing under their parent section.
-- **Serif/sans toggle** — the prefs panel has Theme + Size; a third row for font could be added (Georgia ↔ system-ui).
 
 ## Environment
 
-`shell.nix` provides Python 3.12 + beautifulsoup4. Build everything: `./build.sh`. Build one doc: `nix-shell --run "python parse.py laudato_si && python make_html.py laudato_si"`.
+`flake.nix` provides Python 3.12 + beautifulsoup4. Build everything: `./build.sh` (it re-enters the flake dev shell when needed). Build one doc: `nix develop --command sh -c "python parse.py laudato_si && python make_html.py laudato_si"`.
+
+`shell.nix` is kept only as a legacy fallback.

@@ -22,6 +22,8 @@ EN_SRC = 'sources/laudato_si_en.html'
 LT_SRC = 'sources/laudato_si_lt.html'
 
 NAME = "Laudato Si'"
+SOURCE_URL = ('https://www.vatican.va/content/francesco/en/encyclicals/documents/'
+              'papa-francesco_20150524_enciclica-laudato-si.html')
 
 # The encyclical title arrives flat ("ENCYCLICAL LETTER LAUDATO SI' OF THE
 # HOLY FATHER FRANCIS ON CARE FOR OUR COMMON HOME") — line breaks are
@@ -144,6 +146,12 @@ def extract():
             })
             continue
 
+        # The conclusion is divided from its invitation to prayer by a
+        # centred source ornament. Preserve its function, not its glyphs.
+        if text == '* * * * *' and paragraphs:
+            paragraphs[-1]['break_after'] = True
+            continue
+
         # continuation: unnumbered body para following a numbered one (rare in LS)
         if paragraphs and not has_b:
             paragraphs[-1]['text'] += '\n\n' + _normalise_refs(text)
@@ -212,6 +220,7 @@ def extract():
 
     return {
         'name': NAME,
+        'source_url': SOURCE_URL,
         'desc': DESC,
         'promulgation': promulgation,
         'paragraphs': paragraphs,
