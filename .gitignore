@@ -7,7 +7,7 @@ _site/
 
 scratch/
 *_demo.html
-sources/*.pdf
+sources/*
 
 # Book artefacts and their markdown intermediates. Web HTML is the
 # canonical published output; EPUB/PDF are local-build deliverables.
