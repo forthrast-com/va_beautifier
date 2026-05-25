@@ -165,8 +165,9 @@ footer a {{ color: inherit; }}
 {cards}
   </section>
   <footer>
-    <div>Email me: <a href="mailto:me@forthrast.com">me@forthrast.com</a></div>
+    <div>Email: <a href="mailto:me@forthrast.com">me@forthrast.com</a></div>
     <div>Bluesky: <a href="https://bsky.app/profile/forthrast.com" target="_blank" rel="noopener">@forthrast.com</a></div>
+    <div>GitHub: <a href="https://github.com/forthrast-com" target="_blank" rel="noopener">@forthrast-com</a></div>
   </footer>
 </main>
 </body>
