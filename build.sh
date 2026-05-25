@@ -1,6 +1,7 @@
 #!/bin/sh
-# Parse all sources → TOML → HTML. Run from project root.
+# Parse all sources → TOML → HTML/EPUB/PDF. Run from project root.
 # Add a new doc by dropping `extract/<slug>.py` and adding the slug below.
+# Set VA_SKIP_BOOKS=1 to skip the EPUB+PDF stage (requires pandoc + typst).
 set -e
 
 DOCS="gaudium_et_spes laudato_si magnifica_humanitas"
@@ -15,3 +16,9 @@ for d in $DOCS; do
 done
 
 python make_index.py $DOCS
+
+if [ -z "${VA_SKIP_BOOKS:-}" ] && command -v pandoc >/dev/null 2>&1; then
+    for d in $DOCS; do
+        python make_book.py "$d"
+    done
+fi

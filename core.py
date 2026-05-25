@@ -5,8 +5,12 @@ Each `extract/<doc>.py` exposes:
     def extract() -> {
         'name':         str,        # display name, e.g. "Gaudium et Spes"
         'source_url':   str,        # original Vatican HTML edition
-        'desc':         str,        # multi-line description (may be '')
+        'desc':         str,        # multi-line preamble shown ABOVE the title (may be '')
+        'desc_post':    str,        # multi-line subtitle shown BELOW the title (may be '')
         'promulgation': str,        # multi-line promulgation (may be '')
+        'signature':    str,        # papal signature line, e.g. "Franciscus" (may be '')
+        'hero_image':   str,        # path to title-page image, repo-relative (may be '')
+        'hero_credit':  str,        # one-line credit/caption shown beneath the image (may be '')
         'paragraphs':   list[dict], # per-paragraph dicts (see schema below)
         'footnotes':    list[dict],
     }
@@ -98,19 +102,39 @@ def parse_num(s):
 _SMALL = {'a', 'an', 'the', 'and', 'but', 'or', 'nor', 'for', 'yet', 'so',
           'at', 'by', 'in', 'of', 'on', 'to', 'up', 'as', 'from', 'with'}
 
-def title_case(s):
-    words = s.lower().split()
+# Roman numerals (papal regnal numbers, council numerals like Vatican II,
+# etc.) should survive an uppercase → title-case round-trip unchanged.
+# Match the letter cluster ignoring trailing punctuation; reject the
+# degenerate single-character cases I/L/D/M that almost always mean an
+# initial or word in normal prose.
+_ROMAN = re.compile(r'^[IVXLCDM]{2,}$')
+
+
+def title_case(s, *, cap_last=True):
+    """Dumb title case: capitalise every word, force small words ("of",
+    "the", "in"…) to lowercase regardless of position, and preserve
+    Roman numerals. `cap_last` is accepted for back-compat but now no-op
+    — small words are always lowercase even at end-of-line."""
+    del cap_last  # always treated as dumb-title-case
+    words = s.split()
     result = []
-    for i, word in enumerate(words):
-        if "'" in word or '’' in word:
-            sep = "'" if "'" in word else '’'
-            parts = word.split(sep)
+    for word in words:
+        # Strip surrounding punctuation for the Roman test so "VI," still
+        # registers as a numeral.
+        core = word.strip('.,;:!?"\'’“”()[]')
+        if _ROMAN.match(core):
+            result.append(word)
+            continue
+        lo = word.lower()
+        if "'" in lo or '’' in lo:
+            sep = "'" if "'" in lo else '’'
+            parts = lo.split(sep)
             parts[0] = parts[0].capitalize()
             result.append(sep.join(parts))
-        elif i == 0 or i == len(words) - 1 or word not in _SMALL:
-            result.append(word.capitalize())
+        elif lo in _SMALL:
+            result.append(lo)
         else:
-            result.append(word)
+            result.append(lo.capitalize())
     return ' '.join(result)
 
 
@@ -141,15 +165,24 @@ _PARA_FIELDS = [
 ]
 
 
-def write_toml(path, *, name, source_url='', desc='', promulgation='',
+def write_toml(path, *, name, source_url='', desc='', desc_post='',
+               promulgation='', signature='', hero_image='', hero_credit='',
                paragraphs, footnotes, appendices=()):
     out = [f'name = {_toml_str(name)}']
     if source_url:
         out.append(f'source_url = {_toml_str(source_url)}')
     if desc:
         out.append(f'desc = {_toml_multiline(desc)}')
+    if desc_post:
+        out.append(f'desc_post = {_toml_multiline(desc_post)}')
     if promulgation:
         out.append(f'promulgation = {_toml_multiline(promulgation)}')
+    if signature:
+        out.append(f'signature = {_toml_str(signature)}')
+    if hero_image:
+        out.append(f'hero_image = {_toml_str(hero_image)}')
+    if hero_credit:
+        out.append(f'hero_credit = {_toml_str(hero_credit)}')
     out.append('')
 
     for p in paragraphs:

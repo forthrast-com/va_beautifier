@@ -4,7 +4,7 @@ desc = """
 PASTORAL CONSTITUTION
 ON THE CHURCH IN THE 
  MODERN WORLD"""
-promulgation = """
+desc_post = """
 PROMULGATED BY
 HIS HOLINESS, POPE PAUL VI
 ON DECEMBER 7, 1965"""
@@ -214,7 +214,7 @@ The Church firmly believes that Christ, who died and was raised up for all,(2) c
 [[paragraphs]]
 number = 11
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 0
 chapter_title = ""
 chapter_subtitle = ""
@@ -233,9 +233,9 @@ What does the Church think of man? What needs to be recommended for the upbuildi
 [[paragraphs]]
 number = 12
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 1
-chapter_title = "The Dignity of the Human Person"
+chapter_title = "the Dignity of the Human Person"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -256,9 +256,9 @@ Therefore, as we read elsewhere in Holy Scripture God saw "all that he had made,
 [[paragraphs]]
 number = 13
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 1
-chapter_title = "The Dignity of the Human Person"
+chapter_title = "the Dignity of the Human Person"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -275,9 +275,9 @@ The call to grandeur and the depths of misery, both of which are a part of human
 [[paragraphs]]
 number = 14
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 1
-chapter_title = "The Dignity of the Human Person"
+chapter_title = "the Dignity of the Human Person"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -292,9 +292,9 @@ Now, man is not wrong when he regards himself as superior to bodily concerns, an
 [[paragraphs]]
 number = 15
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 1
-chapter_title = "The Dignity of the Human Person"
+chapter_title = "the Dignity of the Human Person"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -313,9 +313,9 @@ It is, finally, through the gift of the Holy Spirit that man comes by faith to t
 [[paragraphs]]
 number = 16
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 1
-chapter_title = "The Dignity of the Human Person"
+chapter_title = "the Dignity of the Human Person"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -328,9 +328,9 @@ In the depths of his conscience, man detects a law which he does not impose upon
 [[paragraphs]]
 number = 17
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 1
-chapter_title = "The Dignity of the Human Person"
+chapter_title = "the Dignity of the Human Person"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -343,9 +343,9 @@ Only in freedom can man direct himself toward goodness. Our contemporaries make 
 [[paragraphs]]
 number = 18
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 1
-chapter_title = "The Dignity of the Human Person"
+chapter_title = "the Dignity of the Human Person"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -360,9 +360,9 @@ Although the mystery of death utterly beggars the imagination, the Church has be
 [[paragraphs]]
 number = 19
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 1
-chapter_title = "The Dignity of the Human Person"
+chapter_title = "the Dignity of the Human Person"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -379,9 +379,9 @@ Undeniably, those who willfully shut out God from their hearts and try to dodge 
 [[paragraphs]]
 number = 20
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 1
-chapter_title = "The Dignity of the Human Person"
+chapter_title = "the Dignity of the Human Person"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -396,9 +396,9 @@ Not to be overlooked among the forms of modern atheism is that which anticipates
 [[paragraphs]]
 number = 21
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 1
-chapter_title = "The Dignity of the Human Person"
+chapter_title = "the Dignity of the Human Person"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -423,9 +423,9 @@ Above all the Church knows that her message is in harmony with the most secret d
 [[paragraphs]]
 number = 22
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 1
-chapter_title = "The Dignity of the Human Person"
+chapter_title = "the Dignity of the Human Person"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -448,9 +448,9 @@ Such is the mystery of man, and it is a great one, as seen by believers in the l
 [[paragraphs]]
 number = 23
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 2
-chapter_title = "The Community of Mankind"
+chapter_title = "the Community of Mankind"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -465,9 +465,9 @@ Since rather recent documents of the Church's teaching authority have dealt at c
 [[paragraphs]]
 number = 24
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 2
-chapter_title = "The Community of Mankind"
+chapter_title = "the Community of Mankind"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -484,9 +484,9 @@ Indeed, the Lord Jesus, when He prayed to the Father, "that all may be one. . . 
 [[paragraphs]]
 number = 25
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 2
-chapter_title = "The Community of Mankind"
+chapter_title = "the Community of Mankind"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -503,9 +503,9 @@ But if by this social life the human person is greatly aided in responding to hi
 [[paragraphs]]
 number = 26
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 2
-chapter_title = "The Community of Mankind"
+chapter_title = "the Community of Mankind"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -526,9 +526,9 @@ God's Spirit, Who with a marvelous providence directs the unfolding of time and 
 [[paragraphs]]
 number = 27
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 2
-chapter_title = "The Community of Mankind"
+chapter_title = "the Community of Mankind"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -545,9 +545,9 @@ Furthermore, whatever is opposed to life itself, such as any type of murder, gen
 [[paragraphs]]
 number = 28
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 2
-chapter_title = "The Community of Mankind"
+chapter_title = "the Community of Mankind"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -564,9 +564,9 @@ The teaching of Christ even requires that we forgive injuries,(12) and extends t
 [[paragraphs]]
 number = 29
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 2
-chapter_title = "The Community of Mankind"
+chapter_title = "the Community of Mankind"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -585,9 +585,9 @@ Human institutions, both private and public, must labor to minister to the digni
 [[paragraphs]]
 number = 30
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 2
-chapter_title = "The Community of Mankind"
+chapter_title = "the Community of Mankind"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -602,9 +602,9 @@ Let everyone consider it his sacred obligation to esteem and observe social nece
 [[paragraphs]]
 number = 31
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 2
-chapter_title = "The Community of Mankind"
+chapter_title = "the Community of Mankind"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -621,9 +621,9 @@ Hence, the will to play one's role in common endeavors should be everywhere enco
 [[paragraphs]]
 number = 32
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 2
-chapter_title = "The Community of Mankind"
+chapter_title = "the Community of Mankind"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -644,7 +644,7 @@ This solidarity must be constantly increased until that day on which it will be 
 [[paragraphs]]
 number = 33
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 3
 chapter_title = "Man's Activity Throughout the World"
 chapter_subtitle = ""
@@ -661,7 +661,7 @@ In the face of these immense efforts which already preoccupy the whole human rac
 [[paragraphs]]
 number = 34
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 3
 chapter_title = "Man's Activity Throughout the World"
 chapter_subtitle = ""
@@ -680,7 +680,7 @@ Thus, far from thinking that works produced by man's own talent and energy are i
 [[paragraphs]]
 number = 35
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 3
 chapter_title = "Man's Activity Throughout the World"
 chapter_subtitle = ""
@@ -697,7 +697,7 @@ Hence, the norm of human activity is this: that in accord with the divine plan a
 [[paragraphs]]
 number = 36
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 3
 chapter_title = "Man's Activity Throughout the World"
 chapter_subtitle = ""
@@ -716,7 +716,7 @@ But if the expression, the independence of temporal affairs, is taken to mean th
 [[paragraphs]]
 number = 37
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 3
 chapter_title = "Man's Activity Throughout the World"
 chapter_subtitle = ""
@@ -737,7 +737,7 @@ Hence if anyone wants to know how this unhappy situation can be overcome, Christ
 [[paragraphs]]
 number = 38
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 3
 chapter_title = "Man's Activity Throughout the World"
 chapter_subtitle = ""
@@ -758,7 +758,7 @@ The Lord left behind a pledge of this hope and strength for life's journey in th
 [[paragraphs]]
 number = 39
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 3
 chapter_title = "Man's Activity Throughout the World"
 chapter_subtitle = ""
@@ -779,9 +779,9 @@ For after we have obeyed the Lord, and in His Spirit nurtured on earth the value
 [[paragraphs]]
 number = 40
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 4
-chapter_title = "The Role of the Church in the Modern World"
+chapter_title = "the Role of the Church in the Modern World"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -800,9 +800,9 @@ In addition, the Catholic Church gladly holds in high esteem the things which ot
 [[paragraphs]]
 number = 41
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 4
-chapter_title = "The Role of the Church in the Modern World"
+chapter_title = "the Role of the Church in the Modern World"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -823,9 +823,9 @@ The Church, therefore, by virtue of the Gospel committed to her, proclaims the r
 [[paragraphs]]
 number = 42
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 4
-chapter_title = "The Role of the Church in the Modern World"
+chapter_title = "the Role of the Church in the Modern World"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -846,9 +846,9 @@ With great respect, therefore, this council regards all the true, good and just 
 [[paragraphs]]
 number = 43
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 4
-chapter_title = "The Role of the Church in the Modern World"
+chapter_title = "the Role of the Church in the Modern World"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -873,9 +873,9 @@ Although by the power of the Holy Spirit the Church will remain the faithful spo
 [[paragraphs]]
 number = 44
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 4
-chapter_title = "The Role of the Church in the Modern World"
+chapter_title = "the Role of the Church in the Modern World"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -892,9 +892,9 @@ Since the Church has a visible and social structure as a sign of her unity in Ch
 [[paragraphs]]
 number = 45
 part = 1
-part_title = "The Church and Man's Calling"
+part_title = "the Church and Man's Calling"
 chapter = 4
-chapter_title = "The Role of the Church in the Modern World"
+chapter_title = "the Role of the Church in the Modern World"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -1064,7 +1064,7 @@ number = 53
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 2
-chapter_title = "The Proper Development of Culture"
+chapter_title = "the Proper Development of Culture"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -1083,10 +1083,10 @@ number = 54
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 2
-chapter_title = "The Proper Development of Culture"
+chapter_title = "the Proper Development of Culture"
 chapter_subtitle = ""
 section = 1
-section_title = "The Circumstances of Culture in the World Today"
+section_title = "the Circumstances of Culture in the World Today"
 sub_heading = ""
 heading_la = "De novis vivendi formis"
 break_after = false
@@ -1098,10 +1098,10 @@ number = 55
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 2
-chapter_title = "The Proper Development of Culture"
+chapter_title = "the Proper Development of Culture"
 chapter_subtitle = ""
 section = 1
-section_title = "The Circumstances of Culture in the World Today"
+section_title = "the Circumstances of Culture in the World Today"
 sub_heading = ""
 heading_la = "Homo auctor culturae"
 break_after = false
@@ -1113,10 +1113,10 @@ number = 56
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 2
-chapter_title = "The Proper Development of Culture"
+chapter_title = "the Proper Development of Culture"
 chapter_subtitle = ""
 section = 1
-section_title = "The Circumstances of Culture in the World Today"
+section_title = "the Circumstances of Culture in the World Today"
 sub_heading = ""
 heading_la = "Difficultates et munera"
 break_after = false
@@ -1140,7 +1140,7 @@ number = 57
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 2
-chapter_title = "The Proper Development of Culture"
+chapter_title = "the Proper Development of Culture"
 chapter_subtitle = ""
 section = 2
 section_title = "Some Principles for the Proper Development of Culture"
@@ -1165,7 +1165,7 @@ number = 58
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 2
-chapter_title = "The Proper Development of Culture"
+chapter_title = "the Proper Development of Culture"
 chapter_subtitle = ""
 section = 2
 section_title = "Some Principles for the Proper Development of Culture"
@@ -1186,7 +1186,7 @@ number = 59
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 2
-chapter_title = "The Proper Development of Culture"
+chapter_title = "the Proper Development of Culture"
 chapter_subtitle = ""
 section = 2
 section_title = "Some Principles for the Proper Development of Culture"
@@ -1209,7 +1209,7 @@ number = 60
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 2
-chapter_title = "The Proper Development of Culture"
+chapter_title = "the Proper Development of Culture"
 chapter_subtitle = ""
 section = 3
 section_title = "Some More Urgent Duties of Christians in Regard to Culture"
@@ -1228,7 +1228,7 @@ number = 61
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 2
-chapter_title = "The Proper Development of Culture"
+chapter_title = "the Proper Development of Culture"
 chapter_subtitle = ""
 section = 3
 section_title = "Some More Urgent Duties of Christians in Regard to Culture"
@@ -1249,7 +1249,7 @@ number = 62
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 2
-chapter_title = "The Proper Development of Culture"
+chapter_title = "the Proper Development of Culture"
 chapter_subtitle = ""
 section = 3
 section_title = "Some More Urgent Duties of Christians in Regard to Culture"
@@ -1462,7 +1462,7 @@ number = 73
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 4
-chapter_title = "The Life of the Political Community"
+chapter_title = "the Life of the Political Community"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -1485,7 +1485,7 @@ number = 74
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 4
-chapter_title = "The Life of the Political Community"
+chapter_title = "the Life of the Political Community"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -1510,7 +1510,7 @@ number = 75
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 4
-chapter_title = "The Life of the Political Community"
+chapter_title = "the Life of the Political Community"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -1535,7 +1535,7 @@ number = 76
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 4
-chapter_title = "The Life of the Political Community"
+chapter_title = "the Life of the Political Community"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -1560,7 +1560,7 @@ number = 77
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 5
-chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
+chapter_title = "the Fostering of Peace and the Promotion of a Community of Nations"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -1577,7 +1577,7 @@ number = 78
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 5
-chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
+chapter_title = "the Fostering of Peace and the Promotion of a Community of Nations"
 chapter_subtitle = ""
 section = 0
 section_title = ""
@@ -1602,10 +1602,10 @@ number = 79
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 5
-chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
+chapter_title = "the Fostering of Peace and the Promotion of a Community of Nations"
 chapter_subtitle = ""
 section = 1
-section_title = "The Avoidance of War"
+section_title = "the Avoidance of War"
 sub_heading = ""
 heading_la = "De bellorum immanitate refrenanda"
 break_after = false
@@ -1625,10 +1625,10 @@ number = 80
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 5
-chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
+chapter_title = "the Fostering of Peace and the Promotion of a Community of Nations"
 chapter_subtitle = ""
 section = 1
-section_title = "The Avoidance of War"
+section_title = "the Avoidance of War"
 sub_heading = ""
 heading_la = "De bello totali"
 break_after = false
@@ -1648,10 +1648,10 @@ number = 81
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 5
-chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
+chapter_title = "the Fostering of Peace and the Promotion of a Community of Nations"
 chapter_subtitle = ""
 section = 1
-section_title = "The Avoidance of War"
+section_title = "the Avoidance of War"
 sub_heading = ""
 heading_la = "De cursu ad arma apparanda"
 break_after = false
@@ -1669,10 +1669,10 @@ number = 82
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 5
-chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
+chapter_title = "the Fostering of Peace and the Promotion of a Community of Nations"
 chapter_subtitle = ""
 section = 1
-section_title = "The Avoidance of War"
+section_title = "the Avoidance of War"
 sub_heading = ""
 heading_la = "De bello omnino interdicendo et actione internationali ad bellum vitandum"
 break_after = false
@@ -1690,7 +1690,7 @@ number = 83
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 5
-chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
+chapter_title = "the Fostering of Peace and the Promotion of a Community of Nations"
 chapter_subtitle = ""
 section = 2
 section_title = "Setting up an International Community"
@@ -1705,7 +1705,7 @@ number = 84
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 5
-chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
+chapter_title = "the Fostering of Peace and the Promotion of a Community of Nations"
 chapter_subtitle = ""
 section = 2
 section_title = "Setting up an International Community"
@@ -1724,7 +1724,7 @@ number = 85
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 5
-chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
+chapter_title = "the Fostering of Peace and the Promotion of a Community of Nations"
 chapter_subtitle = ""
 section = 2
 section_title = "Setting up an International Community"
@@ -1743,7 +1743,7 @@ number = 86
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 5
-chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
+chapter_title = "the Fostering of Peace and the Promotion of a Community of Nations"
 chapter_subtitle = ""
 section = 2
 section_title = "Setting up an International Community"
@@ -1770,7 +1770,7 @@ number = 87
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 5
-chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
+chapter_title = "the Fostering of Peace and the Promotion of a Community of Nations"
 chapter_subtitle = ""
 section = 2
 section_title = "Setting up an International Community"
@@ -1789,7 +1789,7 @@ number = 88
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 5
-chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
+chapter_title = "the Fostering of Peace and the Promotion of a Community of Nations"
 chapter_subtitle = ""
 section = 2
 section_title = "Setting up an International Community"
@@ -1808,7 +1808,7 @@ number = 89
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 5
-chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
+chapter_title = "the Fostering of Peace and the Promotion of a Community of Nations"
 chapter_subtitle = ""
 section = 2
 section_title = "Setting up an International Community"
@@ -1825,7 +1825,7 @@ number = 90
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 5
-chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
+chapter_title = "the Fostering of Peace and the Promotion of a Community of Nations"
 chapter_subtitle = ""
 section = 2
 section_title = "Setting up an International Community"
@@ -1844,7 +1844,7 @@ number = 91
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 5
-chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
+chapter_title = "the Fostering of Peace and the Promotion of a Community of Nations"
 chapter_subtitle = ""
 section = 2
 section_title = "Setting up an International Community"
@@ -1861,7 +1861,7 @@ number = 92
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 5
-chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
+chapter_title = "the Fostering of Peace and the Promotion of a Community of Nations"
 chapter_subtitle = ""
 section = 2
 section_title = "Setting up an International Community"
@@ -1884,7 +1884,7 @@ number = 93
 part = 2
 part_title = "Some Problems of Special Urgency"
 chapter = 5
-chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
+chapter_title = "the Fostering of Peace and the Promotion of a Community of Nations"
 chapter_subtitle = ""
 section = 2
 section_title = "Setting up an International Community"

@@ -9,9 +9,12 @@ exposing `extract()` to add a new document — no registry edit needed).
 import argparse
 import importlib
 import pkgutil
+from pathlib import Path
 
 import core
 import extract
+
+BUILD = Path(__file__).parent / 'build'
 
 
 def _available():
@@ -24,13 +27,14 @@ def main():
     ap.add_argument('doc', choices=docs, metavar='DOC',
                     help=f'one of: {", ".join(docs)}')
     ap.add_argument('-o', '--out',
-                    help='Output TOML path (default: {doc}.toml)')
+                    help='Output TOML path (default: build/{doc}.toml)')
     args = ap.parse_args()
 
     mod = importlib.import_module(f'extract.{args.doc}')
     result = mod.extract()
 
-    out = args.out or f'{args.doc}.toml'
+    BUILD.mkdir(exist_ok=True)
+    out = args.out or str(BUILD / f'{args.doc}.toml')
     core.write_toml(out, **result)
     print(f"Wrote {out}: {len(result['paragraphs'])} paragraphs, "
           f"{len(result['footnotes'])} footnotes")

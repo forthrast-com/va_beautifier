@@ -57,6 +57,11 @@ def _br_text(tag):
 
 
 def _extract_frontmatter(body_html):
+    """Split the GeS front-matter <p> around its 'GAUDIUM ET SPES' title.
+    Lines before the title become `desc` (preamble); lines after become
+    `desc_post` (the 'PROMULGATED BY... DECEMBER 7, 1965' block). GeS keeps
+    that date line in the front matter rather than as an end-of-doc
+    dedication, so it lives in `desc_post`, not `promulgation`."""
     soup = BeautifulSoup(body_html, 'html.parser')
     fm = next((p for p in soup.find_all('p')
                if 'PASTORAL CONSTITUTION' in p.get_text()), None)
@@ -64,10 +69,10 @@ def _extract_frontmatter(body_html):
         return '', ''
     text = _br_text(fm)
     desc_m = re.match(r'(.+?)\s*GAUDIUM ET SPES', text, re.DOTALL)
-    prom_m = re.search(r'GAUDIUM ET SPES\s*\n(.+)', text, re.DOTALL)
+    post_m = re.search(r'GAUDIUM ET SPES\s*\n(.+)', text, re.DOTALL)
     desc = desc_m.group(1).strip() if desc_m else ''
-    prom = prom_m.group(1).strip() if prom_m else ''
-    return desc, prom
+    post = post_m.group(1).strip() if post_m else ''
+    return desc, post
 
 
 def _walk_body(body_soup):
@@ -231,7 +236,7 @@ def extract():
     notes_html = notes_split[1] if len(notes_split) > 1 else ''
     body_html = body_html[body_html.find('<hr />'):]
 
-    desc, promulgation = _extract_frontmatter(body_html)
+    desc, desc_post = _extract_frontmatter(body_html)
     paragraphs = _walk_body(BeautifulSoup(body_html, 'html.parser'))
     footnotes = _extract_footnotes(notes_html)
 
@@ -243,7 +248,7 @@ def extract():
         'name': NAME,
         'source_url': SOURCE_URL,
         'desc': desc,
-        'promulgation': promulgation,
+        'desc_post': desc_post,
         'paragraphs': paragraphs,
         'footnotes': footnotes,
     }

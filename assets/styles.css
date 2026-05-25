@@ -317,15 +317,22 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     z-index: 60;
 }
 #fn-drawer.open { transform: translateX(0); }
+/* Tab lives as a sibling of the drawer (not a child) so it can sit *behind*
+   the drawer in z-order: when the drawer is open we shift the tab so its
+   right edge overlaps the drawer's left edge by a few px, and the drawer
+   (z 60) paints over that overlap — so the tab reads as tucked under
+   rather than projecting away from the drawer. */
 #fn-tab {
-    position: absolute;
-    left: -2rem;
+    position: fixed;
     top: 50%;
+    right: 0;
     transform: translateY(-50%);
-    z-index: -1;            /* drawer edge paints above the projecting tab */
+    transition: right .3s ease;
+    z-index: 55;            /* below drawer's 60 */
     writing-mode: vertical-rl;
     background: var(--surface);
     border: 1px solid var(--rule-tint);
+    border-right: none;        /* tab is flush against whatever's on its right (screen edge or drawer) */
     padding: .6rem .4rem;
     cursor: pointer;
     font-family: var(--font-body);
@@ -333,7 +340,10 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     color: var(--fg-dim);
     letter-spacing: .05em;
     user-select: none;
-    border-radius: 4px;
+    border-radius: 4px 0 0 4px;   /* left corners rounded only */
+}
+#fn-drawer.open ~ #fn-tab {
+    right: calc(min(380px, 66vw) - .4rem);   /* overlap drawer's left edge by .4rem */
 }
 #fn-tab:hover                   { color: var(--accent); border-color: var(--accent); }
 #fn-content {
@@ -458,10 +468,9 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     font-family: var(--font-display);
 }
 .doc-desc {
-    font-size: 1rem;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    line-height: 1.5;
+    font-size: 1.25rem;
+    letter-spacing: .01em;
+    line-height: 1.45;
     margin-bottom: .75rem;
 }
 .doc-name {
@@ -477,6 +486,31 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     line-height: 1.5;
     margin: 0 auto;
     max-width: 16rem;
+}
+.doc-desc-post { margin-top: .75rem; }
+
+/* ── document end matter (dedication + papal signature) ────────────────── */
+.doc-end-matter {
+    text-align: center;
+    margin: 4rem 0;
+    color: var(--display);
+    font-family: var(--font-display);
+}
+/* The end-matter dedication wraps more naturally than the title-block
+   version did — let it flow at column width and lose the uppercase
+   treatment that suited a tight stanza-shaped block. */
+.doc-end-matter .doc-promulg {
+    max-width: none;
+    text-transform: none;
+    letter-spacing: 0;
+    font-style: italic;
+    font-size: 1.05rem;
+}
+.doc-signature {
+    margin-top: 1.5rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    letter-spacing: .08em;
 }
 
 /* ── appendices (e.g. LS's closing prayers) ─────────────────────────────── */
@@ -601,17 +635,22 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     border-radius: 6px;
     overflow: hidden;
     width: 10.5rem;          /* fixed so all rows' segment boxes line up */
+    height: 2rem;            /* fixed so the Size row's larger A doesn't stretch its row */
 }
 .pref-segments button {
     flex: 1;
     background: transparent;
     border: none;
     color: var(--fg-dim);
-    padding: .35rem 0;
+    padding: 0;
     cursor: pointer;
     font-family: inherit;
-    text-align: center;
+    font-size: .85rem;       /* don't inherit the body's reader font-size */
+    line-height: 1;
     transition: background .15s, color .15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .pref-segments button + button { border-left: 1px solid var(--rule); }
 .pref-segments button:hover   { background: var(--surface); color: var(--fg); }

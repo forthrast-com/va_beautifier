@@ -25,13 +25,11 @@ NAME = "Laudato Si'"
 SOURCE_URL = ('https://www.vatican.va/content/francesco/en/encyclicals/documents/'
               'papa-francesco_20150524_enciclica-laudato-si.html')
 
-# The encyclical title arrives flat ("ENCYCLICAL LETTER LAUDATO SI' OF THE
-# HOLY FATHER FRANCIS ON CARE FOR OUR COMMON HOME") — line breaks are
-# typographic, not in the source. Re-split here so the renderer can centre
-# the description block cleanly.
-DESC = ("ENCYCLICAL LETTER\n"
-        "OF THE HOLY FATHER FRANCIS\n"
-        "ON CARE FOR OUR COMMON HOME")
+# Front matter is the first centred <p> whose text contains "ENCYCLICAL
+# LETTER" — its lines (separated by <br/>) carry the title in the middle.
+# Strip the apostrophe variants before matching since the source uses ’
+# (RIGHT SINGLE QUOTATION MARK).
+TITLE_UPPER = "LAUDATO SI"
 
 
 # The `\s*` slack absorbs whitespace inserted by BeautifulSoup's text-node
@@ -56,6 +54,36 @@ def _normalise_refs(text):
     return RE_INLINE_REF.sub(r'(\1)', text)
 
 
+def _br_lines(tag):
+    """get_text but with <br/> → newline. Preserves the source's line
+    structure so the title can be located within a multi-line block."""
+    parts = []
+    for child in tag.descendants:
+        if hasattr(child, 'name') and child.name == 'br':
+            parts.append('\n')
+        elif isinstance(child, str):
+            parts.append(child)
+    raw = ''.join(parts)
+    return [re.sub(r'\s+', ' ', ln).strip()
+            for ln in raw.splitlines()
+            if ln.strip()]
+
+
+def _split_around_title(lines, title_upper):
+    """Partition front-matter lines around the title. Returns (pre, post).
+    Matching is case-insensitive and strips non-letter chars so e.g.
+    LAUDATO SI’ matches the LAUDATO SI bare upper form."""
+    norm = lambda s: re.sub(r'[^A-Z ]', '', s.upper()).strip()
+    target = norm(title_upper)
+    pre, post, seen = [], [], False
+    for ln in lines:
+        if not seen and norm(ln) == target:
+            seen = True
+            continue
+        (post if seen else pre).append(ln)
+    return pre, post
+
+
 def extract():
     with open(EN_SRC, encoding='utf-8') as f:
         soup = BeautifulSoup(f.read(), 'html.parser')
@@ -64,6 +92,15 @@ def extract():
 
     main = soup.find('main') or soup.body
     ps = main.find_all('p')
+
+    # Front matter: the first centred <p> containing "ENCYCLICAL LETTER"
+    # carries the preamble + title + subtitle as <br/>-separated lines.
+    desc_pre, desc_post = '', ''
+    fm_p = next((p for p in ps if 'ENCYCLICAL LETTER' in p.get_text()), None)
+    if fm_p:
+        pre, post = _split_around_title(_br_lines(fm_p), TITLE_UPPER)
+        desc_pre = '\n'.join(pre)
+        desc_post = '\n'.join(post)
 
     # LS ends with two appended prayers and a "Given in Rome…" promulgation
     # block. None of them are numbered, so without an end-of-body marker
@@ -78,6 +115,7 @@ def extract():
     footnotes = []
     appendices = []
     promulgation = ''
+    signature = ''
 
     # ─── Phase 1: body walk (idx 0 .. last_body_idx) ─────────────────────
     chapter = 0
@@ -194,9 +232,13 @@ def extract():
             current = {'title': text, 'text': ''}
             continue
 
-        # "Franciscus" and other centred bold trailers — ignore
+        # Centred bold trailer: the papal signature ("Franciscus"). Capture
+        # the first one we hit after the promulgation so it can be rendered
+        # in the end matter, then keep ignoring any later trailers.
         align = (p.get('align') or '').lower()
         if align == 'center' and p.find('b'):
+            if promulgation and not signature:
+                signature = text
             continue
 
         # body of current prayer
@@ -221,8 +263,10 @@ def extract():
     return {
         'name': NAME,
         'source_url': SOURCE_URL,
-        'desc': DESC,
+        'desc': desc_pre,
+        'desc_post': desc_post,
         'promulgation': promulgation,
+        'signature': signature,
         'paragraphs': paragraphs,
         'footnotes': footnotes,
         'appendices': appendices,

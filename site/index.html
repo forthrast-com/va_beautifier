@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Forthrast Editions | Vatican Documents</title>
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<title>The Circulars | Vatican Documents</title>
 <style>
 :root {
   color-scheme: light dark;
@@ -32,14 +33,12 @@ body {
 main {
   width: min(62rem, calc(100% - 2.5rem));
   margin: 0 auto;
-  padding: clamp(3rem, 9vh, 6rem) 0 3rem;
+  padding: clamp(1.75rem, 5vh, 3rem) 0 3rem;
 }
 .brand {
   color: var(--dim);
   font-family: system-ui, -apple-system, sans-serif;
-  font-size: .8rem;
-  letter-spacing: .18em;
-  text-transform: uppercase;
+  font-size: .85rem;
 }
 h1 {
   max-width: 15ch;
@@ -105,20 +104,26 @@ footer {
   line-height: 1.7;
   margin-top: 4rem;
   padding-top: 1.2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 footer a { color: inherit; }
+.attribution { text-align: right; font-size: .8rem; opacity: .8; }
 </style>
 </head>
 <body>
 <main>
-  <p class="brand">Forthrast Editions</p>
+  <p class="brand">the circulars · vatican.va, retypeset.</p>
   <h1>Vatican documents, set for reading.</h1>
-  <p class="intro">Reader editions with navigation, footnotes and persistent bookmarks. Generated via templater scripts from Vatican HTML.</p>
+  <p class="intro">Reader editions of a few papal and conciliar documents.<br>Generated via templater scripts from the Vatican HTML.</p>
   <section class="editions" aria-label="Available documents">
 <article class="edition" style="--hue: 42">
   <a class="edition-link" href="gaudium_et_spes.html">
     <h2>Gaudium et Spes</h2>
-    <p>PASTORAL CONSTITUTION ON THE CHURCH IN THE MODERN WORLD</p>
+    <p>Pastoral Constitution on the Church in the Modern World Promulgated by His Holiness, Pope Paul VI on December 7, 1965</p>
     <span class="read">Read edition</span>
   </a>
   <a class="source" href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" target="_blank" rel="noopener">Original Vatican document</a>
@@ -126,7 +131,7 @@ footer a { color: inherit; }
 <article class="edition" style="--hue: 140">
   <a class="edition-link" href="laudato_si.html">
     <h2>Laudato Si&#x27;</h2>
-    <p>ENCYCLICAL LETTER OF THE HOLY FATHER FRANCIS ON CARE FOR OUR COMMON HOME</p>
+    <p>Encyclical Letter of the Holy Father Francis on Care for Our Common Home</p>
     <span class="read">Read edition</span>
   </a>
   <a class="source" href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20150524_enciclica-laudato-si.html" target="_blank" rel="noopener">Original Vatican document</a>
@@ -134,16 +139,19 @@ footer a { color: inherit; }
 <article class="edition" style="--hue: 230">
   <a class="edition-link" href="magnifica_humanitas.html">
     <h2>Magnifica Humanitas</h2>
-    <p>ENCYCLICAL LETTER OF HIS HOLINESS POPE LEO XIV ON SAFEGUARDING THE HUMAN PERSON IN THE TIME OF ARTIFICIAL INTELLIGENCE</p>
+    <p>Encyclical Letter of His Holiness Pope Leo XIV on Safeguarding the Human Person in the Time of Artificial Intelligence</p>
     <span class="read">Read edition</span>
   </a>
   <a class="source" href="https://www.vatican.va/content/leo-xiv/en/encyclicals/documents/20260515-magnifica-humanitas.html" target="_blank" rel="noopener">Original Vatican document</a>
 </article>
   </section>
   <footer>
-    <div>Email: <a href="mailto:me@forthrast.com">me@forthrast.com</a></div>
-    <div>Bluesky: <a href="https://bsky.app/profile/forthrast.com" target="_blank" rel="noopener">@forthrast.com</a></div>
-    <div>GitHub: <a href="https://github.com/forthrast-com" target="_blank" rel="noopener">@forthrast-com</a></div>
+    <div class="contacts">
+      <div>Email: <a href="mailto:me@forthrast.com">me@forthrast.com</a></div>
+      <div>Bluesky: <a href="https://bsky.app/profile/forthrast.com" target="_blank" rel="noopener">@forthrast.com</a></div>
+      <div>GitHub: <a href="https://github.com/forthrast-com" target="_blank" rel="noopener">@forthrast-com</a></div>
+    </div>
+    <div class="attribution">made with claude and codex ^•^</div>
   </footer>
 </main>
 </body>

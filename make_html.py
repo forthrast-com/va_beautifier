@@ -6,7 +6,11 @@ from collections import defaultdict
 from html import escape
 from pathlib import Path
 
+from core import title_case
+
 ASSETS = Path(__file__).parent / 'assets'
+BUILD  = Path(__file__).parent / 'build'
+SITE   = Path(__file__).parent / 'site'
 CSS         = (ASSETS / 'styles.css').read_text()
 JS_TEMPLATE = (ASSETS / 'scripts.js').read_text()
 
@@ -36,7 +40,7 @@ ap = argparse.ArgumentParser(description='Render a TOML intermediate to a single
 ap.add_argument('doc', help='Doc slug (looks for {slug}.toml, writes {slug}.html)')
 args = ap.parse_args()
 
-with open(f'{args.doc}.toml', 'rb') as f:
+with open(BUILD / f'{args.doc}.toml', 'rb') as f:
     data = tomllib.load(f)
 
 paragraphs   = data['paragraphs']
@@ -44,8 +48,10 @@ footnotes    = data['footnotes']
 appendices   = data.get('appendices', [])
 doc_name     = data.get('name', args.doc)
 doc_source   = data.get('source_url', '')
-doc_desc     = data.get('desc', '')
-doc_promulg  = data.get('promulgation', '')
+doc_desc      = data.get('desc', '')
+doc_desc_post = data.get('desc_post', '')
+doc_promulg   = data.get('promulgation', '')
+doc_signature = data.get('signature', '')
 
 # Per-doc accent hue. Drives the whole hsl() accent palette in styles.css
 # via an inline `style="--hue: …"` on the <html> tag. Default = warm gold.
@@ -113,15 +119,79 @@ fn_index = {(fn['part'], fn['chapter'], fn['number']): fn for fn in footnotes}
 
 # ── build sections ────────────────────────────────────────────────────────────
 
+def _desc_line(ln):
+    """Render a single front-matter line: title-case the all-caps source,
+    preserving Roman numerals (POPE LEO XIV, POPE PAUL VI) via the
+    title_case helper. `cap_last=False` because each visual line is a
+    fragment of a longer subtitle phrase — capitalising a trailing
+    small word ("in The") looks wrong. Wrap in inline-block so the
+    centred line still reflows as one unit at narrow widths."""
+    return f'<span style="display:inline-block">{e(title_case(ln, cap_last=False))}</span>'
+
+
+def _desc_block(text, cls, *, break_before_on=False):
+    """Render `text` (one source line per output span) as a centred desc
+    paragraph. With `break_before_on`, insert a hard line break before any
+    line starting with "ON " — the modern encyclicals' subtitles open
+    with "ON CARE FOR…" / "ON SAFEGUARDING…", and the user wants those
+    visually separated from the preceding "OF THE HOLY FATHER / NAME"
+    stanza regardless of viewport width."""
+    pieces = []
+    for ln in text.splitlines():
+        ln = ln.strip()
+        if not ln:
+            continue
+        if break_before_on and pieces and ln.upper().startswith('ON '):
+            pieces.append('<br>')
+        pieces.append(_desc_line(ln))
+    if not pieces:
+        return ''
+    out = ''
+    for piece in pieces:
+        if piece == '<br>':
+            out += '<br>'
+        elif out and not out.endswith('<br>'):
+            out += ' ' + piece
+        else:
+            out += piece
+    return f'<p class="{cls}">{out}</p>'
+
+MODERN_DOCS = {'laudato_si', 'magnifica_humanitas'}
+
+# The Vatican sources place the document title *between* lines of the
+# front-matter block: e.g. MH has "ENCYCLICAL LETTER" above the title and
+# "OF HIS HOLINESS … IN THE TIME OF AI" below; GeS has "PASTORAL
+# CONSTITUTION …" above the title and "PROMULGATED BY … DECEMBER 7, 1965"
+# below. Each extractor pre-splits these into desc (above) + desc_post
+# (below); the renderer just stacks them around the name.
 title_block = ''
-if doc_desc or doc_promulg:
+if doc_desc or doc_name or doc_desc_post:
+    is_modern = args.doc in MODERN_DOCS
     title_block = (
         '<div class="doc-title">'
-        + (f'<p class="doc-desc">{" ".join(f'<span style="display:inline-block">{e(l.strip())}</span>' for l in doc_desc.splitlines() if l.strip())}</p>' if doc_desc else '')
+        + _desc_block(doc_desc, 'doc-desc doc-desc-pre')
         + f'<p class="doc-name">{e(doc_name)}</p>'
-        + (f'<p class="doc-promulg">{" ".join(f'<span style="display:inline-block">{e(l.strip())}</span>' for l in doc_promulg.splitlines() if l.strip())}</p>' if doc_promulg else '')
+        + _desc_block(doc_desc_post, 'doc-desc doc-desc-post',
+                      break_before_on=is_modern)
         + '</div>'
     )
+
+# Dedication + papal signature belong at the END in the Vatican sources
+# (after the body, just before the footnote block), not in the front matter
+# where the dedication used to live.
+end_matter_html = ''
+if doc_promulg or doc_signature:
+    parts = ['<div class="doc-end-matter">']
+    if doc_promulg:
+        promulg_spans = " ".join(
+            f'<span style="display:inline-block">{e(l.strip())}</span>'
+            for l in doc_promulg.splitlines() if l.strip()
+        )
+        parts.append(f'<p class="doc-promulg">{promulg_spans}</p>')
+    if doc_signature:
+        parts.append(f'<p class="doc-signature">{e(doc_signature)}</p>')
+    parts.append('</div>')
+    end_matter_html = ''.join(parts)
 
 html_parts = []
 
@@ -187,10 +257,20 @@ for p in paragraphs:
             else f'Chapter {p["chapter"]}'
         )
         indicator_chapters.append({'id': cid, 'label': label, 'spacer': False, 'part': p['part']})
-        html_parts.append(h('h2', 'chapter-num', f'Chapter {p["chapter"]}').replace('<h2 ', f'<h2 id="{cid}" '))
+        # The conclusion is structurally a chapter but the source labels it
+        # only 'CONCLUSION', not 'CHAPTER SIX' — suppress the "Chapter N"
+        # prefix so the rendered heading matches the source. The id then
+        # rides on the title <h3> instead of the (omitted) chapter-num <h2>.
+        is_unnumbered = p['chapter_title'].strip().lower() == 'conclusion'
+        if not is_unnumbered:
+            html_parts.append(h('h2', 'chapter-num', f'Chapter {p["chapter"]}').replace('<h2 ', f'<h2 id="{cid}" '))
         if p['chapter_title']:
             ch_num = f'{to_roman(p["part"])}.{p["chapter"]}' if p['part'] else f'{p["chapter"]}'
-            html_parts.append(h('h3', 'chapter-title', p['chapter_title']).replace('<h3 ', f'<h3 data-sticky data-ch-num="{ch_num}" '))
+            id_attr = f'id="{cid}" ' if is_unnumbered else ''
+            html_parts.append(
+                h('h3', 'chapter-title', p['chapter_title'])
+                .replace('<h3 ', f'<h3 {id_attr}data-sticky data-ch-num="{ch_num}" ')
+            )
             if p.get('chapter_subtitle', ''):
                 html_parts.append(h('p', 'chapter-subtitle', p['chapter_subtitle']))
         seen_chapter     = chapter
@@ -241,11 +321,17 @@ for p in paragraphs:
 
     # Per-doc sticky-bar sub-line. GeS prefers the larger structural unit
     # (section title) and falls back to the paragraph's Latin micro-summary
-    # when not in a section. LS tracks sections; MH exposes its nested
-    # subheadings here.
+    # when not in a section. LS and MH both track sections — sub-headings
+    # are too granular for the sub-bar (they change every 2-5 paras), and
+    # section context is the orientation level a reader actually wants
+    # while scrolling. Sub-heading nav is still available in the TOC
+    # drawer. Kept as separate branches so per-doc tweaks don't have to
+    # disentangle a shared one.
     if args.doc == 'gaudium_et_spes':
         sub_text = (p['section_title'] if p['section'] else '') or head
     elif args.doc == 'laudato_si':
+        sub_text = p['section_title'] if p['section'] else ''
+    elif args.doc == 'magnifica_humanitas':
         sub_text = p['section_title'] if p['section'] else ''
     else:
         sub_text = _cur_sub_text
@@ -525,6 +611,7 @@ page = f"""<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
 <title>{e(doc_name)}</title>
 <style>{CSS}</style>
 <script>
@@ -595,11 +682,11 @@ page = f"""<!DOCTYPE html>
 {title_block}
 {''.join(html_parts)}
 {appendix_html}
+{end_matter_html}
 
 <nav id="ch-indicator"></nav>
 
 <aside id="fn-drawer">
-  <div id="fn-tab">Index</div>
   <div id="fn-content">
     <div class="drawer-tabs" role="tablist" aria-label="Drawer view">
       <button class="drawer-view-tab active" type="button" role="tab" aria-controls="drawer-toc" aria-selected="true" data-drawer-view="toc">Contents</button>
@@ -621,14 +708,15 @@ page = f"""<!DOCTYPE html>
     </div>
   </div>
 </aside>
+<div id="fn-tab">Index</div>
 
 <script>{JS}</script>
 </body>
 </html>
 """
 
-out_path = f'{args.doc}.html'
-with open(out_path, 'w', encoding='utf-8') as f:
-    f.write(page)
+SITE.mkdir(exist_ok=True)
+out_path = SITE / f'{args.doc}.html'
+out_path.write_text(page, encoding='utf-8')
 
 print(f'Wrote {out_path} — {len(paragraphs)} paragraphs, {len(footnotes)} footnotes')

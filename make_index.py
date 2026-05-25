@@ -5,6 +5,11 @@ from pathlib import Path
 import sys
 import tomllib
 
+from core import title_case
+
+BUILD = Path(__file__).parent / 'build'
+SITE  = Path(__file__).parent / 'site'
+
 
 HUES = {
     'gaudium_et_spes': 42,
@@ -14,14 +19,23 @@ HUES = {
 
 
 def render_card(slug):
-    with open(f'{slug}.toml', 'rb') as source:
+    with open(BUILD / f'{slug}.toml', 'rb') as source:
         data = tomllib.load(source)
 
     name = escape(data['name'])
-    description = ' '.join(
-        escape(line.strip()) for line in data.get('desc', '').splitlines()
+    # The title-block descriptor is split across desc (above title) and
+    # desc_post (below title) in the TOML. The card already shows the doc
+    # name as <h2>, so glue desc + desc_post into one flowing subtitle
+    # without re-inserting the title between them, then title-case the
+    # whole concatenation as a single phrase (keeps small words like
+    # "on" / "in" lowercase mid-flow and preserves Roman numerals).
+    joined = ' '.join(
+        line.strip()
+        for part in (data.get('desc', ''), data.get('desc_post', ''))
+        for line in part.splitlines()
         if line.strip()
     )
+    description = escape(title_case(joined)) if joined else ''
     source_url = escape(data.get('source_url', ''), quote=True)
     original = (
         f'<a class="source" href="{source_url}" target="_blank" rel="noopener">'
@@ -50,7 +64,8 @@ def main():
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Forthrast Editions | Vatican Documents</title>
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<title>The Circulars | Vatican Documents</title>
 <style>
 :root {{
   color-scheme: light dark;
@@ -79,14 +94,12 @@ body {{
 main {{
   width: min(62rem, calc(100% - 2.5rem));
   margin: 0 auto;
-  padding: clamp(3rem, 9vh, 6rem) 0 3rem;
+  padding: clamp(1.75rem, 5vh, 3rem) 0 3rem;
 }}
 .brand {{
   color: var(--dim);
   font-family: system-ui, -apple-system, sans-serif;
-  font-size: .8rem;
-  letter-spacing: .18em;
-  text-transform: uppercase;
+  font-size: .85rem;
 }}
 h1 {{
   max-width: 15ch;
@@ -152,29 +165,40 @@ footer {{
   line-height: 1.7;
   margin-top: 4rem;
   padding-top: 1.2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 1rem;
 }}
 footer a {{ color: inherit; }}
+.attribution {{ text-align: right; font-size: .8rem; opacity: .8; }}
 </style>
 </head>
 <body>
 <main>
-  <p class="brand">Forthrast Editions</p>
+  <p class="brand">the circulars · vatican.va, retypeset.</p>
   <h1>Vatican documents, set for reading.</h1>
-  <p class="intro">Reader editions with navigation, footnotes and persistent bookmarks. Generated via templater scripts from Vatican HTML.</p>
+  <p class="intro">Reader editions of a few papal and conciliar documents.<br>Generated via templater scripts from the Vatican HTML.</p>
   <section class="editions" aria-label="Available documents">
 {cards}
   </section>
   <footer>
-    <div>Email: <a href="mailto:me@forthrast.com">me@forthrast.com</a></div>
-    <div>Bluesky: <a href="https://bsky.app/profile/forthrast.com" target="_blank" rel="noopener">@forthrast.com</a></div>
-    <div>GitHub: <a href="https://github.com/forthrast-com" target="_blank" rel="noopener">@forthrast-com</a></div>
+    <div class="contacts">
+      <div>Email: <a href="mailto:me@forthrast.com">me@forthrast.com</a></div>
+      <div>Bluesky: <a href="https://bsky.app/profile/forthrast.com" target="_blank" rel="noopener">@forthrast.com</a></div>
+      <div>GitHub: <a href="https://github.com/forthrast-com" target="_blank" rel="noopener">@forthrast-com</a></div>
+    </div>
+    <div class="attribution">made with claude and codex ^•^</div>
   </footer>
 </main>
 </body>
 </html>
 '''
-    Path('index.html').write_text(page, encoding='utf-8')
-    print(f'Wrote index.html - {len(slugs)} documents')
+    SITE.mkdir(exist_ok=True)
+    out_path = SITE / 'index.html'
+    out_path.write_text(page, encoding='utf-8')
+    print(f'Wrote {out_path} - {len(slugs)} documents')
 
 
 if __name__ == '__main__':

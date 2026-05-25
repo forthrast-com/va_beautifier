@@ -15,10 +15,10 @@ The vatican.va edition is one long page of bare text. The points of difference:
 
     sources/*.html  ──(parse.py <slug>)──▶  <slug>.toml  ──(make_html.py <slug>)──▶  <slug>.html
                                                 │
-                                                └──(make_index.py)────────────▶  index.html
+                                                ├──(make_index.py)────────────▶  index.html
                                                 │
-                                                ├──(not yet)──▶  *.epub
-                                                └──(not yet)──▶  *.pdf
+                                                ├──(make_book.py <slug>)─────▶  <slug>.epub
+                                                └──(make_book.py <slug>)─────▶  <slug>.pdf
 
 The TOML is the canonical intermediate. Downstream renderers consume TOML — never re-parse the Vatican HTML.
 
@@ -28,8 +28,10 @@ The TOML is the canonical intermediate. Downstream renderers consume TOML — ne
 - `core.py` — shared helpers (`clean_text`, `roman_to_int`, `title_case`, `parse_num`) and the TOML serialiser. The serialiser is the contract: each extractor returns a dict with `name`, `desc`, `promulgation`, `paragraphs[]`, `footnotes[]`.
 - `extract/<slug>.py` — per-document extractor. Each exposes `extract() -> dict`. Add a new document by dropping a new module here; no registry edit needed.
 - `make_html.py <slug>` — reads `<slug>.toml`, writes `<slug>.html`. Single self-contained file (CSS + JS inlined). Doc-name comes from the TOML's `name`. Body gets `class="doc-<slug>"` so per-doc CSS overrides can scope to that document only.
+- `make_book.py <slug>` — reads `<slug>.toml`, emits `build/<slug>.md` + `build/<slug>_titlepage.typ` (the title page as raw typst, fed to pandoc via `--include-before-body` so it lands before the TOC). Then runs pandoc twice: once to `<slug>.epub` and once to `<slug>.pdf` (via `--pdf-engine=typst --pdf-engine-opt=--root=<ROOT>`). Body font is Hoefler Text by default; override with `VA_BOOK_FONT=…`. Page breaks and the end matter ride as raw typst blocks, which the EPUB writer ignores.
+- `templates/book.typ` — pandoc-typst `conf` module imported via YAML `template:` metadata. Owns page geometry (A5, 11pt), font defaults, heading shows for chapter/section/subsection, footnote entry styling, and the centred italic "Contents" header on the TOC page. Does *not* render the title — that's the include-before-body's job.
 - `assets/styles.css`, `assets/scripts.js` — read by `make_html.py` and inlined into the output. The JS has two placeholders, `__INDICATOR_JSON__` and `__DOC_NAME__`, substituted at render time. Edit these files directly; the output is still self-contained.
-- `build.sh` — iterates the `DOCS` list, runs parse + render for each. Add a doc → drop extractor → add slug to the list.
+- `build.sh` — iterates the `DOCS` list, runs parse + render + book-build for each. `VA_SKIP_BOOKS=1` skips the EPUB/PDF stage (it only runs if `pandoc` is on PATH). Add a doc → drop extractor → add slug to the list.
 
 ## TOML schema
 
@@ -78,8 +80,80 @@ metadata are published.
 
 ## Open work
 
-- **EPUB** — pandoc is in Home Manager; could consume the TOML directly or via an HTML intermediate.
-- **PDF** — typst is in Home Manager; natural fit, would consume TOML directly.
+- **Title page (PDF) — done.** `templates/book.typ` owns book
+  typography (page geom, heading shows, footnote entries). The title
+  page is written to `build/<slug>_titlepage.typ` and fed in via
+  pandoc's `--include-before-body` so it lands before the TOC.
+  Display-italic doc name (centred, vertically balanced), tracked-caps
+  preamble and subtitle, no page number on the title page. End matter
+  (dedication + signature) renders on its own page via a raw-typst
+  block at the end of the body, with a parallel raw-HTML colophon
+  block so EPUB gets the same content. Image slot is wired through
+  the `hero_image` + `hero_credit` TOML fields — degrades cleanly
+  when unset.
+- **Hero / decorative images** — title-page slot is wired
+  (`hero_image` floats above the title block at 65% width with the
+  `hero_credit` line in italic underneath). To drop an image in: save
+  to e.g. `assets/heros/<slug>.jpg`, then set `hero_image` and
+  `hero_credit` in the extractor (`extract/<slug>.py`'s `extract()`
+  return dict). Typst paths are project-root-relative because
+  `make_book.py` passes `--root=<ROOT>` to the engine — so the value
+  in the TOML can be a plain relative path like `assets/heros/foo.jpg`.
+  Likely sources: Wikimedia Commons, US Library of Congress PPOC,
+  Rijksstudio.
+
+  Per-doc shortlist (pick later — capture now):
+
+  *Magnifica Humanitas* — early-modern automaton, slightly surreal:
+    - **Vaucanson's duck** (1739) — the canonical Enlightenment-era
+      automaton. Famous side-elevation engraving from the 1738 pamphlet.
+      Surreal, recognisable, hits the "what is the human, what is the
+      machine" register cleanly.
+    - **da Vinci's mechanical knight** (c. 1495, Codex Atlanticus) —
+      Renaissance sketches. Weightier, foundational; reads "this concern
+      is older than you think."
+    - **Salomon Schweigger automaton engraving** (17th c.) — orientalist
+      printmaking. More obscure; harder to find a clean high-res scan.
+
+  *Gaudium et Spes* — Vatican II:
+    - **Council fathers in St Peter's** — wide assembly shot during a
+      session. Reads instantly as Vatican II to anyone who recognises
+      the setting.
+    - **Lothar Wolleh portrait** (1960s) — graphic, tighter portraiture
+      from Wolleh's session series. Licence varies per print; confirm
+      PD-eligibility per image.
+    - **Opening-procession crowd shot** (Oct 1962) — bishops streaming
+      into St Peter's Square. More dynamic; sets the scene rather than
+      the chamber.
+
+  *Laudato Si'* — fever-dream sun-and-birds plate:
+    - **Mughal solar miniature** (16-17th c.) — Indian miniature with
+      solar disc and animals arrayed around it. Closest to the
+      encyclical's cosmic-fraternity register.
+    - **William Blake bird study** — Romantic-era, visionary, slightly
+      mystical. Less ecological, more apocalyptic-pastoral.
+    - **Mughal nature plate (non-solar)** — same school, tree-and-birds
+      composition rather than the sun. Calmer, easier to crop tall.
+- **Book polish (other)** —
+    - *MH TOC orphans:* the introduction's section headings (Introduction,
+      The res novae of our time, Two biblical images, &c.) sit indented
+      under nothing because the body H1 is `.unlisted`. Either promote
+      "Introduction" to chapter-level for MH or have the renderer suppress
+      the indent when there's no listed parent.
+    - *Italics through the TOML:* `clean_text` flattens `<i>` / `<em>`, so
+      Latin phrases and short-title book references (*Pacem in Terris*,
+      *Centesimus Annus*) come through plain in both web and book outputs.
+      Worth preserving as markdown `*…*` in the TOML's body text.
+    - *Multi-paragraph footnotes:* the few notes in LS that span two
+      paragraphs render as one block — pandoc's continuation-indent
+      handling needs a closer look.
+    - *Auto-build hygiene:* `build.sh` re-emits TOMLs and HTML on every
+      run; the `git diff` after a clean build can be noisy. Consider
+      hashing inputs and skipping unchanged docs.
+- **More documents** — `sources/Fratelli tutti_en.html` and
+  `sources/Sacrosanctum Concilium_{en,la}.html` are sitting un-extracted.
+  Sacrosanctum is the old-flat template (GeS-shaped); Fratelli tutti is
+  likely the modern Bootstrap dialect (LS-shaped).
 
 ## Environment
 
