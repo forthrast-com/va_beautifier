@@ -3,3 +3,7 @@ __pycache__/
 .DS_Store
 result
 result-*
+
+scratch/
+*_demo.html
+sources/*.pdf

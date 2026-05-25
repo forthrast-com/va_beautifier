@@ -1,3 +1,4 @@
+name = "Gaudium et Spes"
 desc = """
 PASTORAL CONSTITUTION
 ON THE CHURCH IN THE 
@@ -15,6 +16,7 @@ chapter = 0
 chapter_title = ""
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De intima coniunctione Ecclesiae cum tota familia gentium."
 text = """
 The joys and the hopes, the griefs and the anxieties of the men of this age, especially those who are poor or in any way afflicted, these are the joys and hopes, the griefs and anxieties of the followers of Christ. Indeed, nothing genuinely human fails to raise an echo in their hearts. For theirs is a community composed of men. United in Christ, they are led by the Holy Spirit in their journey to the Kingdom of their Father and they have welcomed the news of salvation which is meant for every man. That is why this community realizes that it is truly linked with mankind and its history by the deepest of bonds."""
@@ -27,6 +29,7 @@ chapter = 0
 chapter_title = ""
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "Ad quosnam Concilium sermonem dirigat."
 text = """
 Hence this Second Vatican Council, having probed more profoundly into the mystery of the Church, now addresses itself without hesitation, not only to the sons of the Church and to all who invoke the name of Christ, but to the whole of humanity. For the council yearns to explain to everyone how it conceives of the presence and activity of the Church in the world of today.
@@ -41,6 +44,7 @@ chapter = 0
 chapter_title = ""
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De ministerio homini praebendo."
 text = """
 Though mankind is stricken with wonder at its own discoveries and its power, it often raises anxious questions about the current trend of the world, about the place and role of man in the universe, about the meaning of its individual and collective strivings, and about the ultimate destiny of reality and of humanity. Hence, giving witness and voice to the faith of the whole people of God gathered together by Christ, this council can provide no more eloquent proof of its solidarity with, as well as its respect and love for the entire human family with which it is bound up, than by engaging with it in conversation about these various problems. The council brings to mankind light kindled from the Gospel, and puts at its disposal those saving resources which the Church herself, under the guidance of the Holy Spirit, receives from her Founder. For the human person deserves to be preserved; human society deserves to be renewed. Hence the focal point of our total presentation will be man himself, whole and entire, body and soul, heart and conscience, mind and will.
@@ -55,6 +59,7 @@ chapter = 0
 chapter_title = ""
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De spe et angore."
 text = """
 To carry out such a task, the Church has always had the duty of scrutinizing the signs of the times and of interpreting them in the light of the Gospel. Thus, in language intelligible to each generation, she can respond to the perennial questions which men ask about this present life and the life to come, and about the relationship of the one to the other. We must therefore recognize and understand the world in which we live, its explanations, its longings, and its often dramatic characteristics. Some of the main features of the modern world can be sketched as follows.
@@ -75,6 +80,7 @@ chapter = 0
 chapter_title = ""
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De profunde mutatis condicionibus."
 text = """
 Today's spiritual agitation and the changing conditions of life are part of a broader and deeper revolution. As a result of the latter, intellectual formation is ever increasingly based on the mathematical and natural sciences and on those dealing with man himself, while in the practical order the technology which stems from these sciences takes on mounting importance.
@@ -95,6 +101,7 @@ chapter = 0
 chapter_title = ""
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "Mutationes in ordine sociali."
 text = """
 By this very circumstance, the traditional local communities such as families, clans, tribes, villages, various groups and associations stemming from social contacts, experience more thorough changes every day.
@@ -117,6 +124,7 @@ chapter = 0
 chapter_title = ""
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "Mutationes psychologicae, morales et religiosae."
 text = """
 A change in attitudes and in human structures frequently calls accepted values into question, especially among young people, who have grown impatient on more than one occasion, and indeed become rebels in their distress. Aware of their own influence in the life of society, they want a part in it sooner. This frequently causes parents and educators to experience greater difficulties day by day in discharging their tasks. The institutions, laws and modes of thinking and feeling as handed down from previous generations do not always seem to be well adapted to the contemporary state of affairs; hence arises an upheaval in the manner and even the norms of behavior.
@@ -131,6 +139,7 @@ chapter = 0
 chapter_title = ""
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De inaequilibriis in mundo hodierno."
 text = """
 This development coming so rapidly and often in a disorderly fashion, combined with keener awareness itself of the inequalities in the world beget or intensify contradictions and imbalances.
@@ -151,6 +160,7 @@ chapter = 0
 chapter_title = ""
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De appetitionibus universalioribus generis humani."
 text = """
 Meanwhile the conviction grows not only that humanity can and should increasingly consolidate its control over creation, but even more, that it devolves on humanity to establish a political, social and economic order which will growingly serve man and help individuals as well as groups to affirm and develop the dignity proper to them.
@@ -171,6 +181,7 @@ chapter = 0
 chapter_title = ""
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De profundioribus interrogationibus generis humani."
 text = """
 The truth is that the imbalances under which the modern world labors are linked with that more basic imbalance which is rooted in the heart of man. For in man himself many elements wrestle with one another. Thus, on the one hand, as a creature he experiences his limitations in a multitude of ways; on the other he feels himself to be boundless in his desires and summoned to a higher life. Pulled by manifold attractions he is constantly forced to choose among them and renounce some. Indeed, as a weak and sinful being, he often does what he would not, and fails to do what he would.(1) Hence he suffers from internal divisions, and from these flow so many and such great discords in society. No doubt many whose lives are infected with a practical materialism are blinded against any sharp insight into this kind of dramatic situation; or else, weighed down by unhappiness they are prevented from giving the matter any thought. Thinking they have found serenity in an interpretation of reality everywhere proposed these days, many look forward to a genuine and total emancipation of humanity wrought solely by human effort; they are convinced that the future rule of man over the earth will satisfy every desire of his heart. Nor are there lacking men who despair of any meaning to life and praise the boldness of those who think that human existence is devoid of any inherent significance and strive to confer a total meaning on it by their own ingenuity alone.
@@ -187,6 +198,7 @@ chapter = 0
 chapter_title = ""
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "Impulsionibus Spiritus respondendum."
 text = """
 The People of God believes that it is led by the Lord's Spirit, Who fills the earth. Motivated by this faith, it labors to decipher authentic signs of God's presence and purpose in the happenings, needs and desires in which this People has a part along with other men of our age. For faith throws a new light on everything, manifests God's design for man's total vocation, and thus directs the mind to solutions which are fully human.
@@ -203,6 +215,7 @@ chapter = 1
 chapter_title = "The Dignity of the Human Person"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De homine ad imaginem Dei"
 text = """
 According to the almost unanimous opinion of believers and unbelievers alike, all things on earth should be related to man as their center and crown.
@@ -223,6 +236,7 @@ chapter = 1
 chapter_title = "The Dignity of the Human Person"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De peccato."
 text = """
 Although he was made by God in a state of holiness, from the very onset of his history man abused his liberty, at the urging of the Evil One. Man set himself against God and sought to attain his goal apart from God. Although they knew God, they did not glorify Him as God, but their senseless minds were darkened and they served the creature rather than the Creator.(3) What divine revelation makes known to us agrees with experience. Examining his heart, man finds that he has inclinations toward evil too, and is engulfed by manifold ills which cannot come from his good Creator. Often refusing to acknowledge God as his beginning, man has disrupted also his proper relationship to his own ultimate goal as well as his whole relationship toward himself and others and all created things.
@@ -239,6 +253,7 @@ chapter = 1
 chapter_title = "The Dignity of the Human Person"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De hominis constitutione."
 text = """
 Though made of body and soul, man is one. Through his bodily composition he gathers to himself the elements of the material world; thus they reach their crown through him, and through him raise their voice in free praise of the Creator.(6) For this reason man is not allowed to despise his bodily life, rather he is obliged to regard his body as good and honorable since God has created it and will raise it up on the last day. Nevertheless, wounded by sin, man experiences rebellious stirrings in his body. But the very dignity of man postulates that man glorify God in his body and forbid it to serve the evil inclinations of his heart.
@@ -253,6 +268,7 @@ chapter = 1
 chapter_title = "The Dignity of the Human Person"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De dignitate intellectus, de veritate et de sapientia."
 text = """
 Man judges rightly that by his intellect he surpasses the material universe, for he shares in the light of the divine mind. By relentlessly employing his talents through the ages he has indeed made progress in the practical sciences and in technology and the liberal arts. In our times he has won superlative victories, especially in his probing of the material world and in subjecting it to himself. Still he has always searched for more penetrating truths, and finds them. For his intelligence is not confined to observable data alone, but can with genuine certitude attain to reality itself as knowable, though in consequence of sin that certitude is partly obscured and weakened.
@@ -271,6 +287,7 @@ chapter = 1
 chapter_title = "The Dignity of the Human Person"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De dignitate conscientiae moralis."
 text = """
 In the depths of his conscience, man detects a law which he does not impose upon himself, but which holds him to obedience. Always summoning him to love good and avoid evil, the voice of conscience when necessary speaks to his heart: do this, shun that. For man has in his heart a law written by God; to obey it is the very dignity of man; according to it he will be judged.(9) Conscience is the most secret core and sanctuary of a man. There he is alone with God, Whose voice echoes in his depths.(10) In a wonderful manner conscience reveals that law which is fulfilled by love of God and neighbor.(11) In fidelity to conscience, Christians are joined with the rest of men in the search for truth, and for the genuine solution to the numerous problems which arise in the life of individuals from social relationships. Hence the more right conscience holds sway, the more persons and groups turn aside from blind choice and strive to be guided by the objective norms of morality. Conscience frequently errs from invincible ignorance without losing its dignity. The same cannot be said for a man who cares but little for truth and goodness, or for a conscience which by degrees grows practically sightless as a result of habitual sin."""
@@ -283,6 +300,7 @@ chapter = 1
 chapter_title = "The Dignity of the Human Person"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De praestantia libertatis."
 text = """
 Only in freedom can man direct himself toward goodness. Our contemporaries make much of this freedom and pursue it eagerly; and rightly to be sure. Often however they foster it perversely as a license for doing whatever pleases them, even if it is evil. For its part, authentic freedom is an exceptional sign of the divine image within man. For God has willed that man remain "under the control of his own decisions,"(12) so that he can seek his Creator spontaneously, and come freely to utter and blissful perfection through loyalty to Him. Hence man's dignity demands that he act according to a knowing and free choice that is personally motivated and prompted from within, not under blind internal impulse nor by mere external pressure. Man achieves such dignity when, emancipating himself from all captivity to passion, he pursues his goal in a spontaneous choice of what is good, and procures for himself through effective and skilful action, apt helps to that end. Since man's freedom has been damaged by sin, only by the aid of God's grace can he bring such a relationship with God into full flower. Before the judgement seat of God each man must render an account of his own life, whether he has done good or evil.(13)"""
@@ -295,6 +313,7 @@ chapter = 1
 chapter_title = "The Dignity of the Human Person"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De mysterio mortis."
 text = """
 It is in the face of death that the riddle a human existence grows most acute. Not only is man tormented by pain and by the advancing deterioration of his body, but even more so by a dread of perpetual extinction. He rightly follows the intuition of his heart when he abhors and repudiates the utter ruin and total disappearance of his own person. He rebels against death because he bears in himself an eternal seed which cannot be reduced to sheer matter. All the endeavors of technology, though useful in the extreme, cannot calm his anxiety; for prolongation of biological life is unable to satisfy that desire for higher life which is inescapably lodged in his breast.
@@ -309,6 +328,7 @@ chapter = 1
 chapter_title = "The Dignity of the Human Person"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De formis et radicibus atheismi."
 text = """
 The root reason for human dignity lies in man's call to communion with God. From the very circumstance of his origin man is already invited to converse with God. For man would not exist were he not created by Gods love and constantly preserved by it; and he cannot live fully according to truth unless he freely acknowledges that love and devotes himself to His Creator. Still, many of our contemporaries have never recognized this intimate and vital link with God, or have explicitly rejected it. Thus atheism must be accounted among the most serious problems of this age, and is deserving of closer examination.
@@ -325,6 +345,7 @@ chapter = 1
 chapter_title = "The Dignity of the Human Person"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De atheismo systematico."
 text = """
 Modern atheism often takes on a systematic expression which, in addition to other causes, stretches the desires for human independence to such a point that it poses difficulties against any kind of dependence on God. Those who profess atheism of this sort maintain that it gives man freedom to be an end unto himself, the sole artisan and creator of his own history. They claim that this freedom cannot be reconciled with the affirmation of a Lord Who is author and purpose of all things, or at least that this freedom makes such an affirmation altogether superfluous. Favoring this doctrine can be the sense of power which modern technical progress generates in man.
@@ -339,6 +360,7 @@ chapter = 1
 chapter_title = "The Dignity of the Human Person"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De habitudine Ecclesiae ad atheismum."
 text = """
 In her loyal devotion to God and men, the Church has already repudiated(16) and cannot cease repudiating, sorrowfully but as firmly as possible, those poisonous doctrines and actions which contradict reason and the common experience of humanity, and dethrone man from his native excellence.
@@ -363,6 +385,7 @@ chapter = 1
 chapter_title = "The Dignity of the Human Person"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De Christo Novo Homine"
 text = """
 The truth is that only in the mystery of the incarnate Word does the mystery of man take on light. For Adam, the first man, was a figure of Him Who was to come,(20) namely Christ the Lord. Christ, the final Adam, by the revelation of the mystery of the Father and His love, fully reveals man to man himself and makes his supreme calling clear. It is not surprising, then, that in Him all the aforementioned truths find their root and attain their crown.
@@ -385,6 +408,7 @@ chapter = 2
 chapter_title = "The Community of Mankind"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "Quid Concilium intendat."
 text = """
 One of the salient features of the modern world is the growing interdependence of men one on the other, a development promoted chiefly by modern technical advances. Nevertheless brotherly dialogue among men does not reach its perfection on the level of technical progress, but on the deeper level of interpersonal relationships. These demand a mutual respect for the full spiritual dignity of the person. Christian revelation contributes greatly to the promotion of this communion between persons, and at the same time leads us to a deeper understanding of the laws of social life which the Creator has written into man's moral and spiritual nature.
@@ -399,6 +423,7 @@ chapter = 2
 chapter_title = "The Community of Mankind"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De indole communitaria vocationis humanae in consilio Dei."
 text = """
 God, Who has fatherly concern for everyone, has willed that all men should constitute one family and treat one another in a spirit of brotherhood. For having been created in the image of God, Who "from one man has created the whole human race and made them live all over the face of the earth" (Acts 17:26), all men are called to one and the same goal, namely God Himself.
@@ -415,6 +440,7 @@ chapter = 2
 chapter_title = "The Community of Mankind"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De interdependentia humanae personae et humanae societatis."
 text = """
 Man's social nature makes it evident that the progress of the human person and the advance of society itself hinge on one another. For the beginning, the subject and the goal of all social institutions is and must be the human person which for its part and by its very nature stands completely in need of social life.(3) Since this social life is not something added on to man, through his dealings with others, through reciprocal duties, and through fraternal dialogue he develops all his gifts and is able to rise to his destiny.
@@ -431,6 +457,7 @@ chapter = 2
 chapter_title = "The Community of Mankind"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De bono communi promovendo."
 text = """
 Every day human interdependence grows more tightly drawn and spreads by degrees over the whole world. As a result the common good, that is, the sum of those conditions of social life which allow social groups and their individual members relatively thorough and ready access to their own fulfillment, today takes on an increasingly universal complexion and consequently involves rights and duties with respect to the whole human race. Every social group must take account of the needs and legitimate aspirations of other groups, and even of the general welfare of the entire human family.(5)
@@ -451,6 +478,7 @@ chapter = 2
 chapter_title = "The Community of Mankind"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De reverentia erga personam humanam."
 text = """
 Coming down to practical and particularly urgent consequences, this council lays stress on reverence for man; everyone must consider his every neighbor without exception as another self, taking into account first of all His life and the means necessary to living it with dignity,(8) so as not to imitate the rich man who had no concern for the poor man Lazarus.(9)
@@ -467,6 +495,7 @@ chapter = 2
 chapter_title = "The Community of Mankind"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De reverentia et amore erga adversarios."
 text = """
 Respect and love ought to be extended also to those who think or act differently than we do in social, political and even religious matters. In fact, the more deeply we come to understand their ways of thinking through such courtesy and love, the more easily will we be able to enter into dialogue with them.
@@ -483,6 +512,7 @@ chapter = 2
 chapter_title = "The Community of Mankind"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De essentiali inter omnes homines aequalitate et de iustitia sociali."
 text = """
 Since all men possess a rational soul and are created in God's likeness, since they have the same nature and origin, have been redeemed by Christ and enjoy the same divine calling and destiny, the basic equality of all must receive increasingly greater recognition.
@@ -501,6 +531,7 @@ chapter = 2
 chapter_title = "The Community of Mankind"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "Quod ultra individualisticam ethicam progrediendum sit."
 text = """
 Profound and rapid changes make it more necessary that no one ignoring the trend of events or drugged by laziness, content himself with a merely individualistic morality. It grows increasingly true that the obligations of justice and love are fulfilled only if each person, contributing to the common good, according to his own abilities and the needs of others, also promotes and assists the public and private institutions dedicated to bettering the conditions of human life. Yet there are those who, while possessing grand and rather noble sentiments, nevertheless in reality live always as if they cared nothing for the needs of society. Many in various places even make light of social laws and precepts, and do not hesitate to resort to various frauds and deceptions in avoiding just taxes or other debts due to society. Others think little of certain norms of social life, for example those designed for the protection of health, or laws establishing speed limits; they do not even avert to the fact that by such indifference they imperil their own life and that of others.
@@ -515,6 +546,7 @@ chapter = 2
 chapter_title = "The Community of Mankind"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De responsabilitate et participatione"
 text = """
 In order for individual men to discharge with greater exactness the obligations of their conscience toward themselves and the various group to which they belong, they must be carefully educated to a higher degree of culture through the use of the immense resources available today to the human race. Above all the education of youth from every social background has to be undertaken, so that there can be produced not only men and women of refined talents, but those great-souled persons who are so desperately required by our times.
@@ -531,6 +563,7 @@ chapter = 2
 chapter_title = "The Community of Mankind"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "Verbum Incarnatum et solidarietas humana"
 text = """
 As God did not create man for life in isolation, but for the formation of social unity, so also "it has pleased God to make men holy and save them not merely as individuals, without bond or link between them, but by making them into a single people, a people which acknowledges Him in truth and serves Him in holiness."(13) So from the beginning of salvation history He has chosen men not just as individuals but as members of a certain community. Revealing His mind to them, God called these chosen ones "His people" (Ex. 3:7-12), and even made a covenant with them on Sinai.(14)
@@ -551,6 +584,7 @@ chapter = 3
 chapter_title = "Man's Activity Throughout the World"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "Ponitur problema"
 text = """
 Through his labors and his native endowments man has ceaselessly striven to better his life. Today, however, especially with the help of science and technology, he has extended his mastery over nearly the whole of nature and continues to do so. Thanks to increased opportunities for many kinds of social contact among nations, the human family is gradually recognizing that it comprises a single world community and is making itself so. Hence many benefits once looked for, especially from heavenly powers, man has now enterprisingly procured for himself.
@@ -565,6 +599,7 @@ chapter = 3
 chapter_title = "Man's Activity Throughout the World"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De valore humanae navitatis"
 text = """
 Throughout the course of the centuries, men have labored to better the circumstances of their lives through a monumental amount of individual and collective effort. To believers, this point is settled: considered in itself, this human activity accords with God's will. For man, created to God's image, received a mandate to subject to himself the earth and all it contains, and to govern the world with justice and holiness;(1) a mandate to relate himself and the totality of things to Him Who was to be acknowledged as the Lord and Creator of all. Thus, by the subjection of all things to man, the name of God would be wonderful in all the earth.(2)
@@ -581,6 +616,7 @@ chapter = 3
 chapter_title = "Man's Activity Throughout the World"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De humana navitate ordinanda"
 text = """
 Human activity, to be sure, takes its significance from its relationship to man. Just as it proceeds from man, so it is ordered toward man. For when a man works he not only alters things and society, he develops himself as well. He learns much, he cultivates his resources, he goes outside of himself and beyond himself. Rightly understood this kind of growth is of greater value than any external riches which can be garnered. A man is more precious for what he is than for what he has.(5) Similarly, all that men do to obtain greater justice, wider brotherhood, a more humane disposition of social relationships has greater worth than technical advances. For these advances can supply the material for human progress, but of themselves alone they can never actually bring it about.
@@ -595,6 +631,7 @@ chapter = 3
 chapter_title = "Man's Activity Throughout the World"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De iusta rerum terrenarum autonomia"
 text = """
 Now many of our contemporaries seem to fear that a closer bond between human activity and religion will work against the independence of men, of societies, or of the sciences.
@@ -611,6 +648,7 @@ chapter = 3
 chapter_title = "Man's Activity Throughout the World"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De humana navitate a peccato corrupta"
 text = """
 Sacred Scripture teaches the human family what the experience of the ages confirms: that while human progress is a great advantage to man, it brings with it a strong temptation. For when the order of values is jumbled and bad is mixed with the good, individuals and groups pay heed solely to their own interests, and not to those of others. Thus it happens that the world ceases to be a place of true brotherhood. In our own day, the magnified power of humanity threatens to destroy the race itself.
@@ -629,6 +667,7 @@ chapter = 3
 chapter_title = "Man's Activity Throughout the World"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De humana navitate in paschali mysterio ad perfectionem adducta"
 text = """
 For God's Word, through Whom all things were made, was Himself made flesh and dwelt on the earth of men.(10) Thus He entered the world's history as a perfect man, taking that history up into Himself and summarizing it.(11) He Himself revealed to us that "God is love" (1 John 4:8) and at the same time taught us that the new command of love was the basic law of human perfection and hence of the worlds transformation.
@@ -647,6 +686,7 @@ chapter = 3
 chapter_title = "Man's Activity Throughout the World"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "Terra nova et caelum novum"
 text = """
 We do not know the time for the consummation of the earth and of humanity,(15) nor do we know how all things will be transformed. As deformed by sin, the shape of this world will pass away;(16) but we are taught that God is preparing a new dwelling place and a new earth where justice will abide,(17) and whose blessedness will answer and surpass all the longings for peace which spring up in the human heart.(18) Then, with death overcome, the sons of God will be raised up in Christ, and what was sown in weakness and corruption will be invested with incorruptibility.(19) Enduring with charity and its fruits,(20) all that creation(21) which God made on man's account will be unchained from the bondage of vanity.
@@ -665,6 +705,7 @@ chapter = 4
 chapter_title = "The Role of the Church in the Modern World"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De Ecclesiae et mundi mutua relatione"
 text = """
 Everything we have said about the dignity of the human person, and about the human community and the profound meaning of human activity, lays the foundation for the relationship between the Church and the world, and provides the basis for dialogue between them.(1) In this chapter, presupposing everything which has already been said by this council concerning the mystery of the Church, we must now consider this same Church inasmuch as she exists in the world, living and acting with it.
@@ -683,6 +724,7 @@ chapter = 4
 chapter_title = "The Role of the Church in the Modern World"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De adiutorio quod Ecclesia singulis hominibus praestare satagit"
 text = """
 Modern man is on the road to a more thorough development of his own personality, and to a growing discovery and vindication of his own rights. Since it has been entrusted to the Church to reveal the mystery of God, Who is the ultimate goal of man, she opens up to man at the same time the meaning of his own existence, that is, the innermost truth about himself. The Church truly knows that only God, Whom she serves, meets the deepest longings of the human heart, which is never fully satisfied by what this world has to offer.
@@ -703,6 +745,7 @@ chapter = 4
 chapter_title = "The Role of the Church in the Modern World"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De adiutorio quod Ecclesia societati humanae afferre satagit"
 text = """
 The union of the human family is greatly fortified and fulfilled by the unity, founded on Christ,(10) of the family of God's sons.
@@ -723,6 +766,7 @@ chapter = 4
 chapter_title = "The Role of the Church in the Modern World"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De adiutorio quod Ecclesia per christianos navitati humanae conferre satagit"
 text = """
 This council exhorts Christians, as citizens of two cities, to strive to discharge their earthly duties conscientiously and in response to the Gospel spirit. They are mistaken who, knowing that we have here no abiding city but seek one which is to come,(13) think that they may therefore shirk their earthly responsibilities. For they are forgetting that by the faith itself they are more obliged than ever to measure up to these duties, each according to his proper vocation.(14) Nor, on the contrary, are they any less wide of the mark who think that religion consists in acts of worship alone and in the discharge of certain moral obligations, and who imagine they can plunge themselves into earthly affairs in such a way as to imply that these are altogether divorced from the religious life. This split between the faith which many profess and their daily lives deserves to be counted among the more serious errors of our age. Long since, the Prophets of the Old Testament fought vehemently against this scandal(15) and even more so did Jesus Christ Himself in the New Testament threaten it with grave punishments.(16) Therefore, let there be no false opposition between professional and social activities on the one part, and religious life on the other. The Christian who neglects his temporal duties, neglects his duties toward his neighbor and even God, and jeopardizes his eternal salvation. Christians should rather rejoice that, following the example of Christ Who worked as an artisan, they are free to give proper exercise to all their earthly activities and to their humane, domestic, professional, social and technical enterprises by gathering them into one vital synthesis with religious values, under whose supreme direction all things are harmonized unto God's glory.
@@ -747,6 +791,7 @@ chapter = 4
 chapter_title = "The Role of the Church in the Modern World"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De adiutorio quod Ecclesia a mundo hodierno accipit"
 text = """
 Just as it is in the world's interest to acknowledge the Church as an historical reality, and to recognize her good influence, so the Church herself knows how richly she has profited by the history and development of humanity.
@@ -763,6 +808,7 @@ chapter = 4
 chapter_title = "The Role of the Church in the Modern World"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De Christo, alpha et omega"
 text = """
 While helping the world and receiving many benefits from it, the Church has a single intention: that God's kingdom may come, and that the salvation of the whole human race may come to pass. For every benefit which the People of God during its earthly pilgrimage can offer to the human family stems from the fact that the Church is "the universal sacrament of salvation",(24) simultaneously manifesting and exercising the mystery of God's love.
@@ -779,6 +825,7 @@ chapter = 0
 chapter_title = ""
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "Prooemium"
 text = """
 This council has set forth the dignity of the human person, and the work which men have been destined to undertake throughout the world both as individuals and as members of society. There are a number of particularly urgent needs characterizing the present age, needs which go to the roots of the human race. To a consideration of these in the light of the Gospel and of human experience, the council would now direct the attention of all.
@@ -793,6 +840,7 @@ chapter = 1
 chapter_title = "Fostering the Nobility of Marriage and the Family"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De matrimonio et familia in mundo hodierno"
 text = """
 The well-being of the individual person and of human and Christian society is intimately linked with the healthy condition of that community produced by marriage and family. Hence Christians and all men who hold this community in high esteem sincerely rejoice in the various ways by which men today find help in fostering this community of love and perfecting its life, and by which parents are assisted in their lofty calling. Those who rejoice in such aids look for additional benefits from them and labor to bring them about.
@@ -811,6 +859,7 @@ chapter = 1
 chapter_title = "Fostering the Nobility of Marriage and the Family"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De sanctitate matrimonii et familiae"
 text = """
 The intimate partnership of married life and love has been established by the Creator and qualified by His laws, and is rooted in the conjugal covenant of irrevocable personal consent. Hence by that human act whereby spouses mutually bestow and accept each other a relationship arises which by divine will and in the eyes of society too is a lasting one. For the good of the spouses and their off-springs as well as of society, the existence of the sacred bond no longer depends on human decisions alone. For, God Himself is the author of matrimony, endowed as it is with various benefits and purposes.(1) All of these have a very decisive bearing on the continuation of the human race, on the personal development and eternal destiny of the individual members of a family, and on the dignity, stability, peace and prosperity of the family itself and of human society as a whole. By their very nature, the institution of matrimony itself and conjugal love are ordained for the procreation and education of children, and find in them their ultimate crown. Thus a man and a woman, who by their compact of conjugal love "are no longer two, but one flesh" (Matt. 19:ff), render mutual help and service to each other through an intimate union of their persons and of their actions. Through this union they experience the meaning of their oneness and attain to it with growing perfection day by day. As a mutual gift of two persons, this intimate union and the good of the children impose total fidelity on the spouses and argue for an unbreakable oneness between them.(2)
@@ -831,6 +880,7 @@ chapter = 1
 chapter_title = "Fostering the Nobility of Marriage and the Family"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De amore coniugali"
 text = """
 The biblical Word of God several times urges the betrothed and the married to nourish and develop their wedlock by pure conjugal love and undivided affection.(10) Many men of our own age also highly regard true love between husband and wife as it manifests itself in a variety of ways depending on the worthy customs of various peoples and times.
@@ -849,6 +899,7 @@ chapter = 1
 chapter_title = "Fostering the Nobility of Marriage and the Family"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De matrimonii fecunditate"
 text = """
 Marriage and conjugal love are by their nature ordained toward the begetting and educating of children. Children are really the supreme gift of marriage and contribute very substantially to the welfare of their parents. The God Himself Who said, "it is not good for man to be alone" (Gen. 2:18) and "Who made man from the beginning male and female" (Matt. 19:4), wishing to share with man a certain special participation in His own creative work, blessed male and female, saying: "Increase and multiply" (Gen. 1:28). Hence, while not making the other purposes of matrimony of less account, the true practice of conjugal love, and the whole meaning of the family life which results from it, have this aim: that the couple be ready with stout hearts to cooperate with the love of the Creator and the Savior. Who through them will enlarge and enrich His own family day by day.
@@ -865,6 +916,7 @@ chapter = 1
 chapter_title = "Fostering the Nobility of Marriage and the Family"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De amore coniugali componendo cum observantia vitae humanae"
 text = """
 This council realizes that certain modern conditions often keep couples from arranging their married lives harmoniously, and that they find themselves in circumstances where at least temporarily the size of their families should not be increased. As a result, the faithful exercise of love and the full intimacy of their lives is hard to maintain. But where the intimacy of married life is broken off, its faithfulness can sometimes be imperiled and its quality of fruitfulness ruined, for then the upbringing of the children and the courage to accept new ones are both endangered.
@@ -883,6 +935,7 @@ chapter = 1
 chapter_title = "Fostering the Nobility of Marriage and the Family"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De matrimonii et familiae promotione ab omnibus curanda"
 text = """
 The family is a kind of school of deeper humanity. But if it is to achieve the full flowering of its life and mission, it needs the kindly communion of minds and the joint deliberation of spouses, as well as the painstaking cooperation of parents in the education of their children. The active presence of the father is highly beneficial to their formation. The children, especially the younger among them, need the care of their mother at home. This domestic role of hers must be safely preserved, though the legitimate social progress of women should not be underrated on that account.
@@ -909,6 +962,7 @@ chapter = 2
 chapter_title = "The Proper Development of Culture"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "Introductio"
 text = """
 Man comes to a true and full humanity only through culture, that is through the cultivation of the goods and values of nature. Wherever human life is involved, therefore, nature and culture are quite intimately connected one with the other.
@@ -925,6 +979,7 @@ chapter = 2
 chapter_title = "The Proper Development of Culture"
 section = 1
 section_title = "The Circumstances of Culture in the World Today"
+sub_heading = ""
 heading_la = "De novis vivendi formis"
 text = """
 The circumstances of the life of modern man have been so profoundly changed in their social and cultural aspects, that we can speak of a new age of human history.(1) New ways are open, therefore, for the perfection and the further extension of culture. These ways have been prepared by the enormous growth of natural, human and social sciences, by technical progress, and advances in developing and organizing means whereby men can communicate with one another. Hence the culture of today possesses particular characteristics: sciences which are called exact greatly develop critical judgment; the more recent psychological studies more profoundly explain human activity; historical studies make it much easier to see things in their mutable and evolutionary aspects, customs and usages are becoming more and more uniform; industrialization, urbanization, and other causes which promote community living create a mass-culture from which are born new ways of thinking, acting and making use of leisure. The increase of commerce between the various nations and human groups opens more widely to all the treasures of different civilizations and thus little by little, there develops a more universal form of human culture, which better promotes and expresses the unity of the human race to the degree that it preserves the particular aspects of the different civilizations."""
@@ -937,6 +992,7 @@ chapter = 2
 chapter_title = "The Proper Development of Culture"
 section = 1
 section_title = "The Circumstances of Culture in the World Today"
+sub_heading = ""
 heading_la = "Homo auctor culturae"
 text = """
 From day to day, in every group or nation, there is an increase in the number of men and women who are conscious that they themselves are the authors and the artisans of the culture of their community. Throughout the whole world there is a mounting increase in the sense of autonomy as well as of responsibility. This is of paramount importance for the spiritual and moral maturity of the human race. This becomes more clear if we consider the unification of the world and the duty which is imposed upon us, that we build a better world based upon truth and justice. Thus we are witnesses of the birth of a new humanism, one in which man is defined first of all by this responsibility to his brothers and to history."""
@@ -949,6 +1005,7 @@ chapter = 2
 chapter_title = "The Proper Development of Culture"
 section = 1
 section_title = "The Circumstances of Culture in the World Today"
+sub_heading = ""
 heading_la = "Difficultates et munera"
 text = """
 In these conditions, it is no cause of wonder that man, who senses his responsibility for the progress of culture, nourishes a high hope but also looks with anxiety upon many contradictory things which he must resolve:
@@ -973,6 +1030,7 @@ chapter = 2
 chapter_title = "The Proper Development of Culture"
 section = 2
 section_title = "Some Principles for the Proper Development of Culture"
+sub_heading = ""
 heading_la = "Fides et cultura"
 text = """
 Christians, on pilgrimage toward the heavenly city, should seek and think of these things which are above.(2) This duty in no way decreases, rather it increases, the importance of their obligation to work with all men in the building of a more human world. Indeed, the mystery of the Christian faith furnishes them with an excellent stimulant and aid to fulfill this duty more courageously and especially to uncover the full meaning of this activity, one which gives to human culture its eminent place in the integral vocation of man.
@@ -995,6 +1053,7 @@ chapter = 2
 chapter_title = "The Proper Development of Culture"
 section = 2
 section_title = "Some Principles for the Proper Development of Culture"
+sub_heading = ""
 heading_la = "De multiplici inter bonum nuntium Christi et culturam humanam connexione"
 text = """
 There are many ties between the message of salvation and human culture. For God, revealing Himself to His people to the extent of a full manifestation of Himself in His Incarnate Son, has spoken according to the culture proper to each epoch.
@@ -1013,6 +1072,7 @@ chapter = 2
 chapter_title = "The Proper Development of Culture"
 section = 2
 section_title = "Some Principles for the Proper Development of Culture"
+sub_heading = ""
 heading_la = "De diversis rationibus in cultus humani formis rite componendis"
 text = """
 For the above reasons, the Church recalls to the mind of all that culture is to be subordinated to the integral perfection of the human person, to the good of the community and of the whole society. Therefore it is necessary to develop the human faculties in such a way that there results a growth of the faculty of admiration, of intuition, of contemplation, of making personal judgment, of developing a religious, moral and social sense.
@@ -1033,6 +1093,7 @@ chapter = 2
 chapter_title = "The Proper Development of Culture"
 section = 3
 section_title = "Some More Urgent Duties of Christians in Regard to Culture"
+sub_heading = ""
 heading_la = "Ius ad culturae beneficia omnibus agnoscatur et in rem deducatur"
 text = """
 It is now possible to free most of humanity from the misery of ignorance. Therefore the duty most consonant with our times, especially for Christians, is that of working diligently for fundamental decisions to be taken in economic and political affairs, both on the national and international level which will everywhere recognize and satisfy the right of all to a human and social culture in conformity with the dignity of the human person without any discrimination of race, sex, nation, religion or social condition. Therefore it is necessary to provide all with a sufficient quantity of cultural benefits, especially of those which constitute the so-called fundamental culture lest very many be prevented from cooperating in the promotion of the common good in a truly human manner because of illiteracy and a lack of responsible activity.
@@ -1049,6 +1110,7 @@ chapter = 2
 chapter_title = "The Proper Development of Culture"
 section = 3
 section_title = "Some More Urgent Duties of Christians in Regard to Culture"
+sub_heading = ""
 heading_la = "De educatione ad hominis integrum cultum"
 text = """
 Today it is more difficult to form a synthesis of the various disciplines of knowledge and the arts than it was formerly. For while the mass and the diversity of cultural factors are increasing, there is a decrease in each man's faculty of perceiving and unifying these things, so that the image of "universal man" is being lost sight of more and more. Nevertheless it remains each man's duty to retain an understanding of the whole human person in which the values of intellect, will, conscience and fraternity are preeminent. These values are all rooted in God the Creator and have been wonderfully restored and elevated in Christ.
@@ -1067,6 +1129,7 @@ chapter = 2
 chapter_title = "The Proper Development of Culture"
 section = 3
 section_title = "Some More Urgent Duties of Christians in Regard to Culture"
+sub_heading = ""
 heading_la = "De humano civilique cultu cum christiana institutione rite componendo"
 text = """
 Although the Church has contributed much to the development of culture, experience shows that, for circumstantial reasons, it is sometimes difficult to harmonize culture with Christian teaching. These difficulties do not necessarily harm the life of faith, rather they can stimulate the mind to a deeper and more accurate understanding of the faith. The recent studies and findings of science, history and philosophy raise new questions which effect life and which demand new theological investigations. Furthermore, theologians, within the requirements and methods proper to theology, are invited to seek continually for more suitable ways of communicating doctrine to the men of their times; for the deposit of Faith or the truths are one thing and the manner in which they are enunciated, in the same meaning and understanding, is another.(12) In pastoral care, sufficient use must be made not only of theological principles, but also of the findings of the secular sciences, especially of psychology and sociology, so that the faithful may be brought to a more adequate and mature life of faith.
@@ -1089,6 +1152,7 @@ chapter = 3
 chapter_title = "Economic and Social Life"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De quibusdam vitae oeconomicae aspectibus"
 text = """
 In the economic and social realms, too, the dignity and complete vocation of the human person and the welfare of society as a whole are to be respected and promoted. For man is the source, the center, and the purpose of all economic and social life.
@@ -1109,6 +1173,7 @@ chapter = 3
 chapter_title = "Economic and Social Life"
 section = 1
 section_title = "Economic Development"
+sub_heading = ""
 heading_la = "De progressione oeconomica in hominis servitium"
 text = """
 Today more than ever before attention is rightly given to the increase of the production of agricultural and industrial goods and of the rendering of services, for the purpose of making provision for the growth of population and of satisfying the increasing desires of the human race. Therefore, technical progress, an inventive spirit, an eagerness to create and to expand enterprises, the application of methods of production, and the strenuous efforts of all who engage in production—in a word, all the elements making for such development—must be promoted. The fundamental finality of this production is not the mere increase of products nor profit or control but rather the service of man, and indeed of the whole man with regard for the full range of his material needs and the demands of his intellectual, moral, spiritual, and religious life; this applies to every man whatsoever and to every group of men, of every race and of every part of the world. Consequently, economic activity is to be carried on according to its own methods and laws within the limits of the moral order," so that God's plan for mankind may be realized.(3)"""
@@ -1121,6 +1186,7 @@ chapter = 3
 chapter_title = "Economic and Social Life"
 section = 1
 section_title = "Economic Development"
+sub_heading = ""
 heading_la = "De progressione oeconomica sub consilio hominis"
 text = """
 Economic development must remain under man's determination and must not be left to the judgment of a few men or groups possessing too much economic power or of the political community alone or of certain more powerful nations. It is necessary, on the contrary, that at every level the largest possible number of people and, when it is a question of international relations, all nations have an active share in directing that development. There is need as well of the coordination and fitting and harmonious combination of the spontaneous efforts of individuals and of free groups with the undertakings of public authorities.
@@ -1137,6 +1203,7 @@ chapter = 3
 chapter_title = "Economic and Social Life"
 section = 1
 section_title = "Economic Development"
+sub_heading = ""
 heading_la = "De ingentibus differentiis oeconomicis-socialibus removendis"
 text = """
 To satisfy the demands of justice and equity, strenuous efforts must be made, without disregarding the rights of persons or the natural qualities of each country, to remove as quickly as possible the immense economic inequalities, which now exist and in many cases are growing and which are connected with individual and social discrimination. Likewise, in many areas, in view of the special difficulties of agriculture relative to the raising and selling of produce, country people must be helped both to increase and to market what they produce, and to introduce the necessary development and renewal and also obtain a fair income. Otherwise, as too often happens, they will remain in the condition of lower-class citizens. Let farmers themselves, especially young ones, apply themselves to perfecting their professional skill, for without it, there can be no agricultural advance.(5)
@@ -1153,6 +1220,7 @@ chapter = 3
 chapter_title = "Economic and Social Life"
 section = 2
 section_title = "Certain Principles Governing Socio-economic Life as a Whole"
+sub_heading = ""
 heading_la = "De labore eiusque condicionibus atque de otio"
 text = """
 Human labor which is expended in the production and exchange of goods or in the performance of economic services is superior to the other elements of economic life, for the latter have only the nature of tools.
@@ -1169,6 +1237,7 @@ chapter = 3
 chapter_title = "Economic and Social Life"
 section = 2
 section_title = "Certain Principles Governing Socio-economic Life as a Whole"
+sub_heading = ""
 heading_la = "De participatione in inceptis et in universa rei oeconomicae dispositione, et de conflictibus in labore"
 text = """
 In economic enterprises it is persons who are joined together, that is, free and independent human beings created to the image of God. Therefore, with attention to the functions of each—owners or employers, management or labor—and without doing harm to the necessary unity of management, the active sharing of all in the administration and profits of these enterprises in ways to be properly determined is to be promoted.(7) Since more often, however, decisions concerning economic and social conditions, on which the future lot of the workers and of their children depends, are made not within the business itself but by institutions on a higher level, the workers themselves should have a share also in determining these conditions—in person or through freely elected delegates.
@@ -1185,6 +1254,7 @@ chapter = 3
 chapter_title = "Economic and Social Life"
 section = 2
 section_title = "Certain Principles Governing Socio-economic Life as a Whole"
+sub_heading = ""
 heading_la = "De bonorum terrestrium ad universos homines destinatione"
 text = """
 God intended the earth with everything contained in it for the use of all human beings and peoples. Thus, under the leadership of justice and in the company of charity, created goods should be in abundance for all in like manner.(8) Whatever the forms of property may be, as adapted to the legitimate institutions of peoples, according to diverse and changeable circumstances, attention must always be paid to this universal destination of earthly goods. In using them, therefore, man should regard the external things that he legitimately possesses not only as his own but also as common in the sense that they should be able to benefit not only him but also others.(9) On the other hand, the right of having a share of earthly goods sufficient for oneself and one's family belongs to everyone. The Fathers and Doctors of the Church held this opinion, teaching that men are obliged to come to the relief of the poor and to do so not merely out of their superfluous goods.(10) If one is in extreme necessity, he has the right to procure for himself what he needs out of the riches of others.(11) Since there are so many people prostrate with hunger in the world, this sacred council urges all, both individuals and governments, to remember the aphorism of the Fathers, "Feed the man dying of hunger, because if you have not fed him, you have killed him,"(12) and really to share and employ their earthly goods, according to the ability of each, especially by supporting individuals or peoples with the aid by which they may be able to help and develop themselves.
@@ -1199,6 +1269,7 @@ chapter = 3
 chapter_title = "Economic and Social Life"
 section = 2
 section_title = "Certain Principles Governing Socio-economic Life as a Whole"
+sub_heading = ""
 heading_la = "De bonorum collocationibus et de re nummaria"
 text = """
 Investments, for their part, must be directed toward procuring employment and sufficient income for the people both now and in the future. Whoever makes decisions concerning these investments and the planning of the economy—whether they be individuals or groups of public authorities—are bound to keep these objectives in mind and to recognize their serious obligation of watching, on the one hand, that provision be made for the necessities required for a decent life both of individuals and of the whole community and, on the other, of looking out for the future and of establishing a right balance between the needs of present-day consumption, both individual and collective, and the demands of investing for the generation to come. They should also always bear in mind the urgent needs of underdeveloped countries or regions. In monetary matters they should beware of hurting the welfare of their own country or of other countries. Care should also be taken lest the economically weak countries unjustly suffer any loss from a change in the value of money."""
@@ -1211,6 +1282,7 @@ chapter = 3
 chapter_title = "Economic and Social Life"
 section = 2
 section_title = "Certain Principles Governing Socio-economic Life as a Whole"
+sub_heading = ""
 heading_la = "De accessione ad proprietatem et dominium privatum bonorum; et de latifundiis"
 text = """
 Since property and other forms of private ownership of external goods contribute to the expression of the personality, and since, moreover, they furnish one an occasion to exercise his function in society and in the economy, it is very important that the access of both individuals and communities to some ownership of external goods be fostered
@@ -1233,6 +1305,7 @@ chapter = 3
 chapter_title = "Economic and Social Life"
 section = 2
 section_title = "Certain Principles Governing Socio-economic Life as a Whole"
+sub_heading = ""
 heading_la = "De navitate oeconomica-sociali et de Regno Christi"
 text = """
 Christians who take an active part in present-day socio-economic development and fight for justice and charity should be convinced that they can make a great contribution to the prosperity of mankind and to the peace of the world. In these activities let them, either as individuals or as members of groups, give a shining example. Having acquired the absolutely necessary skill and experience, they should observe the right order in their earthly activities in faithfulness to Christ and His Gospel. Thus their whole life, both individual and social, will be permeated with the spirit of the beatitudes, notably with a spirit of poverty.
@@ -1247,6 +1320,7 @@ chapter = 4
 chapter_title = "The Life of the Political Community"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De hodierna vita publica"
 text = """
 In our day, profound changes are apparent also in the structure and institutions of peoples. These result from their cultural, economic and social evolution. Such changes have a great influence on the life of the political community, especially regarding the rights and duties of all in the exercise of civil freedom and in the attainment of the common good, and in organizing the relations of citizens among themselves and with respect to public authority.
@@ -1267,6 +1341,7 @@ chapter = 4
 chapter_title = "The Life of the Political Community"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De communitatis politicae natura et fine"
 text = """
 Men, families and the various groups which make up the civil community are aware that they cannot achieve a truly human life by their own unaided efforts. They see the need for a wider community, within which each one makes his specific contribution every day toward an ever broader realization of the common good.(1) For this purpose they set up a political community according to various forms. The political community exists, consequently, for the sake of the common good, in which it finds its full justification and significance, and the source of its inherent legitimacy. Indeed, the common good embraces the sum of those conditions of the social life whereby men, families and associations more adequately and readily may attain their own perfection.(2)
@@ -1289,6 +1364,7 @@ chapter = 4
 chapter_title = "The Life of the Political Community"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "De omnium in vita publica cooperatione"
 text = """
 It is in full conformity with human nature that there should be juridico-political structures providing all citizens in an ever better fashion and without any discrimination the practical possibility of freely and actively taking part in the establishment of the juridical foundations of the political community and in the direction of public affairs, in fixing the terms of reference of the various public bodies and in the election of political leaders.(5) All citizens, therefore, should be mindful of the right and also the duty to use their free vote to further the common good. The Church praises and esteems the work of those who for the good of men devote themselves to the service of the state and take on the burdens of this office.
@@ -1311,6 +1387,7 @@ chapter = 4
 chapter_title = "The Life of the Political Community"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "Communitas politica et Ecclesia"
 text = """
 It is very important, especially where a pluralistic society prevails, that there be a correct notion of the relationship between the political community and the Church, and a clear distinction between the tasks which Christians undertake, individually or as a group, on their own responsibility as citizens guided by the dictates of a Christian conscience, and the activities which, in union with their pastors, they carry out in the name of the Church.
@@ -1333,6 +1410,7 @@ chapter = 5
 chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "Introductio"
 text = """
 In our generation when men continue to be afflicted by acute hardships and anxieties arising from the ravages of war or the threat of it, the whole human family faces an hour of supreme crisis in its advance toward maturity. Moving gradually together and everywhere more conscious already of its unity, this family cannot accomplish its task of constructing for all men everywhere a world more genuinely human unless each person devotes himself to the cause of peace with renewed vigor. Thus it happens that the Gospel message, which is in harmony with the loftier strivings and aspirations of the human race, takes on a new luster in our day as it declares that the artisans of peace are blessed "because they will be called the sons of God" (Matt. 5:9).
@@ -1347,6 +1425,7 @@ chapter = 5
 chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
 section = 0
 section_title = ""
+sub_heading = ""
 heading_la = "Sectio I: De bello vitando"
 text = """
 Peace is not merely the absence of war; nor can it be reduced solely to the maintenance of a balance of power between enemies; nor is it brought about by dictatorship. Instead, it is rightly and appropriately called an enterprise of justice. Peace results from that order structured into human society by its divine Founder, and actualized by men as they thirst after ever greater justice. The common good of humanity finds its ultimate meaning in the eternal law. But since the concrete demands of this common good are constantly changing as time goes on, peace is never attained once and for all, but must be built up ceaselessly. Moreover, since the human will is unsteady and wounded by sin, the achievement of peace requires a constant mastering of passions and the vigilance of lawful authority.
@@ -1369,6 +1448,7 @@ chapter = 5
 chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
 section = 1
 section_title = "The Avoidance of War"
+sub_heading = ""
 heading_la = "De bellorum immanitate refrenanda"
 text = """
 Even though recent wars have wrought physical and moral havoc on our world, the devastation of battle still goes on day by day in some part of the world. Indeed, now that every kind of weapon produced by modern science is used in war, the fierce character of warfare threatens to lead the combatants to a savagery far surpassing that of the past. Furthermore, the complexity of the modern world and the intricacy of international relations allow guerrilla warfare to be drawn out by new methods of deceit and subversion. In many causes the use of terrorism is regarded as a new way to wage war.
@@ -1389,6 +1469,7 @@ chapter = 5
 chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
 section = 1
 section_title = "The Avoidance of War"
+sub_heading = ""
 heading_la = "De bello totali"
 text = """
 The horror and perversity of war is immensely magnified by the addition of scientific weapons. For acts of war involving these weapons can inflict massive and indiscriminate destruction, thus going far beyond the bounds of legitimate defense. Indeed, if the kind of instruments which can now be found in the armories of the great nations were to be employed to their fullest, an almost total and altogether reciprocal slaughter of each side by the other would follow, not to mention the widespread devastation that would take place in the world and the deadly after effects that would be spawned by the use of weapons of this kind.
@@ -1409,6 +1490,7 @@ chapter = 5
 chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
 section = 1
 section_title = "The Avoidance of War"
+sub_heading = ""
 heading_la = "De cursu ad arma apparanda"
 text = """
 To be sure, scientific weapons are not amassed solely for use in war. Since the defensive strength of any nation is considered to be dependent upon its capacity for immediate retaliation, this accumulation of arms, which increases each year, likewise serves, in a way heretofore unknown, as deterrent to possible enemy attack. Many regard this procedure as the most effective way by which peace of a sort can be maintained between nations at the present time.
@@ -1427,6 +1509,7 @@ chapter = 5
 chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
 section = 1
 section_title = "The Avoidance of War"
+sub_heading = ""
 heading_la = "De bello omnino interdicendo et actione internationali ad bellum vitandum"
 text = """
 In the meantime, efforts which have already been made and are still underway to eliminate the danger of war are not to be underrated. On the contrary, support should be given to the good will of the very many leaders who work hard to do away with war, which they abominate. These men, although burdened by the extremely weighty preoccupations of their high office, are nonetheless moved by the very grave peacemaking task to which they are bound, even if they cannot ignore the complexity of matters as they stand. We should fervently ask God to give these men the strength to go forward perseveringly and to follow through courageously on this work of building peace with vigor. It is a work of supreme love for mankind. Today it certainly demands that they extend their thoughts and their spirit beyond the confines of their own nation, that they put aside national selfishness and ambition to dominate other nations, and that they nourish a profound reverence for the whole of humanity, which is already making its way so laboriously toward greater unity.
@@ -1445,6 +1528,7 @@ chapter = 5
 chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
 section = 2
 section_title = "Setting up an International Community"
+sub_heading = ""
 heading_la = "De causis discordiarum earumque remediis"
 text = """
 In order to build up peace above all the causes of discord among men, especially injustice, which foment wars must be rooted out. Not a few of these causes come from excessive economic inequalities and from putting off the steps needed to remedy them. Other causes of discord, however, have their source in the desire to dominate and in a contempt for persons. And, if we look for deeper causes, we find them in human envy, distrust, pride, and other egotistical passions. Man cannot bear so many ruptures in the harmony of things. Consequently, the world is constantly beset by strife and violence between men, even when no war is being waged. Besides, since these same evils are present in the relations between various nations as well, in order to overcome or forestall them and to keep violence once unleashed within limits it is absolutely necessary for countries to cooperate more advantageously and more closely together and to organize together international bodies and to work tirelessly for the creation of organizations which will foster peace."""
@@ -1457,6 +1541,7 @@ chapter = 5
 chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
 section = 2
 section_title = "Setting up an International Community"
+sub_heading = ""
 heading_la = "De communitate gentium et de institutionibus internationalibus"
 text = """
 In view of the increasingly close ties of mutual dependence today between all the inhabitants and peoples of the earth, the apt pursuit and efficacious attainment of the universal common good now require of the community of nations that it organize itself in a manner suited to its present responsibilities, especially toward the many parts of the world which are still suffering from unbearable want.
@@ -1473,6 +1558,7 @@ chapter = 5
 chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
 section = 2
 section_title = "Setting up an International Community"
+sub_heading = ""
 heading_la = "De cooperatione internationali in campo oeconomico"
 text = """
 The present solidarity of mankind also calls for a revival of greater international cooperation in the economic field. Although nearly all peoples have become autonomous, they are far from being free of every form of undue dependence, and far from escaping all danger of serious internal difficulties.
@@ -1489,6 +1575,7 @@ chapter = 5
 chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
 section = 2
 section_title = "Setting up an International Community"
+sub_heading = ""
 heading_la = "De quibusdam opportunis normis"
 text = """
 The following norms seem useful for such cooperation:
@@ -1513,6 +1600,7 @@ chapter = 5
 chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
 section = 2
 section_title = "Setting up an International Community"
+sub_heading = ""
 heading_la = "De cooperatione internationali quoad incrementum incolarum"
 text = """
 International cooperation is needed today especially for those peoples who, besides facing so many other difficulties, likewise undergo pressures due to a rapid increase in population. There is an urgent need to explore, with the full and intense cooperation of all, and especially of the wealthier nations, ways whereby the human necessities of food and a suitable education can be furnished and shared with the entire human community. But some peoples could greatly improve upon the conditions of their life if they would change over from antiquated methods of farming to the new technical methods, applying them with needed prudence according to their own circumstances. Their life would likewise be improved by the establishment of a better social order and by a fairer system for the distribution of land ownership.
@@ -1529,6 +1617,7 @@ chapter = 5
 chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
 section = 2
 section_title = "Setting up an International Community"
+sub_heading = ""
 heading_la = "De munere christianorum in subsidiis praestandis"
 text = """
 Christians should cooperate willingly and wholeheartedly in establishing an international order that includes a genuine respect for all freedoms and amicable brotherhood between all. This is all the more pressing since the greater part of the world is still suffering from so much poverty that it is as if Christ Himself were crying out in these poor to beg the charity of the disciples. Do not let men, then, be scandalized because some countries with a majority of citizens who are counted as Christians have an abundance of wealth, whereas others are deprived of the necessities of life and are tormented with hunger, disease, and every kind of misery. The spirit of poverty and charity are the glory and witness of the Church of Christ.
@@ -1545,6 +1634,7 @@ chapter = 5
 chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
 section = 2
 section_title = "Setting up an International Community"
+sub_heading = ""
 heading_la = "De praesentia efficaci Ecclesiae in communitate internationali"
 text = """
 Since, in virtue of her mission received from God, the Church preaches the Gospel to all men and dispenses the treasures of grace, she contributes to the ensuring of peace everywhere on earth and to the placing of the fraternal exchange between men on solid ground by imparting knowledge of the divine and natural law. Therefore, to encourage and stimulate cooperation among men, the Church must be clearly present in the midst of the community of nations both through her official channels and through the full and sincere collaboration of all Christians—a collaboration motivated solely by the desire to be of service to all.
@@ -1559,6 +1649,7 @@ chapter = 5
 chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
 section = 2
 section_title = "Setting up an International Community"
+sub_heading = ""
 heading_la = "De partibus christianorum in institutionibus internationalibus"
 text = """
 An outstanding form of international activity on the part of Christians is found in the joint efforts which, both as individuals and in groups, they contribute to institutes already established or to be established for the encouragement of cooperation among nations. There are also various Catholic associations on an international level which can contribute in many ways to the building up of a peaceful and fraternal community of nations. These should be strengthened by augmenting in them the number of well qualified collaborators, by increasing needed resources, and by advantageously fortifying the coordination of their energies. For today both effective action and the need for dialogue demand joint projects. Moreover, such associations contribute much to the development of a universal outlook—something certainly appropriate for Catholics. They also help to form an awareness of genuine universal solidarity and responsibility.
@@ -1575,6 +1666,7 @@ chapter = 5
 chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
 section = 2
 section_title = "Setting up an International Community"
+sub_heading = ""
 heading_la = "De munere singulorum fidelium et Ecclesiarum particularium"
 text = """
 Drawn from the treasures of Church teaching, the proposals of this sacred synod look to the assistance of every man of our time, whether he believes in God, or does not explicitly recognize Him. If adopted, they will promote among men a sharper insight into their full destiny, and thereby lead them to fashion the world more to man's surpassing dignity, to search for a brotherhood which is universal and more deeply rooted, and to meet the urgencies of our ages with a gallant and unified effort born of love.
@@ -1589,6 +1681,7 @@ chapter = 5
 chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
 section = 2
 section_title = "Setting up an International Community"
+sub_heading = ""
 heading_la = "De dialogo inter omnes homines"
 text = """
 By virtue of her mission to shed on the whole world the radiance of the Gospel message, and to unify under one Spirit all men of whatever nation, race or culture, the Church stands forth as a sign of that brotherhood which allows honest dialogue and gives it vigor.
@@ -1609,6 +1702,7 @@ chapter = 5
 chapter_title = "The Fostering of Peace and the Promotion of a Community of Nations"
 section = 2
 section_title = "Setting up an International Community"
+sub_heading = ""
 heading_la = "De mundo aedificando et ad finem perducendo"
 text = """
 Mindful of the Lord's saying: "by this will all men know that you are my disciples, if you have love for one another" (John 13:35), Christians cannot yearn for anything more ardently than to serve the men of the modern world with mounting generosity and success. Therefore, by holding faithfully to the Gospel and benefiting from its resources, by joining with every man who loves and practices justice, Christians have shouldered a gigantic task for fulfillment in this world, a task concerning which they must give a reckoning to Him who will judge every man on the last of days.
