@@ -9,12 +9,10 @@ exposing `extract()` to add a new document — no registry edit needed).
 import argparse
 import importlib
 import pkgutil
-from pathlib import Path
 
 import core
 import extract
-
-BUILD = Path(__file__).parent / 'build'
+from project import BUILD
 
 
 def _available():

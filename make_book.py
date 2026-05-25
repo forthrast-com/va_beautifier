@@ -6,46 +6,19 @@ that don't translate; here we lean on pandoc's defaults plus typst as the
 PDF engine. Footnotes ride pandoc's native `[^id]` syntax — EPUB lands
 them at end-of-section, typst floats them to the bottom of the page.
 
-Caveats: italics in the Vatican source aren't preserved in the TOML, so
-short-title book references that should be italicised come through plain.
-Tolerable for v1; an italics-aware TOML is a separate ticket.
+Inline source emphasis and superscript/subscript content are carried through
+the TOML as Pandoc-compatible markup for both book formats.
 """
 
 import argparse
-import re
 import shutil
 import subprocess
 import sys
-import tomllib
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
-BUILD = ROOT / 'build'
+from core import CANONICAL_FOOTNOTE_REF, int_to_roman, read_toml
+from project import BUILD, ROOT
+
 BUILD.mkdir(exist_ok=True)
-
-
-# Inline footnote refs are canonical `(N)` for 1 ≤ N ≤ 999 (per the TOML
-# schema). 4-digit years like `(1971)` won't match, so they ride through
-# the body as-is.
-RE_FN_REF = re.compile(r'\((\d{1,3})\)')
-
-
-def to_roman(n):
-    pairs = [(1000,'M'),(900,'CM'),(500,'D'),(400,'CD'),(100,'C'),(90,'XC'),
-             (50,'L'),(40,'XL'),(10,'X'),(9,'IX'),(5,'V'),(4,'IV'),(1,'I')]
-    out = ''
-    for val, sym in pairs:
-        while n >= val:
-            out += sym
-            n -= val
-    return out
-
-
-def _block(lines, paras):
-    """Append a stretch of non-empty lines from a multiline string."""
-    for ln in paras.splitlines():
-        if ln.strip():
-            lines.append(ln.strip())
 
 
 def emit_markdown(data, slug):
@@ -123,7 +96,7 @@ def emit_markdown(data, slug):
         # Part heading. `part=0` is preface/intro — render as a bare title
         # (no "Part N:" prefix), matching the web edition's `.part-title`.
         if part_title and part != prev['part']:
-            label = part_title if part == 0 else f'Part {to_roman(part)}: {part_title}'
+            label = part_title if part == 0 else f'Part {int_to_roman(part)}: {part_title}'
             lines.append('')
             lines.append(f'# {label}')
             lines.append('')
@@ -176,7 +149,7 @@ def emit_markdown(data, slug):
             # the artefact reads as the Vatican source does.
             return m.group(0)
 
-        body = RE_FN_REF.sub(replace_ref, text)
+        body = CANONICAL_FOOTNOTE_REF.sub(replace_ref, text)
         # Sub-paragraphs are separated by `\n\n` in the TOML; pandoc honours
         # blank-line separators. First sub-paragraph gets the bold number.
         chunks = [c.strip() for c in body.split('\n\n') if c.strip()]
@@ -356,8 +329,7 @@ def main():
     if not toml_path.exists():
         sys.exit(f'no TOML for {args.slug}; run parse.py first')
 
-    with toml_path.open('rb') as f:
-        data = tomllib.load(f)
+    data = read_toml(toml_path)
 
     print(f'[{args.slug}] markdown')
     md_path = emit_markdown(data, args.slug)

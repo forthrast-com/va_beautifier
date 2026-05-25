@@ -1,4 +1,5 @@
 name = "Gaudium et Spes"
+hue = 42
 source_url = "https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html"
 desc = """
 PASTORAL CONSTITUTION
@@ -1901,6 +1902,8 @@ Now to Him who is able to accomplish all things in a measure far beyond what we 
 [[footnotes]]
 part = 0
 chapter = 0
+section = 0
+sub_heading = ""
 number = 1
 text = """
 The Pastoral Constitution "De Ecclesia in Mundo Huius Temporis" is made up of two parts; yet it constitutes an organic unity. By way of explanation: the constitution is called "pastoral" because, while resting on doctrinal principles, it seeks to express the relation of the Church to the world and modern mankind. The result is that, on the one hand, a pastoral slant is present in the first part, and, on the other hand, a doctrinal slant is present in the second part. In the first part, the Church develops her teaching on man, on the world which is the enveloping context of man's existence, and on man's relations to his fellow men. In part two, the Church gives closer consideration to various aspects of modern life and human society; special consideration is given to those questions and problems which, in this general area, seem to have a greater urgency in our day. As a result in part two the subject matter which is viewed in the light of doctrinal principles is made up of diverse elements. Some elements have a permanent value; others, only a transitory one. Consequently, the constitution must be interpreted according to the general norms of theological interpretation. Interpreters must bear in mind—especially in part two—the changeable circumstances which the subject matter, by its very nature, involves."""
@@ -1908,258 +1911,332 @@ The Pastoral Constitution "De Ecclesia in Mundo Huius Temporis" is made up of tw
 [[footnotes]]
 part = 0
 chapter = 0
+section = 0
+sub_heading = ""
 number = 2
 text = """
-Cf. John 18:37; Matt. 20:28; Mark 10:45."""
+Cf. *John* 18:37; *Matt*. 20:28; *Mark* 10:45."""
 
 [[footnotes]]
 part = 0
 chapter = 0
+section = 0
+sub_heading = ""
 number = 1
 text = """
-Cf. Rom. 7:14 ff."""
+Cf. *Rom*. 7:14 ff."""
 
 [[footnotes]]
 part = 0
 chapter = 0
+section = 0
+sub_heading = ""
 number = 2
 text = """
-Cf. 2 Cor. 5:15."""
+Cf. *2 Cor*. 5:15."""
 
 [[footnotes]]
 part = 0
 chapter = 0
+section = 0
+sub_heading = ""
 number = 3
 text = """
-Cf. Acts 4:12."""
+Cf. *Acts* 4:12."""
 
 [[footnotes]]
 part = 0
 chapter = 0
+section = 0
+sub_heading = ""
 number = 4
 text = """
-Cf. Heb. 13:8."""
+Cf. *Heb*. 13:8."""
 
 [[footnotes]]
 part = 0
 chapter = 0
+section = 0
+sub_heading = ""
 number = 5
 text = """
-Cf. Col. 1:15."""
+Cf. *Col*. 1:15."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 1
 text = """
-Cf. Gen. 1:26, Wis. 2:23."""
+Cf. *Gen*. 1:26, *Wis*. 2:23."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 2
 text = """
-Cf. Sir. 17:3-10."""
+Cf. *Sir*. 17:3-10."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 3
 text = """
-Cf. Rom. 1:21-25."""
+Cf. *Rom*. 1:21-25."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 4
 text = """
-Cf. John 8:34."""
+Cf. *John* 8:34."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 5
 text = """
-Cf. Dan. 3:57-90."""
+Cf. *Dan*. 3:57-90."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 6
 text = """
-Cf. 1 Cor. 6:13-20."""
+Cf. *1 Cor*. 6:13-20."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 7
 text = """
-Cf. 1 Kings 16:7; Jer. 17:10."""
+Cf. *1 Kings* 16:7; *Jer*. 17:10."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 8
 text = """
-Cf. Sir. 17:7-8."""
+Cf. *Sir*. 17:7-8."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 9
 text = """
-Cf. Rom. 2:15-16."""
+Cf. *Rom*. 2:15-16."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 10
 text = """
-Cf. Pius XII, Radio address on the correct formation of a Christian conscience in the young, March 23, 1952: AAS (1952), p. 271."""
+Cf. Pius XII, *Radio address on the correct formation of a Christian conscience in the young*, March 23, 1952: AAS (1952), p. 271."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 11
 text = """
-Cf. Matt. 22:37-40; Gal. 5:14."""
+Cf. *Matt*. 22:37-40; *Gal*. 5:14."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 12
 text = """
-Cf. Sir. 15:14."""
+Cf. *Sir*. 15:14."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 13
 text = """
-Cf. 2 Cor. 5:10."""
+Cf. *2 Cor*. 5:10."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 14
 text = """
-Cf. Wis. 1:13; 2:23-24; Rom. 5:21; 6:23; Jas. 1:15."""
+Cf. *Wis*. 1:13; 2:23-24; *Rom*. 5:21; 6:23; Jas. 1:15."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 15
 text = """
-Cf. 1 Cor. 15:56-57."""
+Cf. *1 Cor*. 15:56-57."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 16
 text = """
-Cf. Pius XI, encyclical letter [Divini Redemptoris](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19031937_divini-redemptoris_en.html), March 19, 1937: AAS 29 (1937), pp. 65-106; Pius XII, encyclical letter [Ad Apostolorum Principis](/holy_father/pius_xii/encyclicals/documents/hf_p-xii_enc_29061958_ad-apostolorum-principis_en.html), June 29, 1958: AAS 50 (1958) pp. 601-614; John XXIII, encyclical letter [Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html) May 15, 1961: AAS 53 (1961), pp. 451-453; Paul VI, [Ecclesiam Suam](/holy_father/paul_vi/encyclicals/documents/hf_p-vi_enc_06081964_ecclesiam_en.html), Aug. 6, 1964: AAS 56 (1964), pp. 651-653."""
+Cf. Pius XI, encyclical letter *[Divini Redemptoris](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19031937_divini-redemptoris_en.html)*, March 19, 1937: AAS 29 (1937), pp. 65-106; Pius XII, encyclical letter *[Ad Apostolorum Principis](/holy_father/pius_xii/encyclicals/documents/hf_p-xii_enc_29061958_ad-apostolorum-principis_en.html)*, June 29, 1958: AAS 50 (1958) pp. 601-614; John XXIII, encyclical letter *[Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html)* May 15, 1961: AAS 53 (1961), pp. 451-453; Paul VI, *[Ecclesiam Suam](/holy_father/paul_vi/encyclicals/documents/hf_p-vi_enc_06081964_ecclesiam_en.html)*, Aug. 6, 1964: AAS 56 (1964), pp. 651-653."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 17
 text = """
-Cf. Second Vatican Council, [Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html), Chapter I, n. 8: AAS 57 (1965), p. 12."""
+Cf. Second Vatican Council, *[Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html)*, Chapter I, n. 8: AAS 57 (1965), p. 12."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 18
 text = """
-Cf. Phil. 1:27."""
+Cf. *Phil*. 1:27."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 19
 text = """
-St. Augustine, Confessions I, 1: PL 32, 661."""
+St. Augustine, *Confessions* I, 1: PL 32, 661."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 20
 text = """
-Cf. Rom. 5: 14. Cf. Tertullian, De carnis resurrectione 6: "The shape that the slime of the earth was given was intended with a view to Christ, the future man.": P. 2, 282; CSEL 47, p. 33, 1. 12-13."""
+Cf. Rom. 5: 14. Cf. Tertullian, *De carnis resurrectione* 6: "The shape that the slime of the earth was given was intended with a view to Christ, the future man.": P. 2, 282; CSEL 47, p. 33, 1. 12-13."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 21
 text = """
-Cf. 2 Cor. 4:4."""
+Cf. *2 Cor*. 4:4."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 22
 text = """
-Cf. Second Council of Constantinople, canon 7: "The divine Word was not changed into a human nature, nor was a human nature absorbed by the Word." Denzinger 219(428); Cf. also Third Council of Constantinople: "For just as His most holy and immaculate human nature, though deified, was not destroyed (theotheisa ouk anerethe), but rather remained in its proper state and mode of being": Denzinger 291(556); Cf. Council of Chalcedon:" to be acknowledged in two natures, without confusion change, division, or separation." Denzinger 148(302)."""
+Cf. *Second Council of Constantinople*, canon 7: "The divine Word was not changed into a human nature, nor was a human nature absorbed by the Word." Denzinger 219(428); Cf. also Third Council of Constantinople: "For just as His most holy and immaculate human nature, though deified, was not destroyed (theotheisa ouk anerethe), but rather remained in its proper state and mode of being": Denzinger 291(556); Cf. Council of Chalcedon:" to be acknowledged in two natures, without confusion change, division, or separation." Denzinger 148(302)."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 23
 text = """
-Cf. Third Council of Constantinople: "and so His human will, though deified, is not destroyed": Denzinger 291(556)."""
+Cf. Third *Council of Constantinople*: "and so His human will, though deified, is not destroyed": Denzinger 291(556)."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 24
 text = """
-Cf. Heb. 4:15."""
+Cf. *Heb*. 4:15."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 25
 text = """
-Cf. 2 Cor. 5:18-19; Col. 1:20-22."""
+Cf. *2 Cor*. 5:18-19; Col. 1:20-22."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 26
 text = """
-Cf. 1 Pet. 2:21; Matt. 16:24; Luke 14:27."""
+Cf. *1 Pet*. 2:21; *Matt*. 16:24; Luke 14:27."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 27
 text = """
-Cf. Rom. 8:29; Col. 3:10-14."""
+Cf. *Rom*. 8:29; *Col*. 3:10-14."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 28
 text = """
-Cf. Rom. 8:1-11."""
+Cf. *Rom*. 8:1-11."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 29
 text = """
-Cf. 2 Cor. 4:14."""
+Cf. *2 Cor*. 4:14."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 30
 text = """
-Cf. Phil. 3:19; Rom. 8:17."""
+Cf. *Phil*. 3:19; *Rom*. 8:17."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 31
 text = """
 Cf. Second Vatican Council, [Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html), Chapter 2, n. 16: AAS 57 (1965), p. 20."""
@@ -2167,62 +2244,80 @@ Cf. Second Vatican Council, [Dogmatic Constitution on the Church](/archive/hist_
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 32
 text = """
-Cf. Rom. 8:32."""
+Cf. *Rom*. 8:32."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 33
 text = """
-Cf. The Byzantine Easter Liturgy."""
+Cf. The *Byzantine Easter Liturgy*."""
 
 [[footnotes]]
 part = 1
 chapter = 1
+section = 0
+sub_heading = ""
 number = 34
 text = """
-Cf. Rom. 8:15 and Gal. 4:6; cf. also John 1:22 and John 3:1-2."""
+Cf. *Rom*. 8:15 and *Gal*. 4:6; cf. also *John* 1:22 and *John* 3:1-2."""
 
 [[footnotes]]
 part = 1
 chapter = 2
+section = 0
+sub_heading = ""
 number = 1
 text = """
-Cf. John XXIII, encyclical letter, [Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html), May 15, 1961: AAS 53 (1961), pp. 401-464, and encyclical letter [Pacem in Terris](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html), April 11, 1963: AAS 55 (1963), pp. 257-304; Paul VI encyclical letter [Ecclesiam Suam](/holy_father/paul_vi/encyclicals/documents/hf_p-vi_enc_06081964_ecclesiam_en.html), Aug. 6, 1964: AAS 54 (1864) pp. 609-659."""
+Cf. John XXIII, encyclical letter, *[Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html)*, May 15, 1961: AAS 53 (1961), pp. 401-464, and encyclical letter *[Pacem in Terris](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html)*, April 11, 1963: AAS 55 (1963), pp. 257-304; Paul VI encyclical letter *[Ecclesiam Suam](/holy_father/paul_vi/encyclicals/documents/hf_p-vi_enc_06081964_ecclesiam_en.html)*, Aug. 6, 1964: AAS 54 (1864) pp. 609-659."""
 
 [[footnotes]]
 part = 1
 chapter = 2
+section = 0
+sub_heading = ""
 number = 2
 text = """
-Cf. Luke 17:33."""
+Cf. *Luke* 17:33."""
 
 [[footnotes]]
 part = 1
 chapter = 2
+section = 0
+sub_heading = ""
 number = 3
 text = """
-Cf. St. Thomas, 1 Ethica Lect. 1."""
+Cf. St. Thomas, 1 *Ethica Lect*. 1."""
 
 [[footnotes]]
 part = 1
 chapter = 2
+section = 0
+sub_heading = ""
 number = 4
 text = """
-Cf. John XXIII, encyclical letter [Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html): AAS 53 (1961), p. 418. Cf. also Pius XI, encyclical letter [Quadragesimo Anno](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html): AAS 23 (1931), p. 222 ff."""
+Cf. John XXIII, encyclical letter *[Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html)*: AAS 53 (1961), p. 418. Cf. also Pius XI, encyclical letter *[Quadragesimo Anno](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html)*: AAS 23 (1931), p. 222 ff."""
 
 [[footnotes]]
 part = 1
 chapter = 2
+section = 0
+sub_heading = ""
 number = 5
 text = """
-Cf. John XXIII, encyclical letter [Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html): AAS 53 (1961) ."""
+Cf. John XXIII, encyclical letter *[Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html)*: AAS 53 (1961) ."""
 
 [[footnotes]]
 part = 1
 chapter = 2
+section = 0
+sub_heading = ""
 number = 6
 text = """
 Cf. Mark 2:27."""
@@ -2230,83 +2325,107 @@ Cf. Mark 2:27."""
 [[footnotes]]
 part = 1
 chapter = 2
+section = 0
+sub_heading = ""
 number = 7
 text = """
-Cf. John XXIII, encyclical letter [Pacem in Terris](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html): AAS 55 (1963), p. 266."""
+Cf. John XXIII, encyclical letter *[Pacem in Terris](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html)*: AAS 55 (1963), p. 266."""
 
 [[footnotes]]
 part = 1
 chapter = 2
+section = 0
+sub_heading = ""
 number = 8
 text = """
-Cf. Jas. 2:15-16."""
+Cf. *Jas*. 2:15-16."""
 
 [[footnotes]]
 part = 1
 chapter = 2
+section = 0
+sub_heading = ""
 number = 9
 text = """
-Cf. Luke 16:18-31."""
+Cf. *Luke* 16:18-31."""
 
 [[footnotes]]
 part = 1
 chapter = 2
+section = 0
+sub_heading = ""
 number = 10
 text = """
-Cf. John XXIII, encyclical letter [Pacem in Terris](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html): AAS 55 (1963), p. 299 and 300."""
+Cf. John XXIII, encyclical letter *[Pacem in Terris](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html)*: AAS 55 (1963), p. 299 and 300."""
 
 [[footnotes]]
 part = 1
 chapter = 2
+section = 0
+sub_heading = ""
 number = 11
 text = """
-Cf. Luke 6:37-38; Matt. 7:1-2; Rom. 2:1-11; 14:10, 14:10-12."""
+Cf. *Luke* 6:37-38; *Matt*. 7:1-2; *Rom*. 2:1-11; 14:10, 14:10-12."""
 
 [[footnotes]]
 part = 1
 chapter = 2
+section = 0
+sub_heading = ""
 number = 12
 text = """
-Cf. Matt. 5:43-47."""
+Cf. *Matt*. 5:43-47."""
 
 [[footnotes]]
 part = 1
 chapter = 2
+section = 0
+sub_heading = ""
 number = 13
 text = """
-Cf. [Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html), Chapter II, n. 9: AAS 57 (1965). pp. 12-13."""
+Cf. *[Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html)*, Chapter II, n. 9: AAS 57 (1965). pp. 12-13."""
 
 [[footnotes]]
 part = 1
 chapter = 2
+section = 0
+sub_heading = ""
 number = 14
 text = """
-Cf. Exodus 24:1-8."""
+Cf. *Exodus* 24:1-8."""
 
 [[footnotes]]
 part = 1
 chapter = 3
+section = 0
+sub_heading = ""
 number = 1
 text = """
-Cf. Gen. 1:26-27; 9:3; Wis. 9:3."""
+Cf. *Gen*. 1:26-27; 9:3; *Wis*. 9:3."""
 
 [[footnotes]]
 part = 1
 chapter = 3
+section = 0
+sub_heading = ""
 number = 2
 text = """
-Cf. Ps. 8:7 and 10."""
+Cf. *Ps*. 8:7 and 10."""
 
 [[footnotes]]
 part = 1
 chapter = 3
+section = 0
+sub_heading = ""
 number = 3
 text = """
-Cf. John XXIII, encyclical letter [Pacem in Terris](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html): AAS 55 (1963), p. 297."""
+Cf. John XXIII, encyclical letter *[Pacem in Terris](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html)*: AAS 55 (1963), p. 297."""
 
 [[footnotes]]
 part = 1
 chapter = 3
+section = 0
+sub_heading = ""
 number = 4
 text = """
 Cf. Message to all mankind sent by the Fathers at the beginning of the Second Vatican Council, Oct. 20, 1962: AAS 54 (1962), p. 823."""
@@ -2314,6 +2433,8 @@ Cf. Message to all mankind sent by the Fathers at the beginning of the Second Va
 [[footnotes]]
 part = 1
 chapter = 3
+section = 0
+sub_heading = ""
 number = 5
 text = """
 Cf. Paul VI, Address to the diplomatic corps Jan 7 1965: AAS 57 (1965), p. 232."""
@@ -2321,6 +2442,8 @@ Cf. Paul VI, Address to the diplomatic corps Jan 7 1965: AAS 57 (1965), p. 232."
 [[footnotes]]
 part = 1
 chapter = 3
+section = 0
+sub_heading = ""
 number = 6
 text = """
 Cf. First Vatican Council, Dogmatic Constitution on the Catholic Faith, Chapter III: Denz. 1785-1186 (3004-3005)."""
@@ -2328,13 +2451,17 @@ Cf. First Vatican Council, Dogmatic Constitution on the Catholic Faith, Chapter 
 [[footnotes]]
 part = 1
 chapter = 3
+section = 0
+sub_heading = ""
 number = 7
 text = """
-Cf. Msgr. Pio Paschini, Vita e opere di Galileo Galilei, 2 volumes, Vatican Press (1964)."""
+Cf. Msgr. Pio Paschini, *Vita e opere di Galileo Galilei*, 2 volumes, Vatican Press (1964)."""
 
 [[footnotes]]
 part = 1
 chapter = 3
+section = 0
+sub_heading = ""
 number = 8
 text = """
 Cf. Matt. 24:13; 13:24-30 and 36-43."""
@@ -2342,6 +2469,8 @@ Cf. Matt. 24:13; 13:24-30 and 36-43."""
 [[footnotes]]
 part = 1
 chapter = 3
+section = 0
+sub_heading = ""
 number = 9
 text = """
 Cf. 2 Cor. 6:10."""
@@ -2349,6 +2478,8 @@ Cf. 2 Cor. 6:10."""
 [[footnotes]]
 part = 1
 chapter = 3
+section = 0
+sub_heading = ""
 number = 10
 text = """
 Cf. John 1:3 and 14."""
@@ -2356,6 +2487,8 @@ Cf. John 1:3 and 14."""
 [[footnotes]]
 part = 1
 chapter = 3
+section = 0
+sub_heading = ""
 number = 11
 text = """
 Cf. Eph. 1:10."""
@@ -2363,6 +2496,8 @@ Cf. Eph. 1:10."""
 [[footnotes]]
 part = 1
 chapter = 3
+section = 0
+sub_heading = ""
 number = 12
 text = """
 Cf. John 3:16; Rom. 5:8."""
@@ -2370,6 +2505,8 @@ Cf. John 3:16; Rom. 5:8."""
 [[footnotes]]
 part = 1
 chapter = 3
+section = 0
+sub_heading = ""
 number = 13
 text = """
 Cf. Acts 2:36; Matt. 28:18."""
@@ -2377,6 +2514,8 @@ Cf. Acts 2:36; Matt. 28:18."""
 [[footnotes]]
 part = 1
 chapter = 3
+section = 0
+sub_heading = ""
 number = 14
 text = """
 Cf. Rom. 15:16."""
@@ -2384,6 +2523,8 @@ Cf. Rom. 15:16."""
 [[footnotes]]
 part = 1
 chapter = 3
+section = 0
+sub_heading = ""
 number = 15
 text = """
 Cf. Acts 1:7."""
@@ -2391,13 +2532,17 @@ Cf. Acts 1:7."""
 [[footnotes]]
 part = 1
 chapter = 3
+section = 0
+sub_heading = ""
 number = 16
 text = """
-Cf. 1 Cor. 7:31; St. Irenaeus, Adversus haereses, V, 36, PG, VIII, 1221."""
+Cf. 1 Cor. 7:31; St. Irenaeus, *Adversus haereses*, V, 36, PG, VIII, 1221."""
 
 [[footnotes]]
 part = 1
 chapter = 3
+section = 0
+sub_heading = ""
 number = 17
 text = """
 Cf. 2 Cor. 5:2; 2 Pet. 3:13."""
@@ -2405,6 +2550,8 @@ Cf. 2 Cor. 5:2; 2 Pet. 3:13."""
 [[footnotes]]
 part = 1
 chapter = 3
+section = 0
+sub_heading = ""
 number = 18
 text = """
 Cf. 1 Cor. 2:9; Apoc. 21:4-5."""
@@ -2412,6 +2559,8 @@ Cf. 1 Cor. 2:9; Apoc. 21:4-5."""
 [[footnotes]]
 part = 1
 chapter = 3
+section = 0
+sub_heading = ""
 number = 19
 text = """
 Cf. 1 Cor. 15:42 and 53."""
@@ -2419,6 +2568,8 @@ Cf. 1 Cor. 15:42 and 53."""
 [[footnotes]]
 part = 1
 chapter = 3
+section = 0
+sub_heading = ""
 number = 20
 text = """
 Cf. 1 Cor. 13:8; 3:14."""
@@ -2426,6 +2577,8 @@ Cf. 1 Cor. 13:8; 3:14."""
 [[footnotes]]
 part = 1
 chapter = 3
+section = 0
+sub_heading = ""
 number = 21
 text = """
 Cf. Rom. 8:19-21."""
@@ -2433,6 +2586,8 @@ Cf. Rom. 8:19-21."""
 [[footnotes]]
 part = 1
 chapter = 3
+section = 0
+sub_heading = ""
 number = 22
 text = """
 Cf. Luke 9:25."""
@@ -2440,13 +2595,17 @@ Cf. Luke 9:25."""
 [[footnotes]]
 part = 1
 chapter = 3
+section = 0
+sub_heading = ""
 number = 23
 text = """
-Cf. Pius XI, encyclical letter [Quadragesimo Anno](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html): AAS 23 (1931), p. 207."""
+Cf. Pius XI, encyclical letter *[Quadragesimo Anno](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html)*: AAS 23 (1931), p. 207."""
 
 [[footnotes]]
 part = 1
 chapter = 3
+section = 0
+sub_heading = ""
 number = 24
 text = """
 Preface of the Feast of Christ the King."""
@@ -2454,13 +2613,17 @@ Preface of the Feast of Christ the King."""
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 1
 text = """
-Cf. Paul VI, encyclical letter [Ecclesiam Suam](/holy_father/paul_vi/encyclicals/documents/hf_p-vi_enc_06081964_ecclesiam_en.html), III: AAS 56 (1964), pp. 637-659."""
+Cf. Paul VI, encyclical letter *[Ecclesiam Suam](/holy_father/paul_vi/encyclicals/documents/hf_p-vi_enc_06081964_ecclesiam_en.html)*, III: AAS 56 (1964), pp. 637-659."""
 
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 2
 text = """
 Cf. Titus 3:4: "love of mankind.""""
@@ -2468,6 +2631,8 @@ Cf. Titus 3:4: "love of mankind.""""
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 3
 text = """
 Cf. Eph. 1:3; 5:6; 13-14, 23."""
@@ -2475,13 +2640,17 @@ Cf. Eph. 1:3; 5:6; 13-14, 23."""
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 4
 text = """
-Second Vatican Council, [Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html), Chapter I, n. 8: AAS 57 (1965), p. 12."""
+Second Vatican Council, *[Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html)*, Chapter I, n. 8: AAS 57 (1965), p. 12."""
 
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 5
 text = """
 Ibid., Chapter II, no. 9: AAS 57 (1965), p. 14; Cf. n. 8: AAS loc. cit., p. 11."""
@@ -2489,6 +2658,8 @@ Ibid., Chapter II, no. 9: AAS 57 (1965), p. 14; Cf. n. 8: AAS loc. cit., p. 11."
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 6
 text = """
 Ibid., Chapter I, n. 8: AAS 57 (1965), p. 11."""
@@ -2496,6 +2667,8 @@ Ibid., Chapter I, n. 8: AAS 57 (1965), p. 11."""
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 7
 text = """
 Cf. ibid., Chapter IV, n. 38: AAS 57 (1965), p. 43, with note 120."""
@@ -2503,6 +2676,8 @@ Cf. ibid., Chapter IV, n. 38: AAS 57 (1965), p. 43, with note 120."""
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 8
 text = """
 Cf. Rom. 8:14-17."""
@@ -2510,6 +2685,8 @@ Cf. Rom. 8:14-17."""
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 9
 text = """
 Cf. Matt. 22:39."""
@@ -2517,13 +2694,17 @@ Cf. Matt. 22:39."""
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 10
 text = """
-[Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html), Chapter II, n. 9: AAS 57 (1965), pp. 12-14."""
+*[Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html)*, Chapter II, n. 9: AAS 57 (1965), pp. 12-14."""
 
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 11
 text = """
 Cf. Pius XII, Address to the International Union of Institutes of Archeology, History and History of Art, March 9, 1956: AAS 48 (1965), p. 212: "Its divine Founder, Jesus Christ, has not given it any mandate or fixed any end of the cultural order. The goal which Christ assigns to it is strictly religious. . . The Church must lead men to God, in order that they may be given over to him without reserve.... The Church can never lose sight of the strictly religious, supernatural goal. The meaning of all its activities, down to the last canon of its Code, can only cooperate directly or indirectly in this goal.""""
@@ -2531,13 +2712,17 @@ Cf. Pius XII, Address to the International Union of Institutes of Archeology, Hi
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 12
 text = """
-[Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html), Chapter I, n. 1: AAS 57 (1965), p. 5."""
+*[Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html)*, Chapter I, n. 1: AAS 57 (1965), p. 5."""
 
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 13
 text = """
 Cf. Heb. 13:14."""
@@ -2545,6 +2730,8 @@ Cf. Heb. 13:14."""
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 14
 text = """
 Cf. 2 Thess. 3:6-13; Eph. 4:28."""
@@ -2552,6 +2739,8 @@ Cf. 2 Thess. 3:6-13; Eph. 4:28."""
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 15
 text = """
 Cf. Is. 58: 1-12."""
@@ -2559,6 +2748,8 @@ Cf. Is. 58: 1-12."""
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 16
 text = """
 Cf. Matt. 23:3-23; Mark 7: 10-13."""
@@ -2566,20 +2757,26 @@ Cf. Matt. 23:3-23; Mark 7: 10-13."""
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 17
 text = """
-Cf. John XXIII, encyclical letter [Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html), IV: AAS 53 (1961), pp. 456-457; cf. I: AAS loc. cit., pp. 407, 410-411."""
+Cf. John XXIII, encyclical letter *[Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html)*, IV: AAS 53 (1961), pp. 456-457; cf. I: AAS loc. cit., pp. 407, 410-411."""
 
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 18
 text = """
-Cf. [Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html), Chapter III, n. 28: AAS 57 (1965), p. 35."""
+Cf. *[Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html)*, Chapter III, n. 28: AAS 57 (1965), p. 35."""
 
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 19
 text = """
 Ibid., n. 28: AAS loc. cit. pp. 35-36."""
@@ -2587,41 +2784,53 @@ Ibid., n. 28: AAS loc. cit. pp. 35-36."""
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 20
 text = """
-Cf. St. Ambrose, De virginitate, Chapter VIII, n. 48: ML 16, 278."""
+Cf. St. Ambrose, *De virginitate*, Chapter VIII, n. 48: ML 16, 278."""
 
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 21
 text = """
-Cf. [Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html), Chapter II, n. 15: AAS 57 (1965) p. 20."""
+Cf. *[Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html)*, Chapter II, n. 15: AAS 57 (1965) p. 20."""
 
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 22
 text = """
-Cf. [Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html), Chapter II, n. 13: AAS 57 (1965), p. 17."""
+Cf. *[Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html)*, Chapter II, n. 13: AAS 57 (1965), p. 17."""
 
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 23
 text = """
-Cf. Justin, Dialogus cum Tryphene, Chapter 110; MG 6, 729 (ed. Otto), 1897, pp. 391-393: ". . .but the greater the number of persecutions which are inflicted upon us, so much the greater the number of other men who become devout believers through the name of Jesus." Cf. Tertullian, Apologeticus, Chapter L, 13: "Every time you mow us down like grass, we increase in number: the blood of Christians is a seed!" Cf. [Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html), Chapter II, no. 9: AAS 57 (1965), p. 14."""
+Cf. Justin, *Dialogus cum Tryphene*, Chapter 110; MG 6, 729 (ed. Otto), 1897, pp. 391-393: ". . .but the greater the number of persecutions which are inflicted upon us, so much the greater the number of other men who become devout believers through the name of Jesus." Cf. Tertullian, *Apologeticus*, Chapter L, 13: "Every time you mow us down like grass, we increase in number: the blood of Christians is a seed!" Cf. *[Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html)*, Chapter II, no. 9: AAS 57 (1965), p. 14."""
 
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 24
 text = """
-Cf. [Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html), Chapter II n. 15: AAS 57 (1965), p. 20."""
+Cf. *[Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html)*, Chapter II n. 15: AAS 57 (1965), p. 20."""
 
 [[footnotes]]
 part = 1
 chapter = 4
+section = 0
+sub_heading = ""
 number = 25
 text = """
 Cf. Paul VI, address given on Feb. 3, 1965."""
@@ -2629,20 +2838,26 @@ Cf. Paul VI, address given on Feb. 3, 1965."""
 [[footnotes]]
 part = 2
 chapter = 1
+section = 0
+sub_heading = ""
 number = 1
 text = """
-Cf. St. Augustine, De Bene coniugali PL 40, 375-376 and 394, St. Thomas, Summa Theologica, Suppl. Quaest. 49, art. 3 ad 1, Decretum pro Armenis: Denz.-Schoen. 1327; Pius XI, encyclical letter [Casti Connubii](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_31121930_casti-connubii_en.html): AAS 22 (1930, pp. 547-548; Denz.-Schoen. 3703-3714."""
+Cf. St. Augustine, *De Bene coniugali* PL 40, 375-376 and 394, St. Thomas, *Summa Theologica*, Suppl. Quaest. 49, art. 3 ad 1, *Decretum pro Armenis*: Denz.-Schoen. 1327; Pius XI, encyclical letter *[Casti Connubii](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_31121930_casti-connubii_en.html)*: AAS 22 (1930, pp. 547-548; Denz.-Schoen. 3703-3714."""
 
 [[footnotes]]
 part = 2
 chapter = 1
+section = 0
+sub_heading = ""
 number = 2
 text = """
-Cf. Pius XI, encyclical letter [Casti Connubii](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_31121930_casti-connubii_en.html): AAS 22 (1930), pp. 546-547; Denz.-Schoen. 3706."""
+Cf. Pius XI, encyclical letter *[Casti Connubii](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_31121930_casti-connubii_en.html)*: AAS 22 (1930), pp. 546-547; Denz.-Schoen. 3706."""
 
 [[footnotes]]
 part = 2
 chapter = 1
+section = 0
+sub_heading = ""
 number = 3
 text = """
 Cf. Hosea 2; Jer. 3:6-13; Ezech. 16 and 23; Is. 54."""
@@ -2650,6 +2865,8 @@ Cf. Hosea 2; Jer. 3:6-13; Ezech. 16 and 23; Is. 54."""
 [[footnotes]]
 part = 2
 chapter = 1
+section = 0
+sub_heading = ""
 number = 4
 text = """
 Cf. Matt. 9:15; Mark 2:19-20; Luke 5:34-35; John 3:29; Cf. also 2 Cor. 11:2; Eph. 5:27; Rev. 19:7-8; 21:2 and 9."""
@@ -2657,6 +2874,8 @@ Cf. Matt. 9:15; Mark 2:19-20; Luke 5:34-35; John 3:29; Cf. also 2 Cor. 11:2; Eph
 [[footnotes]]
 part = 2
 chapter = 1
+section = 0
+sub_heading = ""
 number = 5
 text = """
 Cf. Eph. 5:25."""
@@ -2664,20 +2883,26 @@ Cf. Eph. 5:25."""
 [[footnotes]]
 part = 2
 chapter = 1
+section = 0
+sub_heading = ""
 number = 6
 text = """
-Cf. Second Vatican Council, [Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html): AAS 57 (1965), pp. 15-16; 40-41; 47."""
+Cf. Second Vatican Council, *[Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html)*: AAS 57 (1965), pp. 15-16; 40-41; 47."""
 
 [[footnotes]]
 part = 2
 chapter = 1
+section = 0
+sub_heading = ""
 number = 7
 text = """
-Pius XI, encyclical letter [Casti Connubii](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_31121930_casti-connubii_en.html): AAS 22 (1930), p. 583."""
+Pius XI, encyclical letter *[Casti Connubii](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_31121930_casti-connubii_en.html)*: AAS 22 (1930), p. 583."""
 
 [[footnotes]]
 part = 2
 chapter = 1
+section = 0
+sub_heading = ""
 number = 8
 text = """
 Cf. 1 Tim. 5:3."""
@@ -2685,6 +2910,8 @@ Cf. 1 Tim. 5:3."""
 [[footnotes]]
 part = 2
 chapter = 1
+section = 0
+sub_heading = ""
 number = 9
 text = """
 Cf. Eph. 5:32."""
@@ -2692,6 +2919,8 @@ Cf. Eph. 5:32."""
 [[footnotes]]
 part = 2
 chapter = 1
+section = 0
+sub_heading = ""
 number = 10
 text = """
 Cf. Gen. 2:22-24, Prov. 5:15-20; 31:10-31; Tob. 8:4-8; Cant. 1:2-3; 1:16; 4:16-5, 1; 7:8-14; 1 Cor. 7:3-6; Eph 5:25-33."""
@@ -2699,13 +2928,17 @@ Cf. Gen. 2:22-24, Prov. 5:15-20; 31:10-31; Tob. 8:4-8; Cant. 1:2-3; 1:16; 4:16-5
 [[footnotes]]
 part = 2
 chapter = 1
+section = 0
+sub_heading = ""
 number = 11
 text = """
-Cf. Pius XI, encyclical letter [Casti Connubii](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_31121930_casti-connubii_en.html): AAS 22 (1930), p. 547 and 548; Denz.-Schoen. 3707."""
+Cf. Pius XI, encyclical letter *[Casti Connubii](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_31121930_casti-connubii_en.html)*: AAS 22 (1930), p. 547 and 548; Denz.-Schoen. 3707."""
 
 [[footnotes]]
 part = 2
 chapter = 1
+section = 0
+sub_heading = ""
 number = 12
 text = """
 Cf. 1 Cor. 7:5."""
@@ -2713,20 +2946,26 @@ Cf. 1 Cor. 7:5."""
 [[footnotes]]
 part = 2
 chapter = 1
+section = 0
+sub_heading = ""
 number = 13
 text = """
-Cf. Pius XII, Address Tra le visite, Jan. 20, 1958: AAS 50 (1958), p. 91."""
+Cf. Pius XII, *Address Tra le visite*, Jan. 20, 1958: AAS 50 (1958), p. 91."""
 
 [[footnotes]]
 part = 2
 chapter = 1
+section = 0
+sub_heading = ""
 number = 14
 text = """
-Cf. Pius XI, encyclical letter [Casti Connubii](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_31121930_casti-connubii_en.html): AAS 22 (1930): Denz.-Schoen. 3716-3718, Pius XII, Allocutio Conventui Unionis Italicae inter Obstetrices, Oct. 29, 1951: AAS 43 (1951), pp. 835-854, Paul VI, Address to a group of cardinals, June 23 1964: AAS 56 (1964), pp. 581-589. Certain questions which need further and more careful investigation have been handed over, at the command of the Supreme Pontiff, to a commission for the study of population, family, and births, in order that, after it fulfills its function, the Supreme Pontiff may pass judgment. With the doctrine of the magisterium in this state, this holy synod does not intend to propose immediately concrete solutions."""
+Cf. Pius XI, encyclical letter *[Casti Connubii](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_31121930_casti-connubii_en.html)*: AAS 22 (1930): Denz.-Schoen. 3716-3718, Pius XII, *Allocutio Conventui Unionis Italicae inter Obstetrices*, Oct. 29, 1951: AAS 43 (1951), pp. 835-854, Paul VI, *Address to a group of cardinals*, June 23 1964: AAS 56 (1964), pp. 581-589. Certain questions which need further and more careful investigation have been handed over, at the command of the Supreme Pontiff, to a commission for the study of population, family, and births, in order that, after it fulfills its function, the Supreme Pontiff may pass judgment. With the doctrine of the magisterium in this state, this holy synod does not intend to propose immediately concrete solutions."""
 
 [[footnotes]]
 part = 2
 chapter = 1
+section = 0
+sub_heading = ""
 number = 15
 text = """
 Cf. Eph. 5:16; Col. 4:5."""
@@ -2734,13 +2973,17 @@ Cf. Eph. 5:16; Col. 4:5."""
 [[footnotes]]
 part = 2
 chapter = 1
+section = 0
+sub_heading = ""
 number = 16
 text = """
-Cf. Sacramentarium Gregorianum: PL 78, 262."""
+Cf. *Sacramentarium Gregorianum*: PL 78, 262."""
 
 [[footnotes]]
 part = 2
 chapter = 1
+section = 0
+sub_heading = ""
 number = 17
 text = """
 Cf. Rom. 5:15 and 18; 6:5-11; Gal. 2:20."""
@@ -2748,6 +2991,8 @@ Cf. Rom. 5:15 and 18; 6:5-11; Gal. 2:20."""
 [[footnotes]]
 part = 2
 chapter = 1
+section = 0
+sub_heading = ""
 number = 18
 text = """
 Cf. Eph. 5:25-27."""
@@ -2755,6 +3000,8 @@ Cf. Eph. 5:25-27."""
 [[footnotes]]
 part = 2
 chapter = 2
+section = 1
+sub_heading = ""
 number = 1
 text = """
 Cf. Introductory statement of this constitution, n. 4 ff."""
@@ -2762,6 +3009,8 @@ Cf. Introductory statement of this constitution, n. 4 ff."""
 [[footnotes]]
 part = 2
 chapter = 2
+section = 2
+sub_heading = ""
 number = 2
 text = """
 Cf. Col. 3:2."""
@@ -2769,6 +3018,8 @@ Cf. Col. 3:2."""
 [[footnotes]]
 part = 2
 chapter = 2
+section = 0
+sub_heading = ""
 number = 3
 text = """
 Cf. Gen. 1:28."""
@@ -2776,6 +3027,8 @@ Cf. Gen. 1:28."""
 [[footnotes]]
 part = 2
 chapter = 2
+section = 2
+sub_heading = ""
 number = 4
 text = """
 Cf. Prov. 8:30-31."""
@@ -2783,13 +3036,17 @@ Cf. Prov. 8:30-31."""
 [[footnotes]]
 part = 2
 chapter = 2
+section = 2
+sub_heading = ""
 number = 5
 text = """
-Cf. St. Irenaeus, Adversus haereses, III, 11, 8 (ed. Sagnard p. 200; cf. ibid., 16, 6: pp. 290-292; 21, 10-22: pp. 370-372; 22 3: p. 378; etc.)"""
+Cf. St. Irenaeus, *Adversus haereses*, III, 11, 8 (ed. Sagnard p. 200; cf. ibid., 16, 6: pp. 290-292; 21, 10-22: pp. 370-372; 22 3: p. 378; etc.)"""
 
 [[footnotes]]
 part = 2
 chapter = 2
+section = 2
+sub_heading = ""
 number = 6
 text = """
 Cf. Eph. 1:10."""
@@ -2797,6 +3054,8 @@ Cf. Eph. 1:10."""
 [[footnotes]]
 part = 2
 chapter = 2
+section = 2
+sub_heading = ""
 number = 7
 text = """
 Cf. the words of Pius XI to Father M. D. Roland-Gosselin "It is necessary never to lose sight of the fact that the objective of the Church is to evangelize, not to civilize. If it civilizes, it is for the sake of evangelization." (Semaines sociales de France, Versailles, 1936, pp. 461-462)."""
@@ -2804,34 +3063,44 @@ Cf. the words of Pius XI to Father M. D. Roland-Gosselin "It is necessary never 
 [[footnotes]]
 part = 2
 chapter = 2
+section = 2
+sub_heading = ""
 number = 8
 text = """
-First Vatican Council, Constitution on the Catholic Faith: Denzinger 1795, 1799 (3015, 3019). Cf. Pius XI, encyclical letter [Quadragesimo Anno](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html): AAS 23 (1931), p. 190."""
+First Vatican Council, *Constitution on the Catholic Faith*: Denzinger 1795, 1799 (3015, 3019). Cf. Pius XI, encyclical letter *[Quadragesimo Anno](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html)*: AAS 23 (1931), p. 190."""
 
 [[footnotes]]
 part = 2
 chapter = 2
+section = 2
+sub_heading = ""
 number = 9
 text = """
-Cf. John XXIII, encyclical letter [Pacem in Terris](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html): AAS 55 (1963), p. 260."""
+Cf. John XXIII, encyclical letter *[Pacem in Terris](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html)*: AAS 55 (1963), p. 260."""
 
 [[footnotes]]
 part = 2
 chapter = 2
+section = 2
+sub_heading = ""
 number = 10
 text = """
-Cf. John XXIII, encyclical letter [Pacem in Terris](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html): AAS 55 (1963), p. 283; Pius XII, Radio address, Dec. 24, 1941: AAS 34 (1942), pp. 16-17."""
+Cf. John XXIII, encyclical letter *[Pacem in Terris](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html)*: AAS 55 (1963), p. 283; Pius XII, Radio address, Dec. 24, 1941: AAS 34 (1942), pp. 16-17."""
 
 [[footnotes]]
 part = 2
 chapter = 2
+section = 3
+sub_heading = ""
 number = 11
 text = """
-John XXIII, encyclical letter [Pacem in Terris](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html): AAS 55 (1963), p. 260."""
+John XXIII, encyclical letter *[Pacem in Terris](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html)*: AAS 55 (1963), p. 260."""
 
 [[footnotes]]
 part = 2
 chapter = 2
+section = 3
+sub_heading = ""
 number = 12
 text = """
 Cf. John XXIII, prayer delivered on Oct. 11, 1962, at the beginning of the council: AAS 54 (1962), p. 792."""
@@ -2839,6 +3108,8 @@ Cf. John XXIII, prayer delivered on Oct. 11, 1962, at the beginning of the counc
 [[footnotes]]
 part = 2
 chapter = 2
+section = 3
+sub_heading = ""
 number = 13
 text = """
 Cf. [Constitution on the Sacred Liturgy](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19631204_sacrosanctum-concilium_en.html), n. 123: AAS 56 (1964), p. 131; Paul VI, Discourse to the artists of Rome: AAS 56 (1964), pp. 439-442."""
@@ -2846,6 +3117,8 @@ Cf. [Constitution on the Sacred Liturgy](/archive/hist_councils/ii_vatican_counc
 [[footnotes]]
 part = 2
 chapter = 2
+section = 3
+sub_heading = ""
 number = 14
 text = """
 Cf. Second Vatican Council, [Decree on Priestly Training](/archive/hist_councils/ii_vatican_council/documents/vat-ii_decree_19651028_optatam-totius_en.html) and [Declaration on Christian Education](/archive/hist_councils/ii_vatican_council/documents/vat-ii_decl_19651028_gravissimum-educationis_en.html)."""
@@ -2853,6 +3126,8 @@ Cf. Second Vatican Council, [Decree on Priestly Training](/archive/hist_councils
 [[footnotes]]
 part = 2
 chapter = 2
+section = 0
+sub_heading = ""
 number = 15
 text = """
 Cf. [Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html), Chapter IV, n. 37: AAS 57 (1965), pp. 42-43."""
@@ -2860,6 +3135,8 @@ Cf. [Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_coun
 [[footnotes]]
 part = 2
 chapter = 3
+section = 0
+sub_heading = ""
 number = 1
 text = """
 Cf. Pius XII, Address on March 23, 1952: AAS 44 (1953), p. 273; John XXIII, Allocution to the Catholic Association of Italian Workers, May 1, 1959: AAS 51 (1959), p. 358."""
@@ -2867,13 +3144,17 @@ Cf. Pius XII, Address on March 23, 1952: AAS 44 (1953), p. 273; John XXIII, Allo
 [[footnotes]]
 part = 2
 chapter = 3
+section = 0
+sub_heading = ""
 number = 2
 text = """
-Cf. Pius XI, encyclical letter [Quadragesimo Anno](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html): AAS 23 (1931), p. 190 ff; Pius XII, Address of March 23, 1952: AAS 44 (1952), p. 276 ff; John XXIII, encyclical letter [Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html): AAS 53 (19ffl), p. 450; Vatican Council II, [Decree on the Media of Social Communication](/archive/hist_councils/ii_vatican_council/documents/vat-ii_decree_19631204_inter-mirifica_en.html), Chapter I, n. 6 AAS 56 (1964), p. 147."""
+Cf. Pius XI, encyclical letter *[Quadragesimo Anno](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html)*: AAS 23 (1931), p. 190 ff; Pius XII, Address of March 23, 1952: AAS 44 (1952), p. 276 ff; John XXIII, encyclical letter *[Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html)*: AAS 53 (19ffl), p. 450; Vatican Council II, [Decree on the Media of Social Communication](/archive/hist_councils/ii_vatican_council/documents/vat-ii_decree_19631204_inter-mirifica_en.html), Chapter I, n. 6 AAS 56 (1964), p. 147."""
 
 [[footnotes]]
 part = 2
 chapter = 3
+section = 1
+sub_heading = ""
 number = 3
 text = """
 Cf. Matt. 16:26, Luke 16:1-31, Col. 3:17."""
@@ -2881,90 +3162,116 @@ Cf. Matt. 16:26, Luke 16:1-31, Col. 3:17."""
 [[footnotes]]
 part = 2
 chapter = 3
+section = 1
+sub_heading = ""
 number = 4
 text = """
-Cf. Leo XIII, encyclical letter [Libertas](/holy_father/leo_xiii/encyclicals/documents/hf_l-xiii_enc_20061888_libertas_en.html), in Acta Leonis XIII, t. VIII, p. 220 ff; Pius XI, encyclical letter [Quadragesimo Anno](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html): AAS 23 (1931), p. 191 ff; Pius XI, encyclical letter [Divini Redemptoris](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19031937_divini-redemptoris_en.html): AAS 39 (1937), p. 65 ff; Pius XII, Nuntius natalicius 1941: AAS 34 (1942), p. 10 ff: John XXIII, encyclical letter [Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html): AAS 53 (1961), pp. 401-464."""
+Cf. Leo XIII, encyclical letter *[Libertas](/holy_father/leo_xiii/encyclicals/documents/hf_l-xiii_enc_20061888_libertas_en.html)*, in Acta Leonis XIII, t. VIII, p. 220 ff; Pius XI, encyclical letter *[Quadragesimo Anno](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html)*: AAS 23 (1931), p. 191 ff; Pius XI, encyclical letter *[Divini Redemptoris](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19031937_divini-redemptoris_en.html)*: AAS 39 (1937), p. 65 ff; Pius XII, Nuntius natalicius 1941: AAS 34 (1942), p. 10 ff: John XXIII, encyclical letter *[Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html)*: AAS 53 (1961), pp. 401-464."""
 
 [[footnotes]]
 part = 2
 chapter = 3
+section = 1
+sub_heading = ""
 number = 5
 text = """
-In reference to agricultural problems cf. especially John XXIII, encyclical letter [Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html): AAS 53 (1961),"""
+In reference to agricultural problems cf. especially John XXIII, encyclical letter *[Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html)*: AAS 53 (1961),"""
 
 [[footnotes]]
 part = 2
 chapter = 3
+section = 2
+sub_heading = ""
 number = 6
 text = """
-Cf. Leo XIII, encyclical letter [Rerum Novarum](/holy_father/leo_xiii/encyclicals/documents/hf_l-xiii_enc_15051891_rerum-novarum_en.html): AAS 23 (1890-91), p. 649, p. 662; Pius XI, encyclical letter [Quadragesimo Anno](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html): AAS 23 (193-1), pp. 200-201; Pius XI, encyclical letter [Divini Redemptoris](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19031937_divini-redemptoris_en.html): AAS 29 (1937), p. 92; Pius XII, Radio address on Christmas Eve 1942: AAS 35 (1943) p. 20; Pius XII, Allocution of June 13, 1943: AAS 35 (1943), p. 172; Pius XII, Radio address to the workers of Spain, March 11, 1951: AAS 43 (1951), p. 215; John XXIII, encyclical letter [Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html): AAS 53 (1961), p. 419."""
+Cf. Leo XIII, encyclical letter *[Rerum Novarum](/holy_father/leo_xiii/encyclicals/documents/hf_l-xiii_enc_15051891_rerum-novarum_en.html)*: AAS 23 (1890-91), p. 649, p. 662; Pius XI, encyclical letter *[Quadragesimo Anno](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html)*: AAS 23 (193-1), pp. 200-201; Pius XI, encyclical letter *[Divini Redemptoris](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19031937_divini-redemptoris_en.html)*: AAS 29 (1937), p. 92; Pius XII, Radio address on Christmas Eve 1942: AAS 35 (1943) p. 20; Pius XII, Allocution of June 13, 1943: AAS 35 (1943), p. 172; Pius XII, Radio address to the workers of Spain, March 11, 1951: AAS 43 (1951), p. 215; John XXIII, encyclical letter *[Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html)*: AAS 53 (1961), p. 419."""
 
 [[footnotes]]
 part = 2
 chapter = 3
+section = 2
+sub_heading = ""
 number = 7
 text = """
-Cf. John XXIII, encyclical letter [Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html): AAS 53 (1961), pp. 408, 424, 427; however, the word "curatione" has been taken from the Latin text of the encyclical letter [Quadragesimo Anno](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html): AAS 23 (1931) p. 199. Under the aspect of the evolution of the question cf. also: Pius XII, Allocution of June 3, 1950: AAS 42 (1950) pp. 485-488; Paul VI, Allocution of June 8, 1964: AAS 56 (1964), pp. 573-579."""
+Cf. John XXIII, encyclical letter *[Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html)*: AAS 53 (1961), pp. 408, 424, 427; however, the word "curatione" has been taken from the Latin text of the encyclical letter *[Quadragesimo Anno](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html)*: AAS 23 (1931) p. 199. Under the aspect of the evolution of the question cf. also: Pius XII, Allocution of June 3, 1950: AAS 42 (1950) pp. 485-488; Paul VI, Allocution of June 8, 1964: AAS 56 (1964), pp. 573-579."""
 
 [[footnotes]]
 part = 2
 chapter = 3
+section = 2
+sub_heading = ""
 number = 8
 text = """
-Cf. Pius XII, encyclical [Sertum Laetitiae](/holy_father/pius_xii/encyclicals/documents/hf_p-xii_enc_01111939_sertum-laetitiae_en.html): AAS 31 (1939), p. 642, John XXIII, Consistorial allocution: AAS 52 (1960), pp. 5-11; John XXIII, encyclical letter [Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html): AAS 53 (1961), p. 411."""
+Cf. Pius XII, encyclical *[Sertum Laetitiae](/holy_father/pius_xii/encyclicals/documents/hf_p-xii_enc_01111939_sertum-laetitiae_en.html)*: AAS 31 (1939), p. 642, John XXIII, Consistorial allocution: AAS 52 (1960), pp. 5-11; John XXIII, encyclical letter *[Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html)*: AAS 53 (1961), p. 411."""
 
 [[footnotes]]
 part = 2
 chapter = 3
+section = 2
+sub_heading = ""
 number = 9
 text = """
-Cf. St. Thomas, Summa Theologica: II-II, q. 32, a. 5 ad 2; Ibid. q. 66, a. 2: cf. explanation in Leo XIII, encyclical letter [Rerum Novarum](/holy_father/leo_xiii/encyclicals/documents/hf_l-xiii_enc_15051891_rerum-novarum_en.html): AAS 23 (1890-91) p. 651; cf. also Pius XII Allocution of June 1, 1941: AAS 33 (1941), p. 199; Pius XII, Birthday radio address 1954: AAS 47 (1955), p. 27."""
+Cf. St. Thomas, *Summa Theologica*: II-II, q. 32, a. 5 ad 2; Ibid. q. 66, a. 2: cf. explanation in Leo XIII, encyclical letter *[Rerum Novarum](/holy_father/leo_xiii/encyclicals/documents/hf_l-xiii_enc_15051891_rerum-novarum_en.html)*: AAS 23 (1890-91) p. 651; cf. also Pius XII Allocution of June 1, 1941: AAS 33 (1941), p. 199; Pius XII, Birthday radio address 1954: AAS 47 (1955), p. 27."""
 
 [[footnotes]]
 part = 2
 chapter = 3
+section = 2
+sub_heading = ""
 number = 10
 text = """
-Cf. St. Basil, Hom. in illud Lucae "Destruam horrea mea," n. 2 (PG 31, 263); Lactantius, Divinarum institutionum, lib. V. on justice (PL 6, 565 B); St. Augustine, In Ioann. Ev. tr. 50, n. 6 (PL 35, 1760); St. Augustine, Enarratio in Ps. CXLVII, 12 (PL 37, 192); St. Gregory the Great, Homiliae in Ev., hom. 20 (PL 76, 1165); St. Gregory the Great, Regulae Pastoralis liber, pars III c. 21 (PL 77 87); St. Bonaventure, In III Sent. d. 33, dub. 1 (ed Quacracchi, III, 728); St. Bonaventure, In IV Sent. d. 15, p. II, a. a q. 1 (ed. cit. IV, 371 b ); q. de superfluo (ms. Assisi Bibl. Comun. 186, ff. 112a-113a); St. Albert the Great, In III Sent., d. 33, a.3, sol. 1 (ed. Borgnet XXVIII, 611); Id. In IV Sent. d. 15, a. 1 (ed. cit. XXIX, 494-497). As for the determination of what is superfluous in our day and age, cf. John XXIII, Radio-television message of Sept. 11, 1962: AAS 54 (1962) p. 682: "The obligation of every man, the urgent obligation of the Christian man, is to reckon what is superfluous by the measure of the needs of others, and to see to it that the administration and the distribution of created goods serve the common good.""""
+Cf. St. Basil, *Hom. in illud Lucae "Destruam horrea mea,"* n. 2 (PG 31, 263); Lactantius, *Divinarum institutionum*, lib. V. on justice (PL 6, 565 B); St. Augustine, *In Ioann. Ev.* tr. 50, n. 6 (PL 35, 1760); St. Augustine, *Enarratio in Ps. CXLVII*, 12 (PL 37, 192); St. Gregory the Great, *Homiliae in Ev*., hom. 20 (PL 76, 1165); St. Gregory the Great, *Regulae Pastoralis liber*, pars III c. 21 (PL 77 87); St. Bonaventure, *In III Sent.* d. 33, dub. 1 (ed Quacracchi, III, 728); St. Bonaventure, *In IV Sent.* d. 15, p. II, a. a q. 1 (ed. cit. IV, 371 b ); q. de superfluo (ms. Assisi Bibl. Comun. 186, ff. 112a-113a); St. Albert the Great, *In III Sent.*, d. 33, a.3, sol. 1 (ed. Borgnet XXVIII, 611); Id. *In IV Sent*. d. 15, a. 1 (ed. cit. XXIX, 494-497). As for the determination of what is superfluous in our day and age, cf. John XXIII, Radio-television message of Sept. 11, 1962: AAS 54 (1962) p. 682: "The obligation of every man, the urgent obligation of the Christian man, is to reckon what is superfluous by the measure of the needs of others, and to see to it that the administration and the distribution of created goods serve the common good.""""
 
 [[footnotes]]
 part = 2
 chapter = 3
+section = 2
+sub_heading = ""
 number = 11
 text = """
-In that case, the old principle holds true: "In extreme necessity all goods are common, that is, all goods are to be shared." On the other hand, for the order, extension, and manner by which the principle is applied in the proposed text, besides the modern authors: cf. St. Thomas, Summa Theologica II-II, q. 66, a. 7. Obviously, for the correct application of the principle, all the conditions that are morally required must be met."""
+In that case, the old principle holds true: "In extreme necessity all goods are common, that is, all goods are to be shared." On the other hand, for the order, extension, and manner by which the principle is applied in the proposed text, besides the modern authors: cf. St. Thomas, *Summa Theologica* II-II, q. 66, a. 7. Obviously, for the correct application of the principle, all the conditions that are morally required must be met."""
 
 [[footnotes]]
 part = 2
 chapter = 3
+section = 2
+sub_heading = ""
 number = 12
 text = """
-Cf. Gratiam, Decretum, C. 21, dist. LXXXVI (ed. Friedberg I, 302). This axiom is also found already in PL 54, 591 A (cf. in Antonianum 27 (1952) 349-366) i."""
+Cf. Gratiam, *Decretum*, C. 21, dist. LXXXVI (ed. Friedberg I, 302). This axiom is also found already in PL 54, 591 A (cf. in Antonianum 27 (1952) 349-366) i."""
 
 [[footnotes]]
 part = 2
 chapter = 3
+section = 2
+sub_heading = ""
 number = 13
 text = """
-Cf. Leo XIII, encyclical letter [Rerum Novarum](/holy_father/leo_xiii/encyclicals/documents/hf_l-xiii_enc_15051891_rerum-novarum_en.html): AAS 23 (1890-91) pp. 643-646, Pius XI, encyclical letter [Quadragesimo Anno](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html): AAS 23 (1931) p. 191; Pius XII, Radio message of June 1, 1941: AAS 33 (1941), p. 199; Pius XII, Radio message on Christmas Eve 1942: AAS 35 (1943), p. 17; Pius XII, Radio message of Sept. 1, 1944: AAS 36 (1944) p. 253; John XXIII, encyclical letter [Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html): AAS 53 (1961) pp. 428-429."""
+Cf. Leo XIII, encyclical letter *[Rerum Novarum](/holy_father/leo_xiii/encyclicals/documents/hf_l-xiii_enc_15051891_rerum-novarum_en.html)*: AAS 23 (1890-91) pp. 643-646, Pius XI, encyclical letter *[Quadragesimo Anno](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html)*: AAS 23 (1931) p. 191; Pius XII, Radio message of June 1, 1941: AAS 33 (1941), p. 199; Pius XII, Radio message on Christmas Eve 1942: AAS 35 (1943), p. 17; Pius XII, Radio message of Sept. 1, 1944: AAS 36 (1944) p. 253; John XXIII, encyclical letter *[Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html)*: AAS 53 (1961) pp. 428-429."""
 
 [[footnotes]]
 part = 2
 chapter = 3
+section = 2
+sub_heading = ""
 number = 14
 text = """
-Cf. Pius XI, encyclical letter [Quadragesimo Anno](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html): AAS 23 (1931) p. 214; John XXIII, encyclical letter [Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html): AAS 53 (1961), p. 429."""
+Cf. Pius XI, encyclical letter *[Quadragesimo Anno](/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html)*: AAS 23 (1931) p. 214; John XXIII, encyclical letter *[Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html)*: AAS 53 (1961), p. 429."""
 
 [[footnotes]]
 part = 2
 chapter = 3
+section = 2
+sub_heading = ""
 number = 15
 text = """
-Cf. Pius XII, Radio message of Pentecost 1941: AAS 44 (1941) p. 199, John XXIII, encyclical letter [Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html): AAS 53 (1961) p. 430."""
+Cf. Pius XII, Radio message of Pentecost 1941: AAS 44 (1941) p. 199, John XXIII, encyclical letter *[Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html)*: AAS 53 (1961) p. 430."""
 
 [[footnotes]]
 part = 2
 chapter = 3
+section = 2
+sub_heading = ""
 number = 16
 text = """
 For the right use of goods according to the doctrine of the New Testament, cf. Luke 3:11, 10:30 ff; 11:41; 1 Pet. 5:3, Mark 8:36; 12:39-41; Jas. 5:1-6; 1 Tim. 6:8; Eph. 1:28; a Cor. 8:13; 1 John 3:17 ff."""
@@ -2972,13 +3279,17 @@ For the right use of goods according to the doctrine of the New Testament, cf. L
 [[footnotes]]
 part = 2
 chapter = 4
+section = 0
+sub_heading = ""
 number = 1
 text = """
-Cf. John XXIII, encyclical letter [Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html): AAS 53 (1961), p. 417."""
+Cf. John XXIII, encyclical letter *[Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html)*: AAS 53 (1961), p. 417."""
 
 [[footnotes]]
 part = 2
 chapter = 4
+section = 0
+sub_heading = ""
 number = 2
 text = """
 Cf. John XXIII, ibid."""
@@ -2986,6 +3297,8 @@ Cf. John XXIII, ibid."""
 [[footnotes]]
 part = 2
 chapter = 4
+section = 0
+sub_heading = ""
 number = 3
 text = """
 Cf. Rom. 13:1-5."""
@@ -2993,6 +3306,8 @@ Cf. Rom. 13:1-5."""
 [[footnotes]]
 part = 2
 chapter = 4
+section = 0
+sub_heading = ""
 number = 4
 text = """
 Cf. Rom. 13:5."""
@@ -3000,27 +3315,35 @@ Cf. Rom. 13:5."""
 [[footnotes]]
 part = 2
 chapter = 4
+section = 0
+sub_heading = ""
 number = 5
 text = """
-Cf. Pius XII, Radio message, Dec. 24, 1942: AAS 35 (1943) pp. 9-24; Dec. 24, 1944: AAS 37 (1945), pp. 11-17; John XXIII encyclical letter [Pacem in Terris](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html): AAS 55 (1963), pp. 263, 271 277 and 278."""
+Cf. Pius XII, Radio message, Dec. 24, 1942: AAS 35 (1943) pp. 9-24; Dec. 24, 1944: AAS 37 (1945), pp. 11-17; John XXIII encyclical letter *[Pacem in Terris](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html)*: AAS 55 (1963), pp. 263, 271 277 and 278."""
 
 [[footnotes]]
 part = 2
 chapter = 4
+section = 0
+sub_heading = ""
 number = 6
 text = """
-Cf. Pius XII, Radio message of June 7, 1941: AAS 33 (1941) p. 200: John XXIII, encyclical letter [Pacem in Terris](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html): 1.c., p. 273 and 274."""
+Cf. Pius XII, Radio message of June 7, 1941: AAS 33 (1941) p. 200: John XXIII, encyclical letter *[Pacem in Terris](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html)*: 1.c., p. 273 and 274."""
 
 [[footnotes]]
 part = 2
 chapter = 4
+section = 0
+sub_heading = ""
 number = 7
 text = """
-Cf. John XXIII, encyclical letter [Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html): AAS 53 (1961), p. 416."""
+Cf. John XXIII, encyclical letter *[Mater et Magistra](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html)*: AAS 53 (1961), p. 416."""
 
 [[footnotes]]
 part = 2
 chapter = 4
+section = 0
+sub_heading = ""
 number = 8
 text = """
 Pius XI, Allocution "Ai dirigenti della Federazione Universitaria Cattolica". Discorsi di Pio XI (ed. Bertetto), Turin, vol. 1 (1960), p. 743."""
@@ -3028,6 +3351,8 @@ Pius XI, Allocution "Ai dirigenti della Federazione Universitaria Cattolica". Di
 [[footnotes]]
 part = 2
 chapter = 4
+section = 0
+sub_heading = ""
 number = 9
 text = """
 Cf. Second Vatican Council, [Dogmatic Constitution on the Church](/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html), n. 13: AAS 57 (1965), p. 17."""
@@ -3035,6 +3360,8 @@ Cf. Second Vatican Council, [Dogmatic Constitution on the Church](/archive/hist_
 [[footnotes]]
 part = 2
 chapter = 4
+section = 0
+sub_heading = ""
 number = 10
 text = """
 Cf. Luke 2:14."""
@@ -3042,27 +3369,35 @@ Cf. Luke 2:14."""
 [[footnotes]]
 part = 2
 chapter = 5
+section = 1
+sub_heading = ""
 number = 1
 text = """
-Cf. John XXIII, encyclical letter [Pacem in Terris](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html), April 11, 1963: AAS 55 (1963), p. 291; "Therefore in this age of ours which prides itself on its atomic power, it is irrational to believe that war is still an apt means of vindicating violated rights.""""
+Cf. John XXIII, encyclical letter *[Pacem in Terris](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html)*, April 11, 1963: AAS 55 (1963), p. 291; "Therefore in this age of ours which prides itself on its atomic power, it is irrational to believe that war is still an apt means of vindicating violated rights.""""
 
 [[footnotes]]
 part = 2
 chapter = 5
+section = 1
+sub_heading = ""
 number = 2
 text = """
-Cf. Pius XII, Allocution of Sept. 30, 1954: AAS 46 (1954) p. 589; Radio message of Dec. 24, 1954: AAS 47 (1955), pp. 15 ff, John XXIII, encyclical letter [Pacem in Terris](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html): AAS 55 (1963), pp. 286-291; Paul VI, Allocution to the United Nations, Oct. 4, 1965."""
+Cf. Pius XII, Allocution of Sept. 30, 1954: AAS 46 (1954) p. 589; Radio message of Dec. 24, 1954: AAS 47 (1955), pp. 15 ff, John XXIII, encyclical letter *[Pacem in Terris](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html)*: AAS 55 (1963), pp. 286-291; Paul VI, Allocution to the United Nations, Oct. 4, 1965."""
 
 [[footnotes]]
 part = 2
 chapter = 5
+section = 1
+sub_heading = ""
 number = 3
 text = """
-Cf. John XXIII, encyclical letter [Pacem in Terris](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html), where reduction of arms is mentioned: AAS 55 (1963), p. 287."""
+Cf. John XXIII, encyclical letter *[Pacem in Terris](/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html)*, where reduction of arms is mentioned: AAS 55 (1963), p. 287."""
 
 [[footnotes]]
 part = 2
 chapter = 5
+section = 1
+sub_heading = ""
 number = 4
 text = """
 Cf. 2 Cor. 2:6."""

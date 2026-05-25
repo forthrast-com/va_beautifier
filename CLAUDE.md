@@ -13,7 +13,7 @@ The vatican.va edition is one long page of bare text. The points of difference:
 
 ## Pipeline
 
-    sources/*.html  ──(parse.py <slug>)──▶  <slug>.toml  ──(make_html.py <slug>)──▶  <slug>.html
+    download_sources.py ──▶ sources/*.html ──(parse.py <slug>)──▶ <slug>.toml ──(make_html.py <slug>)──▶ <slug>.html
                                                 │
                                                 ├──(make_index.py)────────────▶  index.html
                                                 │
@@ -25,7 +25,9 @@ The TOML is the canonical intermediate. Downstream renderers consume TOML — ne
 ## Architecture
 
 - `parse.py` — thin CLI. `argparse` with `choices` discovered via `pkgutil.iter_modules(extract.__path__)`. Loads `extract.<slug>`, calls its `extract()`, writes `<slug>.toml` via `core.write_toml`.
-- `core.py` — shared helpers (`clean_text`, `roman_to_int`, `title_case`, `parse_num`) and the TOML serialiser. The serialiser is the contract: each extractor returns a dict with `name`, `desc`, `promulgation`, `paragraphs[]`, `footnotes[]`.
+- `download_sources.py` — manifest-driven source fetcher. Lists or downloads implemented, queued, and reference-only Vatican pages into `sources/`; existing snapshots are preserved unless `--force` is passed.
+- `core.py` — shared text/structure helpers, canonical paragraph and footnote constructors/context assignment, TOML loading and serialisation. The serialiser is the contract: each extractor returns a dict with `name`, `desc`, `promulgation`, `paragraphs[]`, `footnotes[]`.
+- `project.py` — shared repository paths used by CLI and renderer entrypoints.
 - `extract/<slug>.py` — per-document extractor. Each exposes `extract() -> dict`. Add a new document by dropping a new module here; no registry edit needed.
 - `make_html.py <slug>` — reads `<slug>.toml`, writes `<slug>.html`. Single self-contained file (CSS + JS inlined). Doc-name comes from the TOML's `name`. Body gets `class="doc-<slug>"` so per-doc CSS overrides can scope to that document only.
 - `make_book.py <slug>` — reads `<slug>.toml`, emits `build/<slug>.md` + `build/<slug>_titlepage.typ` (the title page as raw typst, fed to pandoc via `--include-before-body` so it lands before the TOC). Then runs pandoc twice: once to `<slug>.epub` and once to `<slug>.pdf` (via `--pdf-engine=typst --pdf-engine-opt=--root=<ROOT>`). Body font is Hoefler Text by default; override with `VA_BOOK_FONT=…`. Page breaks and the end matter ride as raw typst blocks, which the EPUB writer ignores.
@@ -35,21 +37,26 @@ The TOML is the canonical intermediate. Downstream renderers consume TOML — ne
 
 ## TOML schema
 
-Top-level: `name`, `source_url`, `desc`, `promulgation` (multiline).
+Top-level: `name`, `hue` (web accent colour in HSL degrees), `source_url`, `desc`, `promulgation` (multiline).
 
-`[[paragraphs]]` — `number`, `part`, `part_title`, `chapter`, `chapter_title`, `chapter_subtitle`, `section`, `section_title`, `sub_heading`, `heading_la`, `break_after`, `text` (multiline, `\n\n`-separated sub-paragraphs).
+`[[paragraphs]]` — `number`, `part`, `part_title`, `chapter`, `chapter_title`, `chapter_subtitle`, `section`, `section_title`, `sub_heading`, `heading_la`, `break_after`, `text` (multiline, `\n\n`-separated sub-paragraphs). Authored inline formatting in `text` and footnote `text` is canonical Markdown-compatible content: `*italics*`, `**bold**`, `<sup>…</sup>`, and `<sub>…</sub>`.
 
 - `sub_heading` is per-paragraph and optional (defaults to ''); LS uses it for topical headers within sections, GeS doesn't have any.
 - `heading_la` is a Latin micro-summary; GeS has one per paragraph, LS has none.
 - `break_after` marks a structural separator following a paragraph; LS uses it for the rule before its closing prayers.
 
-`[[footnotes]]` — `part`, `chapter`, `number`, `text`. Inline refs in paragraph text are canonical `(N)` for 1 ≤ N ≤ 999. Extractors normalise alternative source formats (LS's `[N]`) to this canonical form before emitting TOML.
+`[[footnotes]]` — `part`, `chapter`, `section`, `sub_heading`, `number`, `text`. Heading ownership is assigned from the note's first citation at the lowest available level. Inline refs in paragraph text are canonical `(N)` for 1 ≤ N ≤ 999. Extractors normalise alternative source formats (LS's `[N]`) to this canonical form before emitting TOML.
 
 `part = 0` is preface/introduction; `chapter = 0` / `section = 0` mean "none under this scope".
 
 ## Sources
 
 GeS is served as **ISO-8859-1** (EN) and **latin-1** (LA), not UTF-8. LS is UTF-8. Sniff before assuming on any new document.
+
+Run `nix develop --command python download_sources.py --list` to see the
+source manifest and local status; omit `--list` to fetch missing sources.
+`--category queued` selects pending extractor inputs, while
+`--category reference` selects captured contextual documents.
 
 ## Template variation
 
@@ -75,7 +82,7 @@ JS publishes the sticky-bar's measured height to `--bar-h` so other layout (indi
 The web edition leans on UI affordances (sticky heading bar, scroll indicator, footnote drawer) that don't translate to EPUB/PDF — those want endnotes per section, real page breaks, no JS.
 
 The flat GitHub Pages site is deployed through `.github/workflows/pages.yml`;
-`CNAME` sets `docs.forthrast.com`, and only finished HTML files plus Pages
+`CNAME` sets `circulars.forthrast.com`, and only finished HTML files plus Pages
 metadata are published.
 
 ## Open work
@@ -140,10 +147,6 @@ metadata are published.
       under nothing because the body H1 is `.unlisted`. Either promote
       "Introduction" to chapter-level for MH or have the renderer suppress
       the indent when there's no listed parent.
-    - *Italics through the TOML:* `clean_text` flattens `<i>` / `<em>`, so
-      Latin phrases and short-title book references (*Pacem in Terris*,
-      *Centesimus Annus*) come through plain in both web and book outputs.
-      Worth preserving as markdown `*…*` in the TOML's body text.
     - *Multi-paragraph footnotes:* the few notes in LS that span two
       paragraphs render as one block — pandoc's continuation-indent
       handling needs a closer look.
@@ -154,9 +157,14 @@ metadata are published.
   `sources/Sacrosanctum Concilium_{en,la}.html` are sitting un-extracted.
   Sacrosanctum is the old-flat template (GeS-shaped); Fratelli tutti is
   likely the modern Bootstrap dialect (LS-shaped).
+  Reference captures recorded by `download_sources.py` for possible future
+  editions are `antiqua_et_nova_en.html`, `quo_vadis_humanitas_en.html`, and
+  `francis_g7_ai_en.html`.
 
 ## Environment
 
 `flake.nix` provides Python 3.12 + beautifulsoup4. Build everything: `./build.sh` (it re-enters the flake dev shell when needed). Build one doc: `nix develop --command sh -c "python parse.py laudato_si && python make_html.py laudato_si"`.
+
+Run tests: `nix develop --command python -m unittest discover -s tests`.
 
 `shell.nix` is kept only as a legacy fallback.

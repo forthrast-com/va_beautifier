@@ -10,12 +10,23 @@ import re
 
 from bs4 import BeautifulSoup
 
-from core import clean_text, title_case
+from core import (
+    assign_footnote_context,
+    br_lines,
+    chapter_word_to_int,
+    clean_text,
+    extract_footnotes,
+    paragraph_record,
+    split_around_title,
+    title_case,
+)
+from project import SOURCES
 
 
-EN_SRC = 'sources/magnifica_humanitas_en.html'
+EN_SRC = SOURCES / 'magnifica_humanitas_en.html'
 
 NAME = 'Magnifica Humanitas'
+HUE = 230
 SOURCE_URL = ('https://www.vatican.va/content/leo-xiv/en/encyclicals/documents/'
               '20260515-magnifica-humanitas.html')
 
@@ -27,18 +38,6 @@ TITLE_UPPER = 'MAGNIFICA HUMANITAS'
 RE_PARA = re.compile(r'^(\d+)\.\s+(.+)$', re.DOTALL)
 RE_FOOTNOTE = re.compile(r'^\[\s*(\d+)\s*\]\s*(.+)$', re.DOTALL)
 RE_CHAPTER = re.compile(r'^CHAPTER\s+([A-Z]+)$')
-RE_INLINE_REF = re.compile(r'\[(\d{1,3})\]')
-RE_SPACE_BEFORE_REF = re.compile(r' +(\(\d{1,3}\))')
-
-CHAPTER_WORDS = {
-    'ONE': 1, 'TWO': 2, 'THREE': 3, 'FOUR': 4, 'FIVE': 5,
-}
-
-
-def _normalise_refs(text):
-    text = RE_INLINE_REF.sub(r'(\1)', text)
-    return RE_SPACE_BEFORE_REF.sub(r'\1', text)
-
 
 def _heading_text(p):
     text = re.sub(r'\s+', ' ', p.get_text(separator=' ', strip=True)).strip()
@@ -47,38 +46,6 @@ def _heading_text(p):
 
 def _title(text):
     return title_case(text).replace(' Ai', ' AI')
-
-
-def _br_lines(tag):
-    """get_text but with <br/> rendered as line breaks. Preserves the
-    line structure of the source's centred title block, where the title
-    sits between preamble and subtitle lines."""
-    parts = []
-    for child in tag.descendants:
-        if hasattr(child, 'name') and child.name == 'br':
-            parts.append('\n')
-        elif isinstance(child, str):
-            parts.append(child)
-    raw = ''.join(parts)
-    return [re.sub(r'\s+', ' ', ln).strip()
-            for ln in raw.splitlines()
-            if ln.strip()]
-
-
-def _split_around_title(lines, title_upper):
-    """Partition front-matter lines around the title line. Returns
-    (pre_lines, post_lines). Title comparison is case-insensitive and
-    strips trailing punctuation so 'MAGNIFICA HUMANITAS' matches even
-    when the source decorates it."""
-    norm = lambda s: re.sub(r'[^A-Z ]', '', s.upper()).strip()
-    target = norm(title_upper)
-    pre, post, seen = [], [], False
-    for ln in lines:
-        if not seen and norm(ln) == target:
-            seen = True
-            continue
-        (post if seen else pre).append(ln)
-    return pre, post
 
 
 def extract():
@@ -101,13 +68,11 @@ def extract():
     abstract = soup.find('div', class_='abstract')
     desc_pre, desc_post = '', ''
     if abstract:
-        fm_lines = _br_lines(abstract.find('p'))
-        pre, post = _split_around_title(fm_lines, TITLE_UPPER)
+        pre, post = split_around_title(br_lines(abstract.find('p')), TITLE_UPPER)
         desc_pre = '\n'.join(pre)
         desc_post = '\n'.join(post)
 
     paragraphs = []
-    footnotes = []
     promulgation = ''
     signature = ''
 
@@ -128,22 +93,20 @@ def extract():
         m = RE_PARA.match(text)
         if m:
             pending_chapter_title = False
-            paragraphs.append({
-                'number': int(m.group(1)),
-                'part': 0, 'part_title': '',
-                'chapter': chapter, 'chapter_title': chapter_title,
-                'chapter_subtitle': chapter_subtitle,
-                'section': section, 'section_title': section_title,
-                'sub_heading': sub_heading,
-                'heading_la': '',
-                'text': _normalise_refs(m.group(2).strip()),
-            })
+            rich_match = RE_PARA.match(clean_text(p, preserve_formatting=True))
+            paragraphs.append(paragraph_record(
+                int(m.group(1)), rich_match.group(2),
+                chapter=chapter, chapter_title=chapter_title,
+                chapter_subtitle=chapter_subtitle,
+                section=section, section_title=section_title,
+                sub_heading=sub_heading, bracketed_refs=True,
+            ))
             continue
 
         heading = _heading_text(p)
         mc = RE_CHAPTER.match(heading)
-        if mc and mc.group(1) in CHAPTER_WORDS:
-            chapter = CHAPTER_WORDS[mc.group(1)]
+        if mc and (chapter_num := chapter_word_to_int(mc.group(1))) is not None:
+            chapter = chapter_num
             chapter_title = ''
             chapter_subtitle = ''
             section = 0
@@ -200,26 +163,14 @@ def extract():
         if promulgation and 'text-align:center' in style and text:
             signature = text
 
-    for p in ps[first_note_idx:]:
-        text = clean_text(p)
-        m = RE_FOOTNOTE.match(text)
-        if m:
-            footnotes.append({
-                'part': 0,
-                'chapter': 0,
-                'number': int(m.group(1)),
-                'text': _normalise_refs(m.group(2).strip()),
-            })
-
-    fn_to_chapter = {}
-    for p in paragraphs:
-        for ref in re.findall(r'\((\d{1,3})\)', p['text']):
-            fn_to_chapter.setdefault(int(ref), p['chapter'])
-    for fn in footnotes:
-        fn['chapter'] = fn_to_chapter.get(fn['number'], 0)
+    footnotes = extract_footnotes(
+        ps[first_note_idx:], RE_FOOTNOTE, bracketed_refs=True
+    )
+    footnotes = assign_footnote_context(footnotes, paragraphs)
 
     return {
         'name': NAME,
+        'hue': HUE,
         'source_url': SOURCE_URL,
         'desc': desc_pre,
         'desc_post': desc_post,

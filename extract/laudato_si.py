@@ -15,13 +15,27 @@ No PART tier; no per-paragraph Latin micro-summary.
 import re
 from bs4 import BeautifulSoup
 
-from core import clean_text, only_child_is, roman_to_int, title_case
+from core import (
+    assign_footnote_context,
+    br_lines,
+    chapter_word_to_int,
+    clean_text,
+    normalise_footnote_refs,
+    only_child_is,
+    paragraph_record,
+    parse_footnote,
+    roman_to_int,
+    split_around_title,
+    title_case,
+)
+from project import SOURCES
 
 
-EN_SRC = 'sources/laudato_si_en.html'
-LT_SRC = 'sources/laudato_si_lt.html'
+EN_SRC = SOURCES / 'laudato_si_en.html'
+LT_SRC = SOURCES / 'laudato_si_lt.html'
 
 NAME = "Laudato Si'"
+HUE = 140
 SOURCE_URL = ('https://www.vatican.va/content/francesco/en/encyclicals/documents/'
               'papa-francesco_20150524_enciclica-laudato-si.html')
 
@@ -39,51 +53,9 @@ RE_PARA       = re.compile(r'^(\d+)\s*\.\s+(.+)$', re.DOTALL)
 RE_FOOTNOTE   = re.compile(r'^\[\s*(\d+)\s*\]\s+(.+)$', re.DOTALL)
 RE_SECTION_B  = re.compile(r'^([IVX]+)\s*\.\s+(.+)$')
 RE_CHAPTER_C  = re.compile(r'^CHAPTER\s+([A-Z]+)$')
-RE_INLINE_REF = re.compile(r'\[(\d{1,3})\]')
-RE_SPACE_BEFORE_REF = re.compile(r' +(\(\d{1,3}\))')
-
-CHAPTER_WORDS = {
-    'ONE': 1, 'TWO': 2, 'THREE': 3, 'FOUR': 4, 'FIVE': 5, 'SIX': 6,
-    'SEVEN': 7, 'EIGHT': 8, 'NINE': 9, 'TEN': 10,
-}
 
 CHROME = ['script', 'style', 'meta', 'link', 'img', 'header',
           'footer', 'nav', 'svg', 'input', 'button', 'figure']
-
-
-def _normalise_refs(text):
-    text = RE_INLINE_REF.sub(r'(\1)', text)
-    return RE_SPACE_BEFORE_REF.sub(r'\1', text)
-
-
-def _br_lines(tag):
-    """get_text but with <br/> → newline. Preserves the source's line
-    structure so the title can be located within a multi-line block."""
-    parts = []
-    for child in tag.descendants:
-        if hasattr(child, 'name') and child.name == 'br':
-            parts.append('\n')
-        elif isinstance(child, str):
-            parts.append(child)
-    raw = ''.join(parts)
-    return [re.sub(r'\s+', ' ', ln).strip()
-            for ln in raw.splitlines()
-            if ln.strip()]
-
-
-def _split_around_title(lines, title_upper):
-    """Partition front-matter lines around the title. Returns (pre, post).
-    Matching is case-insensitive and strips non-letter chars so e.g.
-    LAUDATO SI’ matches the LAUDATO SI bare upper form."""
-    norm = lambda s: re.sub(r'[^A-Z ]', '', s.upper()).strip()
-    target = norm(title_upper)
-    pre, post, seen = [], [], False
-    for ln in lines:
-        if not seen and norm(ln) == target:
-            seen = True
-            continue
-        (post if seen else pre).append(ln)
-    return pre, post
 
 
 def extract():
@@ -100,7 +72,7 @@ def extract():
     desc_pre, desc_post = '', ''
     fm_p = next((p for p in ps if 'ENCYCLICAL LETTER' in p.get_text()), None)
     if fm_p:
-        pre, post = _split_around_title(_br_lines(fm_p), TITLE_UPPER)
+        pre, post = split_around_title(br_lines(fm_p), TITLE_UPPER)
         desc_pre = '\n'.join(pre)
         desc_post = '\n'.join(post)
 
@@ -139,8 +111,8 @@ def extract():
         # chapter marker: <p align="center">CHAPTER ONE</p> (no <b>)
         if align == 'center' and not has_b:
             mc = RE_CHAPTER_C.match(text)
-            if mc and mc.group(1) in CHAPTER_WORDS:
-                pending_chapter_num = CHAPTER_WORDS[mc.group(1)]
+            if mc and (chapter_num := chapter_word_to_int(mc.group(1))) is not None:
+                pending_chapter_num = chapter_num
                 continue
 
         # centred bold: chapter title (after CHAPTER N) or encyclical title (skip)
@@ -175,15 +147,13 @@ def extract():
         # numbered paragraph
         m = RE_PARA.match(text)
         if m:
-            paragraphs.append({
-                'number': int(m.group(1)),
-                'part': 0, 'part_title': '',
-                'chapter': chapter, 'chapter_title': chapter_title,
-                'section': section, 'section_title': section_title,
-                'sub_heading': sub_heading,
-                'heading_la': '',
-                'text': _normalise_refs(m.group(2).strip()),
-            })
+            rich_match = RE_PARA.match(clean_text(p, preserve_formatting=True))
+            paragraphs.append(paragraph_record(
+                int(m.group(1)), rich_match.group(2),
+                chapter=chapter, chapter_title=chapter_title,
+                section=section, section_title=section_title,
+                sub_heading=sub_heading, bracketed_refs=True,
+            ))
             continue
 
         # The conclusion is divided from its invitation to prayer by a
@@ -194,7 +164,9 @@ def extract():
 
         # continuation: unnumbered body para following a numbered one (rare in LS)
         if paragraphs and not has_b:
-            paragraphs[-1]['text'] += '\n\n' + _normalise_refs(text)
+            paragraphs[-1]['text'] += '\n\n' + normalise_footnote_refs(
+                clean_text(p, preserve_formatting=True), bracketed=True
+            )
 
     # ─── Phase 2: appendix walk (last_body_idx+1 .. end) ─────────────────
     # The tail of LS holds: two prayers (each `<i>Title</i>` followed by
@@ -214,14 +186,13 @@ def extract():
             continue
 
         # footnote definitions stream in at the very end
-        mfn = RE_FOOTNOTE.match(text)
-        if mfn:
+        footnote = parse_footnote(
+            clean_text(p, preserve_formatting=True),
+            RE_FOOTNOTE, bracketed_refs=True
+        )
+        if footnote:
             _flush()
-            footnotes.append({
-                'part': 0, 'chapter': 0,
-                'number': int(mfn.group(1)),
-                'text': _normalise_refs(mfn.group(2).strip()),
-            })
+            footnotes.append(footnote)
             continue
 
         # italic-only block: prayer title, the promulgation, or signature
@@ -247,23 +218,19 @@ def extract():
         if current is not None:
             if current['text']:
                 current['text'] += '\n\n'
-            current['text'] += _normalise_refs(text)
+            current['text'] += normalise_footnote_refs(
+                clean_text(p, preserve_formatting=True), bracketed=True
+            )
 
     _flush()
 
-    # Back-fill footnote chapters by first-cite — keeps the renderer's
-    # drawer-by-chapter grouping intact (see make_html.py:fn_section).
-    fn_to_chapter = {}
-    for p in paragraphs:
-        for ref in re.findall(r'\((\d{1,3})\)', p['text']):
-            n = int(ref)
-            if n not in fn_to_chapter:
-                fn_to_chapter[n] = p['chapter']
-    for fn in footnotes:
-        fn['chapter'] = fn_to_chapter.get(fn['number'], 0)
+    # Store the smallest structural context available for each note. The
+    # reader drawer can then render the canonical TOML hierarchy directly.
+    footnotes = assign_footnote_context(footnotes, paragraphs)
 
     return {
         'name': NAME,
+        'hue': HUE,
         'source_url': SOURCE_URL,
         'desc': desc_pre,
         'desc_post': desc_post,

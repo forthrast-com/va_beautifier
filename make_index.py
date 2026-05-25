@@ -1,26 +1,14 @@
 """Render the flat GitHub Pages landing page from document TOML metadata."""
 
 from html import escape
-from pathlib import Path
 import sys
-import tomllib
 
-from core import title_case
-
-BUILD = Path(__file__).parent / 'build'
-SITE  = Path(__file__).parent / 'site'
-
-
-HUES = {
-    'gaudium_et_spes': 42,
-    'laudato_si': 140,
-    'magnifica_humanitas': 230,
-}
+from core import read_toml, title_case
+from project import BUILD, SITE
 
 
 def render_card(slug):
-    with open(BUILD / f'{slug}.toml', 'rb') as source:
-        data = tomllib.load(source)
+    data = read_toml(BUILD / f'{slug}.toml')
 
     name = escape(data['name'])
     # The title-block descriptor is split across desc (above title) and
@@ -42,7 +30,7 @@ def render_card(slug):
         'Original Vatican document</a>'
         if source_url else ''
     )
-    hue = HUES.get(slug, 42)
+    hue = data.get('hue', 42)
     return f'''<article class="edition" style="--hue: {hue}">
   <a class="edition-link" href="{slug}.html">
     <h2>{name}</h2>

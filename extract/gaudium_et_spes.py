@@ -11,13 +11,24 @@ Quirks:
 import re
 from bs4 import BeautifulSoup, NavigableString, Tag
 
-from core import clean_text, roman_to_int, parse_num, title_case
+from core import (
+    assign_footnote_context,
+    clean_text,
+    normalise_footnote_refs,
+    paragraph_record,
+    parse_num,
+    parse_footnote,
+    roman_to_int,
+    title_case,
+)
+from project import SOURCES
 
 
-EN_SRC = 'sources/gaudium_et_spes_en.html'
-LT_SRC = 'sources/gaudium_et_spes_lt.html'
+EN_SRC = SOURCES / 'gaudium_et_spes_en.html'
+LT_SRC = SOURCES / 'gaudium_et_spes_lt.html'
 
 NAME = 'Gaudium et Spes'
+HUE = 42
 SOURCE_URL = ('https://www.vatican.va/archive/hist_councils/ii_vatican_council/'
               'documents/vat-ii_const_19651207_gaudium-et-spes_en.html')
 
@@ -26,12 +37,6 @@ RE_PART     = re.compile(r'^PART\s+([IVX]+)\s*$')
 RE_CHAPTER  = re.compile(r'^CHAPTER\s+([IVX]+)\s*$')
 RE_SECTION  = re.compile(r'^SECTION\s+(\d+|[IVX]+)\s*(.*)$', re.DOTALL)
 RE_PARA_NUM = re.compile(r'^\s*(\d+)\.\s+(.+)', re.DOTALL)
-RE_SPACE_BEFORE_REF = re.compile(r' +(\(\d{1,3}\))')
-
-
-def _tighten_refs(text):
-    return RE_SPACE_BEFORE_REF.sub(r'\1', text)
-
 CHAPTER_TITLES = {
     'THE DIGNITY OF THE HUMAN PERSON',
     'THE COMMUNITY OF MANKIND',
@@ -156,11 +161,11 @@ def _walk_body(body_soup):
         m = RE_PARA_NUM.match(text)
         if m:
             flush()
-            current = {
-                'number': int(m.group(1)),
-                **{k: state[k] for k in state},
-                'text': _tighten_refs(m.group(2).strip()),
-            }
+            rich = clean_text(tag, preserve_formatting=True)
+            rich_match = RE_PARA_NUM.match(rich)
+            current = paragraph_record(
+                int(m.group(1)), rich_match.group(2), **state
+            )
         elif current is not None and not any(
             text.startswith(h) for h in ['[', 'Print', 'Index']
         ):
@@ -171,7 +176,9 @@ def _walk_body(body_soup):
                 if not (isinstance(c, NavigableString) and not str(c).strip())
             )
             if not all_bold:
-                current['text'] += '\n\n' + _tighten_refs(text)
+                current['text'] += '\n\n' + normalise_footnote_refs(
+                    clean_text(tag, preserve_formatting=True)
+                )
 
     flush()
     return paragraphs
@@ -198,13 +205,12 @@ def _extract_footnotes(notes_html):
         mc = RE_NOTE_CHAPTER.match(text)
         if mc:
             chapter = parse_num(mc.group(1)); continue
-        m = RE_NOTE_NUM.match(text)
-        if m:
-            footnotes.append({
-                'part': part, 'chapter': chapter,
-                'number': int(m.group(1)),
-                'text': _tighten_refs(m.group(2).strip()),
-            })
+        footnote = parse_footnote(
+            clean_text(tag, preserve_formatting=True),
+            RE_NOTE_NUM, part=part, chapter=chapter
+        )
+        if footnote:
+            footnotes.append(footnote)
     return footnotes
 
 
@@ -243,7 +249,9 @@ def extract():
 
     desc, desc_post = _extract_frontmatter(body_html)
     paragraphs = _walk_body(BeautifulSoup(body_html, 'html.parser'))
-    footnotes = _extract_footnotes(notes_html)
+    footnotes = assign_footnote_context(
+        _extract_footnotes(notes_html), paragraphs, preserve_scope=True
+    )
 
     la = _extract_latin_headings()
     for p in paragraphs:
@@ -251,6 +259,7 @@ def extract():
 
     return {
         'name': NAME,
+        'hue': HUE,
         'source_url': SOURCE_URL,
         'desc': desc,
         'desc_post': desc_post,

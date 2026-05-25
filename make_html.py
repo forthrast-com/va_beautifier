@@ -1,32 +1,25 @@
 import argparse
 import json
 import re
-import tomllib
 from collections import defaultdict
 from html import escape
-from pathlib import Path
 
-from core import title_case
+from core import CANONICAL_FOOTNOTE_REF, int_to_roman, read_toml, title_case
+from project import ASSETS, BUILD, SITE
 
-ASSETS = Path(__file__).parent / 'assets'
-BUILD  = Path(__file__).parent / 'build'
-SITE   = Path(__file__).parent / 'site'
 CSS         = (ASSETS / 'styles.css').read_text()
 JS_TEMPLATE = (ASSETS / 'scripts.js').read_text()
-
-# Inline footnote refs: paragraph text carries them as canonical `(N)`. We
-# match 1-3 digits to avoid catching years/citations like "(1995)".
-INLINE_REF_RE = re.compile(r'\((\d{1,3})\)')
 
 # External hyperlinks come through clean_text as `[text](href)` markdown.
 # `[^)\s]+` for the href so a stray `)` in surrounding prose can't extend
 # the match — vatican.va URLs are paren-free.
 INLINE_LINK_RE = re.compile(r'\[([^\]]+)\]\(([^)\s]+)\)')
+INLINE_STRONG_RE = re.compile(r'\*\*(.+?)\*\*')
+INLINE_EM_RE = re.compile(r'(?<!\*)\*([^*\n]+?)\*(?!\*)')
+INLINE_SCRIPT_RE = re.compile(r'&lt;(sup|sub)&gt;(.*?)&lt;/\1&gt;')
 
-# Cleanup for artefacts left when source <sup>/<sub> tags are stripped:
-# stripped tags leave a stray space between the word and the punctuation
-# (or numeric suffix) that was inside them. Use [ \t] (not \s) so we don't
-# eat poetic line breaks within a sub-paragraph.
+# Retain cleanup for legacy TOML files emitted before inline source markup
+# became canonical. Use [ \t] (not \s) so poetic line breaks survive.
 TIGHTEN = [
     (re.compile(r'(\w)[ \t]+([.,;:!?])'),        r'\1\2'),    # "Ibid ." → "Ibid."
     (re.compile(r'(\d)[ \t]+(st|nd|rd|th)\b'),  r'\1\2'),    # "35 th"  → "35th"
@@ -40,8 +33,7 @@ ap = argparse.ArgumentParser(description='Render a TOML intermediate to a single
 ap.add_argument('doc', help='Doc slug (looks for {slug}.toml, writes {slug}.html)')
 args = ap.parse_args()
 
-with open(BUILD / f'{args.doc}.toml', 'rb') as f:
-    data = tomllib.load(f)
+data = read_toml(BUILD / f'{args.doc}.toml')
 
 paragraphs   = data['paragraphs']
 footnotes    = data['footnotes']
@@ -53,34 +45,19 @@ doc_desc_post = data.get('desc_post', '')
 doc_promulg   = data.get('promulgation', '')
 doc_signature = data.get('signature', '')
 
-# Per-doc accent hue. Drives the whole hsl() accent palette in styles.css
-# via an inline `style="--hue: …"` on the <html> tag. Default = warm gold.
-DOC_HUES = {
-    'laudato_si': 140,   # botanical green for the ecology encyclical
-    'magnifica_humanitas': 230,  # indigo-blue for the technology encyclical
-    # 'dilexit_nos': 8,  # red, when the doc lands
-}
-doc_hue = DOC_HUES.get(args.doc, 42)
+# Default = warm gold for legacy TOML files without explicit document colour.
+doc_hue = data.get('hue', 42)
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 
 def e(s): return escape(s)
-
-def to_roman(n):
-    result = ''
-    for val, sym in [(1000,'M'),(900,'CM'),(500,'D'),(400,'CD'),(100,'C'),(90,'XC'),
-                     (50,'L'),(40,'XL'),(10,'X'),(9,'IX'),(5,'V'),(4,'IV'),(1,'I')]:
-        while n >= val:
-            result += sym
-            n -= val
-    return result
 
 def linkify_footnotes(text, part, chapter):
     """Replace (N) inline refs with linked superscripts."""
     def replace(m):
         n = m.group(1)
         return f'<sup><a href="#fn-{part}-{chapter}-{n}">{n}</a></sup>'
-    return INLINE_REF_RE.sub(replace, text)
+    return CANONICAL_FOOTNOTE_REF.sub(replace, text)
 
 def linkify_anchors(text):
     """Convert `[text](href)` markdown back to anchor tags.
@@ -91,6 +68,12 @@ def linkify_anchors(text):
         body, href = m.group(1), m.group(2)
         return f'<a href="{href}" class="ext-link" target="_blank" rel="noopener">{body}</a>'
     return INLINE_LINK_RE.sub(replace, text)
+
+def format_inline(text):
+    """Render the restricted Markdown-compatible markup emitted by `core`."""
+    text = INLINE_SCRIPT_RE.sub(r'<\1>\2</\1>', text)
+    text = INLINE_STRONG_RE.sub(r'<strong>\1</strong>', text)
+    return INLINE_EM_RE.sub(r'<em>\1</em>', text)
 
 def para_html(text, part=None, chapter=None):
     """Convert paragraph text to <p> tags.
@@ -109,13 +92,10 @@ def para_html(text, part=None, chapter=None):
             ln = linkify_anchors(ln)
             if part is not None:
                 ln = linkify_footnotes(ln, part, chapter)
+            ln = format_inline(ln)
             rendered.append(ln)
         out.append('<p>' + '<br>'.join(rendered) + '</p>')
     return '\n'.join(out)
-
-# footnotes indexed by (part, chapter, number)
-fn_index = {(fn['part'], fn['chapter'], fn['number']): fn for fn in footnotes}
-
 
 # ── build sections ────────────────────────────────────────────────────────────
 
@@ -242,8 +222,8 @@ for p in paragraphs:
                 # anchor-only — give the next element the id instead of leaving an empty <h1>
                 html_parts.append(f'<a id="{cid}"></a>')
         else:
-            indicator_chapters.append({'id': cid, 'label': f'Part {to_roman(p["part"])}', 'spacer': True, 'part': p['part']})
-            html_parts.append(h('h1', 'part-num', f'Part {to_roman(p["part"])}').replace('<h1 ', f'<h1 id="{cid}" '))
+            indicator_chapters.append({'id': cid, 'label': f'Part {int_to_roman(p["part"])}', 'spacer': True, 'part': p['part']})
+            html_parts.append(h('h1', 'part-num', f'Part {int_to_roman(p["part"])}').replace('<h1 ', f'<h1 id="{cid}" '))
             if p['part_title']:
                 html_parts.append(h('h2', 'part-title', p['part_title']).replace('<h2 ', '<h2 data-sticky '))
         seen_part        = part
@@ -254,7 +234,7 @@ for p in paragraphs:
     if chapter != seen_chapter and p['chapter'] != 0:
         cid = next_cid()
         label = p['chapter_title'] or (
-            f'Part {to_roman(p["part"])}, Ch. {p["chapter"]}' if p['part']
+            f'Part {int_to_roman(p["part"])}, Ch. {p["chapter"]}' if p['part']
             else f'Chapter {p["chapter"]}'
         )
         indicator_chapters.append({'id': cid, 'label': label, 'spacer': False, 'part': p['part']})
@@ -266,7 +246,7 @@ for p in paragraphs:
         if not is_unnumbered:
             html_parts.append(h('h2', 'chapter-num', f'Chapter {p["chapter"]}').replace('<h2 ', f'<h2 id="{cid}" '))
         if p['chapter_title']:
-            ch_num = f'{to_roman(p["part"])}.{p["chapter"]}' if p['part'] else f'{p["chapter"]}'
+            ch_num = f'{int_to_roman(p["part"])}.{p["chapter"]}' if p['part'] else f'{p["chapter"]}'
             id_attr = f'id="{cid}" ' if is_unnumbered else ''
             html_parts.append(
                 h('h3', 'chapter-title', p['chapter_title'])
@@ -288,7 +268,7 @@ for p in paragraphs:
             label = f'Section {p["section"]}'
             if p['section_title']:
                 label += f': {p["section_title"]}'
-        ch_label = p['chapter_title'] or f'Part {to_roman(p["part"])}, Ch. {p["chapter"]}'
+        ch_label = p['chapter_title'] or f'Part {int_to_roman(p["part"])}, Ch. {p["chapter"]}'
         sections_for_drawer.append({'id': sec_id, 'label': label, 'ch_label': ch_label,
                                      'part': p['part'], 'chapter': p['chapter'],
                                      'section': p['section']})
@@ -330,9 +310,7 @@ for p in paragraphs:
     # disentangle a shared one.
     if args.doc == 'gaudium_et_spes':
         sub_text = (p['section_title'] if p['section'] else '') or head
-    elif args.doc == 'laudato_si':
-        sub_text = p['section_title'] if p['section'] else ''
-    elif args.doc == 'magnifica_humanitas':
+    elif args.doc in MODERN_DOCS:
         sub_text = p['section_title'] if p['section'] else ''
     else:
         sub_text = _cur_sub_text
@@ -368,19 +346,34 @@ fns_by_ch = defaultdict(list)
 for fn in footnotes:
     fns_by_ch[(fn['part'], fn['chapter'])].append(fn)
 
-# Map (part, chapter, fn_number) → (section, para_number, sub_id) via the
-# first paragraph that cites this footnote.
+# Footnote heading placement is canonical TOML data. Only the link back to
+# the first citing paragraph is renderer-owned, because paragraph anchors are
+# an HTML navigation detail rather than source structure.
 fn_section: dict[tuple, int] = {}
-fn_para:    dict[tuple, int] = {}
 fn_sub:     dict[tuple, str] = {}
+fn_para:    dict[tuple, int] = {}
+sub_id_by_context: dict[tuple, str] = {}
+for sb in subs_for_drawer:
+    key = (sb['part'], sb['chapter'], sb['section'], sb['label'])
+    sub_id_by_context.setdefault(key, sb['id'])
+for fn in footnotes:
+    key = (fn['part'], fn['chapter'], fn['number'])
+    section = fn.get('section', 0)
+    fn_section[key] = section
+    sub_heading = fn.get('sub_heading', '')
+    if sub_heading:
+        fn_sub[key] = sub_id_by_context.get(
+            (fn['part'], fn['chapter'], section, sub_heading), ''
+        )
 for p in paragraphs:
-    refs = INLINE_REF_RE.findall(p['text'])
+    refs = CANONICAL_FOOTNOTE_REF.findall(p['text'])
     for r in refs:
         key = (p['part'], p['chapter'], int(r))
-        if key not in fn_section:
-            fn_section[key] = p['section']
-            fn_para[key]    = p['number']
-            fn_sub[key]     = para_to_sub_id.get(p['number'], '')
+        if key not in fn_para:
+            fn_para[key] = p['number']
+        # Keep older TOML intermediates renderable until they are rebuilt.
+        fn_section.setdefault(key, p['section'])
+        fn_sub.setdefault(key, para_to_sub_id.get(p['number'], ''))
 
 # chapter order from document
 ch_order = []
@@ -393,7 +386,7 @@ for p in paragraphs:
         elif p['part'] == 0:
             label = p['chapter_title'] or f'Chapter {p["chapter"]}'
         else:
-            label = p['chapter_title'] or f'Part {to_roman(p["part"])}, Ch. {p["chapter"]}'
+            label = p['chapter_title'] or f'Part {int_to_roman(p["part"])}, Ch. {p["chapter"]}'
         ch_order.append((key, label))
         seen_ch_order.add(key)
 
@@ -437,7 +430,7 @@ for (part, chapter), ch_label in ch_order:
     elif part == 0:
         group_label = ch_label or f'Chapter {chapter}'
     else:
-        group_label = ch_label or f'Part {to_roman(part)}, Chapter {chapter}'
+        group_label = ch_label or f'Part {int_to_roman(part)}, Chapter {chapter}'
     toc_items.append(toc_item('h3', 'fn-group', 'fn-ch-link', cid, group_label))
 
     for sb in subs_by_chsec.get((part, chapter, 0), []):
