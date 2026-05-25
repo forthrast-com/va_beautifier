@@ -561,8 +561,8 @@ page = f"""<!DOCTYPE html>
   <p class="panel-title">About this edition</p>
   <p>Generated via templater scripts from Vatican HTML.</p>
   {f'<p><a href="{e(doc_source)}" target="_blank" rel="noopener">Original Vatican document</a></p>' if doc_source else ''}
-  <p><a href="mailto:me@forthrast.com">me@forthrast.com</a><br>
-  <a href="https://bsky.app/profile/forthrast.com" target="_blank" rel="noopener">@forthrast.com on Bluesky</a></p>
+  <p>Email me: <a href="mailto:me@forthrast.com">me@forthrast.com</a><br>
+  Bluesky: <a href="https://bsky.app/profile/forthrast.com" target="_blank" rel="noopener">@forthrast.com</a></p>
 </div>
 
 <div id="prefs-panel" hidden>
