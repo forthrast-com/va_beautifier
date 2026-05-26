@@ -27,8 +27,8 @@ jobs:
         run: python3 download_sources.py --category implemented
       - name: Install Nix
         uses: cachix/install-nix-action@v31
-      - name: Build editions
-        run: ./build.sh
+      - name: Build
+        run: nix develop --command make
       - name: Prepare flat site
         run: |
           mkdir _site
