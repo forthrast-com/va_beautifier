@@ -7,23 +7,116 @@ from core import read_toml, title_case
 from project import BUILD, SITE
 
 
+# Promulgation dates lifted from each source's `eventDate` meta tag. Used to
+# sort the landing page reverse-chronologically; missing entries sort to the
+# bottom (treated as the empty string).
+PROMULGATION_DATES = {
+    'gaudium_et_spes':       '1965-12-07',
+    'laudato_si':            '2015-05-24',
+    'magnifica_humanitas':   '2026-05-15',
+    'antiqua_et_nova':       '2025-01-28',
+    'quo_vadis_humanitas':   '2026-03-04',
+    'sacrosanctum_concilium':'1963-12-04',
+}
+
+
+# Hand-crafted card descriptions per document. Encyclicals bold the Holy
+# Father; council constitutions append "of the Second Vatican Council" and
+# bold the council; organisation-issued notes/papers list each body on its
+# own line, bolded. The subtitle follows on the last line.
+CARD_DESCRIPTIONS = {
+    'gaudium_et_spes': (
+        'Pastoral Constitution on the Church in the Modern World'
+        '<br>of the <strong>Second Vatican Council</strong>'
+        '<br>Promulgated by Pope Paul VI on 7 December 1965'
+    ),
+    'sacrosanctum_concilium': (
+        'Constitution on the Sacred Liturgy'
+        '<br>of the <strong>Second Vatican Council</strong>'
+        '<br>Promulgated by Pope Paul VI on 4 December 1963'
+    ),
+    'laudato_si': (
+        'Encyclical Letter'
+        '<br>of the Holy Father <strong>Francis</strong>'
+        '<br>on Care for Our Common Home'
+    ),
+    'magnifica_humanitas': (
+        'Encyclical Letter'
+        '<br>of His Holiness <strong>Pope Leo XIV</strong>'
+        '<br>on Safeguarding the Human Person in the Time of Artificial Intelligence'
+    ),
+    'antiqua_et_nova': (
+        '<strong>Dicastery for the Doctrine of the Faith</strong>'
+        '<br><strong>Dicastery for Culture and Education</strong>'
+        '<br>Note on the Relationship Between Artificial Intelligence '
+        'and Human Intelligence'
+    ),
+    'quo_vadis_humanitas': (
+        '<strong>International Theological Commission</strong>'
+        '<br>Thinking through Christian Anthropology in the Face of '
+        'Certain Scenarios for the Future of Humanity'
+    ),
+}
+
+
+SORT_ICON_SVG = (
+    '<svg class="sort-icon" viewBox="0 0 16 16" aria-hidden="true" '
+    'focusable="false">'
+    '<rect x="2" y="3"  width="12" height="1.6" rx=".5" />'
+    '<rect x="2" y="7"  width="8"  height="1.6" rx=".5" />'
+    '<rect x="2" y="11" width="4"  height="1.6" rx=".5" />'
+    '</svg>'
+)
+
+
+def file_size(path):
+    """Present a compact download size for an artefact, if it was built."""
+    if not path.exists():
+        return ''
+    size = path.stat().st_size
+    for unit in ('KB', 'MB', 'GB'):
+        size /= 1024
+        if size < 1024 or unit == 'GB':
+            return f'{size:.1f} {unit}'
+    return ''
+
+
+def render_downloads(slug):
+    formats = []
+    for extension, label in (('pdf', 'PDF'), ('epub', 'EPUB')):
+        size = file_size(BUILD / f'{slug}.{extension}')
+        if size:
+            formats.append(
+                f'<a class="format" href="downloads/{slug}.{extension}">'
+                f'<span>{label}</span><small>{size}</small></a>'
+            )
+    if not formats:
+        return ''
+    return (
+        '<div class="formats" aria-label="Download formats">'
+        + ''.join(formats)
+        + '</div>'
+    )
+
+
 def render_card(slug):
     data = read_toml(BUILD / f'{slug}.toml')
 
     name = escape(data['name'])
-    # The title-block descriptor is split across desc (above title) and
-    # desc_post (below title) in the TOML. The card already shows the doc
-    # name as <h2>, so glue desc + desc_post into one flowing subtitle
-    # without re-inserting the title between them, then title-case the
-    # whole concatenation as a single phrase (keeps small words like
-    # "on" / "in" lowercase mid-flow and preserves Roman numerals).
-    joined = ' '.join(
-        line.strip()
-        for part in (data.get('desc', ''), data.get('desc_post', ''))
-        for line in part.splitlines()
-        if line.strip()
-    )
-    description = escape(title_case(joined)) if joined else ''
+    # Prefer the hand-crafted card description so council documents can
+    # append "of the Second Vatican Council" and organisation-issued
+    # notes can break onto separate lines for each co-signing body. Fall
+    # back to the flowed desc + desc_post when no override is present.
+    if slug in CARD_DESCRIPTIONS:
+        description = CARD_DESCRIPTIONS[slug]
+    else:
+        joined = ' '.join(
+            line.strip()
+            for part in (data.get('desc', ''), data.get('desc_post', ''))
+            for line in part.splitlines()
+            if line.strip()
+        )
+        description = escape(title_case(joined)) if joined else ''
     source_url = escape(data.get('source_url', ''), quote=True)
     original = (
         f'<a class="source" href="{source_url}" target="_blank" rel="noopener">'
@@ -31,12 +124,14 @@ def render_card(slug):
         if source_url else ''
     )
     hue = data.get('hue', 42)
+    downloads = render_downloads(slug)
     return f'''<article class="edition" style="--hue: {hue}">
   <a class="edition-link" href="{slug}.html">
     <h2>{name}</h2>
     <p>{description}</p>
     <span class="read">Read edition</span>
   </a>
+  {downloads}
   {original}
 </article>'''
 
@@ -45,6 +140,14 @@ def main():
     slugs = sys.argv[1:]
     if not slugs:
         raise SystemExit('usage: python make_index.py DOC [DOC ...]')
+
+    # Reverse chronological by promulgation date (newest first). Unknown
+    # slugs sort to the bottom in their original order.
+    slugs = sorted(
+        slugs,
+        key=lambda slug: PROMULGATION_DATES.get(slug, ''),
+        reverse=True,
+    )
 
     cards = '\n'.join(render_card(slug) for slug in slugs)
     page = f'''<!DOCTYPE html>
@@ -103,6 +206,36 @@ h1 {{
   line-height: 1.55;
   margin: 0 0 clamp(2.6rem, 6vw, 4rem);
 }}
+.sort-bar {{
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .55rem;
+  margin: 0 0 .9rem;
+  color: var(--dim);
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: .8rem;
+}}
+.sort-label {{
+  letter-spacing: .02em;
+}}
+.sort-toggle {{
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  color: var(--dim);
+  cursor: not-allowed;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .25rem .4rem;
+  opacity: .85;
+}}
+.sort-icon {{
+  width: 1rem;
+  height: 1rem;
+  fill: currentColor;
+}}
 .editions {{
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
@@ -118,7 +251,7 @@ h1 {{
 .edition-link {{
   display: block;
   color: inherit;
-  min-height: 15rem;
+  min-height: 14rem;
   padding-top: 1.25rem;
   text-decoration: none;
 }}
@@ -139,6 +272,28 @@ h1 {{
   color: hsl(var(--hue), 50%, 35%);
   font-family: system-ui, -apple-system, sans-serif;
   font-size: .9rem;
+}}
+.formats {{
+  border-top: 1px solid var(--rule);
+  display: flex;
+  gap: .55rem;
+  padding: .85rem 0;
+}}
+.format {{
+  align-items: baseline;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  color: hsl(var(--hue), 50%, 35%);
+  display: flex;
+  flex: 1;
+  font: .82rem system-ui, -apple-system, sans-serif;
+  justify-content: space-between;
+  padding: .45rem .55rem;
+  text-decoration: none;
+}}
+.format small {{
+  color: var(--dim);
+  font-size: .76rem;
 }}
 .source {{
   border-top: 1px solid var(--rule);
@@ -168,6 +323,12 @@ footer a {{ color: inherit; }}
   <p class="brand">the circulars · vatican.va, retypeset.</p>
   <h1>Vatican documents, set for reading.</h1>
   <p class="intro">Reader editions of a few papal and conciliar documents.<br>Generated via templater scripts from the Vatican HTML.</p>
+  <div class="sort-bar" aria-label="Sort controls">
+    <span class="sort-label">Sorted by promulgation, newest first</span>
+    <button class="sort-toggle" type="button" aria-label="Change sort order" disabled>
+      {SORT_ICON_SVG}
+    </button>
+  </div>
   <section class="editions" aria-label="Available documents">
 {cards}
   </section>

@@ -153,7 +153,7 @@ def emit_markdown(data, slug):
         # Sub-paragraphs are separated by `\n\n` in the TOML; pandoc honours
         # blank-line separators. First sub-paragraph gets the bold number.
         chunks = [c.strip() for c in body.split('\n\n') if c.strip()]
-        if chunks:
+        if chunks and not p.get('hide_number', False):
             chunks[0] = f'**{number}.** {chunks[0]}'
         for chunk in chunks:
             lines.append(chunk)
@@ -177,15 +177,19 @@ def emit_markdown(data, slug):
     # them at end-of-section; the typst writer floats them to page bottom.
     lines.append('')
     for (part, chapter, n), fn in used.items():
+        # Split on \n\n so each sub-paragraph becomes a real pandoc footnote
+        # paragraph. Single \n inside a sub-paragraph is treated as a soft
+        # break (typst handles this naturally; pandoc wraps it).
         text = fn['text'].rstrip()
-        first, *rest = text.split('\n')
-        lines.append(f'[^{part}-{chapter}-{n}]: {first.strip()}')
-        for r in rest:
-            # Continuation lines need 4-space indent in pandoc footnotes.
-            if r.strip():
-                lines.append(f'    {r.strip()}')
-            else:
-                lines.append('')
+        paragraphs_fn = [p.strip() for p in text.split('\n\n') if p.strip()]
+        first, *rest = paragraphs_fn or ['']
+        lines.append(f'[^{part}-{chapter}-{n}]: {first}')
+        for paragraph in rest:
+            # Pandoc keeps a footnote alive across blank lines only when the
+            # blank itself is indented; the body of the continuation needs
+            # its own 4-space indent too.
+            lines.append('    ')
+            lines.append(f'    {paragraph}')
         lines.append('')
 
     md_path = BUILD / f'{slug}.md'
@@ -217,7 +221,7 @@ def _title_page_typst(name, desc, desc_post, hero_image, hero_credit):
     the block sits a little high to give the image room to breathe. The
     typst template paths use `/`-rooted paths (typst resolves these
     relative to the project root set via `--root`)."""
-    parts = ['#page(numbering: none)[', '  #set align(center)', '  #v(1fr)']
+    parts = ['#page(numbering: none, header: none)[', '  #set align(center)', '  #v(1fr)']
 
     if hero_image:
         # Typst paths starting with `/` are project-root-relative — the
@@ -244,6 +248,8 @@ def _title_page_typst(name, desc, desc_post, hero_image, hero_credit):
         parts.append('  #v(1.8em)')
 
     parts.append(f'  #text(size: 28pt, style: "italic")[{_typ_content(name)}]')
+    parts.append('  #v(1.1em)')
+    parts.append('  #line(length: 18%, stroke: 0.5pt)')
 
     if desc_post:
         parts.append('  #v(1.8em)')
