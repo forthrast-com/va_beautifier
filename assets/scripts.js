@@ -149,7 +149,9 @@ window.addEventListener('resize', () => {
 // px relative to the paragraph. CSS default (top:50%) is the JS-off
 // fallback — the first frame of scroll handler replaces it.
 if (document.body.classList.contains('doc-laudato_si') ||
-    document.body.classList.contains('doc-magnifica_humanitas')) {
+    document.body.classList.contains('doc-magnifica_humanitas') ||
+    document.body.classList.contains('doc-antiqua_et_nova') ||
+    document.body.classList.contains('doc-quo_vadis_humanitas')) {
   const paragraphs = Array.from(document.querySelectorAll('.paragraph'));
   let raf = 0;
   let cachedNumH = 0;   // every digit renders the same height for a given font/size
@@ -178,8 +180,10 @@ if (document.body.classList.contains('doc-laudato_si') ||
       updates.push((rect.bottom < -50 || rect.top > vh + 50) ? null : rect);
     }
     if (!cachedNumH) {
-      const visibleIdx = updates.findIndex(r => r);
-      cachedNumH = visibleIdx >= 0 ? paragraphs[visibleIdx].querySelector('.para-num').offsetHeight : 16;
+      const visiblePara = paragraphs.find((para, i) =>
+        updates[i] && para.querySelector('.para-num')
+      );
+      cachedNumH = visiblePara ? visiblePara.querySelector('.para-num').offsetHeight : 16;
     }
     const halfNum = cachedNumH / 2;
 

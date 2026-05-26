@@ -461,6 +461,8 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
      section:  italic + bar at first indent
      sub:      bar at second indent, no other ornament  */
 .sec-nav-item                   { margin: .5rem 0 .25rem 0; padding-left: .75rem; border-left: 2px solid var(--rule-tint); line-height: 1.25; }
+.sec-nav-item.unrooted          { padding-left: 0; border-left: 0; margin-top: .9rem; }
+.sec-nav-item.unrooted .sec-nav-link { color: var(--fg); font-style: normal; font-size: .95rem; font-weight: 500; }
 .sec-nav-link                   { color: var(--fg-dim); text-decoration: none; font-size: .85rem; font-style: italic; line-height: 1.25; }
 .sec-nav-link:hover             { color: var(--fg); text-decoration: underline; }
 .sub-nav-item                   { margin: .25rem 0 .15rem 0; padding-left: .75rem; border-left: 2px solid var(--rule); line-height: 1.2; }
@@ -698,7 +700,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
    Pick a hue, set it in DOC_HUES, the recipe above does the rest. */
 
 /* ────────────────────────────────────────────────────────────────────────
-   .doc-laudato_si, .doc-magnifica_humanitas — long modern documents
+   Long structured documents: gutter numbers and height-capped indicator
 
    LS has no per-paragraph Latin micro-summary; on wide viewports the para
    number lives in the left margin alongside a vertical rule (both hang
@@ -708,9 +710,13 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
    ──────────────────────────────────────────────────────────────────────── */
 
 .doc-laudato_si .paragraph,
-.doc-magnifica_humanitas .paragraph         { position: relative; margin: 1.75rem 0; }
+.doc-magnifica_humanitas .paragraph,
+.doc-antiqua_et_nova .paragraph,
+.doc-quo_vadis_humanitas .paragraph         { position: relative; margin: 1.75rem 0; }
 .doc-laudato_si .paragraph::before,
-.doc-magnifica_humanitas .paragraph::before {
+.doc-magnifica_humanitas .paragraph::before,
+.doc-antiqua_et_nova .paragraph::before,
+.doc-quo_vadis_humanitas .paragraph::before {
     content: '';
     position: absolute;
     top: 0; bottom: 0;
@@ -719,7 +725,9 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     background: var(--rule-tint);
 }
 .doc-laudato_si .para-num,
-.doc-magnifica_humanitas .para-num {
+.doc-magnifica_humanitas .para-num,
+.doc-antiqua_et_nova .para-num,
+.doc-quo_vadis_humanitas .para-num {
     position: absolute;
     right: calc(100% + 2rem);   /* in the gutter, breathing room from the rule */
     top: 50%;
@@ -731,32 +739,41 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     will-change: top;
 }
 .doc-laudato_si .para-num::after,
-.doc-magnifica_humanitas .para-num::after { content: none; }
+.doc-magnifica_humanitas .para-num::after,
+.doc-antiqua_et_nova .para-num::after,
+.doc-quo_vadis_humanitas .para-num::after { content: none; }
 .doc-laudato_si #sticky-num,
-.doc-magnifica_humanitas #sticky-num {
+.doc-magnifica_humanitas #sticky-num,
+.doc-antiqua_et_nova #sticky-num,
+.doc-quo_vadis_humanitas #sticky-num {
     transform: translateX(-.6rem);  /* centre chapter number above gutter rule */
 }
 
 /* MH uses a third visible level below chapters: section headings are the
    document's subheads; italic headings nested inside them are sub-subheads. */
-.doc-magnifica_humanitas h3.chapter-title {
+.doc-magnifica_humanitas h3.chapter-title,
+.doc-quo_vadis_humanitas h3.chapter-title {
     font-size: 1.55rem;
     line-height: 1.25;
 }
-.doc-magnifica_humanitas .chapter-subtitle {
+.doc-magnifica_humanitas .chapter-subtitle,
+.doc-quo_vadis_humanitas .chapter-subtitle {
     font-size: 1.12rem;
 }
-.doc-magnifica_humanitas h4.section-title {
+.doc-magnifica_humanitas h4.section-title,
+.doc-quo_vadis_humanitas h4.section-title {
     font-size: 1.18rem;
     font-style: normal;
     font-weight: 600;
     color: var(--fg);
 }
-.doc-magnifica_humanitas h5.sub-heading {
+.doc-magnifica_humanitas h5.sub-heading,
+.doc-quo_vadis_humanitas h5.sub-heading {
     font-size: 1.1rem;
     color: var(--fg-dim);
 }
-.doc-magnifica_humanitas .sec-nav-link {
+.doc-magnifica_humanitas .sec-nav-link,
+.doc-quo_vadis_humanitas .sec-nav-link {
     font-style: normal;
     font-weight: 600;
     color: var(--fg);
@@ -764,11 +781,17 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 /* Narrow viewport: gutter doesn't fit, revert to inline `5.` prefix. */
 @media (max-width: 900px) {
     .doc-laudato_si .paragraph,
-    .doc-magnifica_humanitas .paragraph         { position: static; }
+    .doc-magnifica_humanitas .paragraph,
+    .doc-antiqua_et_nova .paragraph,
+    .doc-quo_vadis_humanitas .paragraph         { position: static; }
     .doc-laudato_si .paragraph::before,
-    .doc-magnifica_humanitas .paragraph::before { display: none; }
+    .doc-magnifica_humanitas .paragraph::before,
+    .doc-antiqua_et_nova .paragraph::before,
+    .doc-quo_vadis_humanitas .paragraph::before { display: none; }
     .doc-laudato_si .para-num,
-    .doc-magnifica_humanitas .para-num {
+    .doc-magnifica_humanitas .para-num,
+    .doc-antiqua_et_nova .para-num,
+    .doc-quo_vadis_humanitas .para-num {
         position: static;
         font-weight: bold;
         color: inherit;
@@ -776,23 +799,33 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
         text-align: left;
     }
     .doc-laudato_si .para-num::after,
-    .doc-magnifica_humanitas .para-num::after           { content: '.'; }
+    .doc-magnifica_humanitas .para-num::after,
+    .doc-antiqua_et_nova .para-num::after,
+    .doc-quo_vadis_humanitas .para-num::after           { content: '.'; }
     .doc-laudato_si .paragraph p:first-of-type,
-    .doc-magnifica_humanitas .paragraph p:first-of-type { display: inline; margin-top: 0; }
+    .doc-magnifica_humanitas .paragraph p:first-of-type,
+    .doc-antiqua_et_nova .paragraph p:first-of-type,
+    .doc-quo_vadis_humanitas .paragraph p:first-of-type { display: inline; margin-top: 0; }
 }
 
 /* Indicator: explicit height (not max-height — flex children with basis 0
    collapse to nothing without it). Centred in the area below the sticky
    bar, not the full viewport. */
 .doc-laudato_si #ch-indicator,
-.doc-magnifica_humanitas #ch-indicator {
+.doc-magnifica_humanitas #ch-indicator,
+.doc-antiqua_et_nova #ch-indicator,
+.doc-quo_vadis_humanitas #ch-indicator {
     height: calc(95vh - var(--bar-h, 4rem));
     top:    calc(50% + var(--bar-h, 4rem) / 2);
 }
 .doc-laudato_si .ch-bar,
-.doc-magnifica_humanitas .ch-bar { flex: 1 1 0; min-height: 8px; height: auto; }
+.doc-magnifica_humanitas .ch-bar,
+.doc-antiqua_et_nova .ch-bar,
+.doc-quo_vadis_humanitas .ch-bar { flex: 1 1 0; min-height: 8px; height: auto; }
 .doc-laudato_si .ch-seg,
-.doc-magnifica_humanitas .ch-seg { flex: 1; height: auto; min-height: 1px; }
+.doc-magnifica_humanitas .ch-seg,
+.doc-antiqua_et_nova .ch-seg,
+.doc-quo_vadis_humanitas .ch-seg { flex: 1; height: auto; min-height: 1px; }
 </style>
 <script>
   // Apply saved prefs before paint to avoid a flash of the default theme.
@@ -863,7 +896,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <a id="ch-0"></a><h4 id="sec-0-0-1" class="section-title">Introduction</h4><div class="paragraph" id="para-1" data-sub-text="Introduction"><span class="para-num">1</span>
 <p>Humanity, created by God in all its grandeur, is today facing a pivotal choice: either to construct a new Tower of Babel or to build the city in which God and humanity dwell together. Each generation inherits the task of shaping its own era, of guiding history to become a place where the dignity of every person is safeguarded, justice is promoted and fraternity is made possible. Yet every era also runs the risk of creating an inhumane and more unjust world. Whenever humanity is in danger of marring its true identity, we Christians lift our eyes to the Incarnate God, knowing that it is “only in the mystery of the Word made flesh that the mystery of humanity truly becomes clear.”<sup><a href="#fn-0-0-1">1</a></sup> In Jesus Christ, this humanity in its grandeur becomes the Way, the Truth and the Life, opening the path for each of us to grow toward fullness.</p></div><div class="paragraph" id="para-2" data-sub-text="Introduction"><span class="para-num">2</span>
 <p>Founded on Christ, the living stone, we experience the powerful and mysterious action of the Holy Spirit, and we believe that every authentic human effort to cooperate with him for the good will be blessed by our heavenly Father, in whom we place our hope. For this reason, we can diligently contribute to every initiative that builds a more just world, and we can call others to collaborate in promoting the integral development of every human being. We wish to engage in dialogue with all men and women of our time, with whom we share in the events, questions and aspirations of humanity.<sup><a href="#fn-0-0-2">2</a></sup> Together with them, we seek to identify new paths for the common good and for promoting a dignified life for all. Indeed, openness to dialogue is an integral part of the Church’s vocation because, constituted in Christ as “a sacrament… of communion with God and of the unity of the entire human race,”<sup><a href="#fn-0-0-3">3</a></sup> she recognizes history as the place where the Gospel challenges and directs human experience.</p></div><div class="paragraph" id="para-3" data-sub-text="Introduction"><span class="para-num">3</span>
-<p>In this spirit, <a href="https://www.vatican.va/content/leo-xiii/en.html" class="ext-link" target="_blank" rel="noopener">Pope Leo XIII</a> published his Encyclical <a href="https://www.vatican.va/content/leo-xiii/en/encyclicals/documents/hf_l-xiii_enc_15051891_rerum-novarum.html" class="ext-link" target="_blank" rel="noopener"><em>Rerum Novarum</em></a> in 1891, the 135 <sup>th</sup> anniversary of which we celebrate with deep gratitude this year. With that document, <a href="https://www.vatican.va/content/francesco/en.html" class="ext-link" target="_blank" rel="noopener">my beloved predecessor</a> gave impetus to the reflection on society, the economy and politics, which is now known as the “Social Doctrine of the Church.” When some objected that the Church should not waste energy on worldly matters, but instead focus on communicating the message of eternal life, <a href="https://www.vatican.va/content/leo-xiii/en.html" class="ext-link" target="_blank" rel="noopener">Leo XIII</a> responded with realism and wisdom, saying that the proclamation of the Gospel cannot overlook the concrete lives of people.<sup><a href="#fn-0-0-4">4</a></sup> Many decades have passed since then, and the Magisterium, pastors, theologians and faithful have continued to reflect on social issues in the light of the Gospel. Today, the Social Doctrine of the Church is a legacy of wisdom, where we find principles for thought, criteria for discernment and judgment, and concrete guidelines for action. Founded on Sacred Scripture and Tradition, and in engagement with the sciences, it helps us clearly interpret the challenges of the present and identify appropriate ways for living out a clear Christian witness, with joy and in service to the world. It is not an inert set of concepts, but a living <em>corpus</em> of truth that safeguards and interprets humanity’s vocation to a full and just life. I therefore wish to add my own voice to this living tradition, invoking the help of the Spirit of wisdom, who has dwelt in the world since its beginning (cf. <em>Prov</em> 8:22-31).</p></div><h4 id="sec-0-0-2" class="section-title">The res novae of our time</h4><div class="paragraph" id="para-4" data-sub-text="The res novae of our time"><span class="para-num">4</span>
+<p>In this spirit, <a href="https://www.vatican.va/content/leo-xiii/en.html" class="ext-link" target="_blank" rel="noopener">Pope Leo XIII</a> published his Encyclical <a href="https://www.vatican.va/content/leo-xiii/en/encyclicals/documents/hf_l-xiii_enc_15051891_rerum-novarum.html" class="ext-link" target="_blank" rel="noopener"><em>Rerum Novarum</em></a> in 1891, the 135 <sup>th</sup> anniversary of which we celebrate with deep gratitude this year. With that document, my beloved predecessor gave impetus to the reflection on society, the economy and politics, which is now known as the “Social Doctrine of the Church.” When some objected that the Church should not waste energy on worldly matters, but instead focus on communicating the message of eternal life, <a href="https://www.vatican.va/content/leo-xiii/en.html" class="ext-link" target="_blank" rel="noopener">Leo XIII</a> responded with realism and wisdom, saying that the proclamation of the Gospel cannot overlook the concrete lives of people.<sup><a href="#fn-0-0-4">4</a></sup> Many decades have passed since then, and the Magisterium, pastors, theologians and faithful have continued to reflect on social issues in the light of the Gospel. Today, the Social Doctrine of the Church is a legacy of wisdom, where we find principles for thought, criteria for discernment and judgment, and concrete guidelines for action. Founded on Sacred Scripture and Tradition, and in engagement with the sciences, it helps us clearly interpret the challenges of the present and identify appropriate ways for living out a clear Christian witness, with joy and in service to the world. It is not an inert set of concepts, but a living <em>corpus</em> of truth that safeguards and interprets humanity’s vocation to a full and just life. I therefore wish to add my own voice to this living tradition, invoking the help of the Spirit of wisdom, who has dwelt in the world since its beginning (cf. <em>Prov</em> 8:22-31).</p></div><h4 id="sec-0-0-2" class="section-title">The res novae of our time</h4><div class="paragraph" id="para-4" data-sub-text="The res novae of our time"><span class="para-num">4</span>
 <p>While <a href="https://www.vatican.va/content/leo-xiii/en.html" class="ext-link" target="_blank" rel="noopener">Leo XIII</a> spoke in his time of “new things” ( <em>rerum novarum</em>), today we cannot limit ourselves simply to repeating his insightful teachings. Instead, we must ask God for the wisdom to interpret the great trends of our time, particularly technological advances. In recent years, it has become increasingly evident how rapidly and profoundly digitalization, artificial intelligence (AI) and robotics are transforming our world. Technology should not be considered, in itself, as a force antagonistic to humanity. On the contrary, it has formed part of our history since the beginning as “a profoundly human reality, linked to the autonomy and freedom of man.”<sup><a href="#fn-0-0-5">5</a></sup> Over the centuries, technological development has significantly improved the living conditions of humanity. At the same time, each phase of progress has also revealed the ambiguity of tools that can cause harm when not oriented toward the good. Today, however, we find ourselves facing a new situation. The power and prevalence of emerging technologies are interwoven into the fabric of daily life, shaping decision-making processes and deeply affecting the collective imagination: “Never has humanity had such power over itself.”<sup><a href="#fn-0-0-6">6</a></sup> New technologies open up a horizon extending in directions that are imaginable but not yet fully predictable. This complicates the assessment of their potential impact and the long-term effects they may have on both the dignity of individuals and the common good.</p></div><div class="paragraph" id="para-5" data-sub-text="The res novae of our time"><span class="para-num">5</span>
 <p>It now falls to us to face the challenges of our time with clarity of thought and responsibility. It is necessary to establish adequate regulatory tools capable of upholding justice and curbing the distorting effects of technological power. Nevertheless, the issue is not limited to regulation. As <a href="https://www.vatican.va/content/francesco/en.html" class="ext-link" target="_blank" rel="noopener">Pope Francis</a> warned, we must realistically ask ourselves who holds this power today and how they use it: “It must also be recognized that nuclear energy, biotechnology, information technology, knowledge of our own DNA, and many other abilities which we have acquired… have given those with the knowledge, and especially the economic resources to use them, an impressive dominance over the whole of humanity and the entire world.”<sup><a href="#fn-0-0-7">7</a></sup> In the past, it was largely up to the State to guide and direct innovation. Today, however, the main drivers of development are private, often transnational, parties that are endowed with resources and the capacity to intervene that surpass those of many Governments. Technological power thus takes on an unprecedented, predominantly “private” aspect, which makes it even more challenging to discern, govern and direct such power toward the common good.</p></div><div class="paragraph" id="para-6" data-sub-text="The res novae of our time"><span class="para-num">6</span>
 <p>For this reason it is necessary to begin a shared discernment process for identifying the spiritual and cultural roots of ongoing transformations. If we focus only on contingencies, we risk letting the succession of emergencies dictate the direction of our path. We are living through a rapid phase of transition, a “change of era,” in which — while some are vying for the future of new technologies and others dedicate themselves to reflecting on the matter — most people are watching and waiting, observing from afar and merely hoping for the best. For this very reason, crucial questions impose themselves on our conscience and can no longer be avoided: Where are we going? Toward what goal do we wish to orient ourselves? What direction should we choose as a people and as a human community?</p></div><h4 id="sec-0-0-3" class="section-title">Two biblical images</h4><div class="paragraph" id="para-7" data-sub-text="Two biblical images"><span class="para-num">7</span>
@@ -942,7 +975,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <p>The idea of “social justice” helps us recognize that injustices do not arise solely from the wrong choices of individuals, but also from structures, mechanisms and economic and cultural systems that produce inequality almost automatically. <a href="https://www.vatican.va/content/john-paul-ii/en.html" class="ext-link" target="_blank" rel="noopener">Saint John Paul II</a> spoke in this vein of structures of sin<sup><a href="#fn-0-2-108">108</a></sup> that oppose God’s will and require a commitment to personal and social conversion. In this perspective, justice is not merely about the fairer distribution of resources or the correction of current injustices, but also assumes a restorative dimension. It aims to mend broken bonds and reintegrate those who have been excluded, taking into account the wounds caused by injustices, such as wars, colonialism, racial or gender discrimination, violence against entire peoples and exploitation. This may include restoring dignity and a voice to those who have been ignored, fostering processes of healing for collective memory, opposing discriminatory laws and practices, and providing concrete support to those who still bear the consequences of wrongs suffered in the past.</p></div><div class="paragraph" id="para-80" data-sub-text="The principles of Social Doctrine"><span class="para-num">80</span>
 <p>In this day and age, social justice must also grapple with the environment shaped by digital technologies. The spread of global networks, platforms and artificial intelligence systems is changing the way we obtain information, communicate and access services. Justice demands that we prevent the emergence of new forms of exclusion and deprivation of freedoms: individuals and peoples hindered or denied access to basic technologies, communities exposed to invasive surveillance and social groups penalized by opaque algorithms that perpetuate prejudice and discrimination. In the digital age, a just social order guarantees everyone equal access to opportunities, protects the youngest and weakest members of society, combats hate and misinformation and subjects the use of data and technology to public oversight, so that the guiding principle is not solely profit but the dignity of every person and the common good of all people.</p></div><div class="paragraph" id="para-81" data-sub-text="The principles of Social Doctrine"><span class="para-num">81</span>
 <p>A litmus test for social justice today is the treatment of migrants, refugees and those forced to move due to poverty, violence, climate change and environmental disasters. The way a society treats them reveals whether its sense of justice is driven by fear or by the spirit of fraternity. <a href="https://www.vatican.va/content/francesco/en.html" class="ext-link" target="_blank" rel="noopener">Pope Francis</a> urged us to see migrants not simply as a problem to be managed, but as a living image of the People of God on the move.<sup><a href="#fn-0-2-109">109</a></sup> They are people with dignity, resources and dreams, who have the right to be treated with respect and to ask to become active members of the societies that welcome them. Social justice in this area entails at least two complementary commitments. On the one hand, this means protecting the rightful hopes of those forced to leave by ensuring safe and legal routes, dignified conditions for receiving them, and genuine pathways to integration. On the other hand, it means promoting the right to remain in one’s homeland in peace and security by addressing the root causes that force people to migrate, including those linked to economic injustices and the climate crisis. When these rights are respected, migration can become an opportunity for encounter and mutual enrichment among peoples.</p></div><h4 id="sec-0-2-3" class="section-title">Integral human development</h4><div class="paragraph" id="para-82" data-sub-text="Integral human development"><span class="para-num">82</span>
-<p>In his Encyclical <a href="https://www.vatican.va/content/paul-vi/en/encyclicals/documents/hf_p-vi_enc_26031967_populorum.html" class="ext-link" target="_blank" rel="noopener"><em>Populorum Progressio</em></a>, <a href="https://www.vatican.va/content/paul-vi/en.html" class="ext-link" target="_blank" rel="noopener">Paul VI</a> affirmed that development is authentic only if it is “integral,” meaning that it can “foster the development of each man and of the whole man.”<sup><a href="#fn-0-2-110">110</a></sup><sup><sup><a href="#fn-0-2-10">10</a></sup></sup> In the decades that followed, the Social Doctrine of the Church reprised and reflected on this expression in order to indicate the practical ways in which the noble principles — dignity, the common good, the universal destination of goods, subsidiarity, solidarity and social justice — are implemented in real life. By “integral human development,” we mean a process in which the growth of individuals and peoples encompasses all dimensions of existence and opens the future to subsequent generations as well.</p></div><div class="paragraph" id="para-83" data-sub-text="Integral human development"><span class="para-num">83</span>
+<p>In his Encyclical <a href="https://www.vatican.va/content/paul-vi/en/encyclicals/documents/hf_p-vi_enc_26031967_populorum.html" class="ext-link" target="_blank" rel="noopener"><em>Populorum Progressio</em></a>, <a href="https://www.vatican.va/content/paul-vi/en.html" class="ext-link" target="_blank" rel="noopener">Paul VI</a> affirmed that development is authentic only if it is “integral,” meaning that it can “foster the development of each man and of the whole man.”<sup><a href="#fn-0-2-110">110</a></sup><sup><a href="#fn-0-2-10">10</a></sup> In the decades that followed, the Social Doctrine of the Church reprised and reflected on this expression in order to indicate the practical ways in which the noble principles — dignity, the common good, the universal destination of goods, subsidiarity, solidarity and social justice — are implemented in real life. By “integral human development,” we mean a process in which the growth of individuals and peoples encompasses all dimensions of existence and opens the future to subsequent generations as well.</p></div><div class="paragraph" id="para-83" data-sub-text="Integral human development"><span class="para-num">83</span>
 <p>For individuals as well as for nations, development is both a duty and a right. Minimum conditions are required for enabling every person and people to flourish in accord with their dignity, without being kept in a state of dependence or excluded from access to necessary goods. Development is truly human when it places people at the center instead of the accumulation of wealth, and when it concerns peoples as well as individuals. Justice demands the recognition of the rights of society and the rights of peoples, and includes a responsibility toward future generations. Development is not truly human if it increases consumption for some while shifting costs and burdens onto others, or relegates entire regions to subordinate roles, preventing them from realizing their full potential.<sup><a href="#fn-0-2-111">111</a></sup> Development is integral when it is not limited to the economic sphere, but promotes quality of life in its spiritual, cultural, moral and relational dimensions, while respecting our common home, the diversity of peoples and their ways of life.<sup><a href="#fn-0-2-112">112</a></sup></p></div><div class="paragraph" id="para-84" data-sub-text="Integral human development"><span class="para-num">84</span>
 <p>Today, the concept of integral human development is a benchmark for the evaluation of integral ecology, which has become an indispensable dimension of the Church’s Social Doctrine. Indeed, the quality of development is measured by the ability to integrate justice toward people and the care of our common home, and to promote dignified living conditions, access to necessary goods, just social relations, care of creation and consideration for future generations. It follows that true progress is not what increases the wellbeing of some by degrading ecosystems, shifting costs onto the most disadvantaged communities, or compromising the living conditions of those who will follow us.</p></div><div class="paragraph" id="para-85" data-sub-text="Integral human development"><span class="para-num">85</span>
 <p>Seen in this light, integral human development is the framework through which we can interpret the changes of our time, including those brought about by the digital revolution. Technological innovations, including artificial intelligence, are not neutral, for they can either foster participation and justice or exacerbate inequality, control and exclusion. For this reason, they must be evaluated by asking a crucial question: Do they truly help individuals and peoples to become more humane and fraternal, while respecting our common home and future generations? It is here that the principles of Social Doctrine become concrete criteria for discernment regarding the issues which we will address in the following chapters.</p></div><h4 id="sec-0-2-4" class="section-title">An examen for the Church</h4><div class="paragraph" id="para-86" data-sub-text="An examen for the Church"><span class="para-num">86</span>
@@ -1119,12 +1152,11 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
       <button class="drawer-view-tab" type="button" role="tab" aria-controls="drawer-bookmarks" aria-selected="false" data-drawer-view="bookmarks">Bookmarks</button>
     </div>
     <div id="drawer-toc" class="drawer-view active" role="tabpanel">
-      <h3 class="fn-group toc-item" data-target="ch-0" data-label="Preface / Introduction"><a href="#ch-0" class="fn-ch-link">Preface / Introduction</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-0" aria-label="Bookmark Preface / Introduction" aria-pressed="false"></button></h3>
-<p class="sec-nav-item toc-item" data-target="sec-0-0-1" data-label="Introduction"><a href="#sec-0-0-1" class="sec-nav-link">Introduction</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-0-1" aria-label="Bookmark Introduction" aria-pressed="false"></button></p>
-<p class="sec-nav-item toc-item" data-target="sec-0-0-2" data-label="The res novae of our time"><a href="#sec-0-0-2" class="sec-nav-link">The res novae of our time</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-0-2" aria-label="Bookmark The res novae of our time" aria-pressed="false"></button></p>
-<p class="sec-nav-item toc-item" data-target="sec-0-0-3" data-label="Two biblical images"><a href="#sec-0-0-3" class="sec-nav-link">Two biblical images</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-0-3" aria-label="Bookmark Two biblical images" aria-pressed="false"></button></p>
-<p class="sec-nav-item toc-item" data-target="sec-0-0-4" data-label="Building for the common good"><a href="#sec-0-0-4" class="sec-nav-link">Building for the common good</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-0-4" aria-label="Bookmark Building for the common good" aria-pressed="false"></button></p>
-<p class="sec-nav-item toc-item" data-target="sec-0-0-5" data-label="Remaining human"><a href="#sec-0-0-5" class="sec-nav-link">Remaining human</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-0-5" aria-label="Bookmark Remaining human" aria-pressed="false"></button></p>
+      <p class="sec-nav-item unrooted toc-item" data-target="sec-0-0-1" data-label="Introduction"><a href="#sec-0-0-1" class="sec-nav-link">Introduction</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-0-1" aria-label="Bookmark Introduction" aria-pressed="false"></button></p>
+<p class="sec-nav-item unrooted toc-item" data-target="sec-0-0-2" data-label="The res novae of our time"><a href="#sec-0-0-2" class="sec-nav-link">The res novae of our time</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-0-2" aria-label="Bookmark The res novae of our time" aria-pressed="false"></button></p>
+<p class="sec-nav-item unrooted toc-item" data-target="sec-0-0-3" data-label="Two biblical images"><a href="#sec-0-0-3" class="sec-nav-link">Two biblical images</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-0-3" aria-label="Bookmark Two biblical images" aria-pressed="false"></button></p>
+<p class="sec-nav-item unrooted toc-item" data-target="sec-0-0-4" data-label="Building for the common good"><a href="#sec-0-0-4" class="sec-nav-link">Building for the common good</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-0-4" aria-label="Bookmark Building for the common good" aria-pressed="false"></button></p>
+<p class="sec-nav-item unrooted toc-item" data-target="sec-0-0-5" data-label="Remaining human"><a href="#sec-0-0-5" class="sec-nav-link">Remaining human</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-0-5" aria-label="Bookmark Remaining human" aria-pressed="false"></button></p>
 <h3 class="fn-group toc-item" data-target="ch-1" data-label="A Dynamic Approach Faithful to the Gospel"><a href="#ch-1" class="fn-ch-link">A Dynamic Approach Faithful to the Gospel</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-1" aria-label="Bookmark A Dynamic Approach Faithful to the Gospel" aria-pressed="false"></button></h3>
 <p class="sec-nav-item toc-item" data-target="sec-0-1-1" data-label="A Church journeying through human history"><a href="#sec-0-1-1" class="sec-nav-link">A Church journeying through human history</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-1-1" aria-label="Bookmark A Church journeying through human history" aria-pressed="false"></button></p>
 <p class="sub-nav-item toc-item" data-target="sub-23" data-label="The wisdom of the word of God in dialogue with the human sciences"><a href="#sub-23" class="sub-nav-link">The wisdom of the word of God in dialogue with the human sciences</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-23" aria-label="Bookmark The wisdom of the word of God in dialogue with the human sciences" aria-pressed="false"></button></p>
@@ -1197,26 +1229,25 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <p class="sub-nav-item toc-item" data-target="sub-243" data-label="The song of hope: the Magnificat"><a href="#sub-243" class="sub-nav-link">The song of hope: the Magnificat</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-243" aria-label="Bookmark The song of hope: the Magnificat" aria-pressed="false"></button></p>
     </div>
     <div id="drawer-footnotes" class="drawer-view" role="tabpanel" hidden>
-      <h3 class="fn-group"><a href="#ch-0" class="fn-ch-link">Preface / Introduction</a></h3>
-<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-0-1">Introduction</a></p>
+      <p class="sec-nav-item unrooted"><a class="sec-nav-link" href="#sec-0-0-1">Introduction</a></p>
 <ol class="fn-list">
 <li id="fn-0-0-1" class="fn-item"><a href="#para-1" class="fn-num-link">1</a><p>Second Vatican Ecumenical Council, Pastoral Constitution <a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener"><em>Gaudium et Spes</em></a>, 22: <em>AAS</em> 58 (1966), 1042.</p></li>
 <li id="fn-0-0-2" class="fn-item"><a href="#para-2" class="fn-num-link">2</a><p>Cf. <a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener">ibid.</a>, 11: <em>AAS</em> 58 (1966), 1033-1034.</p></li>
 <li id="fn-0-0-3" class="fn-item"><a href="#para-2" class="fn-num-link">3</a><p>Second Vatican Ecumenical Council, Dogmatic Constitution <a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html" class="ext-link" target="_blank" rel="noopener"><em>Lumen Gentium</em></a>, 1: <em>AAS</em> 57 (1965), 5.</p></li>
 <li id="fn-0-0-4" class="fn-item"><a href="#para-3" class="fn-num-link">4</a><p>Cf. Leo XIII, Encyclical Letter <a href="https://www.vatican.va/content/leo-xiii/en/encyclicals/documents/hf_l-xiii_enc_15051891_rerum-novarum.html" class="ext-link" target="_blank" rel="noopener"><em>Rerum Novarum</em></a> (15 May 1891), 22: <em>ASS</em> 23 (1890-1891), 653.</p></li>
 </ol>
-<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-0-2">The res novae of our time</a></p>
+<p class="sec-nav-item unrooted"><a class="sec-nav-link" href="#sec-0-0-2">The res novae of our time</a></p>
 <ol class="fn-list">
 <li id="fn-0-0-5" class="fn-item"><a href="#para-4" class="fn-num-link">5</a><p>Benedict XVI, Encyclical Letter <a href="https://www.vatican.va/content/benedict-xvi/en/encyclicals/documents/hf_ben-xvi_enc_20090629_caritas-in-veritate.html" class="ext-link" target="_blank" rel="noopener"><em>Caritas in Veritate</em></a> (29 June 2009), 69: <em>AAS</em> 101 (2009), 702.</p></li>
 <li id="fn-0-0-6" class="fn-item"><a href="#para-4" class="fn-num-link">6</a><p>Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20150524_enciclica-laudato-si.html" class="ext-link" target="_blank" rel="noopener"><em>Laudato Si</em></a> <em>’</em> (24 May 2015), 104: <em>AAS</em> 107 (2015), 888.</p></li>
 <li id="fn-0-0-7" class="fn-item"><a href="#para-5" class="fn-num-link">7</a><p><a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20150524_enciclica-laudato-si.html" class="ext-link" target="_blank" rel="noopener">Ibid.</a></p></li>
 </ol>
-<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-0-3">Two biblical images</a></p>
-<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-0-4">Building for the common good</a></p>
+<p class="sec-nav-item unrooted"><a class="sec-nav-link" href="#sec-0-0-3">Two biblical images</a></p>
+<p class="sec-nav-item unrooted"><a class="sec-nav-link" href="#sec-0-0-4">Building for the common good</a></p>
 <ol class="fn-list">
 <li id="fn-0-0-8" class="fn-item"><a href="#para-11" class="fn-num-link">8</a><p>Saint Augustine, <em>Confessions</em>, I, 1, 1: <em>CCSL</em> 27, Turnhout 1981, 1.</p></li>
 </ol>
-<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-0-5">Remaining human</a></p>
+<p class="sec-nav-item unrooted"><a class="sec-nav-link" href="#sec-0-0-5">Remaining human</a></p>
 <h3 class="fn-group"><a href="#ch-1" class="fn-ch-link">A Dynamic Approach Faithful to the Gospel</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-1-1">A Church journeying through human history</a></p>
 <ol class="fn-list">
@@ -1768,7 +1799,9 @@ window.addEventListener('resize', () => {
 // px relative to the paragraph. CSS default (top:50%) is the JS-off
 // fallback — the first frame of scroll handler replaces it.
 if (document.body.classList.contains('doc-laudato_si') ||
-    document.body.classList.contains('doc-magnifica_humanitas')) {
+    document.body.classList.contains('doc-magnifica_humanitas') ||
+    document.body.classList.contains('doc-antiqua_et_nova') ||
+    document.body.classList.contains('doc-quo_vadis_humanitas')) {
   const paragraphs = Array.from(document.querySelectorAll('.paragraph'));
   let raf = 0;
   let cachedNumH = 0;   // every digit renders the same height for a given font/size
@@ -1797,8 +1830,10 @@ if (document.body.classList.contains('doc-laudato_si') ||
       updates.push((rect.bottom < -50 || rect.top > vh + 50) ? null : rect);
     }
     if (!cachedNumH) {
-      const visibleIdx = updates.findIndex(r => r);
-      cachedNumH = visibleIdx >= 0 ? paragraphs[visibleIdx].querySelector('.para-num').offsetHeight : 16;
+      const visiblePara = paragraphs.find((para, i) =>
+        updates[i] && para.querySelector('.para-num')
+      );
+      cachedNumH = visiblePara ? visiblePara.querySelector('.para-num').offsetHeight : 16;
     }
     const halfNum = cachedNumH / 2;
 

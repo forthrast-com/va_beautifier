@@ -19,7 +19,8 @@ Each `extract/<doc>.py` exposes:
 Paragraph schema (all keys optional except number, text — defaults to 0 / ''):
 
     number, part, part_title, chapter, chapter_title, chapter_subtitle,
-    section, section_title, sub_heading, heading_la, break_after, text
+    section, section_title, sub_heading, heading_la, break_after,
+    hide_number, text
 
 Footnote schema:
 
@@ -174,6 +175,9 @@ def chapter_word_to_int(word):
 
 _INLINE_FOOTNOTE_REF = re.compile(r'\[(\d{1,3})\]')
 _SPACE_BEFORE_FOOTNOTE_REF = re.compile(r' +(\(\d{1,3}\))')
+_SUPERSCRIPT_FOOTNOTE_REF = re.compile(
+    r'(?:<sup>\s*)+(\(\d{1,3}\))(?:\s*</sup>)+'
+)
 # Public contract consumed by renderers: match note markers, not four-digit
 # parenthesised years or longer prose citations.
 CANONICAL_FOOTNOTE_REF = re.compile(r'\((\d{1,3})\)')
@@ -187,6 +191,7 @@ def normalise_footnote_refs(text, *, bracketed=False):
     """
     if bracketed:
         text = _INLINE_FOOTNOTE_REF.sub(r'(\1)', text)
+    text = _SUPERSCRIPT_FOOTNOTE_REF.sub(r'\1', text)
     return _SPACE_BEFORE_FOOTNOTE_REF.sub(r'\1', text)
 
 
@@ -397,6 +402,8 @@ def write_toml(path, *, name, hue=None, source_url='', desc='', desc_post='',
                 out.append(f'{key} = {str(p.get(key, False)).lower()}')
             else:  # mlstr
                 out.append(f'{key} = {_toml_multiline(p.get(key, ""))}')
+        if p.get('hide_number', False):
+            out.append('hide_number = true')
         out.append('')
 
     for fn in footnotes:

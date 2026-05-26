@@ -10,16 +10,19 @@ Published for `https://circulars.forthrast.com/` using GitHub Pages:
 - `/gaudium_et_spes.html`
 - `/laudato_si.html`
 - `/magnifica_humanitas.html`
+- `/antiqua_et_nova.html`
+- `/quo_vadis_humanitas.html`
+- `/sacrosanctum_concilium.html`
 
 ## Build
 
 ```sh
-./build.sh
+nix develop --command make
 ```
 
-The build uses the Nix flake and renders the TOML intermediate files and flat
-HTML pages, including `index.html`. GitHub Actions rebuilds the pages and
-deploys only the finished static site files.
+The build uses the Nix flake and renders the TOML intermediate files, flat
+HTML pages, and downloadable PDF/EPUB editions. GitHub Actions rebuilds the
+site and publishes the finished reading and download files.
 
 Run the unit and extractor regression tests with:
 

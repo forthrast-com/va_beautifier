@@ -35,10 +35,19 @@
     margin: margin,
     numbering: pagenumbering,
     number-align: center + bottom,
+    header: context {
+      if counter(page).get().first() > 1 {
+        set text(size: 8pt, style: "italic", fill: rgb("#756d60"))
+        align(left, title)
+        v(0.45em)
+        line(length: 100%, stroke: (paint: rgb("#c8c0b2"), thickness: 0.35pt))
+      }
+    },
   )
 
   // ── Text & paragraphs ────────────────────────────────────────────────
   set text(font: font, size: fontsize, lang: lang)
+  show link: it => text(fill: rgb("#544b3f"), it)
   // First-line indent on body paragraphs is the canonical book look;
   // typst already suppresses the indent on the first paragraph of a
   // section, which is what we want here.
@@ -50,37 +59,37 @@
 
   // ── Headings ─────────────────────────────────────────────────────────
   // H1: chapter title — large italic display, centred.
-  show heading.where(level: 1): it => {
+  show heading.where(level: 1): it => block(sticky: true, {
     set text(size: 1.6em, weight: "regular", style: "italic")
     set par(first-line-indent: 0em, justify: false)
     v(2em)
     align(center, it.body)
     v(1.2em)
-  }
+  })
   // H2: section heading — medium italic, centred.
-  show heading.where(level: 2): it => {
+  show heading.where(level: 2): it => block(sticky: true, {
     set text(size: 1.15em, weight: "regular", style: "italic")
     set par(first-line-indent: 0em, justify: false)
     v(1.2em)
     align(center, it.body)
     v(0.6em)
-  }
+  })
   // H3: subsection — bold, left-aligned, tighter.
-  show heading.where(level: 3): it => {
+  show heading.where(level: 3): it => block(sticky: true, {
     set text(size: 1em, weight: "bold")
     set par(first-line-indent: 0em, justify: false)
     v(0.8em)
     it.body
     v(0.3em)
-  }
+  })
   // H4: italic sub-heading — slight emphasis only.
-  show heading.where(level: 4): it => {
+  show heading.where(level: 4): it => block(sticky: true, {
     set text(size: 1em, style: "italic")
     set par(first-line-indent: 0em, justify: false)
     v(0.6em)
     it.body
     v(0.2em)
-  }
+  })
 
   // ── Footnotes ────────────────────────────────────────────────────────
   // Page-bottom notes; the separator line is shorter than the default rule

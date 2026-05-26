@@ -110,19 +110,22 @@ def _desc_line(ln):
     return f'<span style="display:inline-block">{e(title_case(ln, small_words=True))}</span>'
 
 
-def _desc_block(text, cls, *, break_before_on=False):
+def _desc_block(text, cls, *, break_before_on=False, stacked=False):
     """Render `text` (one source line per output span) as a centred desc
     paragraph. With `break_before_on`, insert a hard line break before any
     line starting with "ON " — the modern encyclicals' subtitles open
     with "ON CARE FOR…" / "ON SAFEGUARDING…", and the user wants those
     visually separated from the preceding "OF THE HOLY FATHER / NAME"
-    stanza regardless of viewport width."""
+    stanza regardless of viewport width. With `stacked=True`, every
+    source line gets its own row — for documents whose front matter lists
+    distinct institutions (Antiqua et nova names two dicasteries) rather
+    than a fragmented title phrase."""
     pieces = []
     for ln in text.splitlines():
         ln = ln.strip()
         if not ln:
             continue
-        if break_before_on and pieces and ln.upper().startswith('ON '):
+        if (stacked or break_before_on and ln.upper().startswith('ON ')) and pieces:
             pieces.append('<br>')
         pieces.append(_desc_line(ln))
     if not pieces:
@@ -137,7 +140,12 @@ def _desc_block(text, cls, *, break_before_on=False):
             out += piece
     return f'<p class="{cls}">{out}</p>'
 
-MODERN_DOCS = {'laudato_si', 'magnifica_humanitas'}
+LONG_DOCS = {
+    'laudato_si',
+    'magnifica_humanitas',
+    'antiqua_et_nova',
+    'quo_vadis_humanitas',
+}
 
 # The Vatican sources place the document title *between* lines of the
 # front-matter block: e.g. MH has "ENCYCLICAL LETTER" above the title and
@@ -147,10 +155,15 @@ MODERN_DOCS = {'laudato_si', 'magnifica_humanitas'}
 # (below); the renderer just stacks them around the name.
 title_block = ''
 if doc_desc or doc_name or doc_desc_post:
-    is_modern = args.doc in MODERN_DOCS
+    is_modern = args.doc in LONG_DOCS
+    # Documents whose pre-title `desc` lists distinct issuing bodies
+    # (Antiqua et nova — two co-signing dicasteries) want each line on
+    # its own row instead of flowed as a single title phrase.
+    stack_desc_pre = args.doc in {'antiqua_et_nova'}
     title_block = (
         '<div class="doc-title">'
-        + _desc_block(doc_desc, 'doc-desc doc-desc-pre')
+        + _desc_block(doc_desc, 'doc-desc doc-desc-pre',
+                      stacked=stack_desc_pre)
         + f'<p class="doc-name">{e(doc_name)}</p>'
         + _desc_block(doc_desc_post, 'doc-desc doc-desc-post',
                       break_before_on=is_modern)
@@ -208,7 +221,18 @@ for p in paragraphs:
     chapter = (p['chapter'], p['chapter_title'], p.get('chapter_subtitle', ''))
     section = (p['section'], p['section_title'])
 
-    if part != seen_part:
+    # An empty part_title following a labelled intro within the same part
+    # number isn't a new part — it's the body of a part-less document
+    # continuing past its named introduction. Only count it as a change
+    # when the part number flips or a fresh non-empty title appears.
+    if isinstance(seen_part, tuple):
+        same_part = (
+            seen_part[0] == p['part']
+            and (not p['part_title'] or seen_part[1] == p['part_title'])
+        )
+    else:
+        same_part = False
+    if not same_part:
         cid = next_cid()
         if p['part'] == 0:
             # Preface/introduction group. Documents that name it (GeS) get
@@ -262,7 +286,7 @@ for p in paragraphs:
 
     if section != seen_section and p['section'] != 0:
         sec_id = f'sec-{p["part"]}-{p["chapter"]}-{p["section"]}'
-        if args.doc == 'magnifica_humanitas':
+        if args.doc in {'magnifica_humanitas', 'quo_vadis_humanitas'}:
             label = p['section_title']
         else:
             label = f'Section {p["section"]}'
@@ -310,14 +334,15 @@ for p in paragraphs:
     # disentangle a shared one.
     if args.doc == 'gaudium_et_spes':
         sub_text = (p['section_title'] if p['section'] else '') or head
-    elif args.doc in MODERN_DOCS:
+    elif args.doc in LONG_DOCS:
         sub_text = p['section_title'] if p['section'] else ''
     else:
         sub_text = _cur_sub_text
 
+    visible_num = '' if p.get('hide_number', False) else f'<span class="para-num">{num}</span>'
     html_parts.append(
         f'<div class="paragraph" id="para-{num}" data-sub-text="{e(sub_text)}">'
-        f'<span class="para-num">{num}</span>'
+        f'{visible_num}'
         + (f' <em class="heading-la">{e(head)}</em>' if head else '')
         + f'\n{body}'
         f'</div>'
@@ -431,18 +456,27 @@ for (part, chapter), ch_label in ch_order:
         group_label = ch_label or f'Chapter {chapter}'
     else:
         group_label = ch_label or f'Part {int_to_roman(part)}, Chapter {chapter}'
-    toc_items.append(toc_item('h3', 'fn-group', 'fn-ch-link', cid, group_label))
+
+    # An unrooted preface — chapter 0 with no part_title in the TOML but
+    # carrying its own sections (MH) — has no real heading to nest under.
+    # Render those sections flush so they don't dangle off an empty parent.
+    unrooted = (part == 0 and chapter == 0 and not ch_label and secs)
+    item_cls = 'sec-nav-item unrooted' if unrooted else 'sec-nav-item'
+
+    if not unrooted:
+        toc_items.append(toc_item('h3', 'fn-group', 'fn-ch-link', cid, group_label))
 
     for sb in subs_by_chsec.get((part, chapter, 0), []):
         toc_items.append(toc_item('p', 'sub-nav-item', 'sub-nav-link', sb['id'], sb['label']))
     for s in sorted(secs, key=lambda x: x['section']):
-        toc_items.append(toc_item('p', 'sec-nav-item', 'sec-nav-link', s['id'], s['label']))
+        toc_items.append(toc_item('p', item_cls, 'sec-nav-link', s['id'], s['label']))
         for sb in subs_by_chsec.get((part, chapter, s['section']), []):
             toc_items.append(toc_item('p', 'sub-nav-item', 'sub-nav-link', sb['id'], sb['label']))
 
     if not secs and not fns and not ch_subs:
         continue
-    drawer_items.append(f'<h3 class="fn-group"><a href="#{cid}" class="fn-ch-link">{e(group_label)}</a></h3>')
+    if not unrooted:
+        drawer_items.append(f'<h3 class="fn-group"><a href="#{cid}" class="fn-ch-link">{e(group_label)}</a></h3>')
 
     if drawer_style == 'chapter':
         # Flat list of footnotes for this chapter, in number order.
@@ -473,7 +507,8 @@ for (part, chapter), ch_label in ch_order:
             continue
 
         if s:
-            drawer_items.append(f'<p class="sec-nav-item"><a class="sec-nav-link" href="#{s["id"]}">{e(s["label"])}</a></p>')
+            sec_cls = 'sec-nav-item unrooted' if unrooted else 'sec-nav-item'
+            drawer_items.append(f'<p class="{sec_cls}"><a class="sec-nav-link" href="#{s["id"]}">{e(s["label"])}</a></p>')
 
         # Bucket the section's footnotes by which sub-heading (if any)
         # the citing paragraph fell under.
@@ -541,8 +576,12 @@ DOC_INDICATOR_LEVEL = {
 indicator_level = DOC_INDICATOR_LEVEL.get(args.doc, 'paragraphs')
 
 ch_paras: dict[str, list[int]] = {}
+visible_para_numbers = {
+    p['number'] for p in paragraphs if not p.get('hide_number', False)
+}
 for pnum, cid in para_ch_id.items():
-    ch_paras.setdefault(cid, []).append(pnum)
+    if pnum in visible_para_numbers:
+        ch_paras.setdefault(cid, []).append(pnum)
 
 # Map each section id → its (first, last) paragraph range so we can
 # build section-mode segs without re-walking paragraphs.

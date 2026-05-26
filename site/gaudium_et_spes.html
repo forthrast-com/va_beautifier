@@ -461,6 +461,8 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
      section:  italic + bar at first indent
      sub:      bar at second indent, no other ornament  */
 .sec-nav-item                   { margin: .5rem 0 .25rem 0; padding-left: .75rem; border-left: 2px solid var(--rule-tint); line-height: 1.25; }
+.sec-nav-item.unrooted          { padding-left: 0; border-left: 0; margin-top: .9rem; }
+.sec-nav-item.unrooted .sec-nav-link { color: var(--fg); font-style: normal; font-size: .95rem; font-weight: 500; }
 .sec-nav-link                   { color: var(--fg-dim); text-decoration: none; font-size: .85rem; font-style: italic; line-height: 1.25; }
 .sec-nav-link:hover             { color: var(--fg); text-decoration: underline; }
 .sub-nav-item                   { margin: .25rem 0 .15rem 0; padding-left: .75rem; border-left: 2px solid var(--rule); line-height: 1.2; }
@@ -698,7 +700,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
    Pick a hue, set it in DOC_HUES, the recipe above does the rest. */
 
 /* ────────────────────────────────────────────────────────────────────────
-   .doc-laudato_si, .doc-magnifica_humanitas — long modern documents
+   Long structured documents: gutter numbers and height-capped indicator
 
    LS has no per-paragraph Latin micro-summary; on wide viewports the para
    number lives in the left margin alongside a vertical rule (both hang
@@ -708,9 +710,13 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
    ──────────────────────────────────────────────────────────────────────── */
 
 .doc-laudato_si .paragraph,
-.doc-magnifica_humanitas .paragraph         { position: relative; margin: 1.75rem 0; }
+.doc-magnifica_humanitas .paragraph,
+.doc-antiqua_et_nova .paragraph,
+.doc-quo_vadis_humanitas .paragraph         { position: relative; margin: 1.75rem 0; }
 .doc-laudato_si .paragraph::before,
-.doc-magnifica_humanitas .paragraph::before {
+.doc-magnifica_humanitas .paragraph::before,
+.doc-antiqua_et_nova .paragraph::before,
+.doc-quo_vadis_humanitas .paragraph::before {
     content: '';
     position: absolute;
     top: 0; bottom: 0;
@@ -719,7 +725,9 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     background: var(--rule-tint);
 }
 .doc-laudato_si .para-num,
-.doc-magnifica_humanitas .para-num {
+.doc-magnifica_humanitas .para-num,
+.doc-antiqua_et_nova .para-num,
+.doc-quo_vadis_humanitas .para-num {
     position: absolute;
     right: calc(100% + 2rem);   /* in the gutter, breathing room from the rule */
     top: 50%;
@@ -731,32 +739,41 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     will-change: top;
 }
 .doc-laudato_si .para-num::after,
-.doc-magnifica_humanitas .para-num::after { content: none; }
+.doc-magnifica_humanitas .para-num::after,
+.doc-antiqua_et_nova .para-num::after,
+.doc-quo_vadis_humanitas .para-num::after { content: none; }
 .doc-laudato_si #sticky-num,
-.doc-magnifica_humanitas #sticky-num {
+.doc-magnifica_humanitas #sticky-num,
+.doc-antiqua_et_nova #sticky-num,
+.doc-quo_vadis_humanitas #sticky-num {
     transform: translateX(-.6rem);  /* centre chapter number above gutter rule */
 }
 
 /* MH uses a third visible level below chapters: section headings are the
    document's subheads; italic headings nested inside them are sub-subheads. */
-.doc-magnifica_humanitas h3.chapter-title {
+.doc-magnifica_humanitas h3.chapter-title,
+.doc-quo_vadis_humanitas h3.chapter-title {
     font-size: 1.55rem;
     line-height: 1.25;
 }
-.doc-magnifica_humanitas .chapter-subtitle {
+.doc-magnifica_humanitas .chapter-subtitle,
+.doc-quo_vadis_humanitas .chapter-subtitle {
     font-size: 1.12rem;
 }
-.doc-magnifica_humanitas h4.section-title {
+.doc-magnifica_humanitas h4.section-title,
+.doc-quo_vadis_humanitas h4.section-title {
     font-size: 1.18rem;
     font-style: normal;
     font-weight: 600;
     color: var(--fg);
 }
-.doc-magnifica_humanitas h5.sub-heading {
+.doc-magnifica_humanitas h5.sub-heading,
+.doc-quo_vadis_humanitas h5.sub-heading {
     font-size: 1.1rem;
     color: var(--fg-dim);
 }
-.doc-magnifica_humanitas .sec-nav-link {
+.doc-magnifica_humanitas .sec-nav-link,
+.doc-quo_vadis_humanitas .sec-nav-link {
     font-style: normal;
     font-weight: 600;
     color: var(--fg);
@@ -764,11 +781,17 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 /* Narrow viewport: gutter doesn't fit, revert to inline `5.` prefix. */
 @media (max-width: 900px) {
     .doc-laudato_si .paragraph,
-    .doc-magnifica_humanitas .paragraph         { position: static; }
+    .doc-magnifica_humanitas .paragraph,
+    .doc-antiqua_et_nova .paragraph,
+    .doc-quo_vadis_humanitas .paragraph         { position: static; }
     .doc-laudato_si .paragraph::before,
-    .doc-magnifica_humanitas .paragraph::before { display: none; }
+    .doc-magnifica_humanitas .paragraph::before,
+    .doc-antiqua_et_nova .paragraph::before,
+    .doc-quo_vadis_humanitas .paragraph::before { display: none; }
     .doc-laudato_si .para-num,
-    .doc-magnifica_humanitas .para-num {
+    .doc-magnifica_humanitas .para-num,
+    .doc-antiqua_et_nova .para-num,
+    .doc-quo_vadis_humanitas .para-num {
         position: static;
         font-weight: bold;
         color: inherit;
@@ -776,23 +799,33 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
         text-align: left;
     }
     .doc-laudato_si .para-num::after,
-    .doc-magnifica_humanitas .para-num::after           { content: '.'; }
+    .doc-magnifica_humanitas .para-num::after,
+    .doc-antiqua_et_nova .para-num::after,
+    .doc-quo_vadis_humanitas .para-num::after           { content: '.'; }
     .doc-laudato_si .paragraph p:first-of-type,
-    .doc-magnifica_humanitas .paragraph p:first-of-type { display: inline; margin-top: 0; }
+    .doc-magnifica_humanitas .paragraph p:first-of-type,
+    .doc-antiqua_et_nova .paragraph p:first-of-type,
+    .doc-quo_vadis_humanitas .paragraph p:first-of-type { display: inline; margin-top: 0; }
 }
 
 /* Indicator: explicit height (not max-height — flex children with basis 0
    collapse to nothing without it). Centred in the area below the sticky
    bar, not the full viewport. */
 .doc-laudato_si #ch-indicator,
-.doc-magnifica_humanitas #ch-indicator {
+.doc-magnifica_humanitas #ch-indicator,
+.doc-antiqua_et_nova #ch-indicator,
+.doc-quo_vadis_humanitas #ch-indicator {
     height: calc(95vh - var(--bar-h, 4rem));
     top:    calc(50% + var(--bar-h, 4rem) / 2);
 }
 .doc-laudato_si .ch-bar,
-.doc-magnifica_humanitas .ch-bar { flex: 1 1 0; min-height: 8px; height: auto; }
+.doc-magnifica_humanitas .ch-bar,
+.doc-antiqua_et_nova .ch-bar,
+.doc-quo_vadis_humanitas .ch-bar { flex: 1 1 0; min-height: 8px; height: auto; }
 .doc-laudato_si .ch-seg,
-.doc-magnifica_humanitas .ch-seg { flex: 1; height: auto; min-height: 1px; }
+.doc-magnifica_humanitas .ch-seg,
+.doc-antiqua_et_nova .ch-seg,
+.doc-quo_vadis_humanitas .ch-seg { flex: 1; height: auto; min-height: 1px; }
 </style>
 <script>
   // Apply saved prefs before paint to avoid a flash of the default theme.
@@ -1612,7 +1645,9 @@ window.addEventListener('resize', () => {
 // px relative to the paragraph. CSS default (top:50%) is the JS-off
 // fallback — the first frame of scroll handler replaces it.
 if (document.body.classList.contains('doc-laudato_si') ||
-    document.body.classList.contains('doc-magnifica_humanitas')) {
+    document.body.classList.contains('doc-magnifica_humanitas') ||
+    document.body.classList.contains('doc-antiqua_et_nova') ||
+    document.body.classList.contains('doc-quo_vadis_humanitas')) {
   const paragraphs = Array.from(document.querySelectorAll('.paragraph'));
   let raf = 0;
   let cachedNumH = 0;   // every digit renders the same height for a given font/size
@@ -1641,8 +1676,10 @@ if (document.body.classList.contains('doc-laudato_si') ||
       updates.push((rect.bottom < -50 || rect.top > vh + 50) ? null : rect);
     }
     if (!cachedNumH) {
-      const visibleIdx = updates.findIndex(r => r);
-      cachedNumH = visibleIdx >= 0 ? paragraphs[visibleIdx].querySelector('.para-num').offsetHeight : 16;
+      const visiblePara = paragraphs.find((para, i) =>
+        updates[i] && para.querySelector('.para-num')
+      );
+      cachedNumH = visiblePara ? visiblePara.querySelector('.para-num').offsetHeight : 16;
     }
     const halfNum = cachedNumH / 2;
 

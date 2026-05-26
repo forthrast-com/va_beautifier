@@ -26,6 +26,8 @@
             packages = [
               python
               pkgs.gnumake
+              pkgs.pandoc
+              pkgs.typst
             ];
           };
         });

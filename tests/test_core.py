@@ -54,6 +54,14 @@ class TextHelperTests(unittest.TestCase):
         self.assertEqual(text, 'Creation(12) and hope(13), in (2015).')
         self.assertEqual(CANONICAL_FOOTNOTE_REF.findall(text), ['12', '13'])
 
+    def test_formatted_footnote_refs_drop_source_superscripts(self):
+        text = normalise_footnote_refs(
+            'Creation<sup><sup>[46]</sup></sup> and hope [47].',
+            bracketed=True,
+        )
+
+        self.assertEqual(text, 'Creation(46) and hope(47).')
+
     def test_roman_helpers_round_trip(self):
         for number in (1, 4, 9, 14, 42):
             self.assertEqual(roman_to_int(int_to_roman(number)), number)

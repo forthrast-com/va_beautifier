@@ -77,7 +77,7 @@ SOURCES_MANIFEST = (
         'Sacrosanctum Concilium_en.html',
         'https://www.vatican.va/archive/hist_councils/ii_vatican_council/'
         'documents/vat-ii_const_19631204_sacrosanctum-concilium_en.html',
-        'queued',
+        'implemented',
         'Sacrosanctum Concilium (English)',
     ),
     Source(
@@ -85,7 +85,7 @@ SOURCES_MANIFEST = (
         'Sacrosanctum Concilium_la.html',
         'https://www.vatican.va/archive/hist_councils/ii_vatican_council/'
         'documents/vat-ii_const_19631204_sacrosanctum-concilium_lt.html',
-        'queued',
+        'implemented',
         'Sacrosanctum Concilium (Latin)',
     ),
     Source(
@@ -93,7 +93,7 @@ SOURCES_MANIFEST = (
         'antiqua_et_nova_en.html',
         'https://www.vatican.va/roman_curia/congregations/cfaith/documents/'
         'rc_ddf_doc_20250128_antiqua-et-nova_en.html',
-        'reference',
+        'implemented',
         'Antiqua et nova (English)',
     ),
     Source(
@@ -101,7 +101,7 @@ SOURCES_MANIFEST = (
         'quo_vadis_humanitas_en.html',
         'https://www.vatican.va/roman_curia/congregations/cfaith/'
         'cti_documents/rc_cti_doc_20260304_quo-vadis-humanits_en.html',
-        'reference',
+        'implemented',
         'Quo vadis, humanitas? (English)',
     ),
     Source(

@@ -20,19 +20,25 @@ class FakeResponse:
 
 
 class ManifestTests(unittest.TestCase):
-    def test_categories_include_queued_and_reference_sources(self):
+    def test_categories_include_queued_and_remaining_reference_sources(self):
         queued = download_sources.selected_sources([], 'queued')
         reference = download_sources.selected_sources([], 'reference')
+        implemented = download_sources.selected_sources([], 'implemented')
 
         self.assertEqual(
             {source.key for source in queued},
-            {
-                'fratelli_tutti_en',
-                'sacrosanctum_concilium_en',
-                'sacrosanctum_concilium_lt',
-            },
+            {'fratelli_tutti_en'},
         )
-        self.assertEqual(len(reference), 3)
+        self.assertEqual(
+            {source.key for source in reference},
+            {'francis_g7_ai_en'},
+        )
+        self.assertTrue({
+            'antiqua_et_nova_en',
+            'quo_vadis_humanitas_en',
+            'sacrosanctum_concilium_en',
+            'sacrosanctum_concilium_lt',
+        }.issubset({source.key for source in implemented}))
 
     def test_explicit_keys_preserve_requested_order(self):
         sources = download_sources.selected_sources(

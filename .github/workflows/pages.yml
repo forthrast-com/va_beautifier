@@ -31,9 +31,10 @@ jobs:
         run: nix develop --command make
       - name: Prepare flat site
         run: |
-          mkdir _site
+          mkdir -p _site/downloads
           cp CNAME .nojekyll _site/
           cp site/*.html site/favicon.ico _site/
+          cp build/*.pdf build/*.epub _site/downloads/
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site
