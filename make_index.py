@@ -20,43 +20,91 @@ PROMULGATION_DATES = {
 }
 
 
-# Hand-crafted card descriptions per document. Encyclicals bold the Holy
-# Father; council constitutions append "of the Second Vatican Council" and
-# bold the council; organisation-issued notes/papers list each body on its
-# own line, bolded. The subtitle follows on the last line.
-CARD_DESCRIPTIONS = {
-    'gaudium_et_spes': (
-        'Pastoral Constitution on the Church in the Modern World'
-        '<br>of the <strong>Second Vatican Council</strong>'
-        '<br>Promulgated by Pope Paul VI on 7 December 1965'
-    ),
-    'sacrosanctum_concilium': (
-        'Constitution on the Sacred Liturgy'
-        '<br>of the <strong>Second Vatican Council</strong>'
-        '<br>Promulgated by Pope Paul VI on 4 December 1963'
-    ),
-    'laudato_si': (
-        'Encyclical Letter'
-        '<br>of the Holy Father <strong>Francis</strong>'
-        '<br>on Care for Our Common Home'
-    ),
-    'magnifica_humanitas': (
-        'Encyclical Letter'
-        '<br>of His Holiness <strong>Pope Leo XIV</strong>'
-        '<br>on Safeguarding the Human Person in the Time of Artificial Intelligence'
-    ),
-    'antiqua_et_nova': (
-        '<strong>Dicastery for the Doctrine of the Faith</strong>'
-        '<br><strong>Dicastery for Culture and Education</strong>'
-        '<br>Note on the Relationship Between Artificial Intelligence '
-        'and Human Intelligence'
-    ),
-    'quo_vadis_humanitas': (
-        '<strong>International Theological Commission</strong>'
-        '<br>Thinking through Christian Anthropology in the Face of '
-        'Certain Scenarios for the Future of Humanity'
-    ),
+# Structured card metadata per document. Each entry declares a `type`
+# whose template controls what gets bolded, where the linebreaks fall,
+# and how the subtitle attaches. Adding a doc means adding a row here;
+# adding a doc category means adding a branch in `_build_description`.
+CARD_META = {
+    'gaudium_et_spes': {
+        'type': 'council_constitution',
+        'kind': 'Pastoral Constitution on the Church in the Modern World',
+        'body': 'Second Vatican Council',
+        'promulgated_by': 'Pope Paul VI',
+        'date': '7 December 1965',
+    },
+    'sacrosanctum_concilium': {
+        'type': 'council_constitution',
+        'kind': 'Constitution on the Sacred Liturgy',
+        'body': 'Second Vatican Council',
+        'promulgated_by': 'Pope Paul VI',
+        'date': '4 December 1963',
+    },
+    'laudato_si': {
+        'type': 'encyclical',
+        'kind': 'Encyclical Letter',
+        'issuer_prefix': 'of the Holy Father',
+        'issuer': 'Francis',
+        'subtitle': 'on Care for Our Common Home',
+    },
+    'magnifica_humanitas': {
+        'type': 'encyclical',
+        'kind': 'Encyclical Letter',
+        'issuer_prefix': 'of His Holiness',
+        'issuer': 'Pope Leo XIV',
+        'subtitle': (
+            'on Safeguarding the Human Person '
+            'in the Time of Artificial Intelligence'
+        ),
+    },
+    'antiqua_et_nova': {
+        'type': 'curia_note',
+        'bodies': (
+            'Dicastery for the Doctrine of the Faith',
+            'Dicastery for Culture and Education',
+        ),
+        'subtitle': (
+            'Note on the Relationship Between Artificial Intelligence '
+            'and Human Intelligence'
+        ),
+    },
+    'quo_vadis_humanitas': {
+        'type': 'commission_paper',
+        'bodies': ('International Theological Commission',),
+        'subtitle': (
+            'Thinking through Christian Anthropology in the Face of '
+            'Certain Scenarios for the Future of Humanity'
+        ),
+    },
 }
+
+
+def _build_description(slug):
+    meta = CARD_META.get(slug)
+    if not meta:
+        return None
+    kind = meta['type']
+    if kind == 'council_constitution':
+        return (
+            f"{meta['kind']}"
+            f"<br>of the <strong>{meta['body']}</strong>"
+            f"<br>Promulgated by {meta['promulgated_by']} "
+            f"on {meta['date']}"
+        )
+    if kind == 'encyclical':
+        return (
+            f"{meta['kind']}"
+            f"<br>{meta['issuer_prefix']} "
+            f"<strong>{meta['issuer']}</strong>"
+            f"<br>{meta['subtitle']}"
+        )
+    # Organisation-issued (Curia note, Theological-Commission paper):
+    # bold every co-signing body on its own line, then the subtitle.
+    bodies = '<br>'.join(
+        f'<strong>{body}</strong>' for body in meta.get('bodies', ())
+    )
+    if not bodies:
+        return None
+    return f'{bodies}<br>{meta["subtitle"]}'
 
 
 SORT_ICON_SVG = (
@@ -103,13 +151,13 @@ def render_card(slug):
     data = read_toml(BUILD / f'{slug}.toml')
 
     name = escape(data['name'])
-    # Prefer the hand-crafted card description so council documents can
-    # append "of the Second Vatican Council" and organisation-issued
-    # notes can break onto separate lines for each co-signing body. Fall
-    # back to the flowed desc + desc_post when no override is present.
-    if slug in CARD_DESCRIPTIONS:
-        description = CARD_DESCRIPTIONS[slug]
-    else:
+    # The card description is composed from structured CARD_META by
+    # template — council constitutions append "of the …Council" and bold
+    # the council; encyclicals bold the issuer; org-issued notes stack
+    # each co-signing body bolded. Docs without a CARD_META row fall
+    # back to the flowed desc + desc_post from the TOML.
+    description = _build_description(slug)
+    if description is None:
         joined = ' '.join(
             line.strip()
             for part in (data.get('desc', ''), data.get('desc_post', ''))
@@ -183,7 +231,7 @@ body {{
   font-family: Georgia, 'Times New Roman', serif;
 }}
 main {{
-  width: min(62rem, calc(100% - 2.5rem));
+  width: min(68rem, calc(100% - 2.5rem));
   margin: 0 auto;
   padding: clamp(1.75rem, 5vh, 3rem) 0 3rem;
 }}
@@ -238,7 +286,7 @@ h1 {{
 }}
 .editions {{
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
   gap: 1.15rem;
 }}
 .edition {{
@@ -249,10 +297,11 @@ h1 {{
   padding: 0 1.3rem 1.25rem;
 }}
 .edition-link {{
-  display: block;
   color: inherit;
+  display: flex;
+  flex-direction: column;
   min-height: 14rem;
-  padding-top: 1.25rem;
+  padding: 1.25rem 0 .85rem;
   text-decoration: none;
 }}
 .edition h2 {{
@@ -272,6 +321,9 @@ h1 {{
   color: hsl(var(--hue), 50%, 35%);
   font-family: system-ui, -apple-system, sans-serif;
   font-size: .9rem;
+}}
+.edition-link .read {{
+  margin-top: auto;        /* anchor "Read edition" to the bottom of the card */
 }}
 .formats {{
   border-top: 1px solid var(--rule);

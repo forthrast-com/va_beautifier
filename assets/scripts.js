@@ -151,7 +151,8 @@ window.addEventListener('resize', () => {
 if (document.body.classList.contains('doc-laudato_si') ||
     document.body.classList.contains('doc-magnifica_humanitas') ||
     document.body.classList.contains('doc-antiqua_et_nova') ||
-    document.body.classList.contains('doc-quo_vadis_humanitas')) {
+    document.body.classList.contains('doc-quo_vadis_humanitas') ||
+    document.body.classList.contains('doc-sacrosanctum_concilium')) {
   const paragraphs = Array.from(document.querySelectorAll('.paragraph'));
   let raf = 0;
   let cachedNumH = 0;   // every digit renders the same height for a given font/size

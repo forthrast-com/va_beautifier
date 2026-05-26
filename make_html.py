@@ -145,6 +145,7 @@ LONG_DOCS = {
     'magnifica_humanitas',
     'antiqua_et_nova',
     'quo_vadis_humanitas',
+    'sacrosanctum_concilium',
 }
 
 # The Vatican sources place the document title *between* lines of the
@@ -172,16 +173,20 @@ if doc_desc or doc_name or doc_desc_post:
 
 # Dedication + papal signature belong at the END in the Vatican sources
 # (after the body, just before the footnote block), not in the front matter
-# where the dedication used to live.
+# where the dedication used to live. Multi-stanza promulgations (A&N
+# carries one stanza for the papal audience and another for the offices
+# of issuance) are split on `\n\n` so each renders on its own line.
 end_matter_html = ''
 if doc_promulg or doc_signature:
     parts = ['<div class="doc-end-matter">']
     if doc_promulg:
-        promulg_spans = " ".join(
-            f'<span style="display:inline-block">{e(l.strip())}</span>'
-            for l in doc_promulg.splitlines() if l.strip()
-        )
-        parts.append(f'<p class="doc-promulg">{promulg_spans}</p>')
+        stanzas = [s.strip() for s in doc_promulg.split('\n\n') if s.strip()]
+        for stanza in stanzas:
+            stanza_spans = " ".join(
+                f'<span style="display:inline-block">{e(line.strip())}</span>'
+                for line in stanza.splitlines() if line.strip()
+            )
+            parts.append(f'<p class="doc-promulg">{stanza_spans}</p>')
     if doc_signature:
         parts.append(f'<p class="doc-signature">{e(doc_signature)}</p>')
     parts.append('</div>')

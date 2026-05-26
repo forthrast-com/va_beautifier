@@ -31,7 +31,7 @@ body {
   font-family: Georgia, 'Times New Roman', serif;
 }
 main {
-  width: min(62rem, calc(100% - 2.5rem));
+  width: min(68rem, calc(100% - 2.5rem));
   margin: 0 auto;
   padding: clamp(1.75rem, 5vh, 3rem) 0 3rem;
 }
@@ -86,7 +86,7 @@ h1 {
 }
 .editions {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
   gap: 1.15rem;
 }
 .edition {
@@ -97,10 +97,11 @@ h1 {
   padding: 0 1.3rem 1.25rem;
 }
 .edition-link {
-  display: block;
   color: inherit;
+  display: flex;
+  flex-direction: column;
   min-height: 14rem;
-  padding-top: 1.25rem;
+  padding: 1.25rem 0 .85rem;
   text-decoration: none;
 }
 .edition h2 {
@@ -120,6 +121,9 @@ h1 {
   color: hsl(var(--hue), 50%, 35%);
   font-family: system-ui, -apple-system, sans-serif;
   font-size: .9rem;
+}
+.edition-link .read {
+  margin-top: auto;        /* anchor "Read edition" to the bottom of the card */
 }
 .formats {
   border-top: 1px solid var(--rule);
@@ -229,7 +233,7 @@ footer a { color: inherit; }
     <p>Constitution on the Sacred Liturgy<br>of the <strong>Second Vatican Council</strong><br>Promulgated by Pope Paul VI on 4 December 1963</p>
     <span class="read">Read edition</span>
   </a>
-  <div class="formats" aria-label="Download formats"><a class="format" href="downloads/sacrosanctum_concilium.pdf"><span>PDF</span><small>239.3 KB</small></a><a class="format" href="downloads/sacrosanctum_concilium.epub"><span>EPUB</span><small>34.0 KB</small></a></div>
+  <div class="formats" aria-label="Download formats"><a class="format" href="downloads/sacrosanctum_concilium.pdf"><span>PDF</span><small>237.9 KB</small></a><a class="format" href="downloads/sacrosanctum_concilium.epub"><span>EPUB</span><small>33.9 KB</small></a></div>
   <a class="source" href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19631204_sacrosanctum-concilium_en.html" target="_blank" rel="noopener">Original Vatican document</a>
 </article>
   </section>

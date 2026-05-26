@@ -260,7 +260,11 @@ def extract():
     body_html = notes_split[0]
     notes_html = notes_split[1] if len(notes_split) > 1 else ''
 
-    desc, promulgation = _extract_frontmatter(body_html)
+    # SC carries its "SOLEMNLY PROMULGATED…" line in the front matter,
+    # under the title — same layout as GeS. Hand it through as desc_post
+    # so the title block stacks pre / NAME / post like the other old-flat
+    # documents, instead of dropping it into an end-of-doc dedication.
+    desc, desc_post = _extract_frontmatter(body_html)
 
     soup = BeautifulSoup(body_html, 'html.parser')
     corpo = soup.find(id='corpo') or soup.body or soup
@@ -272,7 +276,7 @@ def extract():
         'hue': HUE,
         'source_url': SOURCE_URL,
         'desc': desc,
-        'promulgation': promulgation,
+        'desc_post': desc_post,
         'paragraphs': paragraphs,
         'footnotes': footnotes,
     }

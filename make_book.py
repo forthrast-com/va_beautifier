@@ -279,17 +279,32 @@ def _write_titlepage_include(data, slug):
     return path
 
 
+def _promulgation_stanzas(promulg):
+    """Yield each `\\n\\n`-separated stanza of a promulgation block, with
+    intra-stanza linebreaks collapsed to single spaces."""
+    for stanza in promulg.split('\n\n'):
+        text = ' '.join(line.strip() for line in stanza.splitlines() if line.strip())
+        if text:
+            yield text
+
+
 def _end_matter_typst(promulg, signature):
-    """Render dedication + signature as a centred standalone page."""
+    """Render dedication + signature as a centred standalone page. Multi-
+    stanza promulgations (A&N: audience block + offices block) render on
+    separate lines so the source's logical paragraph break carries through
+    to the PDF."""
     parts = [
         '#pagebreak(weak: true)',
         '#page()[',
         '  #set align(center)',
         '  #v(1fr)',
     ]
-    if promulg:
-        text = ' '.join(ln.strip() for ln in promulg.splitlines() if ln.strip())
-        parts.append(f'  #text(style: "italic", size: 11pt)[{_typ_content(text)}]')
+    stanzas = list(_promulgation_stanzas(promulg)) if promulg else []
+    for index, stanza in enumerate(stanzas):
+        if index:
+            parts.append('  #v(0.9em)')
+        parts.append(f'  #text(style: "italic", size: 11pt)[{_typ_content(stanza)}]')
+    if stanzas:
         parts.append('  #v(2em)')
     if signature:
         parts.append(f'  #text(weight: "bold", tracking: 0.14em)[{_typ_content(signature)}]')
@@ -301,9 +316,8 @@ def _end_matter_html(promulg, signature):
     """EPUB end matter — semantic colophon section with centred styles."""
     import html
     parts = ['<section epub:type="colophon" style="text-align:center; margin-top:4em;">']
-    if promulg:
-        text = ' '.join(ln.strip() for ln in promulg.splitlines() if ln.strip())
-        parts.append(f'<p style="font-style:italic;">{html.escape(text)}</p>')
+    for stanza in _promulgation_stanzas(promulg) if promulg else ():
+        parts.append(f'<p style="font-style:italic;">{html.escape(stanza)}</p>')
     if signature:
         parts.append(f'<p style="font-weight:bold; letter-spacing:0.14em; margin-top:1.5em;">{html.escape(signature)}</p>')
     parts.append('</section>')

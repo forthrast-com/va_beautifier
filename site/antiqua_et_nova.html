@@ -712,11 +712,13 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .doc-laudato_si .paragraph,
 .doc-magnifica_humanitas .paragraph,
 .doc-antiqua_et_nova .paragraph,
-.doc-quo_vadis_humanitas .paragraph         { position: relative; margin: 1.75rem 0; }
+.doc-quo_vadis_humanitas .paragraph,
+.doc-sacrosanctum_concilium .paragraph      { position: relative; margin: 1.75rem 0; }
 .doc-laudato_si .paragraph::before,
 .doc-magnifica_humanitas .paragraph::before,
 .doc-antiqua_et_nova .paragraph::before,
-.doc-quo_vadis_humanitas .paragraph::before {
+.doc-quo_vadis_humanitas .paragraph::before,
+.doc-sacrosanctum_concilium .paragraph::before {
     content: '';
     position: absolute;
     top: 0; bottom: 0;
@@ -727,7 +729,8 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .doc-laudato_si .para-num,
 .doc-magnifica_humanitas .para-num,
 .doc-antiqua_et_nova .para-num,
-.doc-quo_vadis_humanitas .para-num {
+.doc-quo_vadis_humanitas .para-num,
+.doc-sacrosanctum_concilium .para-num {
     position: absolute;
     right: calc(100% + 2rem);   /* in the gutter, breathing room from the rule */
     top: 50%;
@@ -741,11 +744,13 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .doc-laudato_si .para-num::after,
 .doc-magnifica_humanitas .para-num::after,
 .doc-antiqua_et_nova .para-num::after,
-.doc-quo_vadis_humanitas .para-num::after { content: none; }
+.doc-quo_vadis_humanitas .para-num::after,
+.doc-sacrosanctum_concilium .para-num::after { content: none; }
 .doc-laudato_si #sticky-num,
 .doc-magnifica_humanitas #sticky-num,
 .doc-antiqua_et_nova #sticky-num,
-.doc-quo_vadis_humanitas #sticky-num {
+.doc-quo_vadis_humanitas #sticky-num,
+.doc-sacrosanctum_concilium #sticky-num {
     transform: translateX(-.6rem);  /* centre chapter number above gutter rule */
 }
 
@@ -783,15 +788,18 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     .doc-laudato_si .paragraph,
     .doc-magnifica_humanitas .paragraph,
     .doc-antiqua_et_nova .paragraph,
-    .doc-quo_vadis_humanitas .paragraph         { position: static; }
+    .doc-quo_vadis_humanitas .paragraph,
+    .doc-sacrosanctum_concilium .paragraph      { position: static; }
     .doc-laudato_si .paragraph::before,
     .doc-magnifica_humanitas .paragraph::before,
     .doc-antiqua_et_nova .paragraph::before,
-    .doc-quo_vadis_humanitas .paragraph::before { display: none; }
+    .doc-quo_vadis_humanitas .paragraph::before,
+    .doc-sacrosanctum_concilium .paragraph::before { display: none; }
     .doc-laudato_si .para-num,
     .doc-magnifica_humanitas .para-num,
     .doc-antiqua_et_nova .para-num,
-    .doc-quo_vadis_humanitas .para-num {
+    .doc-quo_vadis_humanitas .para-num,
+    .doc-sacrosanctum_concilium .para-num {
         position: static;
         font-weight: bold;
         color: inherit;
@@ -801,11 +809,13 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     .doc-laudato_si .para-num::after,
     .doc-magnifica_humanitas .para-num::after,
     .doc-antiqua_et_nova .para-num::after,
-    .doc-quo_vadis_humanitas .para-num::after           { content: '.'; }
+    .doc-quo_vadis_humanitas .para-num::after,
+    .doc-sacrosanctum_concilium .para-num::after        { content: '.'; }
     .doc-laudato_si .paragraph p:first-of-type,
     .doc-magnifica_humanitas .paragraph p:first-of-type,
     .doc-antiqua_et_nova .paragraph p:first-of-type,
-    .doc-quo_vadis_humanitas .paragraph p:first-of-type { display: inline; margin-top: 0; }
+    .doc-quo_vadis_humanitas .paragraph p:first-of-type,
+    .doc-sacrosanctum_concilium .paragraph p:first-of-type { display: inline; margin-top: 0; }
 }
 
 /* Indicator: explicit height (not max-height — flex children with basis 0
@@ -814,18 +824,21 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .doc-laudato_si #ch-indicator,
 .doc-magnifica_humanitas #ch-indicator,
 .doc-antiqua_et_nova #ch-indicator,
-.doc-quo_vadis_humanitas #ch-indicator {
+.doc-quo_vadis_humanitas #ch-indicator,
+.doc-sacrosanctum_concilium #ch-indicator {
     height: calc(95vh - var(--bar-h, 4rem));
     top:    calc(50% + var(--bar-h, 4rem) / 2);
 }
 .doc-laudato_si .ch-bar,
 .doc-magnifica_humanitas .ch-bar,
 .doc-antiqua_et_nova .ch-bar,
-.doc-quo_vadis_humanitas .ch-bar { flex: 1 1 0; min-height: 8px; height: auto; }
+.doc-quo_vadis_humanitas .ch-bar,
+.doc-sacrosanctum_concilium .ch-bar { flex: 1 1 0; min-height: 8px; height: auto; }
 .doc-laudato_si .ch-seg,
 .doc-magnifica_humanitas .ch-seg,
 .doc-antiqua_et_nova .ch-seg,
-.doc-quo_vadis_humanitas .ch-seg { flex: 1; height: auto; min-height: 1px; }
+.doc-quo_vadis_humanitas .ch-seg,
+.doc-sacrosanctum_concilium .ch-seg { flex: 1; height: auto; min-height: 1px; }
 </style>
 <script>
   // Apply saved prefs before paint to avoid a flash of the default theme.
@@ -1012,7 +1025,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <p>Since a “person’s perfection is measured not by the information or knowledge they possess, but by the depth of their charity,”<sup><a href="#fn-0-6-212">212</a></sup> how we incorporate AI “to include the least of our brothers and sisters, the vulnerable, and those most in need, will be the true measure of our humanity.”<sup><a href="#fn-0-6-213">213</a></sup> The “wisdom of the heart” can illuminate and guide the human-centered use of this technology to help promote the common good, care for our “common home,” advance the search for the truth, foster integral human development, favor human solidarity and fraternity, and lead humanity to its ultimate goal: happiness and full communion with God.<sup><a href="#fn-0-6-214">214</a></sup></p></div><div class="paragraph" id="para-117" data-sub-text=""><span class="para-num">117</span>
 <p>From this perspective of wisdom, believers will be able to act as moral agents capable of using this technology to promote an authentic vision of the human person and society.<sup><a href="#fn-0-6-215">215</a></sup> This should be done with the understanding that technological progress is part of God’s plan for creation—an activity that we are called to order toward the Paschal Mystery of Jesus Christ, in the continual search for the True and the Good.</p></div>
 
-<div class="doc-end-matter"><p class="doc-promulg"><span style="display:inline-block">The Supreme Pontiff, Francis, at the Audience granted on 14 January 2025 to the undersigned Prefects and Secretaries of the Dicastery for the Doctrine of the Faith and the Dicastery for Culture and Education, approved this Note and ordered its publication.</span> <span style="display:inline-block">Given in Rome, at the offices of the Dicastery for the Doctrine of the Faith and the Dicastery for Culture and Education, on 28 January 2025, the Liturgical Memorial of Saint Thomas Aquinas, Doctor of the Church.</span></p><p class="doc-signature">Ex audientia die 14 ianuarii 2025 Franciscus</p></div>
+<div class="doc-end-matter"><p class="doc-promulg"><span style="display:inline-block">The Supreme Pontiff, Francis, at the Audience granted on 14 January 2025 to the undersigned Prefects and Secretaries of the Dicastery for the Doctrine of the Faith and the Dicastery for Culture and Education, approved this Note and ordered its publication.</span></p><p class="doc-promulg"><span style="display:inline-block">Given in Rome, at the offices of the Dicastery for the Doctrine of the Faith and the Dicastery for Culture and Education, on 28 January 2025, the Liturgical Memorial of Saint Thomas Aquinas, Doctor of the Church.</span></p><p class="doc-signature">Ex audientia die 14 ianuarii 2025 Franciscus</p></div>
 
 <nav id="ch-indicator"></nav>
 
@@ -1504,7 +1517,8 @@ window.addEventListener('resize', () => {
 if (document.body.classList.contains('doc-laudato_si') ||
     document.body.classList.contains('doc-magnifica_humanitas') ||
     document.body.classList.contains('doc-antiqua_et_nova') ||
-    document.body.classList.contains('doc-quo_vadis_humanitas')) {
+    document.body.classList.contains('doc-quo_vadis_humanitas') ||
+    document.body.classList.contains('doc-sacrosanctum_concilium')) {
   const paragraphs = Array.from(document.querySelectorAll('.paragraph'));
   let raf = 0;
   let cachedNumH = 0;   // every digit renders the same height for a given font/size
