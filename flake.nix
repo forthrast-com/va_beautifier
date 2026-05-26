@@ -25,6 +25,7 @@
           default = pkgs.mkShell {
             packages = [
               python
+              pkgs.gnumake
             ];
           };
         });
