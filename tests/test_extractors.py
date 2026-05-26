@@ -35,6 +35,13 @@ class ExtractorRegressionTests(unittest.TestCase):
         self.assertIn('*corpus*', data['paragraphs'][2]['text'])
         self.assertTrue(any('<sup>th</sup>' in fn['text']
                             for fn in data['footnotes']))
+        conclusion = {p['number']: p for p in data['paragraphs'][228:]}
+        self.assertEqual(conclusion[229]['chapter'], 5)
+        self.assertEqual(conclusion[229]['section_title'], 'CONCLUSION')
+        self.assertEqual(conclusion[230]['sub_heading'],
+                         'The Word became flesh')
+        self.assertEqual(conclusion[243]['sub_heading'],
+                         'The song of hope: the Magnificat')
 
 
 if __name__ == '__main__':

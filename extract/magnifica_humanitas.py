@@ -83,7 +83,6 @@ def extract():
     section_title = 'Introduction'
     sub_heading = ''
     pending_chapter_title = False
-    in_conclusion = False
 
     for p in ps[first_body_idx:first_note_idx]:
         text = clean_text(p)
@@ -113,22 +112,6 @@ def extract():
             section_title = ''
             sub_heading = ''
             pending_chapter_title = True
-            in_conclusion = False
-            continue
-
-        if heading == 'CONCLUSION':
-            # The TOC at the top of the source lists CONCLUSION parallel to
-            # the numbered chapters, so it earns its own chapter slot rather
-            # than being demoted to a final section. Its bold-italic
-            # sub-titles then become sections of that chapter.
-            chapter += 1
-            chapter_title = 'Conclusion'
-            chapter_subtitle = ''
-            section = 0
-            section_title = ''
-            sub_heading = ''
-            pending_chapter_title = False
-            in_conclusion = True
             continue
 
         if p.find('b'):
@@ -140,8 +123,7 @@ def extract():
                     chapter_subtitle += separator + _title(heading)
                 continue
 
-            subordinate = (not in_conclusion
-                           and p.find('i') is not None
+            subordinate = (p.find('i') is not None
                            and chapter != 0
                            and section)
             if subordinate:
