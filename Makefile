@@ -41,5 +41,5 @@ build/%.epub: build/%.toml make_book.py templates/book.typ
 # --- Housekeeping ---
 
 clean:
-	rm -f $(TOMLS) $(HTMLS) site/index.html
+	rm -f $(HTMLS) site/index.html
 	rm -rf build/

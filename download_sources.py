@@ -53,7 +53,7 @@ SOURCES_MANIFEST = (
         'laudato_si_lt.html',
         'https://www.vatican.va/content/francesco/la/encyclicals/documents/'
         'papa-francesco_20150524_enciclica-laudato-si.html',
-        'implemented',
+        'queued',
         "Laudato Si' (Latin)",
     ),
     Source(

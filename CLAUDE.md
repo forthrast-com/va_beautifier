@@ -33,7 +33,7 @@ The TOML is the canonical intermediate. Downstream renderers consume TOML — ne
 - `make_book.py <slug>` — reads `<slug>.toml`, emits `build/<slug>.md` + `build/<slug>_titlepage.typ` (the title page as raw typst, fed to pandoc via `--include-before-body` so it lands before the TOC). Then runs pandoc twice: once to `<slug>.epub` and once to `<slug>.pdf` (via `--pdf-engine=typst --pdf-engine-opt=--root=<ROOT>`). Body font is Hoefler Text by default; override with `VA_BOOK_FONT=…`. Page breaks and the end matter ride as raw typst blocks, which the EPUB writer ignores.
 - `templates/book.typ` — pandoc-typst `conf` module imported via YAML `template:` metadata. Owns page geometry (A5, 11pt), font defaults, heading shows for chapter/section/subsection, footnote entry styling, and the centred italic "Contents" header on the TOC page. Does *not* render the title — that's the include-before-body's job.
 - `assets/styles.css`, `assets/scripts.js` — read by `make_html.py` and inlined into the output. The JS has two placeholders, `__INDICATOR_JSON__` and `__DOC_NAME__`, substituted at render time. Edit these files directly; the output is still self-contained.
-- `build.sh` — iterates the `DOCS` list, runs parse + render + book-build for each. `VA_SKIP_BOOKS=1` skips the EPUB/PDF stage (it only runs if `pandoc` is on PATH). Add a doc → drop extractor → add slug to the list.
+- `Makefile` — dependency-tracked build. `make` builds all HTML + index; `make books` also builds EPUB/PDF (requires pandoc + typst). Add a doc → drop extractor → add slug to `DOCS` and add an explicit TOML target with its source deps.
 
 ## TOML schema
 
@@ -105,9 +105,9 @@ metadata are published.
     - *Multi-paragraph footnotes:* the few notes in LS that span two
       paragraphs render as one block — pandoc's continuation-indent
       handling needs a closer look.
-    - *Auto-build hygiene:* `build.sh` re-emits TOMLs and HTML on every
-      run; the `git diff` after a clean build can be noisy. Consider
-      hashing inputs and skipping unchanged docs.
+    - *Auto-build hygiene:* `make` is now dependency-tracked so unchanged
+      docs are skipped, but `make clean && make` still re-emits everything.
+      Consider hashing inputs to skip truly unchanged docs even after a clean.
 - **More documents** — `sources/Fratelli tutti_en.html` and
   `sources/Sacrosanctum Concilium_{en,la}.html` are sitting un-extracted.
   Sacrosanctum is the old-flat template (GeS-shaped); Fratelli tutti is
@@ -118,7 +118,7 @@ metadata are published.
 
 ## Environment
 
-`flake.nix` provides Python 3.12 + beautifulsoup4. Build everything: `./build.sh` (it re-enters the flake dev shell when needed). Build one doc: `nix develop --command sh -c "python parse.py laudato_si && python make_html.py laudato_si"`.
+`flake.nix` provides Python 3.12 + beautifulsoup4 + GNU make. Build everything: `nix develop --command make`. Build one doc: `nix develop --command sh -c "python parse.py laudato_si && python make_html.py laudato_si"`.
 
 Run tests: `nix develop --command python -m unittest discover -s tests`.
 

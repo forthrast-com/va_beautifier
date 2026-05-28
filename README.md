@@ -14,7 +14,7 @@ Published for `https://circulars.forthrast.com/` using GitHub Pages:
 ## Build
 
 ```sh
-./build.sh
+nix develop --command make
 ```
 
 The build uses the Nix flake and renders the TOML intermediate files and flat

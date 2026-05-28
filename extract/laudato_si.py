@@ -32,7 +32,6 @@ from project import SOURCES
 
 
 EN_SRC = SOURCES / 'laudato_si_en.html'
-LT_SRC = SOURCES / 'laudato_si_lt.html'
 
 NAME = "Laudato Si'"
 HUE = 140
