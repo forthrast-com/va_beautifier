@@ -684,18 +684,21 @@ page = f"""<!DOCTYPE html>
 
 <aside id="fn-drawer">
   <div id="fn-content">
+    <input type="radio" name="drawer-view" id="view-toc"       hidden aria-hidden="true" checked>
+    <input type="radio" name="drawer-view" id="view-footnotes" hidden aria-hidden="true">
+    <input type="radio" name="drawer-view" id="view-bookmarks" hidden aria-hidden="true">
     <div class="drawer-tabs" role="tablist" aria-label="Drawer view">
-      <button class="drawer-view-tab active" type="button" role="tab" aria-controls="drawer-toc" aria-selected="true" data-drawer-view="toc">Contents</button>
-      <button class="drawer-view-tab" type="button" role="tab" aria-controls="drawer-footnotes" aria-selected="false" data-drawer-view="footnotes">Footnotes</button>
-      <button class="drawer-view-tab" type="button" role="tab" aria-controls="drawer-bookmarks" aria-selected="false" data-drawer-view="bookmarks">Bookmarks</button>
+      <label class="drawer-view-tab" for="view-toc"       role="tab" aria-controls="drawer-toc"       aria-selected="true"  data-drawer-view="toc">Contents</label>
+      <label class="drawer-view-tab" for="view-footnotes" role="tab" aria-controls="drawer-footnotes" aria-selected="false" data-drawer-view="footnotes">Footnotes</label>
+      <label class="drawer-view-tab" for="view-bookmarks" role="tab" aria-controls="drawer-bookmarks" aria-selected="false" data-drawer-view="bookmarks">Bookmarks</label>
     </div>
-    <div id="drawer-toc" class="drawer-view active" role="tabpanel">
+    <div id="drawer-toc" class="drawer-view" role="tabpanel">
       {toc_drawer_html}
     </div>
-    <div id="drawer-footnotes" class="drawer-view" role="tabpanel" hidden>
+    <div id="drawer-footnotes" class="drawer-view" role="tabpanel">
       {fn_drawer_html}
     </div>
-    <div id="drawer-bookmarks" class="drawer-view" role="tabpanel" hidden>
+    <div id="drawer-bookmarks" class="drawer-view" role="tabpanel">
       <div class="bookmarks-empty">
         <p>No bookmarks yet.</p>
         <p>In Contents, hover over a heading and select its bookmark icon to save it here.</p>
