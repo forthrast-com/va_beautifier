@@ -622,7 +622,7 @@ JS = (JS_TEMPLATE
       .replace('__DOC_NAME__', json.dumps(doc_name)))
 
 page = f"""<!DOCTYPE html>
-<html lang="en" style="--hue: {doc_hue}">
+<html lang="en" class="no-js" style="--hue: {doc_hue}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -630,6 +630,7 @@ page = f"""<!DOCTYPE html>
 <title>{e(doc_name)}</title>
 <style>{CSS}</style>
 <script>
+  document.documentElement.classList.remove('no-js');
   // Apply saved prefs before paint to avoid a flash of the default theme.
   // 'auto' (or no value) for theme leaves the attr unset so the CSS
   // prefers-color-scheme media query decides.

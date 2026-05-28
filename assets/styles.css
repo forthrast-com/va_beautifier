@@ -759,6 +759,11 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .doc-laudato_si .ch-seg,
 .doc-magnifica_humanitas .ch-seg { flex: 1; height: auto; min-height: 1px; }
 
+/* ── no-JS: hide non-functional fixed chrome ────────────────────────────── */
+.no-js #sticky-bar,
+.no-js #bar-actions,
+.no-js #doc-title-corner { display: none; }
+
 /* ── no-JS fallback: inline TOC + footnotes ────────────────────────────── */
 .noscript-toc {
     margin: 2rem 0 3.5rem;
