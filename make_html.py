@@ -636,6 +636,7 @@ page = f"""<!DOCTYPE html>
   <button id="action-home" aria-label="Home" title="Home">⌂</button>
   <button id="action-info" aria-label="About this document" title="About">i</button>
   <button id="action-prefs" aria-label="Reader settings" title="Reader settings"><span class="a-small">a</span>A</button>
+  <button id="fn-tab" aria-label="Notes &amp; contents" title="Notes &amp; contents" aria-expanded="false"><span class="dr-lines"><span>—</span><span>–</span><span>-</span></span></button>
 </div>
 
 <div id="info-panel" hidden>
@@ -702,8 +703,6 @@ page = f"""<!DOCTYPE html>
     </div>
   </div>
 </aside>
-<div id="fn-tab">Index</div>
-
 <script>{JS}</script>
 </body>
 </html>

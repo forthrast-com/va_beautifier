@@ -11,6 +11,8 @@ the TOML as Pandoc-compatible markup for both book formats.
 """
 
 import argparse
+import html
+import os
 import shutil
 import subprocess
 import sys
@@ -45,7 +47,6 @@ def emit_markdown(data, slug):
     # Hoefler Text is the right register for an encyclical: humanist,
     # warm, oldstyle figures, the face you find in good prayer books.
     # macOS-bundled. Override via VA_BOOK_FONT for other hosts.
-    import os
     font = os.environ.get('VA_BOOK_FONT', 'Hoefler Text')
     # Typst restricts imports to the project root, so we pass `--root`
     # via `--pdf-engine-opt` in run_pandoc() and reference the template
@@ -275,7 +276,6 @@ def _end_matter_typst(promulg, signature):
 
 def _end_matter_html(promulg, signature):
     """EPUB end matter — semantic colophon section with centred styles."""
-    import html
     parts = ['<section epub:type="colophon" style="text-align:center; margin-top:4em;">']
     if promulg:
         text = ' '.join(ln.strip() for ln in promulg.splitlines() if ln.strip())
@@ -333,10 +333,13 @@ def main():
             # `--root` tells typst where the project root is, so the
             # `template:` path in the markdown (which starts with `/`)
             # resolves to <ROOT>/templates/book.typ.
-            run_pandoc(md_path, BUILD / f'{args.slug}.pdf',
-                       '--pdf-engine=typst',
-                       f'--pdf-engine-opt=--root={ROOT}',
-                       f'--include-before-body={titlepage_path}')
+            pdf_args = (
+                '--pdf-engine=typst',
+                f'--pdf-engine-opt=--root={ROOT}',
+                f'--include-before-body={titlepage_path}',
+            )
+            run_pandoc(md_path, BUILD / f'{args.slug}.pdf',    *pdf_args)
+            run_pandoc(md_path, BUILD / f'{args.slug}_a4.pdf', '-M', 'papersize=a4', *pdf_args)
         else:
             print('  ! typst not found, skipping PDF')
 

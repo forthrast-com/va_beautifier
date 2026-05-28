@@ -33,9 +33,9 @@ site/index.html: $(HTMLS) make_index.py
 
 # --- Books (requires pandoc + typst) ---
 
-books: $(DOCS:%=build/%.epub) $(DOCS:%=build/%.pdf)
+books: $(DOCS:%=build/%.epub) $(DOCS:%=build/%.pdf) $(DOCS:%=build/%_a4.pdf)
 
-build/%.epub build/%.pdf &: build/%.toml make_book.py templates/book.typ
+build/%.epub build/%.pdf build/%_a4.pdf &: build/%.toml make_book.py templates/book.typ
 	python3 make_book.py $*
 
 # --- Housekeeping ---
