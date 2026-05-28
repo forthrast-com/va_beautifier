@@ -28,8 +28,6 @@ def emit_markdown(data, slug):
     promulg     = data.get('promulgation', '')
     signature   = data.get('signature', '')
     source_url  = data.get('source_url', '')
-    hero_image  = data.get('hero_image', '')
-    hero_credit = data.get('hero_credit', '')
     paragraphs  = data.get('paragraphs', [])
     footnotes   = data.get('footnotes', [])
 
@@ -211,24 +209,10 @@ def _typ_content(s):
     return s.replace('\\', '\\\\').replace('[', '\\[').replace(']', '\\]')
 
 
-def _title_page_typst(name, desc, desc_post, hero_image, hero_credit):
+def _title_page_typst(name, desc, desc_post):
     """Render the title page as raw typst. The 1fr vertical fillers above
-    and below the title block centre it on the page; with a hero image
-    the block sits a little high to give the image room to breathe. The
-    typst template paths use `/`-rooted paths (typst resolves these
-    relative to the project root set via `--root`)."""
+    and below the title block centre it on the page."""
     parts = ['#page(numbering: none)[', '  #set align(center)', '  #v(1fr)']
-
-    if hero_image:
-        # Typst paths starting with `/` are project-root-relative — the
-        # build script sets the root to ROOT, so this resolves to
-        # <ROOT>/<hero_image>.
-        path = '/' + hero_image.lstrip('/')
-        parts.append(f'  #image({_typ_str(path)}, width: 65%)')
-        if hero_credit:
-            parts.append('  #v(0.4em)')
-            parts.append(f'  #text(size: 8pt, style: "italic")[{_typ_content(hero_credit)}]')
-        parts.append('  #v(2.5em)')
 
     def stacked(block, size, tracking):
         bits = [_typ_content(ln.strip()) for ln in block.splitlines() if ln.strip()]
@@ -265,8 +249,6 @@ def _write_titlepage_include(data, slug):
         data['name'],
         data.get('desc', ''),
         data.get('desc_post', ''),
-        data.get('hero_image', ''),
-        data.get('hero_credit', ''),
     )
     path = BUILD / f'{slug}_titlepage.typ'
     path.write_text(title_typst + '\n', encoding='utf-8')

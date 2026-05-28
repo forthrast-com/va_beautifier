@@ -10,8 +10,6 @@ Each `extract/<doc>.py` exposes:
         'desc_post':    str,        # multi-line subtitle shown BELOW the title (may be '')
         'promulgation': str,        # multi-line promulgation (may be '')
         'signature':    str,        # papal signature line, e.g. "Franciscus" (may be '')
-        'hero_image':   str,        # path to title-page image, repo-relative (may be '')
-        'hero_credit':  str,        # one-line credit/caption shown beneath the image (may be '')
         'paragraphs':   list[dict], # per-paragraph dicts (see schema below)
         'footnotes':    list[dict],
     }
@@ -365,7 +363,7 @@ _PARA_FIELDS = [
 
 
 def write_toml(path, *, name, hue=None, source_url='', desc='', desc_post='',
-               promulgation='', signature='', hero_image='', hero_credit='',
+               promulgation='', signature='',
                paragraphs, footnotes, appendices=()):
     out = [f'name = {_toml_str(name)}']
     if hue is not None:
@@ -380,10 +378,6 @@ def write_toml(path, *, name, hue=None, source_url='', desc='', desc_post='',
         out.append(f'promulgation = {_toml_multiline(promulgation)}')
     if signature:
         out.append(f'signature = {_toml_str(signature)}')
-    if hero_image:
-        out.append(f'hero_image = {_toml_str(hero_image)}')
-    if hero_credit:
-        out.append(f'hero_credit = {_toml_str(hero_credit)}')
     out.append('')
 
     for p in paragraphs:
