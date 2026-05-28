@@ -329,30 +329,16 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
    right edge overlaps the drawer's left edge by a few px, and the drawer
    (z 60) paints over that overlap — so the tab reads as tucked under
    rather than projecting away from the drawer. */
-#fn-tab {
-    position: fixed;
-    top: 50%;
-    right: 0;
-    transform: translateY(-50%);
-    transition: right .3s ease;
-    z-index: 55;            /* below drawer's 60 */
-    writing-mode: vertical-rl;
-    background: var(--surface);
-    border: 1px solid var(--rule-tint);
-    border-right: none;        /* tab is flush against whatever's on its right (screen edge or drawer) */
-    padding: .6rem .4rem;
-    cursor: pointer;
-    font-family: var(--font-body);
-    font-size: .8rem;
-    color: var(--fg-dim);
-    letter-spacing: .05em;
-    user-select: none;
-    border-radius: 4px 0 0 4px;   /* left corners rounded only */
+#fn-tab .dr-lines {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    line-height: 1;
+    font-size: .68rem;
+    letter-spacing: 0;
 }
-#fn-drawer.open ~ #fn-tab {
-    right: calc(min(380px, 66vw) - .4rem);   /* overlap drawer's left edge by .4rem */
-}
-#fn-tab:hover                   { color: var(--accent); border-color: var(--accent); }
+#fn-tab[aria-expanded="true"]   { color: var(--accent); border-color: var(--accent); }
 #fn-content {
     flex: 1;
     min-width: 0;
@@ -865,9 +851,10 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 </div>
 
 <div id="bar-actions">
-  <button id="action-home" aria-label="Home" title="Home">⌂</button>
+  <button id="action-home" aria-label="Home" title="Home"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 16" width="11" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><rect x="1.5" y="2" width="9" height="13" rx=".8"/><circle cx="9" cy="8.5" r=".85" fill="currentColor" stroke="none"/></svg></button>
   <button id="action-info" aria-label="About this document" title="About">i</button>
   <button id="action-prefs" aria-label="Reader settings" title="Reader settings"><span class="a-small">a</span>A</button>
+  <button id="fn-tab" aria-label="Notes &amp; contents" title="Notes &amp; contents" aria-expanded="false"><span class="dr-lines"><span>—</span><span>–</span><span>-</span></span></button>
 </div>
 
 <div id="info-panel" hidden>
@@ -1544,8 +1531,6 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     </div>
   </div>
 </aside>
-<div id="fn-tab">Index</div>
-
 <script>// ─────────────────────────────────────────────────────────────────────────
 // Vatican-document reader scripts.
 //
@@ -1783,7 +1768,10 @@ try {
   if (Array.isArray(stored)) bookmarks = stored.filter(id => tocByTarget.has(id));
 } catch (e) {}
 
-tab.addEventListener('click', () => drawer.classList.toggle('open'));
+tab.addEventListener('click', () => {
+  const open = drawer.classList.toggle('open');
+  tab.setAttribute('aria-expanded', String(open));
+});
 
 function showDrawerView(view) {
   drawerTabs.forEach(button => {
