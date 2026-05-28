@@ -50,9 +50,13 @@ site/index.html: $(HTMLS) $(EPUBS) make_index.py
 
 # --- Books (requires pandoc + typst) ---
 
+# All three artefacts (EPUB, A5 PDF, A4 PDF) come from one make_book.py
+# invocation, so the epub rule below is the authoritative trigger and the
+# PDF rules at the bottom of this file are no-ops that just declare the
+# dependency for explicit `make site/downloads/foo-a5.pdf` calls.
 books: $(EPUBS)
 
-site/downloads/%.epub: build/%.toml make_book.py templates/book.typ
+site/downloads/%.epub: build/%.toml make_book.py templates/book.typ templates/epub.css templates/strip_fn_backlink.lua
 	python3 make_book.py $*
 
 # `make books` emits an .epub and two .pdfs (A5 reading edition + A4
