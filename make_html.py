@@ -687,7 +687,7 @@ page = f"""<!DOCTYPE html>
 </script>
 </head>
 <body class="doc-{args.doc}">
-<noscript><p class="noscript-banner">Non-interactive render — you might want to enable JavaScript. <a href="https://circulars.forthrast.com">circulars.forthrast.com</a></p></noscript>
+<noscript><p class="noscript-banner">Non-interactive render, you might want to enable JavaScript.<a href="https://circulars.forthrast.com">circulars.forthrast.com</a></p></noscript>
 <div id="doc-title-corner">{e(doc_name)}</div>
 <div id="sticky-bar">
   <span id="sticky-text">

@@ -826,7 +826,12 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .no-js #doc-title-corner { display: none; }
 
 /* ── no-JS fallback: inline TOC + footnotes ────────────────────────────── */
+.no-js body { padding-top: 1.5rem; }
 .noscript-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 2rem;
     font-size: .85rem;
     color: var(--fg-dim);
     border-bottom: 1px solid var(--rule);
