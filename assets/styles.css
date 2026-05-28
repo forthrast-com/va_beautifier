@@ -322,15 +322,6 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
    right edge overlaps the drawer's left edge by a few px, and the drawer
    (z 60) paints over that overlap — so the tab reads as tucked under
    rather than projecting away from the drawer. */
-#fn-tab .dr-lines {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 2px;
-    line-height: 1;
-    font-size: .68rem;
-    letter-spacing: 0;
-}
 #fn-tab[aria-expanded="true"]   { color: var(--accent); border-color: var(--accent); }
 #fn-content {
     flex: 1;
