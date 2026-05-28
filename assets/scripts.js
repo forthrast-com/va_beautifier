@@ -249,7 +249,10 @@ try {
   if (Array.isArray(stored)) bookmarks = stored.filter(id => tocByTarget.has(id));
 } catch (e) {}
 
-tab.addEventListener('click', () => drawer.classList.toggle('open'));
+tab.addEventListener('click', () => {
+  const open = drawer.classList.toggle('open');
+  tab.setAttribute('aria-expanded', String(open));
+});
 
 function showDrawerView(view) {
   drawerTabs.forEach(button => {

@@ -13,6 +13,7 @@ the TOML as Pandoc-compatible markup for both book formats.
 import argparse
 import colorsys
 import html
+import os
 import re
 import shutil
 import subprocess
@@ -61,7 +62,6 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
     # Hoefler Text is the right register for an encyclical: humanist,
     # warm, oldstyle figures, the face you find in good prayer books.
     # macOS-bundled. Override via VA_BOOK_FONT for other hosts.
-    import os
     font = os.environ.get('VA_BOOK_FONT', 'Hoefler Text')
     # Typst restricts imports to the project root, so we pass `--root`
     # via `--pdf-engine-opt` in run_pandoc() and reference the template
