@@ -680,7 +680,8 @@ page = f"""<!DOCTYPE html>
   <button id="action-home" aria-label="Home" title="Home"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 15" width="12" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"><path d="M7,1 L13,7 L13,14 L9,14 L9,9 L5,9 L5,14 L1,14 L1,7 Z"/></svg></button>
   <button id="action-info" aria-label="About this document" title="About">i</button>
   <button id="action-prefs" aria-label="Reader settings" title="Reader settings"><span class="a-small">a</span>A</button>
-  <button id="fn-tab" aria-label="Notes &amp; contents" title="Notes &amp; contents" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 9" width="14" height="9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="0" y1="1.5" x2="14" y2="1.5"/><line x1="5" y1="4.5" x2="14" y2="4.5"/><line x1="9" y1="7.5" x2="14" y2="7.5"/></svg></button>
+  <input type="checkbox" id="drawer-cb" hidden aria-hidden="true">
+  <label for="drawer-cb" id="fn-tab" role="button" tabindex="0" aria-label="Notes &amp; contents" title="Notes &amp; contents" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 9" width="14" height="9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="0" y1="1.5" x2="14" y2="1.5"/><line x1="5" y1="4.5" x2="14" y2="4.5"/><line x1="9" y1="7.5" x2="14" y2="7.5"/></svg></label>
 </div>
 
 <div id="info-panel" hidden>

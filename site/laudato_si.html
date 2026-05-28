@@ -318,22 +318,18 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     height: calc(100vh - var(--bar-h, 3rem));
     background: var(--surface);
     border-left: 1px solid var(--rule-tint);
-    display: none;
+    transform: translateX(100%);
+    transition: transform .3s ease;
+    display: flex;
     z-index: 60;
 }
-#fn-drawer.open {
-    display: flex;
-    animation: drawer-in .3s ease;
-}
-@keyframes drawer-in {
-    from { transform: translateX(100%); }
-    to   { transform: translateX(0); }
-}
+body:has(#drawer-cb:checked) #fn-drawer { transform: translateX(0); }
 /* Tab lives as a sibling of the drawer (not a child) so it can sit *behind*
    the drawer in z-order: when the drawer is open we shift the tab so its
    right edge overlaps the drawer's left edge by a few px, and the drawer
    (z 60) paints over that overlap — so the tab reads as tucked under
    rather than projecting away from the drawer. */
+body:has(#drawer-cb:checked) #fn-tab,
 #fn-tab[aria-expanded="true"]   { color: var(--accent); border-color: var(--accent); }
 #fn-content {
     flex: 1;
@@ -542,7 +538,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     gap: .35rem;
     font-family: system-ui, -apple-system, sans-serif;
 }
-#bar-actions button {
+#bar-actions :is(button, label) {
     width: 2rem; height: 2rem;
     border: 1px solid var(--rule);
     background: transparent;
@@ -554,9 +550,10 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     line-height: 1;
     display: flex; align-items: center; justify-content: center;
     transition: color .15s, border-color .15s, background .15s;
+    user-select: none;
 }
-#bar-actions button:hover  { color: var(--fg); border-color: var(--fg-dim); }
-#bar-actions button:active { background: var(--surface); }
+#bar-actions :is(button, label):hover  { color: var(--fg); border-color: var(--fg-dim); }
+#bar-actions :is(button, label):active { background: var(--surface); }
 #action-prefs              { letter-spacing: -.02em; font-family: Georgia, serif; }
 #action-prefs .a-small     { font-size: .7em; vertical-align: baseline; }
 #action-info               { font-style: italic; font-family: Georgia, serif; }
@@ -666,7 +663,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     #sticky-num         { display: none; }
     #sticky-sub         { padding-left: 0; font-size: .62em; }
     #bar-actions        { right: .4rem; }
-    #bar-actions button { width: 1.7rem; height: 1.7rem; font-size: .8rem; }
+    #bar-actions :is(button, label) { width: 1.7rem; height: 1.7rem; font-size: .8rem; }
     #prefs-panel        { right: .4rem; padding: .7rem .85rem; }
     #info-panel         { right: 2.75rem; padding: .7rem .85rem; }
     .pref-row           { gap: .75rem; margin: .4rem 0; }
@@ -850,7 +847,8 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
   <button id="action-home" aria-label="Home" title="Home"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 15" width="12" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"><path d="M7,1 L13,7 L13,14 L9,14 L9,9 L5,9 L5,14 L1,14 L1,7 Z"/></svg></button>
   <button id="action-info" aria-label="About this document" title="About">i</button>
   <button id="action-prefs" aria-label="Reader settings" title="Reader settings"><span class="a-small">a</span>A</button>
-  <button id="fn-tab" aria-label="Notes &amp; contents" title="Notes &amp; contents" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 9" width="14" height="9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="0" y1="1.5" x2="14" y2="1.5"/><line x1="5" y1="4.5" x2="14" y2="4.5"/><line x1="9" y1="7.5" x2="14" y2="7.5"/></svg></button>
+  <input type="checkbox" id="drawer-cb" hidden aria-hidden="true">
+  <label for="drawer-cb" id="fn-tab" role="button" tabindex="0" aria-label="Notes &amp; contents" title="Notes &amp; contents" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 9" width="14" height="9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="0" y1="1.5" x2="14" y2="1.5"/><line x1="5" y1="4.5" x2="14" y2="4.5"/><line x1="9" y1="7.5" x2="14" y2="7.5"/></svg></label>
 </div>
 
 <div id="info-panel" hidden>
@@ -1764,9 +1762,11 @@ try {
   if (Array.isArray(stored)) bookmarks = stored.filter(id => tocByTarget.has(id));
 } catch (e) {}
 
-tab.addEventListener('click', () => {
-  const open = drawer.classList.toggle('open');
-  tab.setAttribute('aria-expanded', String(open));
+const drawerCb = document.getElementById('drawer-cb');
+tab.addEventListener('click', e => {
+  e.preventDefault();   // stop the label toggling the checkbox twice
+  drawerCb.checked = !drawerCb.checked;
+  tab.setAttribute('aria-expanded', String(drawerCb.checked));
 });
 
 function showDrawerView(view) {
@@ -1879,7 +1879,7 @@ document.querySelectorAll('.sec-nav-link, .sub-nav-link').forEach(a => {
 document.querySelectorAll('sup a').forEach(a => {
   a.addEventListener('click', e => {
     e.preventDefault();
-    drawer.classList.add('open');
+    drawerCb.checked = true;
     showDrawerView('footnotes');
     selectFn(a.getAttribute('href').slice(1));
   });
