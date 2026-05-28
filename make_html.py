@@ -687,6 +687,7 @@ page = f"""<!DOCTYPE html>
 </script>
 </head>
 <body class="doc-{args.doc}">
+<noscript><p class="noscript-banner">Simplified view — navigation and footnotes require JavaScript. <a href="index.html">All documents →</a></p></noscript>
 <div id="doc-title-corner">{e(doc_name)}</div>
 <div id="sticky-bar">
   <span id="sticky-text">
