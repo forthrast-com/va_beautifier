@@ -357,7 +357,11 @@ body:has(#drawer-cb:checked) #fn-tab,
     cursor: pointer;
 }
 .drawer-view-tab:hover          { color: var(--fg); background: var(--surface-hi); }
-.drawer-view-tab.active {
+.drawer-view-tab.active,
+body:has(#view-toc:checked)         .drawer-view-tab[for="view-toc"],
+body:has(#view-footnotes:checked)   .drawer-view-tab[for="view-footnotes"],
+body:has(#view-bookmarks:checked)   .drawer-view-tab[for="view-bookmarks"],
+body:has(#fn-drawer .fn-item:target) .drawer-view-tab[for="view-footnotes"] {
     color: var(--accent);
     border-color: var(--rule-tint);
     background: var(--surface-hi);
@@ -366,8 +370,16 @@ body:has(#drawer-cb:checked) #fn-tab,
     flex: 1;
     overflow-y: auto;
     padding: 1rem 1rem 2rem .5rem;
+    display: none;
 }
-.drawer-view[hidden]            { display: none; }
+/* Radio-driven tab visibility */
+body:has(#view-toc:checked) #drawer-toc,
+body:has(#view-footnotes:checked) #drawer-footnotes,
+body:has(#view-bookmarks:checked) #drawer-bookmarks     { display: block; }
+/* Footnote ref click: open drawer and surface footnotes panel */
+body:has(#fn-drawer .fn-item:target) #fn-drawer         { transform: translateX(0); }
+body:has(#fn-drawer .fn-item:target) #drawer-footnotes  { display: block; }
+body:has(#fn-drawer .fn-item:target) #fn-tab            { color: var(--accent); border-color: var(--accent); }
 .toc-item {
     display: flex;
     align-items: start;
@@ -1149,12 +1161,15 @@ body:has(#drawer-cb:checked) #fn-tab,
 
 <aside id="fn-drawer">
   <div id="fn-content">
+    <input type="radio" name="drawer-view" id="view-toc"       hidden aria-hidden="true" checked>
+    <input type="radio" name="drawer-view" id="view-footnotes" hidden aria-hidden="true">
+    <input type="radio" name="drawer-view" id="view-bookmarks" hidden aria-hidden="true">
     <div class="drawer-tabs" role="tablist" aria-label="Drawer view">
-      <button class="drawer-view-tab active" type="button" role="tab" aria-controls="drawer-toc" aria-selected="true" data-drawer-view="toc">Contents</button>
-      <button class="drawer-view-tab" type="button" role="tab" aria-controls="drawer-footnotes" aria-selected="false" data-drawer-view="footnotes">Footnotes</button>
-      <button class="drawer-view-tab" type="button" role="tab" aria-controls="drawer-bookmarks" aria-selected="false" data-drawer-view="bookmarks">Bookmarks</button>
+      <label class="drawer-view-tab" for="view-toc"       role="tab" aria-controls="drawer-toc"       aria-selected="true"  data-drawer-view="toc">Contents</label>
+      <label class="drawer-view-tab" for="view-footnotes" role="tab" aria-controls="drawer-footnotes" aria-selected="false" data-drawer-view="footnotes">Footnotes</label>
+      <label class="drawer-view-tab" for="view-bookmarks" role="tab" aria-controls="drawer-bookmarks" aria-selected="false" data-drawer-view="bookmarks">Bookmarks</label>
     </div>
-    <div id="drawer-toc" class="drawer-view active" role="tabpanel">
+    <div id="drawer-toc" class="drawer-view" role="tabpanel">
       <h3 class="fn-group toc-item" data-target="ch-0" data-label="Preface / Introduction"><a href="#ch-0" class="fn-ch-link">Preface / Introduction</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-0" aria-label="Bookmark Preface / Introduction" aria-pressed="false"></button></h3>
 <p class="sub-nav-item toc-item" data-target="sub-3" data-label="Nothing in this world is indifferent to us"><a href="#sub-3" class="sub-nav-link">Nothing in this world is indifferent to us</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-3" aria-label="Bookmark Nothing in this world is indifferent to us" aria-pressed="false"></button></p>
 <p class="sub-nav-item toc-item" data-target="sub-7" data-label="United by the same concern"><a href="#sub-7" class="sub-nav-link">United by the same concern</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-7" aria-label="Bookmark United by the same concern" aria-pressed="false"></button></p>
@@ -1210,7 +1225,7 @@ body:has(#drawer-cb:checked) #fn-tab,
 <p class="sec-nav-item toc-item" data-target="appendix-1" data-label="A prayer for our earth"><a href="#appendix-1" class="sec-nav-link">A prayer for our earth</a><button class="bookmark-toggle" type="button" data-bookmark-target="appendix-1" aria-label="Bookmark A prayer for our earth" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="appendix-2" data-label="A Christian prayer in union with creation"><a href="#appendix-2" class="sec-nav-link">A Christian prayer in union with creation</a><button class="bookmark-toggle" type="button" data-bookmark-target="appendix-2" aria-label="Bookmark A Christian prayer in union with creation" aria-pressed="false"></button></p>
     </div>
-    <div id="drawer-footnotes" class="drawer-view" role="tabpanel" hidden>
+    <div id="drawer-footnotes" class="drawer-view" role="tabpanel">
       <h3 class="fn-group"><a href="#ch-0" class="fn-ch-link">Preface / Introduction</a></h3>
 <ol class="fn-list">
 <li id="fn-0-0-1" class="fn-item"><a href="#para-1" class="fn-num-link">1</a><p><em>Canticle of the Creatures</em>, in <em>Francis of Assisi: Early Documents</em>, vol. 1, New York-London-Manila, 1999, 113-114.</p></li>
@@ -1516,7 +1531,7 @@ body:has(#drawer-cb:checked) #fn-tab,
 <li id="fn-0-6-172" class="fn-item"><a href="#para-244" class="fn-num-link">172</a><p>BASIL THE GREAT, <em>Hom. in Hexaemeron</em>, I, 2, 6: PG 29, 8.</p></li>
 </ol>
     </div>
-    <div id="drawer-bookmarks" class="drawer-view" role="tabpanel" hidden>
+    <div id="drawer-bookmarks" class="drawer-view" role="tabpanel">
       <div class="bookmarks-empty">
         <p>No bookmarks yet.</p>
         <p>In Contents, hover over a heading and select its bookmark icon to save it here.</p>
@@ -1770,20 +1785,16 @@ tab.addEventListener('click', e => {
 });
 
 function showDrawerView(view) {
-  drawerTabs.forEach(button => {
-    const active = button.dataset.drawerView === view;
-    button.classList.toggle('active', active);
-    button.setAttribute('aria-selected', active ? 'true' : 'false');
-  });
-  drawerViews.forEach(panel => {
-    const active = panel.id === 'drawer-' + view;
-    panel.hidden = !active;
-    panel.classList.toggle('active', active);
+  const radio = document.getElementById('view-' + view);
+  if (radio) radio.checked = true;
+  drawerTabs.forEach(tab => {
+    const active = tab.dataset.drawerView === view;
+    tab.setAttribute('aria-selected', active ? 'true' : 'false');
   });
 }
 
-drawerTabs.forEach(button => {
-  button.addEventListener('click', () => showDrawerView(button.dataset.drawerView));
+drawerTabs.forEach(tab => {
+  tab.addEventListener('click', () => showDrawerView(tab.dataset.drawerView));
 });
 
 function followDrawerLink(a) {
@@ -1880,6 +1891,7 @@ document.querySelectorAll('sup a').forEach(a => {
   a.addEventListener('click', e => {
     e.preventDefault();
     drawerCb.checked = true;
+    document.getElementById('view-footnotes').checked = true;
     showDrawerView('footnotes');
     selectFn(a.getAttribute('href').slice(1));
   });
