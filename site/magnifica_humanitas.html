@@ -772,6 +772,14 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .no-js #doc-title-corner { display: none; }
 
 /* ── no-JS fallback: inline TOC + footnotes ────────────────────────────── */
+.noscript-banner {
+    font-size: .85rem;
+    color: var(--fg-dim);
+    border-bottom: 1px solid var(--rule);
+    padding: .6rem 0 .65rem;
+    margin: 0 0 2rem;
+}
+.noscript-banner a { color: var(--accent); }
 .noscript-toc {
     margin: 2rem 0 3.5rem;
     padding: 1.5rem 1.5rem 1.25rem;
@@ -824,6 +832,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 </script>
 </head>
 <body class="doc-magnifica_humanitas">
+<noscript><p class="noscript-banner">Simplified view — navigation and footnotes require JavaScript. <a href="index.html">All documents →</a></p></noscript>
 <div id="doc-title-corner">Magnifica Humanitas</div>
 <div id="sticky-bar">
   <span id="sticky-text">
