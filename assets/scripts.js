@@ -249,24 +249,26 @@ try {
   if (Array.isArray(stored)) bookmarks = stored.filter(id => tocByTarget.has(id));
 } catch (e) {}
 
-const drawerCb = document.getElementById('drawer-cb');
-tab.addEventListener('click', e => {
-  e.preventDefault();   // stop the label toggling the checkbox twice
-  drawerCb.checked = !drawerCb.checked;
-  tab.setAttribute('aria-expanded', String(drawerCb.checked));
+tab.addEventListener('click', () => {
+  const open = drawer.classList.toggle('open');
+  tab.setAttribute('aria-expanded', String(open));
 });
 
 function showDrawerView(view) {
-  const radio = document.getElementById('view-' + view);
-  if (radio) radio.checked = true;
-  drawerTabs.forEach(tab => {
-    const active = tab.dataset.drawerView === view;
-    tab.setAttribute('aria-selected', active ? 'true' : 'false');
+  drawerTabs.forEach(button => {
+    const active = button.dataset.drawerView === view;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-selected', active ? 'true' : 'false');
+  });
+  drawerViews.forEach(panel => {
+    const active = panel.id === 'drawer-' + view;
+    panel.hidden = !active;
+    panel.classList.toggle('active', active);
   });
 }
 
-drawerTabs.forEach(tab => {
-  tab.addEventListener('click', () => showDrawerView(tab.dataset.drawerView));
+drawerTabs.forEach(button => {
+  button.addEventListener('click', () => showDrawerView(button.dataset.drawerView));
 });
 
 function followDrawerLink(a) {
@@ -362,8 +364,7 @@ document.querySelectorAll('.sec-nav-link, .sub-nav-link').forEach(a => {
 document.querySelectorAll('sup a').forEach(a => {
   a.addEventListener('click', e => {
     e.preventDefault();
-    drawerCb.checked = true;
-    document.getElementById('view-footnotes').checked = true;
+    drawer.classList.add('open');
     showDrawerView('footnotes');
     selectFn(a.getAttribute('href').slice(1));
   });

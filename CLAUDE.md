@@ -122,6 +122,38 @@ published, while intermediate Markdown/TOML stays in `build/` only.
   reference capture recorded by `download_sources.py` for a possible
   future edition is `francis_g7_ai_en.html`.
 
+## JS-free drawer (not implemented — approach notes)
+
+The drawer, tabs, and footnote refs can all work without JavaScript using
+only CSS + native HTML. Tested and reverted — the embedded-browser context
+that prompted it turned out to disable JS globally (Claude iOS app), and
+the extra HTML complexity wasn't worth the marginal improvement elsewhere.
+
+If revisiting:
+
+- **Drawer toggle** — replace `<button id="fn-tab">` with
+  `<input type="checkbox" id="drawer-cb" hidden>` +
+  `<label for="drawer-cb" id="fn-tab">`. CSS: `body:has(#drawer-cb:checked)
+  #fn-drawer { transform: translateX(0); }`. JS intercepts the label click
+  with `e.preventDefault()` and sets `drawerCb.checked` manually so both
+  paths stay in sync.
+
+- **Tab strip** — add three hidden radio inputs (`name="drawer-view"`,
+  ids `view-toc` / `view-footnotes` / `view-bookmarks`, first `checked`).
+  Tab buttons become `<label for="view-X">`. CSS:
+  `body:has(#view-X:checked) #drawer-X { display: block; }` for visibility,
+  `body:has(#view-X:checked) .drawer-view-tab[for="view-X"]` for active
+  styling. JS sets `radio.checked` instead of toggling `.active` and
+  `panel.hidden`.
+
+- **Footnote refs** — the `<sup>` links already point to `#fn-{p}-{ch}-{n}`
+  IDs on `.fn-item` elements inside the drawer.
+  `body:has(#fn-drawer .fn-item:target) #fn-drawer { transform: translateX(0); }`
+  opens the drawer; a parallel rule forces `#drawer-footnotes` visible.
+  Limitation: clicking close (unchecking the drawer checkbox) won't hide the
+  drawer while a `:target` is still active — a reset anchor inside the close
+  button (`href="#"` or a top-of-page anchor) would fix this.
+
 ## Environment
 
 `flake.nix` provides Python 3.12 + beautifulsoup4, GNU make, pandoc, and

@@ -316,13 +316,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     display: flex;
     z-index: 60;
 }
-body:has(#drawer-cb:checked) #fn-drawer { transform: translateX(0); }
-/* Tab lives as a sibling of the drawer (not a child) so it can sit *behind*
-   the drawer in z-order: when the drawer is open we shift the tab so its
-   right edge overlaps the drawer's left edge by a few px, and the drawer
-   (z 60) paints over that overlap — so the tab reads as tucked under
-   rather than projecting away from the drawer. */
-body:has(#drawer-cb:checked) #fn-tab,
+#fn-drawer.open { transform: translateX(0); }
 #fn-tab[aria-expanded="true"]   { color: var(--accent); border-color: var(--accent); }
 #fn-content {
     flex: 1;
@@ -350,11 +344,7 @@ body:has(#drawer-cb:checked) #fn-tab,
     cursor: pointer;
 }
 .drawer-view-tab:hover          { color: var(--fg); background: var(--surface-hi); }
-.drawer-view-tab.active,
-body:has(#view-toc:checked)         .drawer-view-tab[for="view-toc"],
-body:has(#view-footnotes:checked)   .drawer-view-tab[for="view-footnotes"],
-body:has(#view-bookmarks:checked)   .drawer-view-tab[for="view-bookmarks"],
-body:has(#fn-drawer .fn-item:target) .drawer-view-tab[for="view-footnotes"] {
+.drawer-view-tab.active {
     color: var(--accent);
     border-color: var(--rule-tint);
     background: var(--surface-hi);
@@ -363,16 +353,8 @@ body:has(#fn-drawer .fn-item:target) .drawer-view-tab[for="view-footnotes"] {
     flex: 1;
     overflow-y: auto;
     padding: 1rem 1rem 2rem .5rem;
-    display: none;
 }
-/* Radio-driven tab visibility */
-body:has(#view-toc:checked) #drawer-toc,
-body:has(#view-footnotes:checked) #drawer-footnotes,
-body:has(#view-bookmarks:checked) #drawer-bookmarks     { display: block; }
-/* Footnote ref click: open drawer and surface footnotes panel */
-body:has(#fn-drawer .fn-item:target) #fn-drawer         { transform: translateX(0); }
-body:has(#fn-drawer .fn-item:target) #drawer-footnotes  { display: block; }
-body:has(#fn-drawer .fn-item:target) #fn-tab            { color: var(--accent); border-color: var(--accent); }
+.drawer-view[hidden]            { display: none; }
 .toc-item {
     display: flex;
     align-items: start;
@@ -559,7 +541,7 @@ body:has(#fn-drawer .fn-item:target) #fn-tab            { color: var(--accent); 
     gap: .35rem;
     font-family: system-ui, -apple-system, sans-serif;
 }
-#bar-actions :is(button, label) {
+#bar-actions button {
     width: 2rem; height: 2rem;
     border: 1px solid var(--rule);
     background: transparent;
@@ -571,10 +553,9 @@ body:has(#fn-drawer .fn-item:target) #fn-tab            { color: var(--accent); 
     line-height: 1;
     display: flex; align-items: center; justify-content: center;
     transition: color .15s, border-color .15s, background .15s;
-    user-select: none;
 }
-#bar-actions :is(button, label):hover  { color: var(--fg); border-color: var(--fg-dim); }
-#bar-actions :is(button, label):active { background: var(--surface); }
+#bar-actions button:hover  { color: var(--fg); border-color: var(--fg-dim); }
+#bar-actions button:active { background: var(--surface); }
 #action-prefs              { letter-spacing: -.02em; font-family: Georgia, serif; }
 #action-prefs .a-small     { font-size: .7em; vertical-align: baseline; }
 #action-info               { font-style: italic; font-family: Georgia, serif; }
@@ -684,7 +665,7 @@ body:has(#fn-drawer .fn-item:target) #fn-tab            { color: var(--accent); 
     #sticky-num         { display: none; }
     #sticky-sub         { padding-left: 0; font-size: .62em; }
     #bar-actions        { right: .4rem; }
-    #bar-actions :is(button, label) { width: 1.7rem; height: 1.7rem; font-size: .8rem; }
+    #bar-actions button { width: 1.7rem; height: 1.7rem; font-size: .8rem; }
     #prefs-panel        { right: .4rem; padding: .7rem .85rem; }
     #info-panel         { right: 2.75rem; padding: .7rem .85rem; }
     .pref-row           { gap: .75rem; margin: .4rem 0; }

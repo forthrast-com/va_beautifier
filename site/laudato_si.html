@@ -323,13 +323,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     display: flex;
     z-index: 60;
 }
-body:has(#drawer-cb:checked) #fn-drawer { transform: translateX(0); }
-/* Tab lives as a sibling of the drawer (not a child) so it can sit *behind*
-   the drawer in z-order: when the drawer is open we shift the tab so its
-   right edge overlaps the drawer's left edge by a few px, and the drawer
-   (z 60) paints over that overlap — so the tab reads as tucked under
-   rather than projecting away from the drawer. */
-body:has(#drawer-cb:checked) #fn-tab,
+#fn-drawer.open { transform: translateX(0); }
 #fn-tab[aria-expanded="true"]   { color: var(--accent); border-color: var(--accent); }
 #fn-content {
     flex: 1;
@@ -357,11 +351,7 @@ body:has(#drawer-cb:checked) #fn-tab,
     cursor: pointer;
 }
 .drawer-view-tab:hover          { color: var(--fg); background: var(--surface-hi); }
-.drawer-view-tab.active,
-body:has(#view-toc:checked)         .drawer-view-tab[for="view-toc"],
-body:has(#view-footnotes:checked)   .drawer-view-tab[for="view-footnotes"],
-body:has(#view-bookmarks:checked)   .drawer-view-tab[for="view-bookmarks"],
-body:has(#fn-drawer .fn-item:target) .drawer-view-tab[for="view-footnotes"] {
+.drawer-view-tab.active {
     color: var(--accent);
     border-color: var(--rule-tint);
     background: var(--surface-hi);
@@ -370,16 +360,8 @@ body:has(#fn-drawer .fn-item:target) .drawer-view-tab[for="view-footnotes"] {
     flex: 1;
     overflow-y: auto;
     padding: 1rem 1rem 2rem .5rem;
-    display: none;
 }
-/* Radio-driven tab visibility */
-body:has(#view-toc:checked) #drawer-toc,
-body:has(#view-footnotes:checked) #drawer-footnotes,
-body:has(#view-bookmarks:checked) #drawer-bookmarks     { display: block; }
-/* Footnote ref click: open drawer and surface footnotes panel */
-body:has(#fn-drawer .fn-item:target) #fn-drawer         { transform: translateX(0); }
-body:has(#fn-drawer .fn-item:target) #drawer-footnotes  { display: block; }
-body:has(#fn-drawer .fn-item:target) #fn-tab            { color: var(--accent); border-color: var(--accent); }
+.drawer-view[hidden]            { display: none; }
 .toc-item {
     display: flex;
     align-items: start;
@@ -550,7 +532,7 @@ body:has(#fn-drawer .fn-item:target) #fn-tab            { color: var(--accent); 
     gap: .35rem;
     font-family: system-ui, -apple-system, sans-serif;
 }
-#bar-actions :is(button, label) {
+#bar-actions button {
     width: 2rem; height: 2rem;
     border: 1px solid var(--rule);
     background: transparent;
@@ -562,10 +544,9 @@ body:has(#fn-drawer .fn-item:target) #fn-tab            { color: var(--accent); 
     line-height: 1;
     display: flex; align-items: center; justify-content: center;
     transition: color .15s, border-color .15s, background .15s;
-    user-select: none;
 }
-#bar-actions :is(button, label):hover  { color: var(--fg); border-color: var(--fg-dim); }
-#bar-actions :is(button, label):active { background: var(--surface); }
+#bar-actions button:hover  { color: var(--fg); border-color: var(--fg-dim); }
+#bar-actions button:active { background: var(--surface); }
 #action-prefs              { letter-spacing: -.02em; font-family: Georgia, serif; }
 #action-prefs .a-small     { font-size: .7em; vertical-align: baseline; }
 #action-info               { font-style: italic; font-family: Georgia, serif; }
@@ -675,7 +656,7 @@ body:has(#fn-drawer .fn-item:target) #fn-tab            { color: var(--accent); 
     #sticky-num         { display: none; }
     #sticky-sub         { padding-left: 0; font-size: .62em; }
     #bar-actions        { right: .4rem; }
-    #bar-actions :is(button, label) { width: 1.7rem; height: 1.7rem; font-size: .8rem; }
+    #bar-actions button { width: 1.7rem; height: 1.7rem; font-size: .8rem; }
     #prefs-panel        { right: .4rem; padding: .7rem .85rem; }
     #info-panel         { right: 2.75rem; padding: .7rem .85rem; }
     .pref-row           { gap: .75rem; margin: .4rem 0; }
@@ -859,8 +840,7 @@ body:has(#fn-drawer .fn-item:target) #fn-tab            { color: var(--accent); 
   <button id="action-home" aria-label="Home" title="Home"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 15" width="12" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"><path d="M7,1 L13,7 L13,14 L9,14 L9,9 L5,9 L5,14 L1,14 L1,7 Z"/></svg></button>
   <button id="action-info" aria-label="About this document" title="About">i</button>
   <button id="action-prefs" aria-label="Reader settings" title="Reader settings"><span class="a-small">a</span>A</button>
-  <input type="checkbox" id="drawer-cb" hidden aria-hidden="true">
-  <label for="drawer-cb" id="fn-tab" role="button" tabindex="0" aria-label="Notes &amp; contents" title="Notes &amp; contents" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 9" width="14" height="9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="0" y1="1.5" x2="14" y2="1.5"/><line x1="5" y1="4.5" x2="14" y2="4.5"/><line x1="9" y1="7.5" x2="14" y2="7.5"/></svg></label>
+  <button id="fn-tab" aria-label="Notes &amp; contents" title="Notes &amp; contents" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 9" width="14" height="9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="0" y1="1.5" x2="14" y2="1.5"/><line x1="5" y1="4.5" x2="14" y2="4.5"/><line x1="9" y1="7.5" x2="14" y2="7.5"/></svg></button>
 </div>
 
 <div id="info-panel" hidden>
@@ -1161,15 +1141,12 @@ body:has(#fn-drawer .fn-item:target) #fn-tab            { color: var(--accent); 
 
 <aside id="fn-drawer">
   <div id="fn-content">
-    <input type="radio" name="drawer-view" id="view-toc"       hidden aria-hidden="true" checked>
-    <input type="radio" name="drawer-view" id="view-footnotes" hidden aria-hidden="true">
-    <input type="radio" name="drawer-view" id="view-bookmarks" hidden aria-hidden="true">
     <div class="drawer-tabs" role="tablist" aria-label="Drawer view">
-      <label class="drawer-view-tab" for="view-toc"       role="tab" aria-controls="drawer-toc"       aria-selected="true"  data-drawer-view="toc">Contents</label>
-      <label class="drawer-view-tab" for="view-footnotes" role="tab" aria-controls="drawer-footnotes" aria-selected="false" data-drawer-view="footnotes">Footnotes</label>
-      <label class="drawer-view-tab" for="view-bookmarks" role="tab" aria-controls="drawer-bookmarks" aria-selected="false" data-drawer-view="bookmarks">Bookmarks</label>
+      <button class="drawer-view-tab active" type="button" role="tab" aria-controls="drawer-toc"       aria-selected="true"  data-drawer-view="toc">Contents</button>
+      <button class="drawer-view-tab"        type="button" role="tab" aria-controls="drawer-footnotes" aria-selected="false" data-drawer-view="footnotes">Footnotes</button>
+      <button class="drawer-view-tab"        type="button" role="tab" aria-controls="drawer-bookmarks" aria-selected="false" data-drawer-view="bookmarks">Bookmarks</button>
     </div>
-    <div id="drawer-toc" class="drawer-view" role="tabpanel">
+    <div id="drawer-toc" class="drawer-view active" role="tabpanel">
       <h3 class="fn-group toc-item" data-target="ch-0" data-label="Preface / Introduction"><a href="#ch-0" class="fn-ch-link">Preface / Introduction</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-0" aria-label="Bookmark Preface / Introduction" aria-pressed="false"></button></h3>
 <p class="sub-nav-item toc-item" data-target="sub-3" data-label="Nothing in this world is indifferent to us"><a href="#sub-3" class="sub-nav-link">Nothing in this world is indifferent to us</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-3" aria-label="Bookmark Nothing in this world is indifferent to us" aria-pressed="false"></button></p>
 <p class="sub-nav-item toc-item" data-target="sub-7" data-label="United by the same concern"><a href="#sub-7" class="sub-nav-link">United by the same concern</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-7" aria-label="Bookmark United by the same concern" aria-pressed="false"></button></p>
@@ -1225,7 +1202,7 @@ body:has(#fn-drawer .fn-item:target) #fn-tab            { color: var(--accent); 
 <p class="sec-nav-item toc-item" data-target="appendix-1" data-label="A prayer for our earth"><a href="#appendix-1" class="sec-nav-link">A prayer for our earth</a><button class="bookmark-toggle" type="button" data-bookmark-target="appendix-1" aria-label="Bookmark A prayer for our earth" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="appendix-2" data-label="A Christian prayer in union with creation"><a href="#appendix-2" class="sec-nav-link">A Christian prayer in union with creation</a><button class="bookmark-toggle" type="button" data-bookmark-target="appendix-2" aria-label="Bookmark A Christian prayer in union with creation" aria-pressed="false"></button></p>
     </div>
-    <div id="drawer-footnotes" class="drawer-view" role="tabpanel">
+    <div id="drawer-footnotes" class="drawer-view" role="tabpanel" hidden>
       <h3 class="fn-group"><a href="#ch-0" class="fn-ch-link">Preface / Introduction</a></h3>
 <ol class="fn-list">
 <li id="fn-0-0-1" class="fn-item"><a href="#para-1" class="fn-num-link">1</a><p><em>Canticle of the Creatures</em>, in <em>Francis of Assisi: Early Documents</em>, vol. 1, New York-London-Manila, 1999, 113-114.</p></li>
@@ -1531,7 +1508,7 @@ body:has(#fn-drawer .fn-item:target) #fn-tab            { color: var(--accent); 
 <li id="fn-0-6-172" class="fn-item"><a href="#para-244" class="fn-num-link">172</a><p>BASIL THE GREAT, <em>Hom. in Hexaemeron</em>, I, 2, 6: PG 29, 8.</p></li>
 </ol>
     </div>
-    <div id="drawer-bookmarks" class="drawer-view" role="tabpanel">
+    <div id="drawer-bookmarks" class="drawer-view" role="tabpanel" hidden>
       <div class="bookmarks-empty">
         <p>No bookmarks yet.</p>
         <p>In Contents, hover over a heading and select its bookmark icon to save it here.</p>
@@ -1777,24 +1754,26 @@ try {
   if (Array.isArray(stored)) bookmarks = stored.filter(id => tocByTarget.has(id));
 } catch (e) {}
 
-const drawerCb = document.getElementById('drawer-cb');
-tab.addEventListener('click', e => {
-  e.preventDefault();   // stop the label toggling the checkbox twice
-  drawerCb.checked = !drawerCb.checked;
-  tab.setAttribute('aria-expanded', String(drawerCb.checked));
+tab.addEventListener('click', () => {
+  const open = drawer.classList.toggle('open');
+  tab.setAttribute('aria-expanded', String(open));
 });
 
 function showDrawerView(view) {
-  const radio = document.getElementById('view-' + view);
-  if (radio) radio.checked = true;
-  drawerTabs.forEach(tab => {
-    const active = tab.dataset.drawerView === view;
-    tab.setAttribute('aria-selected', active ? 'true' : 'false');
+  drawerTabs.forEach(button => {
+    const active = button.dataset.drawerView === view;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-selected', active ? 'true' : 'false');
+  });
+  drawerViews.forEach(panel => {
+    const active = panel.id === 'drawer-' + view;
+    panel.hidden = !active;
+    panel.classList.toggle('active', active);
   });
 }
 
-drawerTabs.forEach(tab => {
-  tab.addEventListener('click', () => showDrawerView(tab.dataset.drawerView));
+drawerTabs.forEach(button => {
+  button.addEventListener('click', () => showDrawerView(button.dataset.drawerView));
 });
 
 function followDrawerLink(a) {
@@ -1890,8 +1869,7 @@ document.querySelectorAll('.sec-nav-link, .sub-nav-link').forEach(a => {
 document.querySelectorAll('sup a').forEach(a => {
   a.addEventListener('click', e => {
     e.preventDefault();
-    drawerCb.checked = true;
-    document.getElementById('view-footnotes').checked = true;
+    drawer.classList.add('open');
     showDrawerView('footnotes');
     selectFn(a.getAttribute('href').slice(1));
   });
