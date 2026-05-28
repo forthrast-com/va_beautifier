@@ -324,35 +324,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     z-index: 60;
 }
 #fn-drawer.open { transform: translateX(0); }
-/* Tab lives as a sibling of the drawer (not a child) so it can sit *behind*
-   the drawer in z-order: when the drawer is open we shift the tab so its
-   right edge overlaps the drawer's left edge by a few px, and the drawer
-   (z 60) paints over that overlap — so the tab reads as tucked under
-   rather than projecting away from the drawer. */
-#fn-tab {
-    position: fixed;
-    top: 50%;
-    right: 0;
-    transform: translateY(-50%);
-    transition: right .3s ease;
-    z-index: 55;            /* below drawer's 60 */
-    writing-mode: vertical-rl;
-    background: var(--surface);
-    border: 1px solid var(--rule-tint);
-    border-right: none;        /* tab is flush against whatever's on its right (screen edge or drawer) */
-    padding: .6rem .4rem;
-    cursor: pointer;
-    font-family: var(--font-body);
-    font-size: .8rem;
-    color: var(--fg-dim);
-    letter-spacing: .05em;
-    user-select: none;
-    border-radius: 4px 0 0 4px;   /* left corners rounded only */
-}
-#fn-drawer.open ~ #fn-tab {
-    right: calc(min(380px, 66vw) - .4rem);   /* overlap drawer's left edge by .4rem */
-}
-#fn-tab:hover                   { color: var(--accent); border-color: var(--accent); }
+#fn-tab[aria-expanded="true"]   { color: var(--accent); border-color: var(--accent); }
 #fn-content {
     flex: 1;
     min-width: 0;
@@ -793,6 +765,45 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .doc-magnifica_humanitas .ch-bar { flex: 1 1 0; min-height: 8px; height: auto; }
 .doc-laudato_si .ch-seg,
 .doc-magnifica_humanitas .ch-seg { flex: 1; height: auto; min-height: 1px; }
+
+/* ── no-JS fallback: inline TOC + footnotes ────────────────────────────── */
+.noscript-toc {
+    margin: 2rem 0 3.5rem;
+    padding: 1.5rem 1.5rem 1.25rem;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    background: var(--surface);
+}
+.noscript-toc h2 {
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--fg-dimmer);
+    margin: 0 0 1rem;
+}
+.noscript-toc-list,
+.noscript-toc-list ul { list-style: none; margin: 0; padding: 0; }
+.noscript-toc-list ul { padding-left: 1.25rem; }
+.ntoc-ch             { margin: .5rem 0; }
+.ntoc-ch > a         { font-weight: 600; color: var(--fg); text-decoration: none; }
+.ntoc-ch > a:hover   { color: var(--accent); text-decoration: underline; }
+.ntoc-sec            { margin: .2rem 0; }
+.ntoc-sec > a        { color: var(--fg-dim); font-size: .875rem; font-style: italic; text-decoration: none; }
+.ntoc-sec > a:hover  { color: var(--fg); text-decoration: underline; }
+.noscript-fn {
+    border-top: 2px solid var(--rule);
+    padding-top: 2rem;
+    margin-top: 4rem;
+    margin-bottom: 4rem;
+}
+.noscript-fn > h2 {
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--fg-dimmer);
+    margin: 0 0 .5rem;
+}
+.noscript-fn .fn-item.fn-active { background: none; margin: 0; padding: 0; }
 </style>
 <script>
   // Apply saved prefs before paint to avoid a flash of the default theme.
@@ -819,9 +830,10 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 </div>
 
 <div id="bar-actions">
-  <button id="action-home" aria-label="Home" title="Home">⌂</button>
+  <button id="action-home" aria-label="Home" title="Home"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 15" width="12" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"><path d="M7,1 L13,7 L13,14 L9,14 L9,9 L5,9 L5,14 L1,14 L1,7 Z"/></svg></button>
   <button id="action-info" aria-label="About this document" title="About">i</button>
   <button id="action-prefs" aria-label="Reader settings" title="Reader settings"><span class="a-small">a</span>A</button>
+  <button id="fn-tab" aria-label="Notes &amp; contents" title="Notes &amp; contents" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 9" width="14" height="9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="0" y1="1.5" x2="14" y2="1.5"/><line x1="5" y1="4.5" x2="14" y2="4.5"/><line x1="9" y1="7.5" x2="14" y2="7.5"/></svg></button>
 </div>
 
 <div id="info-panel" hidden>
@@ -860,6 +872,61 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 </div>
 
 <div class="doc-title"><p class="doc-desc doc-desc-pre"><span style="display:inline-block">Encyclical Letter</span></p><p class="doc-name">Magnifica Humanitas</p><p class="doc-desc doc-desc-post"><span style="display:inline-block">of His Holiness</span> <span style="display:inline-block">Pope Leo XIV</span><br><span style="display:inline-block">on Safeguarding the Human Person</span> <span style="display:inline-block">in the Time of Artificial Intelligence</span></p></div>
+<noscript>
+<nav class="noscript-toc">
+  <h2>Contents</h2>
+  <ul class="noscript-toc-list">
+<li class="ntoc-ch"><a href="#ch-0">Preface / Introduction</a>
+<ul>
+<li class="ntoc-sec"><a href="#sec-0-0-1">Introduction</a></li>
+<li class="ntoc-sec"><a href="#sec-0-0-2">The res novae of our time</a></li>
+<li class="ntoc-sec"><a href="#sec-0-0-3">Two biblical images</a></li>
+<li class="ntoc-sec"><a href="#sec-0-0-4">Building for the common good</a></li>
+<li class="ntoc-sec"><a href="#sec-0-0-5">Remaining human</a></li>
+</ul>
+</li>
+<li class="ntoc-ch"><a href="#ch-1">A Dynamic Approach Faithful to the Gospel</a>
+<ul>
+<li class="ntoc-sec"><a href="#sec-0-1-1">A Church journeying through human history</a></li>
+<li class="ntoc-sec"><a href="#sec-0-1-2">The development of Social Doctrine from Leo XIII to the present</a></li>
+</ul>
+</li>
+<li class="ntoc-ch"><a href="#ch-2">Foundations and Principles of the Social Doctrine of the Church</a>
+<ul>
+<li class="ntoc-sec"><a href="#sec-0-2-1">The foundations of Social Doctrine</a></li>
+<li class="ntoc-sec"><a href="#sec-0-2-2">The principles of Social Doctrine</a></li>
+<li class="ntoc-sec"><a href="#sec-0-2-3">Integral human development</a></li>
+<li class="ntoc-sec"><a href="#sec-0-2-4">An examen for the Church</a></li>
+</ul>
+</li>
+<li class="ntoc-ch"><a href="#ch-3">Technology and Dominance.</a>
+<ul>
+<li class="ntoc-sec"><a href="#sec-0-3-1">The technocratic paradigm and digital power</a></li>
+<li class="ntoc-sec"><a href="#sec-0-3-2">Artificial intelligence</a></li>
+<li class="ntoc-sec"><a href="#sec-0-3-3">What must not be lost</a></li>
+<li class="ntoc-sec"><a href="#sec-0-3-4">The authentic “more than human”: grace and Christian humanism</a></li>
+<li class="ntoc-sec"><a href="#sec-0-3-5">Two cities and two loves</a></li>
+</ul>
+</li>
+<li class="ntoc-ch"><a href="#ch-4">Safeguarding Humanity at a Time of Transformation.</a>
+<ul>
+<li class="ntoc-sec"><a href="#sec-0-4-1">Truth as a common good</a></li>
+<li class="ntoc-sec"><a href="#sec-0-4-2">The dignity of work at a time of digital transition</a></li>
+<li class="ntoc-sec"><a href="#sec-0-4-3">Protecting freedom against dependencies and commercialization</a></li>
+<li class="ntoc-sec"><a href="#sec-0-4-4">A shared responsibility</a></li>
+</ul>
+</li>
+<li class="ntoc-ch"><a href="#ch-5">The Culture of Power and the Civilization of Love</a>
+<ul>
+<li class="ntoc-sec"><a href="#sec-0-5-1">The civilization of love in the digital age</a></li>
+<li class="ntoc-sec"><a href="#sec-0-5-2">The culture of power</a></li>
+<li class="ntoc-sec"><a href="#sec-0-5-3">Building the civilization of love</a></li>
+<li class="ntoc-sec"><a href="#sec-0-5-4">CONCLUSION</a></li>
+</ul>
+</li>
+</ul>
+</nav>
+</noscript>
 <a id="ch-0"></a><h4 id="sec-0-0-1" class="section-title">Introduction</h4><div class="paragraph" id="para-1" data-sub-text="Introduction"><span class="para-num">1</span>
 <p>Humanity, created by God in all its grandeur, is today facing a pivotal choice: either to construct a new Tower of Babel or to build the city in which God and humanity dwell together. Each generation inherits the task of shaping its own era, of guiding history to become a place where the dignity of every person is safeguarded, justice is promoted and fraternity is made possible. Yet every era also runs the risk of creating an inhumane and more unjust world. Whenever humanity is in danger of marring its true identity, we Christians lift our eyes to the Incarnate God, knowing that it is “only in the mystery of the Word made flesh that the mystery of humanity truly becomes clear.”<sup><a href="#fn-0-0-1">1</a></sup> In Jesus Christ, this humanity in its grandeur becomes the Way, the Truth and the Life, opening the path for each of us to grow toward fullness.</p></div><div class="paragraph" id="para-2" data-sub-text="Introduction"><span class="para-num">2</span>
 <p>Founded on Christ, the living stone, we experience the powerful and mysterious action of the Holy Spirit, and we believe that every authentic human effort to cooperate with him for the good will be blessed by our heavenly Father, in whom we place our hope. For this reason, we can diligently contribute to every initiative that builds a more just world, and we can call others to collaborate in promoting the integral development of every human being. We wish to engage in dialogue with all men and women of our time, with whom we share in the events, questions and aspirations of humanity.<sup><a href="#fn-0-0-2">2</a></sup> Together with them, we seek to identify new paths for the common good and for promoting a dignified life for all. Indeed, openness to dialogue is an integral part of the Church’s vocation because, constituted in Christ as “a sacrament… of communion with God and of the unity of the entire human race,”<sup><a href="#fn-0-0-3">3</a></sup> she recognizes history as the place where the Gospel challenges and directs human experience.</p></div><div class="paragraph" id="para-3" data-sub-text="Introduction"><span class="para-num">3</span>
@@ -1109,14 +1176,428 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 
 <div class="doc-end-matter"><p class="doc-promulg"><span style="display:inline-block">Given in Rome, at Saint Peter’s, on 15 May, in the year 2026, the second of my Pontificate.</span></p><p class="doc-signature">LEO PP. XIV</p></div>
 
+<noscript>
+<section class="noscript-fn">
+  <h2>Notes</h2>
+  <h3 class="fn-group"><a href="#ch-0" class="fn-ch-link">Preface / Introduction</a></h3>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-0-1">Introduction</a></p>
+<ol class="fn-list">
+<li id="fn-0-0-1" class="fn-item"><a href="#para-1" class="fn-num-link">1</a><p>Second Vatican Ecumenical Council, Pastoral Constitution <a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener"><em>Gaudium et Spes</em></a>, 22: <em>AAS</em> 58 (1966), 1042.</p></li>
+<li id="fn-0-0-2" class="fn-item"><a href="#para-2" class="fn-num-link">2</a><p>Cf. <a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener">ibid.</a>, 11: <em>AAS</em> 58 (1966), 1033-1034.</p></li>
+<li id="fn-0-0-3" class="fn-item"><a href="#para-2" class="fn-num-link">3</a><p>Second Vatican Ecumenical Council, Dogmatic Constitution <a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html" class="ext-link" target="_blank" rel="noopener"><em>Lumen Gentium</em></a>, 1: <em>AAS</em> 57 (1965), 5.</p></li>
+<li id="fn-0-0-4" class="fn-item"><a href="#para-3" class="fn-num-link">4</a><p>Cf. Leo XIII, Encyclical Letter <a href="https://www.vatican.va/content/leo-xiii/en/encyclicals/documents/hf_l-xiii_enc_15051891_rerum-novarum.html" class="ext-link" target="_blank" rel="noopener"><em>Rerum Novarum</em></a> (15 May 1891), 22: <em>ASS</em> 23 (1890-1891), 653.</p></li>
+</ol>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-0-2">The res novae of our time</a></p>
+<ol class="fn-list">
+<li id="fn-0-0-5" class="fn-item"><a href="#para-4" class="fn-num-link">5</a><p>Benedict XVI, Encyclical Letter <a href="https://www.vatican.va/content/benedict-xvi/en/encyclicals/documents/hf_ben-xvi_enc_20090629_caritas-in-veritate.html" class="ext-link" target="_blank" rel="noopener"><em>Caritas in Veritate</em></a> (29 June 2009), 69: <em>AAS</em> 101 (2009), 702.</p></li>
+<li id="fn-0-0-6" class="fn-item"><a href="#para-4" class="fn-num-link">6</a><p>Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20150524_enciclica-laudato-si.html" class="ext-link" target="_blank" rel="noopener"><em>Laudato Si</em></a> <em>’</em> (24 May 2015), 104: <em>AAS</em> 107 (2015), 888.</p></li>
+<li id="fn-0-0-7" class="fn-item"><a href="#para-5" class="fn-num-link">7</a><p><a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20150524_enciclica-laudato-si.html" class="ext-link" target="_blank" rel="noopener">Ibid.</a></p></li>
+</ol>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-0-3">Two biblical images</a></p>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-0-4">Building for the common good</a></p>
+<ol class="fn-list">
+<li id="fn-0-0-8" class="fn-item"><a href="#para-11" class="fn-num-link">8</a><p>Saint Augustine, <em>Confessions</em>, I, 1, 1: <em>CCSL</em> 27, Turnhout 1981, 1.</p></li>
+</ol>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-0-5">Remaining human</a></p>
+<h3 class="fn-group"><a href="#ch-1" class="fn-ch-link">A Dynamic Approach Faithful to the Gospel</a></h3>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-1-1">A Church journeying through human history</a></p>
+<ol class="fn-list">
+<li id="fn-0-1-9" class="fn-item"><a href="#para-19" class="fn-num-link">9</a><p>Francis, Apostolic Exhortation <a href="https://www.vatican.va/content/francesco/en/apost_exhortations/documents/papa-francesco_esortazione-ap_20131124_evangelii-gaudium.html" class="ext-link" target="_blank" rel="noopener"><em>Evangelii Gaudium</em></a> (24 November 2013), 183: <em>AAS</em> 105 (2013), 1097.</p></li>
+<li id="fn-0-1-10" class="fn-item"><a href="#para-20" class="fn-num-link">10</a><p>Second Vatican Ecumenical Council, Pastoral Constitution <a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener"><em>Gaudium et Spes</em></a>, 36: <em>AAS</em> 58 (1966), 1054; cf. Decree on the Apostolate of the Laity <a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_decree_19651118_apostolicam-actuositatem_en.html" class="ext-link" target="_blank" rel="noopener"><em>Apostolicam Actuositatem</em></a>, 7: <em>AAS</em> 58 (1966), 843-844.</p></li>
+<li id="fn-0-1-11" class="fn-item"><a href="#para-22" class="fn-num-link">11</a><p>Second Vatican Ecumenical Council, Pastoral Constitution <a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener"><em>Gaudium et</em> Spes</a>, 44: <em>AAS</em> 58 (1966), 1065.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-23">The wisdom of the word of God in dialogue with the human sciences</a></p>
+<ol class="fn-list">
+<li id="fn-0-1-12" class="fn-item"><a href="#para-23" class="fn-num-link">12</a><p>Francis, Apostolic Exhortation <a href="https://www.vatican.va/content/francesco/en/apost_exhortations/documents/papa-francesco_esortazione-ap_20131124_evangelii-gaudium.html" class="ext-link" target="_blank" rel="noopener"><em>Evangelii Gaudium</em></a> (24 November 2013), 257; <em>AAS</em> 105 (2013), 1123.</p></li>
+<li id="fn-0-1-13" class="fn-item"><a href="#para-23" class="fn-num-link">13</a><p>Saint John Paul II, Apostolic Letter issued “Motu Proprio” <em>Socialium Scientiarum</em> (1 January 1994): <em>AAS</em> 86 (1994), 209.</p></li>
+<li id="fn-0-1-14" class="fn-item"><a href="#para-23" class="fn-num-link">14</a><p>Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20150524_enciclica-laudato-si.html" class="ext-link" target="_blank" rel="noopener"><em>Laudato Si</em></a> <em>’</em> (24 May 2015), 61: <em>AAS</em> 107 (2015), 871.</p></li>
+<li id="fn-0-1-15" class="fn-item"><a href="#para-24" class="fn-num-link">15</a><p>Cf. Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_30121987_sollicitudo-rei-socialis.html" class="ext-link" target="_blank" rel="noopener"><em>Sollicitudo Rei Socialis</em></a> (30 December 1987), 41: <em>AAS</em>  80 (1988), 570-572.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-25">Social Doctrine as a shared discernment</a></p>
+<ol class="fn-list">
+<li id="fn-0-1-16" class="fn-item"><a href="#para-25" class="fn-num-link">16</a><p>Saint John Paul II, Apostolic Letter <a href="https://www.vatican.va/content/john-paul-ii/en/apost_letters/1994/documents/hf_jp-ii_apl_19941110_tertio-millennio-adveniente.html" class="ext-link" target="_blank" rel="noopener"><em>Tertio Millennio Adveniente</em></a> (10 November 1994), 35: <em>AAS</em> 87 (1995), 27.</p></li>
+<li id="fn-0-1-17" class="fn-item"><a href="#para-25" class="fn-num-link">17</a><p><a href="https://www.vatican.va/content/leo-xiv/en/speeches/2025/may/documents/20250517-centesimus-annus-pro-pontifice.html" class="ext-link" target="_blank" rel="noopener"><em>Address to the Members of the “Centesimus Annus Pro Pontifice” Foundation</em></a> (17 May 2025): <em>AAS</em> 117 (2025), 696.</p></li>
+<li id="fn-0-1-18" class="fn-item"><a href="#para-25" class="fn-num-link">18</a><p>Francis, Apostolic Exhortation <a href="https://www.vatican.va/content/francesco/en/apost_exhortations/documents/papa-francesco_esortazione-ap_20131124_evangelii-gaudium.html" class="ext-link" target="_blank" rel="noopener"><em>Evangelii Gaudium</em></a> (24 November 2013), 222: <em>AAS</em> 105 (2013), 1111.</p></li>
+<li id="fn-0-1-19" class="fn-item"><a href="#para-25" class="fn-num-link">19</a><p>Cf. <a href="https://www.vatican.va/content/francesco/en/apost_exhortations/documents/papa-francesco_esortazione-ap_20131124_evangelii-gaudium.html" class="ext-link" target="_blank" rel="noopener">ibid<em>.</em></a>, 236: <em>AAS</em> 105 (2013), 1115; Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener"><em>Fratelli Tutti</em></a> (3 October 2020), 215: <em>AAS</em> 112 (2020), 1045-1046.</p></li>
+<li id="fn-0-1-20" class="fn-item"><a href="#para-26" class="fn-num-link">20</a><p>Second Vatican Ecumenical Council, Dogmatic Constitution <a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html" class="ext-link" target="_blank" rel="noopener"><em>Lumen Gentium</em></a>, 13: <em>AAS</em> 57 (1965), 17.</p></li>
+<li id="fn-0-1-21" class="fn-item"><a href="#para-26" class="fn-num-link">21</a><p>Cf. Saint Paul VI, Apostolic Letter <a href="https://www.vatican.va/content/paul-vi/en/apost_letters/documents/hf_p-vi_apl_19710514_octogesima-adveniens.html" class="ext-link" target="_blank" rel="noopener"><em>Octogesima Adveniens</em></a> (14 May 1971), 4: <em>AAS</em> 63 (1971), 403.</p></li>
+<li id="fn-0-1-22" class="fn-item"><a href="#para-27" class="fn-num-link">22</a><p>Cf. Francis, Apostolic Exhortation <a href="https://www.vatican.va/content/francesco/en/apost_exhortations/documents/papa-francesco_esortazione-ap_20131124_evangelii-gaudium.html" class="ext-link" target="_blank" rel="noopener"><em>Evangelii Gaudium</em></a> (24 November 2013), 243: <em>AAS</em> 105 (2013), 1118.</p></li>
+</ol>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-1-2">The development of Social Doctrine from Leo XIII to the present</a></p>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-29">The first stages of the Church’s Social Doctrine</a></p>
+<ol class="fn-list">
+<li id="fn-0-1-23" class="fn-item"><a href="#para-29" class="fn-num-link">23</a><p>Cf. Pius XII, Apostolic Exhortation <em>Menti Nostrae</em> (23 September 1950): <em>AAS</em> 42 (1950), 657-702.</p></li>
+<li id="fn-0-1-24" class="fn-item"><a href="#para-29" class="fn-num-link">24</a><p>Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_01051991_centesimus-annus.html" class="ext-link" target="_blank" rel="noopener"><em>Centesimus Annus</em></a> (1 May 1991), 5: <em>AAS</em> 83 (1991), 799.</p></li>
+<li id="fn-0-1-25" class="fn-item"><a href="#para-30" class="fn-num-link">25</a><p>Pius XI, Encyclical Letter <a href="https://www.vatican.va/content/pius-xi/en/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno.html" class="ext-link" target="_blank" rel="noopener"><em>Quadragesimo Anno</em></a> (15 May 1931), 39: <em>AAS</em> 23 (1931), 189; cf. Pius XII, <em>Radio Message on the 50<sup>th</sup> Anniversary of “Rerum Novarum</em>”: <em>AAS</em> 33 (1941), 198.</p></li>
+<li id="fn-0-1-26" class="fn-item"><a href="#para-32" class="fn-num-link">26</a><p>Cf. Pius XII, <em>Address to the Sacred College of Cardinals and the Roman</em> <em>Prelature</em> (24 December 1940): <em>AAS</em> 33 (1941), 13.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-33">The years of the Second Vatican Council</a></p>
+<ol class="fn-list">
+<li id="fn-0-1-27" class="fn-item"><a href="#para-33" class="fn-num-link">27</a><p>Cf. Saint John XXIII, Encyclical Letter <a href="https://www.vatican.va/content/john-xxiii/en/encyclicals/documents/hf_j-xxiii_enc_15051961_mater.html" class="ext-link" target="_blank" rel="noopener"><em>Mater et Magistra</em></a> (15 May 1961), 2-3: <em>AAS</em> 53 (1961), 402.</p></li>
+<li id="fn-0-1-28" class="fn-item"><a href="#para-33" class="fn-num-link">28</a><p>Cf. Saint John XXIII, Encyclical Letter <a href="https://www.vatican.va/content/john-xxiii/en/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem.html" class="ext-link" target="_blank" rel="noopener"><em>Pacem in Terris</em></a> (11 April 1963), 87: <em>AAS</em> 55 (1963), 301.</p></li>
+<li id="fn-0-1-29" class="fn-item"><a href="#para-34" class="fn-num-link">29</a><p>Cf. Second Vatican Ecumenical Council, Pastoral Constitution <a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener"><em>Gaudium et</em> Spes</a> <em>,</em> 26: <em>AAS</em> 58 (1966), 1046-1047.</p></li>
+<li id="fn-0-1-30" class="fn-item"><a href="#para-34" class="fn-num-link">30</a><p>Cfr. Second Vatican Ecumenical Council, Declaration <a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_decl_19651207_dignitatis-humanae_en.html" class="ext-link" target="_blank" rel="noopener"><em>Dignitatis Humanae</em></a>, 2: <em>AAS</em> 58 (1966), 930-931.</p></li>
+<li id="fn-0-1-31" class="fn-item"><a href="#para-35" class="fn-num-link">31</a><p>Saint Paul VI, Encyclical Letter <em>Populorum Progressio</em> (26 March 1967), 14: <em>AAS</em> 59 (1967), 264.</p></li>
+<li id="fn-0-1-32" class="fn-item"><a href="#para-35" class="fn-num-link">32</a><p>Ibid <em>.</em>, 76: <em>AAS</em> 59 (1967), 299.</p></li>
+<li id="fn-0-1-33" class="fn-item"><a href="#para-36" class="fn-num-link">33</a><p>Cf. Saint Paul VI, Apostolic Letter <a href="https://www.vatican.va/content/paul-vi/en/apost_letters/documents/hf_p-vi_apl_19710514_octogesima-adveniens.html" class="ext-link" target="_blank" rel="noopener"><em>Octogesima Adveniens</em></a> (14 May 1971), 4-7: <em>AAS</em> 63 (1971); 404-406.</p></li>
+<li id="fn-0-1-34" class="fn-item"><a href="#para-36" class="fn-num-link">34</a><p>Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_30121987_sollicitudo-rei-socialis.html" class="ext-link" target="_blank" rel="noopener"><em>Sollicitudo Rei Socialis</em></a> (30 December 1987), 36: <em>AAS</em> 80 (1988), 561.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-37">The recent Magisterium</a></p>
+<ol class="fn-list">
+<li id="fn-0-1-35" class="fn-item"><a href="#para-37" class="fn-num-link">35</a><p>Cf. Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_14091981_laborem-exercens.html" class="ext-link" target="_blank" rel="noopener"><em>Laborem Exercens</em></a> (14 September 1981), 19: <em>AAS</em> 73 (1981), 625-629.</p></li>
+<li id="fn-0-1-36" class="fn-item"><a href="#para-37" class="fn-num-link">36</a><p>Cf. <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_14091981_laborem-exercens.html" class="ext-link" target="_blank" rel="noopener">ibid</a>, 10: <em>AAS</em> 73 (1981), 600-602.</p></li>
+<li id="fn-0-1-37" class="fn-item"><a href="#para-38" class="fn-num-link">37</a><p>Cf. Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_30121987_sollicitudo-rei-socialis.html" class="ext-link" target="_blank" rel="noopener"><em>Sollicitudo Rei S</em>ocialis</a> (30 December 1987), 14: <em>AAS</em> 80 (1988), 526-528.</p></li>
+<li id="fn-0-1-38" class="fn-item"><a href="#para-38" class="fn-num-link">38</a><p>Cf. <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_30121987_sollicitudo-rei-socialis.html" class="ext-link" target="_blank" rel="noopener">ibid</a>., 16: <em>AAS</em> 80 (1988), 531.</p></li>
+<li id="fn-0-1-39" class="fn-item"><a href="#para-38" class="fn-num-link">39</a><p>Cf. <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_30121987_sollicitudo-rei-socialis.html" class="ext-link" target="_blank" rel="noopener">ibid.</a>, 31-33: <em>AAS</em> 80 (1988), 555-559.</p></li>
+<li id="fn-0-1-40" class="fn-item"><a href="#para-39" class="fn-num-link">40</a><p>Cf. Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_01051991_centesimus-annus.html" class="ext-link" target="_blank" rel="noopener"><em>Centesimus Annus</em></a> (1 May 1991), 46: <em>AAS</em> 83 (1991), 850-851.</p></li>
+<li id="fn-0-1-41" class="fn-item"><a href="#para-39" class="fn-num-link">41</a><p>Cf. <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_01051991_centesimus-annus.html" class="ext-link" target="_blank" rel="noopener">ibid.</a>, 42: <em>AAS</em> 83 (1991), 844-846.</p></li>
+<li id="fn-0-1-42" class="fn-item"><a href="#para-40" class="fn-num-link">42</a><p>Benedict XVI, Encyclical Letter <a href="https://www.vatican.va/content/benedict-xvi/en/encyclicals/documents/hf_ben-xvi_enc_20090629_caritas-in-veritate.html" class="ext-link" target="_blank" rel="noopener"><em>Caritas in Veritate</em></a> (29 June 2009), 21: <em>AAS</em> 101 (2009), 656.</p></li>
+<li id="fn-0-1-43" class="fn-item"><a href="#para-40" class="fn-num-link">43</a><p>Cf. <a href="https://www.vatican.va/content/benedict-xvi/en/encyclicals/documents/hf_ben-xvi_enc_20090629_caritas-in-veritate.html" class="ext-link" target="_blank" rel="noopener">ibid.</a>, 22: <em>AAS</em> 101 (2009), 657.</p></li>
+<li id="fn-0-1-44" class="fn-item"><a href="#para-40" class="fn-num-link">44</a><p>Cf. <a href="https://www.vatican.va/content/benedict-xvi/en/encyclicals/documents/hf_ben-xvi_enc_20090629_caritas-in-veritate.html" class="ext-link" target="_blank" rel="noopener">ibid.</a>, 24: <em>AAS</em> 101 (2009), 658-659.</p></li>
+<li id="fn-0-1-45" class="fn-item"><a href="#para-40" class="fn-num-link">45</a><p>Cf. <a href="https://www.vatican.va/content/benedict-xvi/en/encyclicals/documents/hf_ben-xvi_enc_20090629_caritas-in-veritate.html" class="ext-link" target="_blank" rel="noopener">ibid.</a>, 36: <em>AAS</em> 101 (2009), 671-672.</p></li>
+<li id="fn-0-1-46" class="fn-item"><a href="#para-41" class="fn-num-link">46</a><p><a href="https://www.vatican.va/content/benedict-xvi/en/encyclicals/documents/hf_ben-xvi_enc_20090629_caritas-in-veritate.html" class="ext-link" target="_blank" rel="noopener">Ibid.</a>, 2: <em>AAS</em> 101 (2009), 642.</p></li>
+<li id="fn-0-1-47" class="fn-item"><a href="#para-42" class="fn-num-link">47</a><p>Cf. Francis, Apostolic Exhortation <a href="https://www.vatican.va/content/francesco/en/apost_exhortations/documents/papa-francesco_esortazione-ap_20131124_evangelii-gaudium.html" class="ext-link" target="_blank" rel="noopener"><em>Evangelii Gaudium</em></a> (24 November 2013), 198: <em>AAS</em> 105 (2013), 1103.</p></li>
+<li id="fn-0-1-48" class="fn-item"><a href="#para-43" class="fn-num-link">48</a><p>Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20150524_enciclica-laudato-si.html" class="ext-link" target="_blank" rel="noopener"><em>Laudato Si</em></a> <em>’</em> (24 May 2015), 49: <em>AAS</em> 107 (2015), 866.</p></li>
+<li id="fn-0-1-49" class="fn-item"><a href="#para-44" class="fn-num-link">49</a><p>Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener"><em>Fratelli Tutti</em></a> (3 October 2020), 127: <em>AAS</em> 112 (2020), 1013.</p></li>
+<li id="fn-0-1-50" class="fn-item"><a href="#para-44" class="fn-num-link">50</a><p>Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/20241024-enciclica-dilexit-nos.html" class="ext-link" target="_blank" rel="noopener"><em>Dilexit Nos</em></a> (24 October 2024), 167: <em>AAS</em> 116 (2024), 1421.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-45">Interpreting history in the light of faith</a></p>
+<h3 class="fn-group"><a href="#ch-2" class="fn-ch-link">Foundations and Principles of the Social Doctrine of the Church</a></h3>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-2-1">The foundations of Social Doctrine</a></p>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-48">The human person: image of the Triune God</a></p>
+<ol class="fn-list">
+<li id="fn-0-2-51" class="fn-item"><a href="#para-48" class="fn-num-link">51</a><p>Cf. Pontifical Council for Justice and Peace, <a href="https://www.vatican.va/roman_curia/pontifical_councils/justpeace/documents/rc_pc_justpeace_doc_20060526_compendio-dott-soc_en.html" class="ext-link" target="_blank" rel="noopener"><em>Compendium of the Social Doctrine of the Church</em></a>, Vatican City 2004, 32.</p></li>
+<li id="fn-0-2-52" class="fn-item"><a href="#para-48" class="fn-num-link">52</a><p>Second Vatican Ecumenical Council, Pastoral Constitution <a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener"><em>Gaudium et Spes</em></a>, 24: <em>AAS</em> 58 (1966), 1045.</p></li>
+<li id="fn-0-2-53" class="fn-item"><a href="#para-49" class="fn-num-link">53</a><p><a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener">Ibid.</a>, 22: <em>AAS</em> 58 (1966), 1042.</p></li>
+<li id="fn-0-2-54" class="fn-item"><a href="#para-49" class="fn-num-link">54</a><p>Cf. Pontifical Council For Justice and Peace, <a href="https://www.vatican.va/roman_curia/pontifical_councils/justpeace/documents/rc_pc_justpeace_doc_20060526_compendio-dott-soc_en.html" class="ext-link" target="_blank" rel="noopener"><em>Compendium of the Social Doctrine of the Church</em></a>, 38.</p></li>
+<li id="fn-0-2-55" class="fn-item"><a href="#para-50" class="fn-num-link">55</a><p>Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_04031979_redemptor-hominis.html" class="ext-link" target="_blank" rel="noopener"><em>Redemptor Hominis</em></a> (4 March 1979), 14: <em>AAS</em> <em>71</em> (1979), 284.</p></li>
+<li id="fn-0-2-56" class="fn-item"><a href="#para-50" class="fn-num-link">56</a><p>Cf. Benedict XVI, Encyclical Letter <a href="https://www.vatican.va/content/benedict-xvi/en/encyclicals/documents/hf_ben-xvi_enc_20090629_caritas-in-veritate.html" class="ext-link" target="_blank" rel="noopener"><em>Caritas in Veritate</em></a> (29 June 2009), 11: <em>AAS</em> 101 (2009), 647-648.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-51">The equal dignity of all human beings</a></p>
+<ol class="fn-list">
+<li id="fn-0-2-57" class="fn-item"><a href="#para-51" class="fn-num-link">57</a><p>Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_06081993_veritatis-splendor.html" class="ext-link" target="_blank" rel="noopener"><em>Veritatis Splendor</em></a> (6 August 1993), 31: <em>AAS</em> 85 (1993), 1159.</p></li>
+<li id="fn-0-2-58" class="fn-item"><a href="#para-51" class="fn-num-link">58</a><p>Cf. Second Vatican Ecumenical Council, Pastoral Constitution <a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener"><em>Gaudium et Spes</em></a>, 26: <em>AAS</em> 58 (1966), 1046-1047.</p></li>
+<li id="fn-0-2-59" class="fn-item"><a href="#para-51" class="fn-num-link">59</a><p>Cf. Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_01051991_centesimus-annus.html" class="ext-link" target="_blank" rel="noopener"><em>Centesimus Annus</em></a> (1 May 1991), 11: <em>AAS</em> 83 (1991), 806-807.</p></li>
+<li id="fn-0-2-60" class="fn-item"><a href="#para-52" class="fn-num-link">60</a><p>Cf. Dicastery for the Doctrine of the Faith, Declaration <a href="https://www.vatican.va/roman_curia/congregations/cfaith/documents/rc_ddf_doc_20240402_dignitas-infinita_en.html" class="ext-link" target="_blank" rel="noopener"><em>Dignitas Infinita</em></a> (2 April 2024), 7: <em>AAS</em> 116 (2024), 592-593.</p></li>
+<li id="fn-0-2-61" class="fn-item"><a href="#para-52" class="fn-num-link">61</a><p>Cf. <a href="https://www.vatican.va/roman_curia/congregations/cfaith/documents/rc_ddf_doc_20240402_dignitas-infinita_en.html" class="ext-link" target="_blank" rel="noopener">ibid<em>.</em></a>, 8: <em>AAS</em> 116 (2024), 593-594.</p></li>
+<li id="fn-0-2-62" class="fn-item"><a href="#para-53" class="fn-num-link">62</a><p><a href="https://www.vatican.va/roman_curia/congregations/cfaith/documents/rc_ddf_doc_20240402_dignitas-infinita_en.html" class="ext-link" target="_blank" rel="noopener">Ibid.</a>, 1: <em>AAS</em> 116 (2024), 589-590.</p></li>
+<li id="fn-0-2-63" class="fn-item"><a href="#para-53" class="fn-num-link">63</a><p>Cf. Saint John Paul II, <em>Angelus with disabled people in the Cathedral of Osnabrück</em> (16 November 1980): <em>Insegnamenti di Giovanni Paolo II,</em> vol. III/2, Vatican City 1980, 1232.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-54">The supreme value of human rights</a></p>
+<ol class="fn-list">
+<li id="fn-0-2-64" class="fn-item"><a href="#para-54" class="fn-num-link">64</a><p>Pontifical Council for Justice and Peace, <a href="https://www.vatican.va/roman_curia/pontifical_councils/justpeace/documents/rc_pc_justpeace_doc_20060526_compendio-dott-soc_en.html" class="ext-link" target="_blank" rel="noopener"><em>Compendium of the Social Doctrine of the Church</em></a>, 152.</p></li>
+<li id="fn-0-2-65" class="fn-item"><a href="#para-54" class="fn-num-link">65</a><p>Cf. Saint John Paul II, <a href="https://www.vatican.va/content/john-paul-ii/en/speeches/1995/october/documents/hf_jp-ii_spe_05101995_address-to-uno.html" class="ext-link" target="_blank" rel="noopener"><em>Address to the 50<sup>th</sup> General Assembly of the United</em> <em>Nations</em></a> (5 October 1995), 2: <em>Insegnamenti di Giovanni Paolo II,</em> vol. XVIII/2, Vatican City 1998, 731.</p></li>
+<li id="fn-0-2-66" class="fn-item"><a href="#para-54" class="fn-num-link">66</a><p>Saint John Paul II, <a href="https://www.vatican.va/content/john-paul-ii/en/speeches/1979/october/documents/hf_jp-ii_spe_19791002_general-assembly-onu.html" class="ext-link" target="_blank" rel="noopener"><em>Address to the 34<sup>th</sup> General Assembly of the United Nations</em></a> (2 October 1979), 7: <em>AAS</em> 71 (1979), 1148.</p></li>
+<li id="fn-0-2-67" class="fn-item"><a href="#para-55" class="fn-num-link">67</a><p>Saint John Paul II, <a href="https://www.vatican.va/content/john-paul-ii/en/messages/peace/documents/hf_jp-ii_mes_14121998_xxxii-world-day-for-peace.html" class="ext-link" target="_blank" rel="noopener"><em>Message for the 32<sup>nd</sup> World Day of Peace</em></a> (1 January 1999), 3: <em>AAS</em> 91 (1999), 379.</p></li>
+<li id="fn-0-2-68" class="fn-item"><a href="#para-55" class="fn-num-link">68</a><p>Cf. Saint John XXIII, Encyclical Letter <a href="https://www.vatican.va/content/john-xxiii/en/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem.html" class="ext-link" target="_blank" rel="noopener"><em>Pacem in Terris</em></a> (11 April 1963), 5: <em>AAS</em> 55 (1963), 259.</p></li>
+<li id="fn-0-2-69" class="fn-item"><a href="#para-55" class="fn-num-link">69</a><p>Saint Paul VI, <a href="https://www.vatican.va/content/paul-vi/en/messages/pont-messages/documents/hf_p-vi_mess_19680415_confer-teheran.html" class="ext-link" target="_blank" rel="noopener"><em>Message to the International Conference on Human Rights</em></a> (15 April 1968): <em>AAS</em> 60 (1968), 285.</p></li>
+<li id="fn-0-2-70" class="fn-item"><a href="#para-55" class="fn-num-link">70</a><p>Cf. Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_25031995_evangelium-vitae.html" class="ext-link" target="_blank" rel="noopener"><em>Evangelium Vitae</em></a> (25 March 1995), 2: <em>AAS</em> 87 (1995), 402.</p></li>
+<li id="fn-0-2-71" class="fn-item"><a href="#para-55" class="fn-num-link">71</a><p>Cf. Second Vatican Ecumenical Council, Pastoral Constitution <a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener"><em>Gaudium et Spes</em></a>, 27: <em>AAS</em> 58 (1966), 1047-1048; cf. Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_06081993_veritatis-splendor.html" class="ext-link" target="_blank" rel="noopener"><em>Veritatis Splendor</em></a> (6 August 1993), 80: <em>AAS</em> 85 (1993), 1197-1198; cf. Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_25031995_evangelium-vitae.html" class="ext-link" target="_blank" rel="noopener"><em>Evangelium Vitae</em></a> (25 March 1995), 7-28: <em>AAS</em> 87 (1995), 408-427.</p></li>
+<li id="fn-0-2-72" class="fn-item"><a href="#para-56" class="fn-num-link">72</a><p>Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener"><em>Fratelli Tutti</em></a> (3 October 2020), 208: <em>AAS</em> 112 (2020), 1043.</p></li>
+<li id="fn-0-2-73" class="fn-item"><a href="#para-56" class="fn-num-link">73</a><p>Cf. <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener">ibid.</a>, 209: <em>AAS</em> 112 (2020), 1043-1044.</p></li>
+<li id="fn-0-2-74" class="fn-item"><a href="#para-57" class="fn-num-link">74</a><p><a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener">Ibid.</a>, 23: <em>AAS</em> 112 (2020), 977. Cf. Apostolic Exhortation <a href="https://www.vatican.va/content/francesco/en/apost_exhortations/documents/papa-francesco_esortazione-ap_20131124_evangelii-gaudium.html" class="ext-link" target="_blank" rel="noopener"><em>Evangelii Gaudium</em></a> (24 November 2013), 212: <em>AAS</em> 105 (2013), 1108.</p></li>
+</ol>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-2-2">The principles of Social Doctrine</a></p>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-59">The principle of the common good</a></p>
+<ol class="fn-list">
+<li id="fn-0-2-75" class="fn-item"><a href="#para-59" class="fn-num-link">75</a><p>Benedict XVI, Apostolic Exhortation <a href="https://www.vatican.va/content/benedict-xvi/en/apost_exhortations/documents/hf_ben-xvi_exh_20070222_sacramentum-caritatis.html" class="ext-link" target="_blank" rel="noopener"><em>Sacramentum Caritatis</em></a> (22 February 2007), 83: <em>AAS</em> 99 (2007), 169.</p></li>
+<li id="fn-0-2-76" class="fn-item"><a href="#para-60" class="fn-num-link">76</a><p>Second Vatican Ecumenical Council, Pastoral Constitution <a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener"><em>Gaudium et Spes</em></a> <em>,</em> 26, <em>AAS</em> 58 (1966), 1046-1047.</p></li>
+<li id="fn-0-2-77" class="fn-item"><a href="#para-60" class="fn-num-link">77</a><p>Cf. Pontifical Council for Justice and Peace, <a href="https://www.vatican.va/roman_curia/pontifical_councils/justpeace/documents/rc_pc_justpeace_doc_20060526_compendio-dott-soc_en.html" class="ext-link" target="_blank" rel="noopener"><em>Compendium of the Social Doctrine of the Church</em></a> <em>,</em> 164.</p></li>
+<li id="fn-0-2-78" class="fn-item"><a href="#para-61" class="fn-num-link">78</a><p>Francis, Apostolic Exhortation <a href="https://www.vatican.va/content/francesco/en/apost_exhortations/documents/papa-francesco_esortazione-ap_20131124_evangelii-gaudium.html" class="ext-link" target="_blank" rel="noopener"><em>Evangelii Gaudium</em></a> (24 November 2013), 235: <em>AAS</em> 105 (2013), 1115.</p></li>
+<li id="fn-0-2-79" class="fn-item"><a href="#para-61" class="fn-num-link">79</a><p>Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener"><em>Fratelli Tutti</em></a> (3 October 2020), 105: <em>AAS</em> 112 (2020), 1005.</p></li>
+<li id="fn-0-2-80" class="fn-item"><a href="#para-61" class="fn-num-link">80</a><p>Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_30121987_sollicitudo-rei-socialis.html" class="ext-link" target="_blank" rel="noopener"><em>Sollicitudo Rei Socialis</em></a> (30 December 1987), 38: <em>AAS</em> 80 (1988), 564.</p></li>
+<li id="fn-0-2-81" class="fn-item"><a href="#para-62" class="fn-num-link">81</a><p>Francis, Apostolic Exhortation <a href="https://www.vatican.va/content/francesco/en/apost_exhortations/documents/papa-francesco_esortazione-ap_20131124_evangelii-gaudium.html" class="ext-link" target="_blank" rel="noopener"><em>Evangelii Gaudium</em></a> (24 November 2013), 220: <em>AAS</em> 105 (2013), 1110.</p></li>
+<li id="fn-0-2-82" class="fn-item"><a href="#para-63" class="fn-num-link">82</a><p>Pontifical Council for Justice and Peace, <a href="https://www.vatican.va/roman_curia/pontifical_councils/justpeace/documents/rc_pc_justpeace_doc_20060526_compendio-dott-soc_en.html" class="ext-link" target="_blank" rel="noopener"><em>Compendium of the Social Doctrine of the Church</em></a> <em>,</em> 169.</p></li>
+<li id="fn-0-2-83" class="fn-item"><a href="#para-64" class="fn-num-link">83</a><p>Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener"><em>Fratelli Tutti</em></a> (3 October 2020), 16: <em>AAS</em> 112 (2020), 974.</p></li>
+<li id="fn-0-2-84" class="fn-item"><a href="#para-64" class="fn-num-link">84</a><p>Cf. Saint John Paul II, <a href="https://www.vatican.va/content/john-paul-ii/en/speeches/1995/october/documents/hf_jp-ii_spe_05101995_address-to-uno.html" class="ext-link" target="_blank" rel="noopener"><em>Address to the 50<sup>th</sup> General Assembly of the United</em> Nations</a> (5 October 1995), 8: <em>Insegnamenti di Giovanni Paolo II,</em> vol. XVIII/2, 735.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-65">The principle of the universal destination of goods</a></p>
+<ol class="fn-list">
+<li id="fn-0-2-85" class="fn-item"><a href="#para-65" class="fn-num-link">85</a><p>Pontifical Council for Justice and Peace, <a href="https://www.vatican.va/roman_curia/pontifical_councils/justpeace/documents/rc_pc_justpeace_doc_20060526_compendio-dott-soc_en.html" class="ext-link" target="_blank" rel="noopener"><em>Compendium of the Social Doctrine of the Church</em></a>, 171.</p></li>
+<li id="fn-0-2-86" class="fn-item"><a href="#para-65" class="fn-num-link">86</a><p>Saint John Paul II, Encyclical Letter <em>Centesimus Annus</em> (1 May 1991), 31: <em>AAS</em> 83 (1991), 831.</p></li>
+<li id="fn-0-2-87" class="fn-item"><a href="#para-65" class="fn-num-link">87</a><p>Saint John Paul II, <em>Homily during the Mass celebrated for farmers at Recife</em> (7 July 1980), 4: <em>AAS</em> 72 (1980), 926.</p></li>
+<li id="fn-0-2-88" class="fn-item"><a href="#para-66" class="fn-num-link">88</a><p>Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_14091981_laborem-exercens.html" class="ext-link" target="_blank" rel="noopener"><em>Laborem Exercens</em></a> (14 September 1981), 19: <em>AAS</em> 73 (1981), 626.</p></li>
+<li id="fn-0-2-89" class="fn-item"><a href="#para-66" class="fn-num-link">89</a><p>Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20150524_enciclica-laudato-si.html" class="ext-link" target="_blank" rel="noopener"><em>Laudato Si</em></a> <em>’</em> (24 May 2015), 93: <em>AAS</em> 107 (2015), 884; cf. Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener"><em>Fratelli Tutti</em></a> (3 October 2020), 120: <em>AAS</em> 112 (2020), 1010.</p></li>
+<li id="fn-0-2-90" class="fn-item"><a href="#para-66" class="fn-num-link">90</a><p>Francis, Apostolic Exhortation <a href="https://www.vatican.va/content/francesco/en/apost_exhortations/documents/papa-francesco_esortazione-ap_20131124_evangelii-gaudium.html" class="ext-link" target="_blank" rel="noopener"><em>Evangelii Gaudium</em></a> (24 November 2013), 189: <em>AAS</em> 105 (2013), 1099.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-68">The principle of subsidiarity</a></p>
+<ol class="fn-list">
+<li id="fn-0-2-91" class="fn-item"><a href="#para-68" class="fn-num-link">91</a><p>Cf. Pontifical Council for Justice and Peace, <a href="https://www.vatican.va/roman_curia/pontifical_councils/justpeace/documents/rc_pc_justpeace_doc_20060526_compendio-dott-soc_en.html" class="ext-link" target="_blank" rel="noopener"><em>Compendium of the Social Doctrine of the Church</em></a>, 187.</p></li>
+<li id="fn-0-2-92" class="fn-item"><a href="#para-69" class="fn-num-link">92</a><p>Cf. Leo XIII, Encyclical Letter <a href="https://www.vatican.va/content/leo-xiii/en/encyclicals/documents/hf_l-xiii_enc_15051891_rerum-novarum.html" class="ext-link" target="_blank" rel="noopener"><em>Rerum Novarum</em></a> (15 May 1891), 26: <em>ASS</em> 23 (1890-1891), 656.</p></li>
+<li id="fn-0-2-93" class="fn-item"><a href="#para-69" class="fn-num-link">93</a><p>Cf. Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_01051991_centesimus-annus.html" class="ext-link" target="_blank" rel="noopener"><em>Centesimus Annus</em></a> (1 May 1991), 11: <em>AAS</em> 83 (1991), 806-807.</p></li>
+<li id="fn-0-2-94" class="fn-item"><a href="#para-69" class="fn-num-link">94</a><p>Cf. <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_01051991_centesimus-annus.html" class="ext-link" target="_blank" rel="noopener">ibid.</a></p></li>
+<li id="fn-0-2-95" class="fn-item"><a href="#para-70" class="fn-num-link">95</a><p>Cf. <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_01051991_centesimus-annus.html" class="ext-link" target="_blank" rel="noopener">ibid.</a>, 48: <em>AAS</em> 83 (1991), 852-854.</p></li>
+<li id="fn-0-2-96" class="fn-item"><a href="#para-71" class="fn-num-link">96</a><p>Cf. Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener"><em>Fratelli Tutti</em></a> (3 October 2020), 169: <em>AAS</em> 112 (2020), 1028.</p></li>
+<li id="fn-0-2-97" class="fn-item"><a href="#para-72" class="fn-num-link">97</a><p>Cf. <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener">ibid.</a>, 168: <em>AAS</em> 112 (2020), 1027-1028.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-73">The principle of solidarity</a></p>
+<ol class="fn-list">
+<li id="fn-0-2-98" class="fn-item"><a href="#para-73" class="fn-num-link">98</a><p>Cf. Saint Paul VI, Encyclical Letter <a href="https://www.vatican.va/content/paul-vi/en/encyclicals/documents/hf_p-vi_enc_26031967_populorum.html" class="ext-link" target="_blank" rel="noopener"><em>Populorum Progressio</em></a> (26 March 1967), 17: <em>AAS</em> 59 (1967), 265-266.</p></li>
+<li id="fn-0-2-99" class="fn-item"><a href="#para-73" class="fn-num-link">99</a><p>Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener"><em>Fratelli Tutti</em></a> (3 October 2020), 32 and 54: <em>AAS</em> 112 (2020), 980 and 988.</p></li>
+<li id="fn-0-2-100" class="fn-item"><a href="#para-73" class="fn-num-link">100</a><p>Cf. Benedict XVI, Encyclical Letter <a href="https://www.vatican.va/content/benedict-xvi/en/encyclicals/documents/hf_ben-xvi_enc_20090629_caritas-in-veritate.html" class="ext-link" target="_blank" rel="noopener"><em>Caritas in Veritate</em></a> (29 June 2009), 58: <em>AAS</em> 101 (2009), 693-694.</p></li>
+<li id="fn-0-2-101" class="fn-item"><a href="#para-74" class="fn-num-link">101</a><p>Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener"><em>Fratelli Tutti</em></a> (3 October 2020), 116: <em>AAS</em> 112 (2020), 1009.</p></li>
+<li id="fn-0-2-102" class="fn-item"><a href="#para-75" class="fn-num-link">102</a><p>Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_30121987_sollicitudo-rei-socialis.html" class="ext-link" target="_blank" rel="noopener"><em>Sollicitudo Rei Socialis</em></a> (30 December 1987), 38: <em>AAS</em> 80 (1988), 564.</p></li>
+<li id="fn-0-2-103" class="fn-item"><a href="#para-75" class="fn-num-link">103</a><p>Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener"><em>Fratelli Tutti</em></a> (3 October 2020), 116: <em>AAS</em> 112 (2020), 1009.</p></li>
+<li id="fn-0-2-104" class="fn-item"><a href="#para-76" class="fn-num-link">104</a><p>Cf. Benedict XVI, Encyclical Letter <a href="https://www.vatican.va/content/benedict-xvi/en/encyclicals/documents/hf_ben-xvi_enc_20090629_caritas-in-veritate.html" class="ext-link" target="_blank" rel="noopener"><em>Caritas in Veritate</em></a> (29 June 2009), 48: <em>AAS</em> 101 (2009), 685.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-77">The principle of social justice</a></p>
+<ol class="fn-list">
+<li id="fn-0-2-105" class="fn-item"><a href="#para-77" class="fn-num-link">105</a><p>Cf. Second Vatican Ecumenical Council, Pastoral Constitution <a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener"><em>Gaudium et Spes</em></a>, 25: <em>AAS</em> 58 (1966), 1045-1046.</p></li>
+<li id="fn-0-2-106" class="fn-item"><a href="#para-78" class="fn-num-link">106</a><p>Cf. Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_30121987_sollicitudo-rei-socialis.html" class="ext-link" target="_blank" rel="noopener"><em>Sollicitudo Rei Socialis</em></a> (30 December 1987), 42: <em>AAS</em> 80 (1988), 572-574.</p></li>
+<li id="fn-0-2-107" class="fn-item"><a href="#para-78" class="fn-num-link">107</a><p>Francis, Apostolic Exhortation <a href="https://www.vatican.va/content/francesco/en/apost_exhortations/documents/papa-francesco_esortazione-ap_20131124_evangelii-gaudium.html" class="ext-link" target="_blank" rel="noopener"><em>Evangelii Gaudium</em></a> (24 November 2013), 53: <em>AAS</em> 105 (2013), 1042.</p></li>
+<li id="fn-0-2-108" class="fn-item"><a href="#para-79" class="fn-num-link">108</a><p>Cf. Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_30121987_sollicitudo-rei-socialis.html" class="ext-link" target="_blank" rel="noopener"><em>Sollicitudo Rei Socialis</em></a> (30 December 1987), 36-37: <em>AAS</em> 80 (1988), 561-564.</p></li>
+<li id="fn-0-2-109" class="fn-item"><a href="#para-81" class="fn-num-link">109</a><p>Cf. Francis, <a href="https://www.vatican.va/content/francesco/en/messages/migration/documents/20240524-world-migrants-day-2024.html" class="ext-link" target="_blank" rel="noopener"><em>Message for the 110<sup>th</sup> World Day of Migrants and Refugees</em></a> (29 September 2024): <em>AAS</em> 116 (2024), 735.</p></li>
+</ol>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-2-3">Integral human development</a></p>
+<ol class="fn-list">
+<li id="fn-0-2-110" class="fn-item"><a href="#para-82" class="fn-num-link">110</a><p>Saint Paul VI, Encyclical Letter <a href="https://www.vatican.va/content/paul-vi/en/encyclicals/documents/hf_p-vi_enc_26031967_populorum.html" class="ext-link" target="_blank" rel="noopener"><em>Populorum Progressio</em></a> (26 March 1967), 14: <em>AAS</em> 59 (1967), 264.</p></li>
+<li id="fn-0-2-111" class="fn-item"><a href="#para-83" class="fn-num-link">111</a><p>Cf. ibid., 17: <em>AAS</em> 59 (1967), 265-266; Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener"><em>Fratelli Tutti</em></a> (3 October 2020), 125-127: <em>AAS</em> 112 (2020), 1012-1013.</p></li>
+<li id="fn-0-2-112" class="fn-item"><a href="#para-83" class="fn-num-link">112</a><p>Cf. Saint Paul VI, Encyclical Letter <a href="https://www.vatican.va/content/paul-vi/en/encyclicals/documents/hf_p-vi_enc_26031967_populorum.html" class="ext-link" target="_blank" rel="noopener"><em>Populorum Progressio</em></a> (26 March 1967), 14: <em>AAS</em> 59 (1967), 264; Benedict XVI, <a href="https://www.vatican.va/content/benedict-xvi/en/speeches/2007/january/documents/hf_ben-xvi_spe_20070108_diplomatic-corps.html" class="ext-link" target="_blank" rel="noopener"><em>Address to the Diplomatic Corps accredited to the Holy See</em></a> (8 January 2007): <em>AAS</em> 99 (2007), 73; Francis, <a href="https://www.vatican.va/content/francesco/en/speeches/2017/february/documents/papa-francesco_20170215_popoli-indigeni.html" class="ext-link" target="_blank" rel="noopener"><em>Address to Participants of the 3<sup>rd</sup> Global Meeting of the Indigenous Peoples’ Forum of the International Fund for Agricultural Development</em></a> (15 February 2017): <em>AAS</em> 109 (2017), 244-245.</p></li>
+</ol>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-2-4">An examen for the Church</a></p>
+<ol class="fn-list">
+<li id="fn-0-2-113" class="fn-item"><a href="#para-86" class="fn-num-link">113</a><p><a href="https://www.synod.va/content/dam/synod/news/2024-10-26_final-document/ENG---Documento-finale.pdf" class="ext-link" target="_blank" rel="noopener"><em>Final Document of the Second Session of the XVI Ordinary General Assembly of the Synod of Bishops</em></a> (26 October 2024), 17.</p></li>
+<li id="fn-0-2-114" class="fn-item"><a href="#para-86" class="fn-num-link">114</a><p>Cf. <a href="https://www.synod.va/content/dam/synod/news/2024-10-26_final-document/ENG---Documento-finale.pdf" class="ext-link" target="_blank" rel="noopener">ibid.</a> <em>,</em> 11.</p></li>
+<li id="fn-0-2-115" class="fn-item"><a href="#para-87" class="fn-num-link">115</a><p>Cf. <a href="https://www.synod.va/content/dam/synod/news/2024-10-26_final-document/ENG---Documento-finale.pdf" class="ext-link" target="_blank" rel="noopener">ibid.</a> <em>,</em> 103-108.</p></li>
+<li id="fn-0-2-116" class="fn-item"><a href="#para-89" class="fn-num-link">116</a><p>Cf. <a href="https://www.synod.va/content/dam/synod/news/2024-10-26_final-document/ENG---Documento-finale.pdf" class="ext-link" target="_blank" rel="noopener">ibid.</a>, 100-101.</p></li>
+<li id="fn-0-2-117" class="fn-item"><a href="#para-89" class="fn-num-link">117</a><p>Cf. Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener"><em>Fratelli Tutti</em></a> (3 October 2020), 94: <em>AAS</em> 112 (2020), 1001.</p></li>
+</ol>
+<h3 class="fn-group"><a href="#ch-3" class="fn-ch-link">Technology and Dominance.</a></h3>
+<ol class="fn-list">
+<li id="fn-0-3-118" class="fn-item"><a href="#para-91" class="fn-num-link">118</a><p>Cf. Pontifical Council for Justice and Peace, <a href="https://www.vatican.va/roman_curia/pontifical_councils/justpeace/documents/rc_pc_justpeace_doc_20060526_compendio-dott-soc_en.html" class="ext-link" target="_blank" rel="noopener"><em>Compendium of the Social Doctrine of the Church</em></a>, 53.</p></li>
+</ol>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-3-1">The technocratic paradigm and digital power</a></p>
+<ol class="fn-list">
+<li id="fn-0-3-119" class="fn-item"><a href="#para-92" class="fn-num-link">119</a><p>Cf. Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20150524_enciclica-laudato-si.html" class="ext-link" target="_blank" rel="noopener"><em>Laudato Si</em></a> <em>’</em>, (24 May 2015), 106-109: <em>AAS</em> 107 (2015), 889-891.</p></li>
+<li id="fn-0-3-120" class="fn-item"><a href="#para-93" class="fn-num-link">120</a><p>R. Guardini, <em>Das Ende der Neuzeit</em>, Würzburg 1951, 89.</p></li>
+<li id="fn-0-3-121" class="fn-item"><a href="#para-94" class="fn-num-link">121</a><p>Saint Paul VI, <a href="https://www.vatican.va/content/paul-vi/en/speeches/1970/documents/hf_p-vi_spe_19701116_xxv-istituzione-fao.html" class="ext-link" target="_blank" rel="noopener"><em>Address on the occasion of the 25<sup>th</sup> Anniversary of the FAO</em></a> (16 November 1970): <em>AAS</em> 62 (1970), 833.</p></li>
+<li id="fn-0-3-122" class="fn-item"><a href="#para-94" class="fn-num-link">122</a><p>Cf. Francis, <a href="https://www.vatican.va/content/francesco/en/speeches/2019/november/documents/papa-francesco_20191111_consiglio-capitalismo-inclusivo.html" class="ext-link" target="_blank" rel="noopener"><em>Address to the Council for an Inclusive Capitalism</em></a> (11 November 2019): <em>L’Osservatore Romano</em>, 11-12 November 2019, 8.</p></li>
+</ol>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-3-2">Artificial intelligence</a></p>
+<ol class="fn-list">
+<li id="fn-0-3-123" class="fn-item"><a href="#para-97" class="fn-num-link">123</a><p>Cf. Dicastery for the Doctrine of the Faith – Dicastery for Culture and Education, Note <a href="https://www.vatican.va/roman_curia/congregations/cfaith/documents/rc_ddf_doc_20250128_antiqua-et-nova_en.html" class="ext-link" target="_blank" rel="noopener"><em>Antiqua et Nova</em></a> (14 January 2025): <em>AAS</em> 117 (2025), 159-210; Francis, <a href="https://www.vatican.va/content/francesco/en/messages/peace/documents/20231208-messaggio-57giornatamondiale-pace2024.html" class="ext-link" target="_blank" rel="noopener"><em>Message for the 57<sup>th</sup> World Day of Peace</em></a> (8 December 2023): <em>AAS</em> 116 (2024), 54-64; Francis, <a href="https://www.vatican.va/content/francesco/en/messages/communications/documents/20240124-messaggio-comunicazioni-sociali.html" class="ext-link" target="_blank" rel="noopener">Message for the 58<sup>th</sup> World Day of Social Communications</a> (24 January 2024): <em>AAS</em> 116 (2024), 261-266; Francis, <a href="https://www.vatican.va/content/francesco/en/speeches/2024/june/documents/20240614-g7-intelligenza-artificiale.html" class="ext-link" target="_blank" rel="noopener"><em>Address to the G7 Session on Artificial Intelligence</em>: “An exciting and fearsome tool”</a> (14 June 2024): <em>AAS</em> 116 (2024), 866-875; International Theological Commission, <a href="https://www.vatican.va/roman_curia/congregations/cfaith/cti_documents/rc_cti_doc_20260304_quo-vadis-humanits_en.html" class="ext-link" target="_blank" rel="noopener"><em>Quo vadis, humanitas? Thinking about Christian anthropology in the face of some scenarios on the future of humanity</em></a> (9 February 2026); <a href="https://www.vatican.va/content/leo-xiv/en/messages/communications/documents/20260124-messaggio-comunicazioni-sociali.html" class="ext-link" target="_blank" rel="noopener"><em>Message for the 60<sup>th</sup> World Day of Social Communications</em></a> (24 January 2026): <em>L’Osservatore Romano</em>, 24 January 2026, 2-3.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-100">A valuable tool that requires vigilance</a></p>
+<ol class="fn-list">
+<li id="fn-0-3-124" class="fn-item"><a href="#para-101" class="fn-num-link">124</a><p>Cf. Dicastery for the Doctrine of the Faith – Dicastery for Culture and Education, Note <a href="https://www.vatican.va/roman_curia/congregations/cfaith/documents/rc_ddf_doc_20250128_antiqua-et-nova_en.html" class="ext-link" target="_blank" rel="noopener"><em>Antiqua et Nova</em></a> (14 January 2025), 96: <em>AAS</em> 117 (2025), 201.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-102">Responsibility, transparency and the governance of AI</a></p>
+<ol class="fn-list">
+<li id="fn-0-3-125" class="fn-item"><a href="#para-102" class="fn-num-link">125</a><p>Francis, <a href="https://www.vatican.va/content/francesco/en/speeches/2023/march/documents/20230327-minerva-dialogues.html" class="ext-link" target="_blank" rel="noopener"><em>Address to Participants at the Meeting of the “Minerva Dialogues” promoted by the Dicastery for Culture and Education</em></a> (27 March 2023): <em>AAS</em> 115 (2023), 465.</p></li>
+<li id="fn-0-3-126" class="fn-item"><a href="#para-104" class="fn-num-link">126</a><p>Cf. Dicastery for the Doctrine of the Faith – Dicastery for Culture and Education, Note <a href="https://www.vatican.va/roman_curia/congregations/cfaith/documents/rc_ddf_doc_20250128_antiqua-et-nova_en.html" class="ext-link" target="_blank" rel="noopener"><em>Antiqua et Nova</em></a> (14 January 2025), 41: <em>AAS</em> 117 (2025), 178.</p></li>
+<li id="fn-0-3-127" class="fn-item"><a href="#para-105" class="fn-num-link">127</a><p>Cf. <a href="https://www.vatican.va/roman_curia/congregations/cfaith/documents/rc_ddf_doc_20250128_antiqua-et-nova_en.html" class="ext-link" target="_blank" rel="noopener">ibid.</a>, 44-45: <em>AAS</em> 117 (2025), 179-180.</p></li>
+<li id="fn-0-3-128" class="fn-item"><a href="#para-108" class="fn-num-link">128</a><p>Cf. Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_01051991_centesimus-annus.html" class="ext-link" target="_blank" rel="noopener"><em>Centesimus Annus</em></a> (1 May 1991), 40: <em>AAS</em> 83 (1991), 843.</p></li>
+</ol>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-3-3">What must not be lost</a></p>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-115">Underlying narratives: transhumanism and posthumanism</a></p>
+<ol class="fn-list">
+<li id="fn-0-3-129" class="fn-item"><a href="#para-116" class="fn-num-link">129</a><p>Cf. International Theological Commission, <a href="https://www.vatican.va/roman_curia/congregations/cfaith/cti_documents/rc_cti_doc_20260304_quo-vadis-humanits_en.html" class="ext-link" target="_blank" rel="noopener"><em>Quo vadis, humanitas? Thinking about Christian anthropology in the face of some scenarios on the future of humanity</em></a> (9 February 2026), 63.</p></li>
+<li id="fn-0-3-130" class="fn-item"><a href="#para-117" class="fn-num-link">130</a><p>Cf. Saint Paul VI, <a href="https://www.vatican.va/content/paul-vi/en/speeches/1970/documents/hf_p-vi_spe_19701116_xxv-istituzione-fao.html" class="ext-link" target="_blank" rel="noopener"><em>Discourse on the occasion of the 25<sup>th</sup> anniversary of the FAO</em></a> (16 November 1970): <em>AAS</em> 62 (1970), 833.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-118">The limit, the heart and the grandeur of the human person</a></p>
+<ol class="fn-list">
+<li id="fn-0-3-131" class="fn-item"><a href="#para-118" class="fn-num-link">131</a><p>International Theological Commission, <a href="https://www.vatican.va/roman_curia/congregations/cfaith/cti_documents/rc_cti_doc_20260304_quo-vadis-humanits_en.html" class="ext-link" target="_blank" rel="noopener"><em>Quo vadis, humanitas? Thinking about Christian anthropology in the face of some scenarios on the future of humanity</em></a> (9 February 2026), 3.</p></li>
+<li id="fn-0-3-132" class="fn-item"><a href="#para-120" class="fn-num-link">132</a><p>“If we devalue the heart, we also devalue what it means to speak from the heart, to act with the heart, to cultivate and heal the heart. If we fail to appreciate the specificity of the heart, we miss the messages that the mind alone cannot communicate; we miss out on the richness of our encounters with others; we miss out on poetry. We also lose track of history and our own past, since our real personal history is built with the heart.  At the end of our lives, that alone will matter.” Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/20241024-enciclica-dilexit-nos.html" class="ext-link" target="_blank" rel="noopener"><em>Dilexit Nos</em></a> (24 October 2024), 11: <em>AAS</em> 116 (2024), 1372.</p></li>
+<li id="fn-0-3-133" class="fn-item"><a href="#para-121" class="fn-num-link">133</a><p>V. Frankl, <em>Man’s Search for Meaning. An Introduction to Logotherapy,</em> Boston 1963, 213.</p></li>
+</ol>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-3-4">The authentic “more than human”: grace and Christian humanism</a></p>
+<ol class="fn-list">
+<li id="fn-0-3-134" class="fn-item"><a href="#para-127" class="fn-num-link">134</a><p>Saint Thomas Aquinas, <em>Summa Theologiae</em>, I-II, q. 112, a. 1, co; q. 114, a, 5, co.: ed. Leonina, VII, Rome 1892, 323 and 349.</p></li>
+<li id="fn-0-3-135" class="fn-item"><a href="#para-127" class="fn-num-link">135</a><p>Cf. ibid., q. 114, a. 1, co.: ed. Leonina, VII, 344.</p></li>
+<li id="fn-0-3-136" class="fn-item"><a href="#para-127" class="fn-num-link">136</a><p>Cf. Saint Thomas Aquinas, <em>Super Boetium de Trinitate</em>, q. 1, a. 2, ad 3: ed. Leonina, L, Rome 1992, 96; <em>Summa Theologiae</em>, I, q. 7, a. 1, ad 3: ed. Leonina, IV, Rome 1888, 72.</p></li>
+<li id="fn-0-3-137" class="fn-item"><a href="#para-128" class="fn-num-link">137</a><p>Francis, Apostolic Exhortation <a href="https://www.vatican.va/content/francesco/en/apost_exhortations/documents/papa-francesco_esortazione-ap_20131124_evangelii-gaudium.html" class="ext-link" target="_blank" rel="noopener"><em>Evangelii Gaudium</em></a>, (24 November 2013), 8: <em>AAS</em> 105 (2013), 1022.</p></li>
+</ol>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-3-5">Two cities and two loves</a></p>
+<ol class="fn-list">
+<li id="fn-0-3-138" class="fn-item"><a href="#para-129" class="fn-num-link">138</a><p>Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_04031979_redemptor-hominis.html" class="ext-link" target="_blank" rel="noopener"><em>Redemptor Hominis</em></a> (4 March 1979), 15: <em>AAS</em> 71 (1979), 286-287.</p></li>
+<li id="fn-0-3-139" class="fn-item"><a href="#para-130" class="fn-num-link">139</a><p>Saint Augustine, <em>De civitate Dei</em>, XIV, 28: <em>CCSL</em> 48, Turnhout 1955, 451.</p></li>
+</ol>
+<h3 class="fn-group"><a href="#ch-4" class="fn-ch-link">Safeguarding Humanity at a Time of Transformation.</a></h3>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-4-1">Truth as a common good</a></p>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-132">Truth and democracy</a></p>
+<ol class="fn-list">
+<li id="fn-0-4-140" class="fn-item"><a href="#para-133" class="fn-num-link">140</a><p>Benedict XVI, Encyclical Letter <a href="https://www.vatican.va/content/benedict-xvi/en/encyclicals/documents/hf_ben-xvi_enc_20090629_caritas-in-veritate.html" class="ext-link" target="_blank" rel="noopener"><em>Caritas in Veritate</em></a> (29 June 2009), 34: <em>AAS</em> 101 (2009), 668-669.</p></li>
+<li id="fn-0-4-141" class="fn-item"><a href="#para-133" class="fn-num-link">141</a><p>Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_06081993_veritatis-splendor.html" class="ext-link" target="_blank" rel="noopener"><em>Veritatis Splendor</em></a> (6 August 1993), 32: <em>AAS</em> 85 (1993), 1159.</p></li>
+<li id="fn-0-4-142" class="fn-item"><a href="#para-133" class="fn-num-link">142</a><p>Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener"><em>Fratelli Tutti</em></a> (3 October 2020), 207: <em>AAS</em> 112 (2020), 1043.</p></li>
+<li id="fn-0-4-143" class="fn-item"><a href="#para-134" class="fn-num-link">143</a><p>H. Arendt, <em>The Origins of Totalitarianism,</em> III <em>,</em> New York 1962, 474 <em>.</em></p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-135">Communication and the collective imagination</a></p>
+<ol class="fn-list">
+<li id="fn-0-4-144" class="fn-item"><a href="#para-135" class="fn-num-link">144</a><p><a href="https://www.vatican.va/content/leo-xiv/en/speeches/2025/may/documents/20250512-media.html" class="ext-link" target="_blank" rel="noopener"><em>Address to Representatives of the Media</em></a> (12 May 2025): <em>AAS</em> 117 (2025), 681-682.</p></li>
+<li id="fn-0-4-145" class="fn-item"><a href="#para-135" class="fn-num-link">145</a><p>Benedict XVI, <a href="https://www.vatican.va/content/benedict-xvi/en/messages/communications/documents/hf_ben-xvi_mes_20130124_47th-world-communications-day.html" class="ext-link" target="_blank" rel="noopener"><em>Message for the 47<sup>th</sup> World Day of Social Communications</em></a> (24 January 2013): <em>AAS</em> 105 (2013), 183.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-137">Toward an ecology of communication</a></p>
+<ol class="fn-list">
+<li id="fn-0-4-146" class="fn-item"><a href="#para-138" class="fn-num-link">146</a><p>Francis, <a href="https://www.vatican.va/content/francesco/en/speeches/2021/november/documents/20211113-onoreficenze-giornalisti.html" class="ext-link" target="_blank" rel="noopener"><em>Address on the occasion of the Conferral of the rank of Knight and Dame of the Grand Cross of the Pian Order to Mr Philip Pullella and Ms Valentina Alazraki</em></a> (13 November 2021): <em>L’Osservatore Romano</em>, 13 November 2021, 12.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-139">An educational alliance for the digital age</a></p>
+<ol class="fn-list">
+<li id="fn-0-4-147" class="fn-item"><a href="#para-140" class="fn-num-link">147</a><p>Cf. Plato, <em>Letter VII</em>, 344b-c: ed. Souilhé, XIII/1, Paris 1931 ( <em>CUF, Série grecque</em> 63), 54.</p></li>
+<li id="fn-0-4-148" class="fn-item"><a href="#para-142" class="fn-num-link">148</a><p>Cf. <a href="https://www.vatican.va/content/leo-xiv/en/speeches/2025/november/documents/20251113-fondazione-infanzia-adolescenza.html" class="ext-link" target="_blank" rel="noopener"><em>Address to the Participants in the Conference “The Dignity of Children and Adolescents in the Age of Artificial Intelligence</em>”</a> (13 November 2025): <em>L’Osservatore Romano</em>, 13 November 2025, 3.</p></li>
+<li id="fn-0-4-149" class="fn-item"><a href="#para-142" class="fn-num-link">149</a><p>Cf. <em>Address to the members of the Advisory Board of the RCS Academy</em> (7 November 2025): <em>L’Osservatore Romano</em> 7 November 2025, 4.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-143">The central role of schools</a></p>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-4-2">The dignity of work at a time of digital transition</a></p>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-148">The value of work</a></p>
+<ol class="fn-list">
+<li id="fn-0-4-150" class="fn-item"><a href="#para-148" class="fn-num-link">150</a><p>Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_14091981_laborem-exercens.html" class="ext-link" target="_blank" rel="noopener"><em>Laborem Exercens</em></a> (14 September 1981), 3: <em>AAS</em> 73 (1981), 584.</p></li>
+<li id="fn-0-4-151" class="fn-item"><a href="#para-149" class="fn-num-link">151</a><p>Cf. Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20150524_enciclica-laudato-si.html" class="ext-link" target="_blank" rel="noopener"><em>Laudato Si</em></a> <em>’</em> (24 May 2015), 128: <em>AAS</em> 107 (2015), 898.</p></li>
+<li id="fn-0-4-152" class="fn-item"><a href="#para-150" class="fn-num-link">152</a><p>Dicastery for the Doctrine of the Faith — Dicastery for Culture and Education, Note <a href="https://www.vatican.va/roman_curia/congregations/cfaith/documents/rc_ddf_doc_20250128_antiqua-et-nova_en.html" class="ext-link" target="_blank" rel="noopener"><em>Antiqua et Nova</em></a> (14 January 2025), 67: <em>AAS</em> 117 (2025), 188-189.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-151">The problem of unemployment</a></p>
+<ol class="fn-list">
+<li id="fn-0-4-153" class="fn-item"><a href="#para-151" class="fn-num-link">153</a><p>Cf. Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_14091981_laborem-exercens.html" class="ext-link" target="_blank" rel="noopener"><em>Laborem Exercens</em></a>, (14 September 1981), 18: <em>AAS</em> 73 (1981), 622-625.</p></li>
+<li id="fn-0-4-154" class="fn-item"><a href="#para-151" class="fn-num-link">154</a><p>Cf. Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20150524_enciclica-laudato-si.html" class="ext-link" target="_blank" rel="noopener"><em>Laudato Si</em></a> <em>’</em> (24 May 2015), 109: <em>AAS</em> 107 (2015), 891.</p></li>
+<li id="fn-0-4-155" class="fn-item"><a href="#para-154" class="fn-num-link">155</a><p>Cf. Benedict XVI, Encyclical Letter <a href="https://www.vatican.va/content/benedict-xvi/en/encyclicals/documents/hf_ben-xvi_enc_20090629_caritas-in-veritate.html" class="ext-link" target="_blank" rel="noopener"><em>Caritas in Veritate</em></a> (29 June 2009), 32: <em>AAS</em> 101 (2009), 666.</p></li>
+<li id="fn-0-4-156" class="fn-item"><a href="#para-155" class="fn-num-link">156</a><p>Cf. Pontifical Council for Justice and Peace, <a href="https://www.vatican.va/roman_curia/pontifical_councils/justpeace/documents/rc_pc_justpeace_doc_20060526_compendio-dott-soc_en.html" class="ext-link" target="_blank" rel="noopener"><em>Compendium of the Social Doctrine of the Church</em></a>, 268.</p></li>
+<li id="fn-0-4-157" class="fn-item"><a href="#para-155" class="fn-num-link">157</a><p>Cf. Benedict XVI, Encyclical Letter <a href="https://www.vatican.va/content/benedict-xvi/en/encyclicals/documents/hf_ben-xvi_enc_20090629_caritas-in-veritate.html" class="ext-link" target="_blank" rel="noopener"><em>Caritas in Veritate</em></a> (29 June 2009), 64: <em>AAS</em> 101 (2009), 698.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-157">An economy that values dignity</a></p>
+<ol class="fn-list">
+<li id="fn-0-4-158" class="fn-item"><a href="#para-157" class="fn-num-link">158</a><p>Cf. Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20150524_enciclica-laudato-si.html" class="ext-link" target="_blank" rel="noopener"><em>Laudato Si</em></a> <em>’</em> (24 May 2015), 129: <em>AAS</em> 107 (2015), 899.</p></li>
+<li id="fn-0-4-159" class="fn-item"><a href="#para-158" class="fn-num-link">159</a><p>Cf. <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20150524_enciclica-laudato-si.html" class="ext-link" target="_blank" rel="noopener">ibid.</a></p></li>
+<li id="fn-0-4-160" class="fn-item"><a href="#para-158" class="fn-num-link">160</a><p>Cf. Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener"><em>Fratelli Tutti</em></a> (3 October 2020), 108: <em>AAS</em> 112 (2020), 1006.</p></li>
+<li id="fn-0-4-161" class="fn-item"><a href="#para-160" class="fn-num-link">161</a><p>Cf. Dicastery for the Doctrine of the Faith — Dicastery for the Promotion of Integral Human Development, <a href="https://www.vatican.va/roman_curia/congregations/cfaith/documents/rc_con_cfaith_doc_20180106_oeconomicae-et-pecuniariae_en.html" class="ext-link" target="_blank" rel="noopener"><em>Oeconomicae et Pecuniariae Quaestiones. Considerations for an Ethical Discernment Regarding some Aspects of the Present Economic-Financial System</em></a> (6 January 2018), 6: <em>AAS</em> 110 (2018), 772.</p></li>
+<li id="fn-0-4-162" class="fn-item"><a href="#para-161" class="fn-num-link">162</a><p>Francis, <a href="https://www.vatican.va/content/francesco/en/speeches/2019/february/documents/papa-francesco_20190214_fao.html" class="ext-link" target="_blank" rel="noopener"><em>Greeting to the staff of the International Fund for Agricultural Development (IFAD)</em></a> (14 February 2019): <em>AAS</em> 111 (2019), 309. Cfr. Benedict XVI, Encyclical Letter <a href="https://www.vatican.va/content/benedict-xvi/en/encyclicals/documents/hf_ben-xvi_enc_20090629_caritas-in-veritate.html" class="ext-link" target="_blank" rel="noopener"><em>Caritas in Veritate</em></a> (29 June 2009), 22: <em>AAS</em> 101 (2009), 657.</p></li>
+<li id="fn-0-4-163" class="fn-item"><a href="#para-162" class="fn-num-link">163</a><p>Cf <em>.</em> <a href="https://www.vatican.va/content/benedict-xvi/en/encyclicals/documents/hf_ben-xvi_enc_20090629_caritas-in-veritate.html" class="ext-link" target="_blank" rel="noopener">ibid.</a>, 36: <em>AAS</em> 101 (2009), 671-672.</p></li>
+<li id="fn-0-4-164" class="fn-item"><a href="#para-163" class="fn-num-link">164</a><p>Cf. Francis, Apostolic Exhortation <a href="https://www.vatican.va/content/francesco/en/apost_exhortations/documents/papa-francesco_esortazione-ap_20131124_evangelii-gaudium.html" class="ext-link" target="_blank" rel="noopener"><em>Evangelii Gaudium</em></a> (24 November 2013), 204: <em>AAS</em> 105 (2013), 1105-1106.</p></li>
+<li id="fn-0-4-165" class="fn-item"><a href="#para-163" class="fn-num-link">165</a><p>Cf. Saint Paul VI, Encyclical Letter <a href="https://www.vatican.va/content/paul-vi/en/encyclicals/documents/hf_p-vi_enc_26031967_populorum.html" class="ext-link" target="_blank" rel="noopener"><em>Populorum Progressio</em></a> (26 March 1967), 87: <em>AAS</em> 59 (1967), 299.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-165">Families and young people: the social conditions for hope</a></p>
+<ol class="fn-list">
+<li id="fn-0-4-166" class="fn-item"><a href="#para-165" class="fn-num-link">166</a><p>Cf. Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_01051991_centesimus-annus.html" class="ext-link" target="_blank" rel="noopener"><em>Centesimus Annus</em></a> (1 May 1991), 39: <em>AAS</em> 83 (1991), 841.</p></li>
+<li id="fn-0-4-167" class="fn-item"><a href="#para-165" class="fn-num-link">167</a><p>Cf. Pontifical Council for Justice and Peace, <a href="https://www.vatican.va/roman_curia/pontifical_councils/justpeace/documents/rc_pc_justpeace_doc_20060526_compendio-dott-soc_en.html" class="ext-link" target="_blank" rel="noopener"><em>Compendium of the Social Doctrine of the Church</em></a>, 211.</p></li>
+<li id="fn-0-4-168" class="fn-item"><a href="#para-165" class="fn-num-link">168</a><p>Cf. Saint John Paul II, Letter to Families <a href="https://www.vatican.va/content/john-paul-ii/en/letters/1994/documents/hf_jp-ii_let_02021994_families.html" class="ext-link" target="_blank" rel="noopener"><em>Gratissimam Sane</em></a> (2 February 1994), 17: <em>AAS</em> 86 (1994), 903-906.</p></li>
+<li id="fn-0-4-169" class="fn-item"><a href="#para-167" class="fn-num-link">169</a><p>Cf. United States Conference of Catholic Bishops, <em>Sons and Daughters of the Light: A Pastoral Plan for Ministry with Young Adults</em> (12 November 1996), Washington D.C., 1996, I, 3.</p></li>
+<li id="fn-0-4-170" class="fn-item"><a href="#para-167" class="fn-num-link">170</a><p>Cf. Pontifical Council for Justice and Peace, <a href="https://www.vatican.va/roman_curia/pontifical_councils/justpeace/documents/rc_pc_justpeace_doc_20060526_compendio-dott-soc_en.html" class="ext-link" target="_blank" rel="noopener"><em>Compendium of the Social Doctrine of the Church</em></a>, 290.</p></li>
+<li id="fn-0-4-171" class="fn-item"><a href="#para-168" class="fn-num-link">171</a><p>Cf. <a href="https://www.vatican.va/roman_curia/pontifical_councils/justpeace/documents/rc_pc_justpeace_doc_20060526_compendio-dott-soc_en.html" class="ext-link" target="_blank" rel="noopener">ibid.</a>, 214.</p></li>
+</ol>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-4-3">Protecting freedom against dependencies and commercialization</a></p>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-170">Dependencies and societal control</a></p>
+<ol class="fn-list">
+<li id="fn-0-4-172" class="fn-item"><a href="#para-172" class="fn-num-link">172</a><p>Cf. Francis, <a href="https://www.vatican.va/content/francesco/en/messages/peace/documents/papa-francesco_20141208_messaggio-xlviii-giornata-mondiale-pace-2015.html" class="ext-link" target="_blank" rel="noopener"><em>Message for the Celebration of the 48<sup>th</sup> World Day of Youth for Peace</em></a> (8 December 2014), 4: <em>AAS</em> 107 (2015), 70-71.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-173">Breaking the chains of new forms of slavery</a></p>
+<ol class="fn-list">
+<li id="fn-0-4-173" class="fn-item"><a href="#para-175" class="fn-num-link">173</a><p>Cf. International Theological Commission, <a href="https://www.vatican.va/roman_curia/congregations/cfaith/cti_documents/rc_con_cfaith_doc_20000307_memory-reconc-itc_en.html" class="ext-link" target="_blank" rel="noopener"><em>Memory and Reconciliation the Church and the Faults of the Past</em></a> <em>,</em> Vatican City 2000, 5.3.</p></li>
+<li id="fn-0-4-174" class="fn-item"><a href="#para-176" class="fn-num-link">174</a><p>As in the Papal Bulls <em>Sicut Dudum</em> (13 January 1435) and <em>Etsi Suscepti</em> (9 January 1442) of Eugenius IV, and in the Papal Bulls <em>Dum Diversas</em> (18 June 1452) and <em>Romanus Pontifex</em> (8 January 1455) of Nicholas V. Political and, at times, even economic needs overcame the demands of the Gospel. The need for evangelization was frequently compromised or at least misunderstood with regard to the needs of worldly powers, thus relativizing the problematic incompatibility of slavery with the Christian conscience.</p></li>
+<li id="fn-0-4-175" class="fn-item"><a href="#para-176" class="fn-num-link">175</a><p>Cf. Leo XIII, Encyclical Letter <a href="https://www.vatican.va/content/leo-xiii/en/encyclicals/documents/hf_l-xiii_enc_05051888_in-plurimis.html" class="ext-link" target="_blank" rel="noopener"><em>In Plurimis</em></a> (5 May 1888), <em>Acta Leonis XIII</em>, VIII, Rome, 1889, 169-192. Consider that, as late as 1866, the Holy Office distinguished between the immoral and moral aspects of slavery, without fully condemning it: <em>Instruction of the Holy Office on various doubts of Monsignor Massaia, Vicar Apostolic in the country of the Galla</em>, April 1866, response to question no. 15.</p></li>
+<li id="fn-0-4-176" class="fn-item"><a href="#para-176" class="fn-num-link">176</a><p>Cf. Saint John Paul II, Bull <a href="https://www.vatican.va/jubilee_2000/docs/documents/hf_jp-ii_doc_30111998_bolla-jubilee_en.html" class="ext-link" target="_blank" rel="noopener"><em>Incarnationis Mysterium</em></a> (29 November 1998), 11: <em>AAS</em> 91 (1999), 139-141.</p></li>
+</ol>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-4-4">A shared responsibility</a></p>
+<h3 class="fn-group"><a href="#ch-5" class="fn-ch-link">The Culture of Power and the Civilization of Love</a></h3>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-5-1">The civilization of love in the digital age</a></p>
+<ol class="fn-list">
+<li id="fn-0-5-177" class="fn-item"><a href="#para-186" class="fn-num-link">177</a><p>Cf. Saint Paul VI, <em>Regina Caeli</em> (17 May 1970): <em>Insegnamenti di Paolo VI,</em> vol.  VIII, 506.</p></li>
+<li id="fn-0-5-178" class="fn-item"><a href="#para-186" class="fn-num-link">178</a><p>Cf. Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener"><em>Fratelli Tutti</em></a> (3 October 2020), 183: <em>AAS</em> 112 (2020), 1033-1034.</p></li>
+<li id="fn-0-5-179" class="fn-item"><a href="#para-187" class="fn-num-link">179</a><p>Cf. Second Vatican Ecumenical Council, Pastoral Constitution <a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener"><em>Gaudium et Spes</em></a>, 26: <em>AAS</em> 58 (1966), 1046-1047.</p></li>
+</ol>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-5-2">The culture of power</a></p>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-189">The normalization of war</a></p>
+<ol class="fn-list">
+<li id="fn-0-5-180" class="fn-item"><a href="#para-189" class="fn-num-link">180</a><p>Saint Paul VI, <a href="https://www.vatican.va/content/paul-vi/en/speeches/1965/documents/hf_p-vi_spe_19651004_united-nations.html" class="ext-link" target="_blank" rel="noopener"><em>Address to the 20<sup>th</sup> General Assembly of the United Nations</em></a> (4 October 1965): <em>AAS</em> 57 (1965), 881.</p></li>
+<li id="fn-0-5-181" class="fn-item"><a href="#para-189" class="fn-num-link">181</a><p>United Nations, <em>United Nations Charter</em>, San Francisco (26 June 1945), Preamble.</p></li>
+<li id="fn-0-5-182" class="fn-item"><a href="#para-192" class="fn-num-link">182</a><p>Cf. Francis <em>,</em> Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener"><em>Fratelli Tutti</em></a> (3 October 2020), 258: <em>AAS</em> 112 (2020), 1061: “In recent decades, every single war has been ostensibly ‘justified.’ <a href="https://www.vatican.va/archive/ENG0015/_INDEX.HTM" class="ext-link" target="_blank" rel="noopener">The <em>Catechism of the Catholic Church</em></a> speaks of the possibility of legitimate defense by means of military force, which involves demonstrating that certain ‘rigorous conditions of moral legitimacy’ have been met.  Yet it is easy to fall into an overly broad interpretation of this potential right.  In this way, some would also wrongly justify even ‘preventive’ attacks or acts of war that can hardly avoid entailing ‘evils and disorders graver than the evil to be eliminated.’”</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-193">Force without limits</a></p>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-197">Weapons and artificial intelligence</a></p>
+<ol class="fn-list">
+<li id="fn-0-5-183" class="fn-item"><a href="#para-197" class="fn-num-link">183</a><p>Cf. Dicastery for the Doctrine of the Faith — Dicastery for Culture and Education, Note <a href="https://www.vatican.va/roman_curia/congregations/cfaith/documents/rc_ddf_doc_20250128_antiqua-et-nova_en.html" class="ext-link" target="_blank" rel="noopener"><em>Antiqua et Nova</em></a> (14 January 2025), 99: <em>AAS</em> 117 (2025), 202-203.</p></li>
+<li id="fn-0-5-184" class="fn-item"><a href="#para-197" class="fn-num-link">184</a><p>Cf.  <a href="https://www.vatican.va/roman_curia/congregations/cfaith/documents/rc_ddf_doc_20250128_antiqua-et-nova_en.html" class="ext-link" target="_blank" rel="noopener">ibid.</a>, 103: <em>AAS</em> 117 (2025), 204.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-201">The crisis of multilateralism</a></p>
+<ol class="fn-list">
+<li id="fn-0-5-185" class="fn-item"><a href="#para-202" class="fn-num-link">185</a><p>Cf. <a href="https://www.vatican.va/content/leo-xiv/en/speeches/2025/june/documents/20250626-roaco.html" class="ext-link" target="_blank" rel="noopener"><em>Address to the Participants in the Plenary Session of the “Reunion of Aid Agencies for the Oriental Churches</em> (ROACO)”</a> (26 June 2025): <em>AAS</em> 117 (2025), 847-849.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-204">A supposed political realism</a></p>
+<ol class="fn-list">
+<li id="fn-0-5-186" class="fn-item"><a href="#para-206" class="fn-num-link">186</a><p>Cf. Francis, <a href="https://www.vatican.va/content/francesco/en/messages/peace/documents/papa-francesco_20191208_messaggio-53giornatamondiale-pace2020.html" class="ext-link" target="_blank" rel="noopener"><em>Message for the 53<sup>rd</sup> World Day of Peace</em></a> (8 December 2019): <em>AAS</em> 112 (2020), 54-61.</p></li>
+</ol>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-5-3">Building the civilization of love</a></p>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-212">We can all do our part</a></p>
+<ol class="fn-list">
+<li id="fn-0-5-187" class="fn-item"><a href="#para-213" class="fn-num-link">187</a><p>J.R.R. Tolkien, <em>The Lord of the Rings. The Return of the King</em>, Part III, Book Five, Chapter IX, New York 1965, 190.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-214">The need to disarm words</a></p>
+<ol class="fn-list">
+<li id="fn-0-5-188" class="fn-item"><a href="#para-214" class="fn-num-link">188</a><p><a href="https://www.vatican.va/content/leo-xiv/en/speeches/2025/may/documents/20250512-media.html" class="ext-link" target="_blank" rel="noopener"><em>Address to Representatives of the Media</em></a>, (12 May 2025): <em>AAS</em> 117 (2025), 682.</p></li>
+<li id="fn-0-5-189" class="fn-item"><a href="#para-214" class="fn-num-link">189</a><p><a href="https://www.vatican.va/content/leo-xiv/en/speeches/2025/may/documents/20250512-media.html" class="ext-link" target="_blank" rel="noopener">Ibid.</a></p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-215">Building peace through justice</a></p>
+<ol class="fn-list">
+<li id="fn-0-5-190" class="fn-item"><a href="#para-215" class="fn-num-link">190</a><p>Saint John Paul II, <a href="https://www.vatican.va/content/john-paul-ii/en/messages/peace/documents/hf_jp-ii_mes_08121997_xxxi-world-day-for-peace.html" class="ext-link" target="_blank" rel="noopener"><em>Message for the 31<sup>st</sup> World Day of Peace</em></a>, (1 January 1998), 1: <em>AAS</em> 90 (1988), 147.</p></li>
+<li id="fn-0-5-191" class="fn-item"><a href="#para-215" class="fn-num-link">191</a><p>Saint Augustine, <em>Enarrationes in Psalmos,</em> 84, 12: <em>CCSL</em> 39, Turnhout 1956, 1172-1173.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-216">Adopting the perspective of victims</a></p>
+<ol class="fn-list">
+<li id="fn-0-5-192" class="fn-item"><a href="#para-216" class="fn-num-link">192</a><p>Cf. Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/20241024-enciclica-dilexit-nos.html" class="ext-link" target="_blank" rel="noopener"><em>Dilexit Nos</em></a> (24 October 2024), 22: <em>AAS</em> 116 (2024), 1375-1376.</p></li>
+<li id="fn-0-5-193" class="fn-item"><a href="#para-216" class="fn-num-link">193</a><p>Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener"><em>Fratelli Tutti</em></a> (3 October 2020), 115: <em>AAS</em> 112 (2020), 1008-1009.</p></li>
+<li id="fn-0-5-194" class="fn-item"><a href="#para-217" class="fn-num-link">194</a><p>Cf. <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener">ibid.</a>, 261: <em>AAS</em> 112 (2020), 1062.</p></li>
+<li id="fn-0-5-195" class="fn-item"><a href="#para-217" class="fn-num-link">195</a><p>Cf. Saint Paul VI, <a href="https://www.vatican.va/content/paul-vi/en/speeches/1965/documents/hf_p-vi_spe_19651004_united-nations.html" class="ext-link" target="_blank" rel="noopener"><em>Address to the 20<sup>th</sup> General Assembly of the United Nations</em></a> (4 October 1965): <em>AAS</em> 57 (1965), 878-879.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-218">Cultivating a healthy realism</a></p>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-219">Reviving dialogue</a></p>
+<ol class="fn-list">
+<li id="fn-0-5-196" class="fn-item"><a href="#para-219" class="fn-num-link">196</a><p>Cf. Pius XII, Radio Message <a href="https://www.vatican.va/content/john-paul-ii/en/messages/pont_messages/1989/documents/hf_jp-ii_mes_19890827_anniv-ii-guerra-mondiale.html" class="ext-link" target="_blank" rel="noopener"><em>A Grave Hour</em></a> (24 August 1939): <em>AAS</em> 31 (1939), 334.</p></li>
+<li id="fn-0-5-197" class="fn-item"><a href="#para-221" class="fn-num-link">197</a><p>Giorgio La Pira, <em>Riflessioni sul Concilio.</em>  Address of Professor Giorgio La Pira, Mayor of Florence, to the <em>“Guides de France”</em>(Rome, 4 September 1962), Florence 1962, 6.</p></li>
+<li id="fn-0-5-198" class="fn-item"><a href="#para-222" class="fn-num-link">198</a><p><a href="https://www.vatican.va/content/leo-xiv/en/speeches/2025/may/documents/20250514-giubileo-chiese-orientali.html" class="ext-link" target="_blank" rel="noopener"><em>Address to Participants in the Jubilee of Oriental Churches</em></a> (14 May 2025): <em>AAS</em> 117 (2025), 686.</p></li>
+<li id="fn-0-5-199" class="fn-item"><a href="#para-223" class="fn-num-link">199</a><p>Cf.  Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener"><em>Fratelli Tutti</em></a> (3 October 2020), 271: <em>AAS</em> 112 (2020), 1066.</p></li>
+<li id="fn-0-5-200" class="fn-item"><a href="#para-223" class="fn-num-link">200</a><p>Cf. Francis, <a href="https://www.vatican.va/content/francesco/en/speeches/2016/september/documents/papa-francesco_20160920_assisi-preghiera-pace.html" class="ext-link" target="_blank" rel="noopener"><em>Appeal for Peace at Assisi for the World Day of Prayer for Peace “Thirst for Peace: Faiths and Cultures in Dialogue”</em></a> (20 September 2016): <em>AAS</em> 108 (2016), 1124.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-224">The necessity of diplomacy and multilateralism</a></p>
+<ol class="fn-list">
+<li id="fn-0-5-201" class="fn-item"><a href="#para-224" class="fn-num-link">201</a><p>Francis, <a href="https://www.vatican.va/content/francesco/en/speeches/2025/january/documents/20250109-corpo-diplomatico.html" class="ext-link" target="_blank" rel="noopener"><em>Address to Members of the Diplomatic Corps accredited to the Holy See</em></a> (9 January 2025): <em>AAS</em> 117 (2025), 110.</p></li>
+<li id="fn-0-5-202" class="fn-item"><a href="#para-226" class="fn-num-link">202</a><p>Cf. Francis, <a href="https://www.vatican.va/content/francesco/en/speeches/2013/june/documents/papa-francesco_20130620_38-sessione-fao.html" class="ext-link" target="_blank" rel="noopener"><em>Address to the Participants in the 38<sup>th</sup> Conference of the FAO</em></a> (20 June 2013): <em>AAS</em> 105 (2013), 616-617.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-228">Praying and hoping</a></p>
+<ol class="fn-list">
+<li id="fn-0-5-203" class="fn-item"><a href="#para-228" class="fn-num-link">203</a><p><em><a href="https://www.vatican.va/content/leo-xiv/en/messages/urbi/documents/20250508-prima-benedizione-urbietorbi.html" class="ext-link" target="_blank" rel="noopener">First “Urbi et Orbi”</a></em> <a href="https://www.vatican.va/content/leo-xiv/en/messages/urbi/documents/20250508-prima-benedizione-urbietorbi.html" class="ext-link" target="_blank" rel="noopener"> <em>Blessing</em></a> (8 May 2025): <em>AAS</em> 117 (2025), 660.</p></li>
+<li id="fn-0-5-204" class="fn-item"><a href="#para-228" class="fn-num-link">204</a><p><a href="https://www.vatican.va/content/leo-xiv/en/messages/urbi/documents/20250508-prima-benedizione-urbietorbi.html" class="ext-link" target="_blank" rel="noopener">Ibid<em>.</em></a></p></li>
+</ol>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-5-4">CONCLUSION</a></p>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-230">The Word became flesh</a></p>
+<ol class="fn-list">
+<li id="fn-0-5-205" class="fn-item"><a href="#para-230" class="fn-num-link">205</a><p>Cf. <a href="https://www.vatican.va/content/leo-xiv/en/homilies/2025/documents/20251231-te-deum.html" class="ext-link" target="_blank" rel="noopener"><em>Homily at First Vespers on the Solemnity of Mary the Most Holy Mother of God</em></a> (31 December 2025): <em>L’Osservatore Romano</em>, 2 January 2026, 1-2.</p></li>
+<li id="fn-0-5-206" class="fn-item"><a href="#para-231" class="fn-num-link">206</a><p>Cf. <a href="https://www.vatican.va/content/leo-xiv/en/homilies/2025/documents/20251225-messa-natale.html" class="ext-link" target="_blank" rel="noopener"><em>Homily of the Mass during the Day</em></a> (25 December 2025): <em>L’Osservatore Romano</em>, 27 December 2025, 3.</p></li>
+<li id="fn-0-5-207" class="fn-item"><a href="#para-231" class="fn-num-link">207</a><p>Cf. <a href="https://www.vatican.va/content/leo-xiv/en/homilies/2025/documents/20251225-messa-natale.html" class="ext-link" target="_blank" rel="noopener">ibid<em>.</em></a></p></li>
+<li id="fn-0-5-208" class="fn-item"><a href="#para-231" class="fn-num-link">208</a><p>Cf. <a href="https://www.vatican.va/content/leo-xiv/en/angelus/2026/documents/20260106-angelus.html" class="ext-link" target="_blank" rel="noopener"><em>Angelus on the Solemnity of the Epiphany</em></a> (6 January 2026): <em>L’Osservatore Romano,</em> 7 January 2026, 3.</p></li>
+<li id="fn-0-5-209" class="fn-item"><a href="#para-232" class="fn-num-link">209</a><p>Cf. <a href="https://www.vatican.va/content/leo-xiv/en/homilies/2025/documents/20251224-messa-notte-natale.html" class="ext-link" target="_blank" rel="noopener"><em>Homily of the Mass during the Night</em></a> (24 December 2025): <em>L’Osservatore Romano</em>, 27 December 2025, 2.</p></li>
+<li id="fn-0-5-210" class="fn-item"><a href="#para-232" class="fn-num-link">210</a><p>P. de Bérulle, <em>Discours de l’état et des grandeurs de Jésus, Discours IV, Unité de Dieu en l’incarnation: Œuvres complètes,</em> Paris 1856, col. 218.</p></li>
+<li id="fn-0-5-211" class="fn-item"><a href="#para-232" class="fn-num-link">211</a><p>Ibid <em>.</em></p></li>
+<li id="fn-0-5-212" class="fn-item"><a href="#para-233" class="fn-num-link">212</a><p>Cf. <a href="https://www.vatican.va/content/leo-xiv/en/speeches/2025/december/documents/20251205-conferenza.html" class="ext-link" target="_blank" rel="noopener"><em>Address to the Conference “Artificial Intelligence and Care of Our Common Home</em>”</a> (5 December 2025): <em>L’Osservatore Romano</em>, 5 December 2025, 2.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-234">One body in Christ</a></p>
+<ol class="fn-list">
+<li id="fn-0-5-213" class="fn-item"><a href="#para-234" class="fn-num-link">213</a><p>Benedict XVI, Encyclical Letter <a href="https://www.vatican.va/content/benedict-xvi/en/encyclicals/documents/hf_ben-xvi_enc_20051225_deus-caritas-est.html" class="ext-link" target="_blank" rel="noopener"><em>Deus Caritas Est</em></a> (25 December 2005), 14: <em>AAS</em> 98 (2006), 228.</p></li>
+<li id="fn-0-5-214" class="fn-item"><a href="#para-234" class="fn-num-link">214</a><p>Saint Augustine, <em>Sermons</em>, 272: <em>In die Pentecostes ad infantes de sacramento</em>: <em>PL</em> 38, Paris 1865, col. 1247.</p></li>
+<li id="fn-0-5-215" class="fn-item"><a href="#para-235" class="fn-num-link">215</a><p>Benedict XVI, <a href="https://www.vatican.va/content/benedict-xvi/en/homilies/2011/documents/hf_ben-xvi_hom_20110421_coena-domini.html" class="ext-link" target="_blank" rel="noopener"><em>Homily at the Mass of the Lord’s Supper</em></a> (21 April 2011): <em>AAS</em> 103 (2011), 321.</p></li>
+<li id="fn-0-5-216" class="fn-item"><a href="#para-235" class="fn-num-link">216</a><p><em><a href="https://www.vatican.va/content/leo-xiv/en/speeches/2025/december/documents/20251222-curia-romana.html" class="ext-link" target="_blank" rel="noopener">Address to the Roma Curia for the Exchange of Christmas Greetings</a></em> (22 December 2025): <em>L’Osservatore Romano</em>, 22 December 2025, 6-7.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-236">The construction site of our time</a></p>
+<ol class="fn-list">
+<li id="fn-0-5-217" class="fn-item"><a href="#para-236" class="fn-num-link">217</a><p>Cf. above, nos. 11-14.</p></li>
+<li id="fn-0-5-218" class="fn-item"><a href="#para-237" class="fn-num-link">218</a><p>Cf. <a href="https://www.vatican.va/content/leo-xiv/en/speeches/2025/november/documents/20251113-fondazione-infanzia-adolescenza.html" class="ext-link" target="_blank" rel="noopener"><em>Address to the Conference “The Dignity of Children and Adolescents in the Age of Artificial Intelligence</em>”</a> (13 November 2025): <em>L’Osservatore Romano</em>, 13 November 2025, 3.</p></li>
+<li id="fn-0-5-219" class="fn-item"><a href="#para-237" class="fn-num-link">219</a><p>Cf. Benedict XVI, Encyclical Letter <a href="https://www.vatican.va/content/benedict-xvi/en/encyclicals/documents/hf_ben-xvi_enc_20090629_caritas-in-veritate.html" class="ext-link" target="_blank" rel="noopener"><em>Caritas in Veritate</em></a> (29 June 2009), 34: <em>AAS</em> 101 (2009), 668-670.</p></li>
+<li id="fn-0-5-220" class="fn-item"><a href="#para-237" class="fn-num-link">220</a><p>Francis, Apostolic Exhortation <a href="https://www.vatican.va/content/francesco/en/apost_exhortations/documents/20231004-laudate-deum.html" class="ext-link" target="_blank" rel="noopener"><em>Laudate Deum</em></a> (4 October 2023), 67: <em>AAS</em> 115 (2023), 1059.</p></li>
+<li id="fn-0-5-221" class="fn-item"><a href="#para-240" class="fn-num-link">221</a><p>Cf. <a href="https://www.vatican.va/content/leo-xiv/en/angelus/2026/documents/20260106-angelus.html" class="ext-link" target="_blank" rel="noopener"><em>Angelus on the Solemnity of the Epiphany</em></a> (6 January 2026): <em>L’Osservatore Romano</em>, 7 January 2026, 3.</p></li>
+</ol>
+<p class="sub-nav-item"><a class="sub-nav-link" href="#sub-243">The song of hope: the Magnificat</a></p>
+<ol class="fn-list">
+<li id="fn-0-5-222" class="fn-item"><a href="#para-243" class="fn-num-link">222</a><p>Benedict XVI, <a href="https://www.vatican.va/content/benedict-xvi/en/audiences/2006/documents/hf_ben-xvi_aud_20060215.html" class="ext-link" target="_blank" rel="noopener"><em>General Audience</em></a> (15 February 2006): <em>L’Osservatore Romano</em>, 16 February 2006, 4.</p></li>
+<li id="fn-0-5-223" class="fn-item"><a href="#para-244" class="fn-num-link">223</a><p><em><a href="https://www.vatican.va/content/leo-xiv/en/speeches/2025/october/documents/20251011-veglia-di-preghiera.html" class="ext-link" target="_blank" rel="noopener">Meditation on the occasion of the Prayer Vigil and Rosary for Peace</a></em> (11 October 2025): <em>L’Osservatore Romano</em>, 13 October 2025, 2.</p></li>
+<li id="fn-0-5-224" class="fn-item"><a href="#para-244" class="fn-num-link">224</a><p>Saint Paul VI, <em>Homily at the Marian Shrine of Our Lady of Bonaria</em>, (24 April 1970): <em>AAS</em> 62 (1970), 301.</p></li>
+</ol>
+</section>
+</noscript>
+
 <nav id="ch-indicator"></nav>
 
 <aside id="fn-drawer">
   <div id="fn-content">
     <div class="drawer-tabs" role="tablist" aria-label="Drawer view">
-      <button class="drawer-view-tab active" type="button" role="tab" aria-controls="drawer-toc" aria-selected="true" data-drawer-view="toc">Contents</button>
-      <button class="drawer-view-tab" type="button" role="tab" aria-controls="drawer-footnotes" aria-selected="false" data-drawer-view="footnotes">Footnotes</button>
-      <button class="drawer-view-tab" type="button" role="tab" aria-controls="drawer-bookmarks" aria-selected="false" data-drawer-view="bookmarks">Bookmarks</button>
+      <button class="drawer-view-tab active" type="button" role="tab" aria-controls="drawer-toc"       aria-selected="true"  data-drawer-view="toc">Contents</button>
+      <button class="drawer-view-tab"        type="button" role="tab" aria-controls="drawer-footnotes" aria-selected="false" data-drawer-view="footnotes">Footnotes</button>
+      <button class="drawer-view-tab"        type="button" role="tab" aria-controls="drawer-bookmarks" aria-selected="false" data-drawer-view="bookmarks">Bookmarks</button>
     </div>
     <div id="drawer-toc" class="drawer-view active" role="tabpanel">
       <h3 class="fn-group toc-item" data-target="ch-0" data-label="Preface / Introduction"><a href="#ch-0" class="fn-ch-link">Preface / Introduction</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-0" aria-label="Bookmark Preface / Introduction" aria-pressed="false"></button></h3>
@@ -1615,8 +2096,6 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     </div>
   </div>
 </aside>
-<div id="fn-tab">Index</div>
-
 <script>// ─────────────────────────────────────────────────────────────────────────
 // Vatican-document reader scripts.
 //
@@ -1849,7 +2328,10 @@ try {
   if (Array.isArray(stored)) bookmarks = stored.filter(id => tocByTarget.has(id));
 } catch (e) {}
 
-tab.addEventListener('click', () => drawer.classList.toggle('open'));
+tab.addEventListener('click', () => {
+  const open = drawer.classList.toggle('open');
+  tab.setAttribute('aria-expanded', String(open));
+});
 
 function showDrawerView(view) {
   drawerTabs.forEach(button => {
