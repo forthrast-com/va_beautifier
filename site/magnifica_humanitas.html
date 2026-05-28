@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="--hue: 230">
+<html lang="en" class="no-js" style="--hue: 230">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -766,6 +766,11 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .doc-laudato_si .ch-seg,
 .doc-magnifica_humanitas .ch-seg { flex: 1; height: auto; min-height: 1px; }
 
+/* ── no-JS: hide non-functional fixed chrome ────────────────────────────── */
+.no-js #sticky-bar,
+.no-js #bar-actions,
+.no-js #doc-title-corner { display: none; }
+
 /* ── no-JS fallback: inline TOC + footnotes ────────────────────────────── */
 .noscript-toc {
     margin: 2rem 0 3.5rem;
@@ -806,6 +811,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .noscript-fn .fn-item.fn-active { background: none; margin: 0; padding: 0; }
 </style>
 <script>
+  document.documentElement.classList.remove('no-js');
   // Apply saved prefs before paint to avoid a flash of the default theme.
   // 'auto' (or no value) for theme leaves the attr unset so the CSS
   // prefers-color-scheme media query decides.
