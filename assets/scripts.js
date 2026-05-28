@@ -230,9 +230,11 @@ try {
   if (Array.isArray(stored)) bookmarks = stored.filter(id => tocByTarget.has(id));
 } catch (e) {}
 
-tab.addEventListener('click', () => {
-  const open = drawer.classList.toggle('open');
-  tab.setAttribute('aria-expanded', String(open));
+const drawerCb = document.getElementById('drawer-cb');
+tab.addEventListener('click', e => {
+  e.preventDefault();   // stop the label toggling the checkbox twice
+  drawerCb.checked = !drawerCb.checked;
+  tab.setAttribute('aria-expanded', String(drawerCb.checked));
 });
 
 function showDrawerView(view) {
@@ -345,7 +347,7 @@ document.querySelectorAll('.sec-nav-link, .sub-nav-link').forEach(a => {
 document.querySelectorAll('sup a').forEach(a => {
   a.addEventListener('click', e => {
     e.preventDefault();
-    drawer.classList.add('open');
+    drawerCb.checked = true;
     showDrawerView('footnotes');
     selectFn(a.getAttribute('href').slice(1));
   });
