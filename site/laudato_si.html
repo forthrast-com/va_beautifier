@@ -318,12 +318,17 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     height: calc(100vh - var(--bar-h, 3rem));
     background: var(--surface);
     border-left: 1px solid var(--rule-tint);
-    transform: translateX(100%);
-    transition: transform .3s ease;
-    display: flex;
+    display: none;
     z-index: 60;
 }
-#fn-drawer.open { transform: translateX(0); }
+#fn-drawer.open {
+    display: flex;
+    animation: drawer-in .3s ease;
+}
+@keyframes drawer-in {
+    from { transform: translateX(100%); }
+    to   { transform: translateX(0); }
+}
 /* Tab lives as a sibling of the drawer (not a child) so it can sit *behind*
    the drawer in z-order: when the drawer is open we shift the tab so its
    right edge overlaps the drawer's left edge by a few px, and the drawer
