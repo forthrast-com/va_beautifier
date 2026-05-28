@@ -37,8 +37,6 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
     signature   = data.get('signature', '')
     signatories = data.get('signatories', [])
     source_url  = data.get('source_url', '')
-    hero_image  = data.get('hero_image', '')
-    hero_credit = data.get('hero_credit', '')
     pdf_accent  = _pdf_accent(data.get('hue', 42))
     paragraphs  = data.get('paragraphs', [])
     footnotes   = data.get('footnotes', [])
@@ -333,38 +331,22 @@ def _html_inline(s, *, preserve_breaks=False):
     return rendered.replace('\n', '<br />') if preserve_breaks else rendered
 
 
-def _title_page_typst(name, desc, desc_post, hero_image, hero_credit, accent,
-                      paper='a5'):
+def _title_page_typst(name, desc, desc_post, accent, paper='a5'):
     """Render the title page as raw typst. The 1fr vertical fillers above
-    and below the title block centre it on the page; with a hero image
-    the block sits a little high to give the image room to breathe. The
-    typst template paths use `/`-rooted paths (typst resolves these
-    relative to the project root set via `--root`).
+    and below the title block centre it on the page; typst paths use
+    `/`-rooted paths (typst resolves these relative to the project root
+    set via `--root`).
 
     `paper` scales typography by the long-edge ratio so the A4 large-print
     edition doesn't ring with empty space around an A5-scale title block."""
     scale = 1.4 if paper == 'a4' else 1.0
     title_pt   = round(28 * scale)
     label_pt   = round(10 * scale)
-    hero_gap   = f'{2.5 * scale:.2f}em'
     block_gap  = f'{1.8 * scale:.2f}em'
     line_gap   = f'{1.1 * scale:.2f}em'
 
     parts = ['#page(numbering: none, header: none)[', '  #set align(center)', '  #v(1fr)']
 
-    if hero_image:
-        # Typst paths starting with `/` are project-root-relative — the
-        # build script sets the root to ROOT, so this resolves to
-        # <ROOT>/<hero_image>.
-        path = '/' + hero_image.lstrip('/')
-        parts.append(f'  #image({_typ_str(path)}, width: 65%)')
-        if hero_credit:
-            parts.append('  #v(0.4em)')
-            parts.append(
-                f'  #text(size: {round(8 * scale)}pt, style: "italic")'
-                f'[{_typ_content(hero_credit)}]'
-            )
-        parts.append(f'  #v({hero_gap})')
 
     def stacked(block, size, tracking):
         bits = [_typ_content(ln.strip()) for ln in block.splitlines() if ln.strip()]
@@ -409,8 +391,6 @@ def _write_titlepage_include(data, slug, *, paper='a5'):
         data['name'],
         data.get('desc', ''),
         data.get('desc_post', ''),
-        data.get('hero_image', ''),
-        data.get('hero_credit', ''),
         _pdf_accent(data.get('hue', 42)),
         paper=paper,
     )
@@ -438,8 +418,6 @@ def _cover_typst(data):
     name        = data['name']
     desc        = data.get('desc', '')
     desc_post   = data.get('desc_post', '')
-    hero_image  = data.get('hero_image', '')
-    hero_credit = data.get('hero_credit', '')
     accent      = _pdf_accent(data.get('hue', 42))
     author      = data.get('author', '')
 
@@ -450,17 +428,6 @@ def _cover_typst(data):
     ]
 
     parts.append('#v(1fr)')
-
-    if hero_image:
-        path = '/' + hero_image.lstrip('/')
-        parts.append(f'#image({_typ_str(path)}, width: 76%)')
-        if hero_credit:
-            parts.append('#v(0.5em)')
-            parts.append(
-                f'#text(size: 8pt, style: "italic")'
-                f'[{_typ_content(hero_credit)}]'
-            )
-        parts.append('#v(2em)')
 
     def stacked(block, size, tracking):
         bits = [_typ_content(ln.strip()) for ln in block.splitlines() if ln.strip()]

@@ -103,52 +103,7 @@ published, while intermediate Markdown/TOML stays in `build/` only.
   preamble and subtitle, no page number on the title page. End matter
   (dedication + signature) renders on its own page via a raw-typst
   block at the end of the body, with a parallel raw-HTML colophon
-  block so EPUB gets the same content. Image slot is wired through
-  the `hero_image` + `hero_credit` TOML fields — degrades cleanly
-  when unset.
-- **Hero / decorative images** — title-page slot is wired
-  (`hero_image` floats above the title block at 65% width with the
-  `hero_credit` line in italic underneath). To drop an image in: save
-  to e.g. `assets/heros/<slug>.jpg`, then set `hero_image` and
-  `hero_credit` in the extractor (`extract/<slug>.py`'s `extract()`
-  return dict). Typst paths are project-root-relative because
-  `make_book.py` passes `--root=<ROOT>` to the engine — so the value
-  in the TOML can be a plain relative path like `assets/heros/foo.jpg`.
-  Likely sources: Wikimedia Commons, US Library of Congress PPOC,
-  Rijksstudio.
-
-  Per-doc shortlist (pick later — capture now):
-
-  *Magnifica Humanitas* — early-modern automaton, slightly surreal:
-    - **Vaucanson's duck** (1739) — the canonical Enlightenment-era
-      automaton. Famous side-elevation engraving from the 1738 pamphlet.
-      Surreal, recognisable, hits the "what is the human, what is the
-      machine" register cleanly.
-    - **da Vinci's mechanical knight** (c. 1495, Codex Atlanticus) —
-      Renaissance sketches. Weightier, foundational; reads "this concern
-      is older than you think."
-    - **Salomon Schweigger automaton engraving** (17th c.) — orientalist
-      printmaking. More obscure; harder to find a clean high-res scan.
-
-  *Gaudium et Spes* — Vatican II:
-    - **Council fathers in St Peter's** — wide assembly shot during a
-      session. Reads instantly as Vatican II to anyone who recognises
-      the setting.
-    - **Lothar Wolleh portrait** (1960s) — graphic, tighter portraiture
-      from Wolleh's session series. Licence varies per print; confirm
-      PD-eligibility per image.
-    - **Opening-procession crowd shot** (Oct 1962) — bishops streaming
-      into St Peter's Square. More dynamic; sets the scene rather than
-      the chamber.
-
-  *Laudato Si'* — fever-dream sun-and-birds plate:
-    - **Mughal solar miniature** (16-17th c.) — Indian miniature with
-      solar disc and animals arrayed around it. Closest to the
-      encyclical's cosmic-fraternity register.
-    - **William Blake bird study** — Romantic-era, visionary, slightly
-      mystical. Less ecological, more apocalyptic-pastoral.
-    - **Mughal nature plate (non-solar)** — same school, tree-and-birds
-      composition rather than the sun. Calmer, easier to crop tall.
+  block so EPUB gets the same content.
 - **Book polish (other)** —
     - *MH TOC orphans:* the introduction's section headings (Introduction,
       The res novae of our time, Two biblical images, &c.) sit indented

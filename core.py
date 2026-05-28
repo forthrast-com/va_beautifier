@@ -15,8 +15,6 @@ Each `extract/<doc>.py` exposes:
         'promulgation': str,        # canonical inline markup; blank lines split stanzas
         'signature':    str,        # canonical inline markup; line breaks are significant
         'signatories':  list[dict], # optional end-matter name/role pairs
-        'hero_image':   str,        # path to title-page image, repo-relative (may be '')
-        'hero_credit':  str,        # one-line credit/caption shown beneath the image (may be '')
         'paragraphs':   list[dict], # per-paragraph dicts (see schema below)
         'footnotes':    list[dict],
     }
@@ -425,7 +423,7 @@ def write_toml(path, *, name, hue=None, source_url='',
                author='', date='', identifier='', rights='',
                publisher=DEFAULT_PUBLISHER, collection=DEFAULT_COLLECTION,
                desc='', desc_post='',
-               promulgation='', signature='', hero_image='', hero_credit='',
+               promulgation='', signature='',
                paragraphs, footnotes, appendices=(), signatories=()):
     out = [f'name = {_toml_str(name)}']
     if hue is not None:
@@ -457,10 +455,6 @@ def write_toml(path, *, name, hue=None, source_url='',
             out.append(f'signature = {_toml_multiline(signature)}')
         else:
             out.append(f'signature = {_toml_str(signature)}')
-    if hero_image:
-        out.append(f'hero_image = {_toml_str(hero_image)}')
-    if hero_credit:
-        out.append(f'hero_credit = {_toml_str(hero_credit)}')
     out.append('')
 
     for p in paragraphs:
