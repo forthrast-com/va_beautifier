@@ -815,11 +815,49 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .doc-antiqua_et_nova .ch-bar,
 .doc-quo_vadis_humanitas .ch-bar,
 .doc-sacrosanctum_concilium .ch-bar { flex: 1 1 0; min-height: 8px; height: auto; }
-.doc-laudato_si .ch-seg,
 .doc-magnifica_humanitas .ch-seg,
 .doc-antiqua_et_nova .ch-seg,
 .doc-quo_vadis_humanitas .ch-seg,
 .doc-sacrosanctum_concilium .ch-seg { flex: 1; height: auto; min-height: 1px; }
+
+/* ── no-JS fallback: inline TOC + footnotes ────────────────────────────── */
+.noscript-toc {
+    margin: 2rem 0 3.5rem;
+    padding: 1.5rem 1.5rem 1.25rem;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    background: var(--surface);
+}
+.noscript-toc h2 {
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--fg-dimmer);
+    margin: 0 0 1rem;
+}
+.noscript-toc-list,
+.noscript-toc-list ul { list-style: none; margin: 0; padding: 0; }
+.noscript-toc-list ul { padding-left: 1.25rem; }
+.ntoc-ch             { margin: .5rem 0; }
+.ntoc-ch > a         { font-weight: 600; color: var(--fg); text-decoration: none; }
+.ntoc-ch > a:hover   { color: var(--accent); text-decoration: underline; }
+.ntoc-sec            { margin: .2rem 0; }
+.ntoc-sec > a        { color: var(--fg-dim); font-size: .875rem; font-style: italic; text-decoration: none; }
+.ntoc-sec > a:hover  { color: var(--fg); text-decoration: underline; }
+.noscript-fn {
+    border-top: 2px solid var(--rule);
+    padding-top: 2rem;
+    margin-top: 4rem;
+    margin-bottom: 4rem;
+}
+.noscript-fn > h2 {
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--fg-dimmer);
+    margin: 0 0 .5rem;
+}
+.noscript-fn .fn-item.fn-active { background: none; margin: 0; padding: 0; }
 
 /* Honour the OS-level "reduce motion" preference. Catches the drawer
    `.3s ease` transition, hover transitions, and the smooth-scroll on

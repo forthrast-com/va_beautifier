@@ -324,35 +324,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     z-index: 60;
 }
 #fn-drawer.open { transform: translateX(0); }
-/* Tab lives as a sibling of the drawer (not a child) so it can sit *behind*
-   the drawer in z-order: when the drawer is open we shift the tab so its
-   right edge overlaps the drawer's left edge by a few px, and the drawer
-   (z 60) paints over that overlap — so the tab reads as tucked under
-   rather than projecting away from the drawer. */
-#fn-tab {
-    position: fixed;
-    top: 50%;
-    right: 0;
-    transform: translateY(-50%);
-    transition: right .3s ease;
-    z-index: 55;            /* below drawer's 60 */
-    writing-mode: vertical-rl;
-    background: var(--surface);
-    border: 1px solid var(--rule-tint);
-    border-right: none;        /* tab is flush against whatever's on its right (screen edge or drawer) */
-    padding: .6rem .4rem;
-    cursor: pointer;
-    font-family: var(--font-body);
-    font-size: .8rem;
-    color: var(--fg-dim);
-    letter-spacing: .05em;
-    user-select: none;
-    border-radius: 4px 0 0 4px;   /* left corners rounded only */
-}
-#fn-drawer.open ~ #fn-tab {
-    right: calc(min(380px, 66vw) - .4rem);   /* overlap drawer's left edge by .4rem */
-}
-#fn-tab:hover                   { color: var(--accent); border-color: var(--accent); }
+#fn-tab[aria-expanded="true"]   { color: var(--accent); border-color: var(--accent); }
 #fn-content {
     flex: 1;
     min-width: 0;
@@ -461,8 +433,6 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
      section:  italic + bar at first indent
      sub:      bar at second indent, no other ornament  */
 .sec-nav-item                   { margin: .5rem 0 .25rem 0; padding-left: .75rem; border-left: 2px solid var(--rule-tint); line-height: 1.25; }
-.sec-nav-item.unrooted          { padding-left: 0; border-left: 0; margin-top: .9rem; }
-.sec-nav-item.unrooted .sec-nav-link { color: var(--fg); font-style: normal; font-size: .95rem; font-weight: 500; }
 .sec-nav-link                   { color: var(--fg-dim); text-decoration: none; font-size: .85rem; font-style: italic; line-height: 1.25; }
 .sec-nav-link:hover             { color: var(--fg); text-decoration: underline; }
 .sub-nav-item                   { margin: .25rem 0 .15rem 0; padding-left: .75rem; border-left: 2px solid var(--rule); line-height: 1.2; }
@@ -700,7 +670,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
    Pick a hue, set it in DOC_HUES, the recipe above does the rest. */
 
 /* ────────────────────────────────────────────────────────────────────────
-   Long structured documents: gutter numbers and height-capped indicator
+   .doc-laudato_si, .doc-magnifica_humanitas — long modern documents
 
    LS has no per-paragraph Latin micro-summary; on wide viewports the para
    number lives in the left margin alongside a vertical rule (both hang
@@ -710,15 +680,9 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
    ──────────────────────────────────────────────────────────────────────── */
 
 .doc-laudato_si .paragraph,
-.doc-magnifica_humanitas .paragraph,
-.doc-antiqua_et_nova .paragraph,
-.doc-quo_vadis_humanitas .paragraph,
-.doc-sacrosanctum_concilium .paragraph      { position: relative; margin: 1.75rem 0; }
+.doc-magnifica_humanitas .paragraph         { position: relative; margin: 1.75rem 0; }
 .doc-laudato_si .paragraph::before,
-.doc-magnifica_humanitas .paragraph::before,
-.doc-antiqua_et_nova .paragraph::before,
-.doc-quo_vadis_humanitas .paragraph::before,
-.doc-sacrosanctum_concilium .paragraph::before {
+.doc-magnifica_humanitas .paragraph::before {
     content: '';
     position: absolute;
     top: 0; bottom: 0;
@@ -727,10 +691,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     background: var(--rule-tint);
 }
 .doc-laudato_si .para-num,
-.doc-magnifica_humanitas .para-num,
-.doc-antiqua_et_nova .para-num,
-.doc-quo_vadis_humanitas .para-num,
-.doc-sacrosanctum_concilium .para-num {
+.doc-magnifica_humanitas .para-num {
     position: absolute;
     right: calc(100% + 2rem);   /* in the gutter, breathing room from the rule */
     top: 50%;
@@ -742,43 +703,32 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     will-change: top;
 }
 .doc-laudato_si .para-num::after,
-.doc-magnifica_humanitas .para-num::after,
-.doc-antiqua_et_nova .para-num::after,
-.doc-quo_vadis_humanitas .para-num::after,
-.doc-sacrosanctum_concilium .para-num::after { content: none; }
+.doc-magnifica_humanitas .para-num::after { content: none; }
 .doc-laudato_si #sticky-num,
-.doc-magnifica_humanitas #sticky-num,
-.doc-antiqua_et_nova #sticky-num,
-.doc-quo_vadis_humanitas #sticky-num,
-.doc-sacrosanctum_concilium #sticky-num {
+.doc-magnifica_humanitas #sticky-num {
     transform: translateX(-.6rem);  /* centre chapter number above gutter rule */
 }
 
 /* MH uses a third visible level below chapters: section headings are the
    document's subheads; italic headings nested inside them are sub-subheads. */
-.doc-magnifica_humanitas h3.chapter-title,
-.doc-quo_vadis_humanitas h3.chapter-title {
+.doc-magnifica_humanitas h3.chapter-title {
     font-size: 1.55rem;
     line-height: 1.25;
 }
-.doc-magnifica_humanitas .chapter-subtitle,
-.doc-quo_vadis_humanitas .chapter-subtitle {
+.doc-magnifica_humanitas .chapter-subtitle {
     font-size: 1.12rem;
 }
-.doc-magnifica_humanitas h4.section-title,
-.doc-quo_vadis_humanitas h4.section-title {
+.doc-magnifica_humanitas h4.section-title {
     font-size: 1.18rem;
     font-style: normal;
     font-weight: 600;
     color: var(--fg);
 }
-.doc-magnifica_humanitas h5.sub-heading,
-.doc-quo_vadis_humanitas h5.sub-heading {
+.doc-magnifica_humanitas h5.sub-heading {
     font-size: 1.1rem;
     color: var(--fg-dim);
 }
-.doc-magnifica_humanitas .sec-nav-link,
-.doc-quo_vadis_humanitas .sec-nav-link {
+.doc-magnifica_humanitas .sec-nav-link {
     font-style: normal;
     font-weight: 600;
     color: var(--fg);
@@ -786,20 +736,11 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 /* Narrow viewport: gutter doesn't fit, revert to inline `5.` prefix. */
 @media (max-width: 900px) {
     .doc-laudato_si .paragraph,
-    .doc-magnifica_humanitas .paragraph,
-    .doc-antiqua_et_nova .paragraph,
-    .doc-quo_vadis_humanitas .paragraph,
-    .doc-sacrosanctum_concilium .paragraph      { position: static; }
+    .doc-magnifica_humanitas .paragraph         { position: static; }
     .doc-laudato_si .paragraph::before,
-    .doc-magnifica_humanitas .paragraph::before,
-    .doc-antiqua_et_nova .paragraph::before,
-    .doc-quo_vadis_humanitas .paragraph::before,
-    .doc-sacrosanctum_concilium .paragraph::before { display: none; }
+    .doc-magnifica_humanitas .paragraph::before { display: none; }
     .doc-laudato_si .para-num,
-    .doc-magnifica_humanitas .para-num,
-    .doc-antiqua_et_nova .para-num,
-    .doc-quo_vadis_humanitas .para-num,
-    .doc-sacrosanctum_concilium .para-num {
+    .doc-magnifica_humanitas .para-num {
         position: static;
         font-weight: bold;
         color: inherit;
@@ -807,38 +748,62 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
         text-align: left;
     }
     .doc-laudato_si .para-num::after,
-    .doc-magnifica_humanitas .para-num::after,
-    .doc-antiqua_et_nova .para-num::after,
-    .doc-quo_vadis_humanitas .para-num::after,
-    .doc-sacrosanctum_concilium .para-num::after        { content: '.'; }
+    .doc-magnifica_humanitas .para-num::after           { content: '.'; }
     .doc-laudato_si .paragraph p:first-of-type,
-    .doc-magnifica_humanitas .paragraph p:first-of-type,
-    .doc-antiqua_et_nova .paragraph p:first-of-type,
-    .doc-quo_vadis_humanitas .paragraph p:first-of-type,
-    .doc-sacrosanctum_concilium .paragraph p:first-of-type { display: inline; margin-top: 0; }
+    .doc-magnifica_humanitas .paragraph p:first-of-type { display: inline; margin-top: 0; }
 }
 
 /* Indicator: explicit height (not max-height — flex children with basis 0
    collapse to nothing without it). Centred in the area below the sticky
    bar, not the full viewport. */
 .doc-laudato_si #ch-indicator,
-.doc-magnifica_humanitas #ch-indicator,
-.doc-antiqua_et_nova #ch-indicator,
-.doc-quo_vadis_humanitas #ch-indicator,
-.doc-sacrosanctum_concilium #ch-indicator {
+.doc-magnifica_humanitas #ch-indicator {
     height: calc(95vh - var(--bar-h, 4rem));
     top:    calc(50% + var(--bar-h, 4rem) / 2);
 }
 .doc-laudato_si .ch-bar,
-.doc-magnifica_humanitas .ch-bar,
-.doc-antiqua_et_nova .ch-bar,
-.doc-quo_vadis_humanitas .ch-bar,
-.doc-sacrosanctum_concilium .ch-bar { flex: 1 1 0; min-height: 8px; height: auto; }
+.doc-magnifica_humanitas .ch-bar { flex: 1 1 0; min-height: 8px; height: auto; }
 .doc-laudato_si .ch-seg,
-.doc-magnifica_humanitas .ch-seg,
-.doc-antiqua_et_nova .ch-seg,
-.doc-quo_vadis_humanitas .ch-seg,
-.doc-sacrosanctum_concilium .ch-seg { flex: 1; height: auto; min-height: 1px; }
+.doc-magnifica_humanitas .ch-seg { flex: 1; height: auto; min-height: 1px; }
+
+/* ── no-JS fallback: inline TOC + footnotes ────────────────────────────── */
+.noscript-toc {
+    margin: 2rem 0 3.5rem;
+    padding: 1.5rem 1.5rem 1.25rem;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    background: var(--surface);
+}
+.noscript-toc h2 {
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--fg-dimmer);
+    margin: 0 0 1rem;
+}
+.noscript-toc-list,
+.noscript-toc-list ul { list-style: none; margin: 0; padding: 0; }
+.noscript-toc-list ul { padding-left: 1.25rem; }
+.ntoc-ch             { margin: .5rem 0; }
+.ntoc-ch > a         { font-weight: 600; color: var(--fg); text-decoration: none; }
+.ntoc-ch > a:hover   { color: var(--accent); text-decoration: underline; }
+.ntoc-sec            { margin: .2rem 0; }
+.ntoc-sec > a        { color: var(--fg-dim); font-size: .875rem; font-style: italic; text-decoration: none; }
+.ntoc-sec > a:hover  { color: var(--fg); text-decoration: underline; }
+.noscript-fn {
+    border-top: 2px solid var(--rule);
+    padding-top: 2rem;
+    margin-top: 4rem;
+    margin-bottom: 4rem;
+}
+.noscript-fn > h2 {
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--fg-dimmer);
+    margin: 0 0 .5rem;
+}
+.noscript-fn .fn-item.fn-active { background: none; margin: 0; padding: 0; }
 </style>
 <script>
   // Apply saved prefs before paint to avoid a flash of the default theme.
@@ -865,9 +830,10 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 </div>
 
 <div id="bar-actions">
-  <button id="action-home" aria-label="Home" title="Home">⌂</button>
+  <button id="action-home" aria-label="Home" title="Home"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 15" width="12" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"><path d="M7,1 L13,7 L13,14 L9,14 L9,9 L5,9 L5,14 L1,14 L1,7 Z"/></svg></button>
   <button id="action-info" aria-label="About this document" title="About">i</button>
   <button id="action-prefs" aria-label="Reader settings" title="Reader settings"><span class="a-small">a</span>A</button>
+  <button id="fn-tab" aria-label="Notes &amp; contents" title="Notes &amp; contents" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 9" width="14" height="9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="0" y1="1.5" x2="14" y2="1.5"/><line x1="5" y1="4.5" x2="14" y2="4.5"/><line x1="9" y1="7.5" x2="14" y2="7.5"/></svg></button>
 </div>
 
 <div id="info-panel" hidden>
@@ -906,6 +872,50 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 </div>
 
 <div class="doc-title"><p class="doc-desc doc-desc-pre"><span style="display:inline-block">Pastoral Constitution</span> <span style="display:inline-block">on the Church in the</span> <span style="display:inline-block">Modern World</span></p><p class="doc-name">Gaudium et Spes</p><p class="doc-desc doc-desc-post"><span style="display:inline-block">Promulgated by</span> <span style="display:inline-block">His Holiness, Pope Paul VI</span> <span style="display:inline-block">on December 7, 1965</span></p></div>
+<noscript>
+<nav class="noscript-toc">
+  <h2>Contents</h2>
+  <ul class="noscript-toc-list">
+<li class="ntoc-ch"><a href="#ch-0">Preface</a>
+</li>
+<li class="ntoc-ch"><a href="#ch-2">Part I, Ch. 0</a>
+</li>
+<li class="ntoc-ch"><a href="#ch-3">The Dignity of the Human Person</a>
+</li>
+<li class="ntoc-ch"><a href="#ch-4">The Community of Mankind</a>
+</li>
+<li class="ntoc-ch"><a href="#ch-5">Man&#x27;s Activity Throughout the World</a>
+</li>
+<li class="ntoc-ch"><a href="#ch-6">The Role of the Church in the Modern World</a>
+</li>
+<li class="ntoc-ch"><a href="#ch-7">Part II, Ch. 0</a>
+</li>
+<li class="ntoc-ch"><a href="#ch-8">Fostering the Nobility of Marriage and the Family</a>
+</li>
+<li class="ntoc-ch"><a href="#ch-9">The Proper Development of Culture</a>
+<ul>
+<li class="ntoc-sec"><a href="#sec-2-2-1">Section 1: The Circumstances of Culture in the World Today</a></li>
+<li class="ntoc-sec"><a href="#sec-2-2-2">Section 2: Some Principles for the Proper Development of Culture</a></li>
+<li class="ntoc-sec"><a href="#sec-2-2-3">Section 3: Some More Urgent Duties of Christians in Regard to Culture</a></li>
+</ul>
+</li>
+<li class="ntoc-ch"><a href="#ch-10">Economic and Social Life</a>
+<ul>
+<li class="ntoc-sec"><a href="#sec-2-3-1">Section 1: Economic Development</a></li>
+<li class="ntoc-sec"><a href="#sec-2-3-2">Section 2: Certain Principles Governing Socio-economic Life as a Whole</a></li>
+</ul>
+</li>
+<li class="ntoc-ch"><a href="#ch-11">The Life of the Political Community</a>
+</li>
+<li class="ntoc-ch"><a href="#ch-12">The Fostering of Peace and the Promotion of a Community of Nations</a>
+<ul>
+<li class="ntoc-sec"><a href="#sec-2-5-1">Section 1: The Avoidance of War</a></li>
+<li class="ntoc-sec"><a href="#sec-2-5-2">Section 2: Setting up an International Community</a></li>
+</ul>
+</li>
+</ul>
+</nav>
+</noscript>
 <h1 id="ch-0" data-sticky class="part-title">Preface</h1><div class="paragraph" id="para-1" data-sub-text="De intima coniunctione Ecclesiae cum tota familia gentium."><span class="para-num">1</span> <em class="heading-la">De intima coniunctione Ecclesiae cum tota familia gentium.</em>
 <p>The joys and the hopes, the griefs and the anxieties of the men of this age, especially those who are poor or in any way afflicted, these are the joys and hopes, the griefs and anxieties of the followers of Christ. Indeed, nothing genuinely human fails to raise an echo in their hearts. For theirs is a community composed of men. United in Christ, they are led by the Holy Spirit in their journey to the Kingdom of their Father and they have welcomed the news of salvation which is meant for every man. That is why this community realizes that it is truly linked with mankind and its history by the deepest of bonds.</p></div><div class="paragraph" id="para-2" data-sub-text="Ad quosnam Concilium sermonem dirigat."><span class="para-num">2</span> <em class="heading-la">Ad quosnam Concilium sermonem dirigat.</em>
 <p>Hence this Second Vatican Council, having probed more profoundly into the mystery of the Church, now addresses itself without hesitation, not only to the sons of the Church and to all who invoke the name of Christ, but to the whole of humanity. For the council yearns to explain to everyone how it conceives of the presence and activity of the Church in the world of today.</p>
@@ -1250,14 +1260,234 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 
 
 
+<noscript>
+<section class="noscript-fn">
+  <h2>Notes</h2>
+  <h3 class="fn-group"><a href="#ch-0" class="fn-ch-link">Preface</a></h3>
+<ol class="fn-list">
+<li id="fn-0-0-1" class="fn-item"><a href="#para-10" class="fn-num-link">1</a><p>The Pastoral Constitution &quot;De Ecclesia in Mundo Huius Temporis&quot; is made up of two parts; yet it constitutes an organic unity. By way of explanation: the constitution is called &quot;pastoral&quot; because, while resting on doctrinal principles, it seeks to express the relation of the Church to the world and modern mankind. The result is that, on the one hand, a pastoral slant is present in the first part, and, on the other hand, a doctrinal slant is present in the second part. In the first part, the Church develops her teaching on man, on the world which is the enveloping context of man&#x27;s existence, and on man&#x27;s relations to his fellow men. In part two, the Church gives closer consideration to various aspects of modern life and human society; special consideration is given to those questions and problems which, in this general area, seem to have a greater urgency in our day. As a result in part two the subject matter which is viewed in the light of doctrinal principles is made up of diverse elements. Some elements have a permanent value; others, only a transitory one. Consequently, the constitution must be interpreted according to the general norms of theological interpretation. Interpreters must bear in mind—especially in part two—the changeable circumstances which the subject matter, by its very nature, involves.</p></li>
+<li id="fn-0-0-2" class="fn-item"><a href="#para-3" class="fn-num-link">2</a><p>Cf. <em>John</em> 18:37; <em>Matt</em>. 20:28; <em>Mark</em> 10:45.</p></li>
+<li id="fn-0-0-1" class="fn-item"><a href="#para-10" class="fn-num-link">1</a><p>Cf. <em>Rom</em>. 7:14 ff.</p></li>
+<li id="fn-0-0-2" class="fn-item"><a href="#para-3" class="fn-num-link">2</a><p>Cf. <em>2 Cor</em>. 5:15.</p></li>
+<li id="fn-0-0-3" class="fn-item"><a href="#para-10" class="fn-num-link">3</a><p>Cf. <em>Acts</em> 4:12.</p></li>
+<li id="fn-0-0-4" class="fn-item"><a href="#para-10" class="fn-num-link">4</a><p>Cf. <em>Heb</em>. 13:8.</p></li>
+<li id="fn-0-0-5" class="fn-item"><a href="#para-10" class="fn-num-link">5</a><p>Cf. <em>Col</em>. 1:15.</p></li>
+</ol>
+<h3 class="fn-group"><a href="#ch-3" class="fn-ch-link">The Dignity of the Human Person</a></h3>
+<ol class="fn-list">
+<li id="fn-1-1-1" class="fn-item"><a href="#para-12" class="fn-num-link">1</a><p>Cf. <em>Gen</em>. 1:26, <em>Wis</em>. 2:23.</p></li>
+<li id="fn-1-1-2" class="fn-item"><a href="#para-12" class="fn-num-link">2</a><p>Cf. <em>Sir</em>. 17:3-10.</p></li>
+<li id="fn-1-1-3" class="fn-item"><a href="#para-13" class="fn-num-link">3</a><p>Cf. <em>Rom</em>. 1:21-25.</p></li>
+<li id="fn-1-1-4" class="fn-item"><a href="#para-13" class="fn-num-link">4</a><p>Cf. <em>John</em> 8:34.</p></li>
+<li id="fn-1-1-5" class="fn-item"><span class="fn-num-link">5</span><p>Cf. <em>Dan</em>. 3:57-90.</p></li>
+<li id="fn-1-1-6" class="fn-item"><a href="#para-14" class="fn-num-link">6</a><p>Cf. <em>1 Cor</em>. 6:13-20.</p></li>
+<li id="fn-1-1-7" class="fn-item"><a href="#para-14" class="fn-num-link">7</a><p>Cf. <em>1 Kings</em> 16:7; <em>Jer</em>. 17:10.</p></li>
+<li id="fn-1-1-8" class="fn-item"><a href="#para-15" class="fn-num-link">8</a><p>Cf. <em>Sir</em>. 17:7-8.</p></li>
+<li id="fn-1-1-9" class="fn-item"><a href="#para-16" class="fn-num-link">9</a><p>Cf. <em>Rom</em>. 2:15-16.</p></li>
+<li id="fn-1-1-10" class="fn-item"><a href="#para-16" class="fn-num-link">10</a><p>Cf. Pius XII, <em>Radio address on the correct formation of a Christian conscience in the young</em>, March 23, 1952: AAS (1952), p. 271.</p></li>
+<li id="fn-1-1-11" class="fn-item"><a href="#para-16" class="fn-num-link">11</a><p>Cf. <em>Matt</em>. 22:37-40; <em>Gal</em>. 5:14.</p></li>
+<li id="fn-1-1-12" class="fn-item"><a href="#para-17" class="fn-num-link">12</a><p>Cf. <em>Sir</em>. 15:14.</p></li>
+<li id="fn-1-1-13" class="fn-item"><a href="#para-17" class="fn-num-link">13</a><p>Cf. <em>2 Cor</em>. 5:10.</p></li>
+<li id="fn-1-1-14" class="fn-item"><a href="#para-18" class="fn-num-link">14</a><p>Cf. <em>Wis</em>. 1:13; 2:23-24; <em>Rom</em>. 5:21; 6:23; Jas. 1:15.</p></li>
+<li id="fn-1-1-15" class="fn-item"><span class="fn-num-link">15</span><p>Cf. <em>1 Cor</em>. 15:56-57.</p></li>
+<li id="fn-1-1-16" class="fn-item"><a href="#para-21" class="fn-num-link">16</a><p>Cf. Pius XI, encyclical letter <em><a href="/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19031937_divini-redemptoris_en.html" class="ext-link" target="_blank" rel="noopener">Divini Redemptoris</a></em>, March 19, 1937: AAS 29 (1937), pp. 65-106; Pius XII, encyclical letter <em><a href="/holy_father/pius_xii/encyclicals/documents/hf_p-xii_enc_29061958_ad-apostolorum-principis_en.html" class="ext-link" target="_blank" rel="noopener">Ad Apostolorum Principis</a></em>, June 29, 1958: AAS 50 (1958) pp. 601-614; John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html" class="ext-link" target="_blank" rel="noopener">Mater et Magistra</a></em> May 15, 1961: AAS 53 (1961), pp. 451-453; Paul VI, <em><a href="/holy_father/paul_vi/encyclicals/documents/hf_p-vi_enc_06081964_ecclesiam_en.html" class="ext-link" target="_blank" rel="noopener">Ecclesiam Suam</a></em>, Aug. 6, 1964: AAS 56 (1964), pp. 651-653.</p></li>
+<li id="fn-1-1-17" class="fn-item"><a href="#para-21" class="fn-num-link">17</a><p>Cf. Second Vatican Council, <em><a href="/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html" class="ext-link" target="_blank" rel="noopener">Dogmatic Constitution on the Church</a></em>, Chapter I, n. 8: AAS 57 (1965), p. 12.</p></li>
+<li id="fn-1-1-18" class="fn-item"><a href="#para-21" class="fn-num-link">18</a><p>Cf. <em>Phil</em>. 1:27.</p></li>
+<li id="fn-1-1-19" class="fn-item"><a href="#para-21" class="fn-num-link">19</a><p>St. Augustine, <em>Confessions</em> I, 1: PL 32, 661.</p></li>
+<li id="fn-1-1-20" class="fn-item"><a href="#para-22" class="fn-num-link">20</a><p>Cf. Rom. 5: 14. Cf. Tertullian, <em>De carnis resurrectione</em> 6: &quot;The shape that the slime of the earth was given was intended with a view to Christ, the future man.&quot;: P. 2, 282; CSEL 47, p. 33, 1. 12-13.</p></li>
+<li id="fn-1-1-21" class="fn-item"><a href="#para-22" class="fn-num-link">21</a><p>Cf. <em>2 Cor</em>. 4:4.</p></li>
+<li id="fn-1-1-22" class="fn-item"><a href="#para-22" class="fn-num-link">22</a><p>Cf. <em>Second Council of Constantinople</em>, canon 7: &quot;The divine Word was not changed into a human nature, nor was a human nature absorbed by the Word.&quot; Denzinger 219(428); Cf. also Third Council of Constantinople: &quot;For just as His most holy and immaculate human nature, though deified, was not destroyed (theotheisa ouk anerethe), but rather remained in its proper state and mode of being&quot;: Denzinger 291(556); Cf. Council of Chalcedon:&quot; to be acknowledged in two natures, without confusion change, division, or separation.&quot; Denzinger 148(302).</p></li>
+<li id="fn-1-1-23" class="fn-item"><a href="#para-22" class="fn-num-link">23</a><p>Cf. Third <em>Council of Constantinople</em>: &quot;and so His human will, though deified, is not destroyed&quot;: Denzinger 291(556).</p></li>
+<li id="fn-1-1-24" class="fn-item"><a href="#para-22" class="fn-num-link">24</a><p>Cf. <em>Heb</em>. 4:15.</p></li>
+<li id="fn-1-1-25" class="fn-item"><a href="#para-22" class="fn-num-link">25</a><p>Cf. <em>2 Cor</em>. 5:18-19; Col. 1:20-22.</p></li>
+<li id="fn-1-1-26" class="fn-item"><a href="#para-22" class="fn-num-link">26</a><p>Cf. <em>1 Pet</em>. 2:21; <em>Matt</em>. 16:24; Luke 14:27.</p></li>
+<li id="fn-1-1-27" class="fn-item"><a href="#para-22" class="fn-num-link">27</a><p>Cf. <em>Rom</em>. 8:29; <em>Col</em>. 3:10-14.</p></li>
+<li id="fn-1-1-28" class="fn-item"><a href="#para-22" class="fn-num-link">28</a><p>Cf. <em>Rom</em>. 8:1-11.</p></li>
+<li id="fn-1-1-29" class="fn-item"><a href="#para-22" class="fn-num-link">29</a><p>Cf. <em>2 Cor</em>. 4:14.</p></li>
+<li id="fn-1-1-30" class="fn-item"><a href="#para-22" class="fn-num-link">30</a><p>Cf. <em>Phil</em>. 3:19; <em>Rom</em>. 8:17.</p></li>
+<li id="fn-1-1-31" class="fn-item"><a href="#para-22" class="fn-num-link">31</a><p>Cf. Second Vatican Council, <a href="/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html" class="ext-link" target="_blank" rel="noopener">Dogmatic Constitution on the Church</a>, Chapter 2, n. 16: AAS 57 (1965), p. 20.</p></li>
+<li id="fn-1-1-32" class="fn-item"><a href="#para-22" class="fn-num-link">32</a><p>Cf. <em>Rom</em>. 8:32.</p></li>
+<li id="fn-1-1-33" class="fn-item"><a href="#para-22" class="fn-num-link">33</a><p>Cf. The <em>Byzantine Easter Liturgy</em>.</p></li>
+<li id="fn-1-1-34" class="fn-item"><a href="#para-22" class="fn-num-link">34</a><p>Cf. <em>Rom</em>. 8:15 and <em>Gal</em>. 4:6; cf. also <em>John</em> 1:22 and <em>John</em> 3:1-2.</p></li>
+</ol>
+<h3 class="fn-group"><a href="#ch-4" class="fn-ch-link">The Community of Mankind</a></h3>
+<ol class="fn-list">
+<li id="fn-1-2-1" class="fn-item"><a href="#para-23" class="fn-num-link">1</a><p>Cf. John XXIII, encyclical letter, <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html" class="ext-link" target="_blank" rel="noopener">Mater et Magistra</a></em>, May 15, 1961: AAS 53 (1961), pp. 401-464, and encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html" class="ext-link" target="_blank" rel="noopener">Pacem in Terris</a></em>, April 11, 1963: AAS 55 (1963), pp. 257-304; Paul VI encyclical letter <em><a href="/holy_father/paul_vi/encyclicals/documents/hf_p-vi_enc_06081964_ecclesiam_en.html" class="ext-link" target="_blank" rel="noopener">Ecclesiam Suam</a></em>, Aug. 6, 1964: AAS 54 (1864) pp. 609-659.</p></li>
+<li id="fn-1-2-2" class="fn-item"><a href="#para-24" class="fn-num-link">2</a><p>Cf. <em>Luke</em> 17:33.</p></li>
+<li id="fn-1-2-3" class="fn-item"><a href="#para-25" class="fn-num-link">3</a><p>Cf. St. Thomas, 1 <em>Ethica Lect</em>. 1.</p></li>
+<li id="fn-1-2-4" class="fn-item"><a href="#para-25" class="fn-num-link">4</a><p>Cf. John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html" class="ext-link" target="_blank" rel="noopener">Mater et Magistra</a></em>: AAS 53 (1961), p. 418. Cf. also Pius XI, encyclical letter <em><a href="/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html" class="ext-link" target="_blank" rel="noopener">Quadragesimo Anno</a></em>: AAS 23 (1931), p. 222 ff.</p></li>
+<li id="fn-1-2-5" class="fn-item"><a href="#para-26" class="fn-num-link">5</a><p>Cf. John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html" class="ext-link" target="_blank" rel="noopener">Mater et Magistra</a></em>: AAS 53 (1961) .</p></li>
+<li id="fn-1-2-6" class="fn-item"><a href="#para-26" class="fn-num-link">6</a><p>Cf. Mark 2:27.</p></li>
+<li id="fn-1-2-7" class="fn-item"><a href="#para-26" class="fn-num-link">7</a><p>Cf. John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html" class="ext-link" target="_blank" rel="noopener">Pacem in Terris</a></em>: AAS 55 (1963), p. 266.</p></li>
+<li id="fn-1-2-8" class="fn-item"><a href="#para-27" class="fn-num-link">8</a><p>Cf. <em>Jas</em>. 2:15-16.</p></li>
+<li id="fn-1-2-9" class="fn-item"><a href="#para-27" class="fn-num-link">9</a><p>Cf. <em>Luke</em> 16:18-31.</p></li>
+<li id="fn-1-2-10" class="fn-item"><a href="#para-28" class="fn-num-link">10</a><p>Cf. John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html" class="ext-link" target="_blank" rel="noopener">Pacem in Terris</a></em>: AAS 55 (1963), p. 299 and 300.</p></li>
+<li id="fn-1-2-11" class="fn-item"><a href="#para-28" class="fn-num-link">11</a><p>Cf. <em>Luke</em> 6:37-38; <em>Matt</em>. 7:1-2; <em>Rom</em>. 2:1-11; 14:10, 14:10-12.</p></li>
+<li id="fn-1-2-12" class="fn-item"><a href="#para-28" class="fn-num-link">12</a><p>Cf. <em>Matt</em>. 5:43-47.</p></li>
+<li id="fn-1-2-13" class="fn-item"><a href="#para-32" class="fn-num-link">13</a><p>Cf. <em><a href="/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html" class="ext-link" target="_blank" rel="noopener">Dogmatic Constitution on the Church</a></em>, Chapter II, n. 9: AAS 57 (1965). pp. 12-13.</p></li>
+<li id="fn-1-2-14" class="fn-item"><a href="#para-32" class="fn-num-link">14</a><p>Cf. <em>Exodus</em> 24:1-8.</p></li>
+</ol>
+<h3 class="fn-group"><a href="#ch-5" class="fn-ch-link">Man&#x27;s Activity Throughout the World</a></h3>
+<ol class="fn-list">
+<li id="fn-1-3-1" class="fn-item"><a href="#para-34" class="fn-num-link">1</a><p>Cf. <em>Gen</em>. 1:26-27; 9:3; <em>Wis</em>. 9:3.</p></li>
+<li id="fn-1-3-2" class="fn-item"><a href="#para-34" class="fn-num-link">2</a><p>Cf. <em>Ps</em>. 8:7 and 10.</p></li>
+<li id="fn-1-3-3" class="fn-item"><a href="#para-34" class="fn-num-link">3</a><p>Cf. John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html" class="ext-link" target="_blank" rel="noopener">Pacem in Terris</a></em>: AAS 55 (1963), p. 297.</p></li>
+<li id="fn-1-3-4" class="fn-item"><a href="#para-34" class="fn-num-link">4</a><p>Cf. Message to all mankind sent by the Fathers at the beginning of the Second Vatican Council, Oct. 20, 1962: AAS 54 (1962), p. 823.</p></li>
+<li id="fn-1-3-5" class="fn-item"><a href="#para-35" class="fn-num-link">5</a><p>Cf. Paul VI, Address to the diplomatic corps Jan 7 1965: AAS 57 (1965), p. 232.</p></li>
+<li id="fn-1-3-6" class="fn-item"><a href="#para-36" class="fn-num-link">6</a><p>Cf. First Vatican Council, Dogmatic Constitution on the Catholic Faith, Chapter III: Denz. 1785-1186 (3004-3005).</p></li>
+<li id="fn-1-3-7" class="fn-item"><a href="#para-36" class="fn-num-link">7</a><p>Cf. Msgr. Pio Paschini, <em>Vita e opere di Galileo Galilei</em>, 2 volumes, Vatican Press (1964).</p></li>
+<li id="fn-1-3-8" class="fn-item"><a href="#para-37" class="fn-num-link">8</a><p>Cf. Matt. 24:13; 13:24-30 and 36-43.</p></li>
+<li id="fn-1-3-9" class="fn-item"><a href="#para-37" class="fn-num-link">9</a><p>Cf. 2 Cor. 6:10.</p></li>
+<li id="fn-1-3-10" class="fn-item"><a href="#para-38" class="fn-num-link">10</a><p>Cf. John 1:3 and 14.</p></li>
+<li id="fn-1-3-11" class="fn-item"><a href="#para-38" class="fn-num-link">11</a><p>Cf. Eph. 1:10.</p></li>
+<li id="fn-1-3-12" class="fn-item"><a href="#para-38" class="fn-num-link">12</a><p>Cf. John 3:16; Rom. 5:8.</p></li>
+<li id="fn-1-3-13" class="fn-item"><a href="#para-38" class="fn-num-link">13</a><p>Cf. Acts 2:36; Matt. 28:18.</p></li>
+<li id="fn-1-3-14" class="fn-item"><a href="#para-38" class="fn-num-link">14</a><p>Cf. Rom. 15:16.</p></li>
+<li id="fn-1-3-15" class="fn-item"><a href="#para-39" class="fn-num-link">15</a><p>Cf. Acts 1:7.</p></li>
+<li id="fn-1-3-16" class="fn-item"><a href="#para-39" class="fn-num-link">16</a><p>Cf. 1 Cor. 7:31; St. Irenaeus, <em>Adversus haereses</em>, V, 36, PG, VIII, 1221.</p></li>
+<li id="fn-1-3-17" class="fn-item"><a href="#para-39" class="fn-num-link">17</a><p>Cf. 2 Cor. 5:2; 2 Pet. 3:13.</p></li>
+<li id="fn-1-3-18" class="fn-item"><a href="#para-39" class="fn-num-link">18</a><p>Cf. 1 Cor. 2:9; Apoc. 21:4-5.</p></li>
+<li id="fn-1-3-19" class="fn-item"><a href="#para-39" class="fn-num-link">19</a><p>Cf. 1 Cor. 15:42 and 53.</p></li>
+<li id="fn-1-3-20" class="fn-item"><a href="#para-39" class="fn-num-link">20</a><p>Cf. 1 Cor. 13:8; 3:14.</p></li>
+<li id="fn-1-3-21" class="fn-item"><a href="#para-39" class="fn-num-link">21</a><p>Cf. Rom. 8:19-21.</p></li>
+<li id="fn-1-3-22" class="fn-item"><a href="#para-39" class="fn-num-link">22</a><p>Cf. Luke 9:25.</p></li>
+<li id="fn-1-3-23" class="fn-item"><a href="#para-39" class="fn-num-link">23</a><p>Cf. Pius XI, encyclical letter <em><a href="/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html" class="ext-link" target="_blank" rel="noopener">Quadragesimo Anno</a></em>: AAS 23 (1931), p. 207.</p></li>
+<li id="fn-1-3-24" class="fn-item"><a href="#para-39" class="fn-num-link">24</a><p>Preface of the Feast of Christ the King.</p></li>
+</ol>
+<h3 class="fn-group"><a href="#ch-6" class="fn-ch-link">The Role of the Church in the Modern World</a></h3>
+<ol class="fn-list">
+<li id="fn-1-4-1" class="fn-item"><a href="#para-40" class="fn-num-link">1</a><p>Cf. Paul VI, encyclical letter <em><a href="/holy_father/paul_vi/encyclicals/documents/hf_p-vi_enc_06081964_ecclesiam_en.html" class="ext-link" target="_blank" rel="noopener">Ecclesiam Suam</a></em>, III: AAS 56 (1964), pp. 637-659.</p></li>
+<li id="fn-1-4-2" class="fn-item"><a href="#para-40" class="fn-num-link">2</a><p>Cf. Titus 3:4: &quot;love of mankind.&quot;</p></li>
+<li id="fn-1-4-3" class="fn-item"><a href="#para-40" class="fn-num-link">3</a><p>Cf. Eph. 1:3; 5:6; 13-14, 23.</p></li>
+<li id="fn-1-4-4" class="fn-item"><a href="#para-40" class="fn-num-link">4</a><p>Second Vatican Council, <em><a href="/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html" class="ext-link" target="_blank" rel="noopener">Dogmatic Constitution on the Church</a></em>, Chapter I, n. 8: AAS 57 (1965), p. 12.</p></li>
+<li id="fn-1-4-5" class="fn-item"><a href="#para-40" class="fn-num-link">5</a><p>Ibid., Chapter II, no. 9: AAS 57 (1965), p. 14; Cf. n. 8: AAS loc. cit., p. 11.</p></li>
+<li id="fn-1-4-6" class="fn-item"><a href="#para-40" class="fn-num-link">6</a><p>Ibid., Chapter I, n. 8: AAS 57 (1965), p. 11.</p></li>
+<li id="fn-1-4-7" class="fn-item"><a href="#para-40" class="fn-num-link">7</a><p>Cf. ibid., Chapter IV, n. 38: AAS 57 (1965), p. 43, with note 120.</p></li>
+<li id="fn-1-4-8" class="fn-item"><a href="#para-41" class="fn-num-link">8</a><p>Cf. Rom. 8:14-17.</p></li>
+<li id="fn-1-4-9" class="fn-item"><a href="#para-41" class="fn-num-link">9</a><p>Cf. Matt. 22:39.</p></li>
+<li id="fn-1-4-10" class="fn-item"><a href="#para-42" class="fn-num-link">10</a><p><em><a href="/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html" class="ext-link" target="_blank" rel="noopener">Dogmatic Constitution on the Church</a></em>, Chapter II, n. 9: AAS 57 (1965), pp. 12-14.</p></li>
+<li id="fn-1-4-11" class="fn-item"><a href="#para-42" class="fn-num-link">11</a><p>Cf. Pius XII, Address to the International Union of Institutes of Archeology, History and History of Art, March 9, 1956: AAS 48 (1965), p. 212: &quot;Its divine Founder, Jesus Christ, has not given it any mandate or fixed any end of the cultural order. The goal which Christ assigns to it is strictly religious. . . The Church must lead men to God, in order that they may be given over to him without reserve.... The Church can never lose sight of the strictly religious, supernatural goal. The meaning of all its activities, down to the last canon of its Code, can only cooperate directly or indirectly in this goal.&quot;</p></li>
+<li id="fn-1-4-12" class="fn-item"><a href="#para-42" class="fn-num-link">12</a><p><em><a href="/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html" class="ext-link" target="_blank" rel="noopener">Dogmatic Constitution on the Church</a></em>, Chapter I, n. 1: AAS 57 (1965), p. 5.</p></li>
+<li id="fn-1-4-13" class="fn-item"><a href="#para-43" class="fn-num-link">13</a><p>Cf. Heb. 13:14.</p></li>
+<li id="fn-1-4-14" class="fn-item"><a href="#para-43" class="fn-num-link">14</a><p>Cf. 2 Thess. 3:6-13; Eph. 4:28.</p></li>
+<li id="fn-1-4-15" class="fn-item"><a href="#para-43" class="fn-num-link">15</a><p>Cf. Is. 58: 1-12.</p></li>
+<li id="fn-1-4-16" class="fn-item"><a href="#para-43" class="fn-num-link">16</a><p>Cf. Matt. 23:3-23; Mark 7: 10-13.</p></li>
+<li id="fn-1-4-17" class="fn-item"><a href="#para-43" class="fn-num-link">17</a><p>Cf. John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html" class="ext-link" target="_blank" rel="noopener">Mater et Magistra</a></em>, IV: AAS 53 (1961), pp. 456-457; cf. I: AAS loc. cit., pp. 407, 410-411.</p></li>
+<li id="fn-1-4-18" class="fn-item"><a href="#para-43" class="fn-num-link">18</a><p>Cf. <em><a href="/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html" class="ext-link" target="_blank" rel="noopener">Dogmatic Constitution on the Church</a></em>, Chapter III, n. 28: AAS 57 (1965), p. 35.</p></li>
+<li id="fn-1-4-19" class="fn-item"><a href="#para-43" class="fn-num-link">19</a><p>Ibid., n. 28: AAS loc. cit. pp. 35-36.</p></li>
+<li id="fn-1-4-20" class="fn-item"><a href="#para-43" class="fn-num-link">20</a><p>Cf. St. Ambrose, <em>De virginitate</em>, Chapter VIII, n. 48: ML 16, 278.</p></li>
+<li id="fn-1-4-21" class="fn-item"><a href="#para-43" class="fn-num-link">21</a><p>Cf. <em><a href="/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html" class="ext-link" target="_blank" rel="noopener">Dogmatic Constitution on the Church</a></em>, Chapter II, n. 15: AAS 57 (1965) p. 20.</p></li>
+<li id="fn-1-4-22" class="fn-item"><a href="#para-44" class="fn-num-link">22</a><p>Cf. <em><a href="/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html" class="ext-link" target="_blank" rel="noopener">Dogmatic Constitution on the Church</a></em>, Chapter II, n. 13: AAS 57 (1965), p. 17.</p></li>
+<li id="fn-1-4-23" class="fn-item"><a href="#para-44" class="fn-num-link">23</a><p>Cf. Justin, <em>Dialogus cum Tryphene</em>, Chapter 110; MG 6, 729 (ed. Otto), 1897, pp. 391-393: &quot;. . .but the greater the number of persecutions which are inflicted upon us, so much the greater the number of other men who become devout believers through the name of Jesus.&quot; Cf. Tertullian, <em>Apologeticus</em>, Chapter L, 13: &quot;Every time you mow us down like grass, we increase in number: the blood of Christians is a seed!&quot; Cf. <em><a href="/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html" class="ext-link" target="_blank" rel="noopener">Dogmatic Constitution on the Church</a></em>, Chapter II, no. 9: AAS 57 (1965), p. 14.</p></li>
+<li id="fn-1-4-24" class="fn-item"><a href="#para-45" class="fn-num-link">24</a><p>Cf. <em><a href="/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html" class="ext-link" target="_blank" rel="noopener">Dogmatic Constitution on the Church</a></em>, Chapter II n. 15: AAS 57 (1965), p. 20.</p></li>
+<li id="fn-1-4-25" class="fn-item"><a href="#para-45" class="fn-num-link">25</a><p>Cf. Paul VI, address given on Feb. 3, 1965.</p></li>
+</ol>
+<h3 class="fn-group"><a href="#ch-8" class="fn-ch-link">Fostering the Nobility of Marriage and the Family</a></h3>
+<ol class="fn-list">
+<li id="fn-2-1-1" class="fn-item"><a href="#para-48" class="fn-num-link">1</a><p>Cf. St. Augustine, <em>De Bene coniugali</em> PL 40, 375-376 and 394, St. Thomas, <em>Summa Theologica</em>, Suppl. Quaest. 49, art. 3 ad 1, <em>Decretum pro Armenis</em>: Denz.-Schoen. 1327; Pius XI, encyclical letter <em><a href="/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_31121930_casti-connubii_en.html" class="ext-link" target="_blank" rel="noopener">Casti Connubii</a></em>: AAS 22 (1930, pp. 547-548; Denz.-Schoen. 3703-3714.</p></li>
+<li id="fn-2-1-2" class="fn-item"><a href="#para-48" class="fn-num-link">2</a><p>Cf. Pius XI, encyclical letter <em><a href="/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_31121930_casti-connubii_en.html" class="ext-link" target="_blank" rel="noopener">Casti Connubii</a></em>: AAS 22 (1930), pp. 546-547; Denz.-Schoen. 3706.</p></li>
+<li id="fn-2-1-3" class="fn-item"><a href="#para-48" class="fn-num-link">3</a><p>Cf. Hosea 2; Jer. 3:6-13; Ezech. 16 and 23; Is. 54.</p></li>
+<li id="fn-2-1-4" class="fn-item"><a href="#para-48" class="fn-num-link">4</a><p>Cf. Matt. 9:15; Mark 2:19-20; Luke 5:34-35; John 3:29; Cf. also 2 Cor. 11:2; Eph. 5:27; Rev. 19:7-8; 21:2 and 9.</p></li>
+<li id="fn-2-1-5" class="fn-item"><span class="fn-num-link">5</span><p>Cf. Eph. 5:25.</p></li>
+<li id="fn-2-1-6" class="fn-item"><a href="#para-48" class="fn-num-link">6</a><p>Cf. Second Vatican Council, <em><a href="/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html" class="ext-link" target="_blank" rel="noopener">Dogmatic Constitution on the Church</a></em>: AAS 57 (1965), pp. 15-16; 40-41; 47.</p></li>
+<li id="fn-2-1-7" class="fn-item"><a href="#para-48" class="fn-num-link">7</a><p>Pius XI, encyclical letter <em><a href="/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_31121930_casti-connubii_en.html" class="ext-link" target="_blank" rel="noopener">Casti Connubii</a></em>: AAS 22 (1930), p. 583.</p></li>
+<li id="fn-2-1-8" class="fn-item"><a href="#para-48" class="fn-num-link">8</a><p>Cf. 1 Tim. 5:3.</p></li>
+<li id="fn-2-1-9" class="fn-item"><a href="#para-48" class="fn-num-link">9</a><p>Cf. Eph. 5:32.</p></li>
+<li id="fn-2-1-10" class="fn-item"><a href="#para-49" class="fn-num-link">10</a><p>Cf. Gen. 2:22-24, Prov. 5:15-20; 31:10-31; Tob. 8:4-8; Cant. 1:2-3; 1:16; 4:16-5, 1; 7:8-14; 1 Cor. 7:3-6; Eph 5:25-33.</p></li>
+<li id="fn-2-1-11" class="fn-item"><a href="#para-49" class="fn-num-link">11</a><p>Cf. Pius XI, encyclical letter <em><a href="/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_31121930_casti-connubii_en.html" class="ext-link" target="_blank" rel="noopener">Casti Connubii</a></em>: AAS 22 (1930), p. 547 and 548; Denz.-Schoen. 3707.</p></li>
+<li id="fn-2-1-12" class="fn-item"><a href="#para-50" class="fn-num-link">12</a><p>Cf. 1 Cor. 7:5.</p></li>
+<li id="fn-2-1-13" class="fn-item"><a href="#para-50" class="fn-num-link">13</a><p>Cf. Pius XII, <em>Address Tra le visite</em>, Jan. 20, 1958: AAS 50 (1958), p. 91.</p></li>
+<li id="fn-2-1-14" class="fn-item"><a href="#para-51" class="fn-num-link">14</a><p>Cf. Pius XI, encyclical letter <em><a href="/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_31121930_casti-connubii_en.html" class="ext-link" target="_blank" rel="noopener">Casti Connubii</a></em>: AAS 22 (1930): Denz.-Schoen. 3716-3718, Pius XII, <em>Allocutio Conventui Unionis Italicae inter Obstetrices</em>, Oct. 29, 1951: AAS 43 (1951), pp. 835-854, Paul VI, <em>Address to a group of cardinals</em>, June 23 1964: AAS 56 (1964), pp. 581-589. Certain questions which need further and more careful investigation have been handed over, at the command of the Supreme Pontiff, to a commission for the study of population, family, and births, in order that, after it fulfills its function, the Supreme Pontiff may pass judgment. With the doctrine of the magisterium in this state, this holy synod does not intend to propose immediately concrete solutions.</p></li>
+<li id="fn-2-1-15" class="fn-item"><span class="fn-num-link">15</span><p>Cf. Eph. 5:16; Col. 4:5.</p></li>
+<li id="fn-2-1-16" class="fn-item"><a href="#para-52" class="fn-num-link">16</a><p>Cf. <em>Sacramentarium Gregorianum</em>: PL 78, 262.</p></li>
+<li id="fn-2-1-17" class="fn-item"><a href="#para-52" class="fn-num-link">17</a><p>Cf. Rom. 5:15 and 18; 6:5-11; Gal. 2:20.</p></li>
+<li id="fn-2-1-18" class="fn-item"><a href="#para-52" class="fn-num-link">18</a><p>Cf. Eph. 5:25-27.</p></li>
+</ol>
+<h3 class="fn-group"><a href="#ch-9" class="fn-ch-link">The Proper Development of Culture</a></h3>
+<ol class="fn-list">
+<li id="fn-2-2-3" class="fn-item"><span class="fn-num-link">3</span><p>Cf. Gen. 1:28.</p></li>
+<li id="fn-2-2-15" class="fn-item"><span class="fn-num-link">15</span><p>Cf. <a href="/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html" class="ext-link" target="_blank" rel="noopener">Dogmatic Constitution on the Church</a>, Chapter IV, n. 37: AAS 57 (1965), pp. 42-43.</p></li>
+</ol>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-2-2-1">Section 1: The Circumstances of Culture in the World Today</a></p>
+<ol class="fn-list">
+<li id="fn-2-2-1" class="fn-item"><a href="#para-54" class="fn-num-link">1</a><p>Cf. Introductory statement of this constitution, n. 4 ff.</p></li>
+</ol>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-2-2-2">Section 2: Some Principles for the Proper Development of Culture</a></p>
+<ol class="fn-list">
+<li id="fn-2-2-2" class="fn-item"><a href="#para-57" class="fn-num-link">2</a><p>Cf. Col. 3:2.</p></li>
+<li id="fn-2-2-4" class="fn-item"><a href="#para-57" class="fn-num-link">4</a><p>Cf. Prov. 8:30-31.</p></li>
+<li id="fn-2-2-5" class="fn-item"><a href="#para-57" class="fn-num-link">5</a><p>Cf. St. Irenaeus, <em>Adversus haereses</em>, III, 11, 8 (ed. Sagnard p. 200; cf. ibid., 16, 6: pp. 290-292; 21, 10-22: pp. 370-372; 22 3: p. 378; etc.)</p></li>
+<li id="fn-2-2-6" class="fn-item"><a href="#para-58" class="fn-num-link">6</a><p>Cf. Eph. 1:10.</p></li>
+<li id="fn-2-2-7" class="fn-item"><a href="#para-58" class="fn-num-link">7</a><p>Cf. the words of Pius XI to Father M. D. Roland-Gosselin &quot;It is necessary never to lose sight of the fact that the objective of the Church is to evangelize, not to civilize. If it civilizes, it is for the sake of evangelization.&quot; (Semaines sociales de France, Versailles, 1936, pp. 461-462).</p></li>
+<li id="fn-2-2-8" class="fn-item"><a href="#para-59" class="fn-num-link">8</a><p>First Vatican Council, <em>Constitution on the Catholic Faith</em>: Denzinger 1795, 1799 (3015, 3019). Cf. Pius XI, encyclical letter <em><a href="/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html" class="ext-link" target="_blank" rel="noopener">Quadragesimo Anno</a></em>: AAS 23 (1931), p. 190.</p></li>
+<li id="fn-2-2-9" class="fn-item"><a href="#para-59" class="fn-num-link">9</a><p>Cf. John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html" class="ext-link" target="_blank" rel="noopener">Pacem in Terris</a></em>: AAS 55 (1963), p. 260.</p></li>
+<li id="fn-2-2-10" class="fn-item"><a href="#para-59" class="fn-num-link">10</a><p>Cf. John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html" class="ext-link" target="_blank" rel="noopener">Pacem in Terris</a></em>: AAS 55 (1963), p. 283; Pius XII, Radio address, Dec. 24, 1941: AAS 34 (1942), pp. 16-17.</p></li>
+</ol>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-2-2-3">Section 3: Some More Urgent Duties of Christians in Regard to Culture</a></p>
+<ol class="fn-list">
+<li id="fn-2-2-11" class="fn-item"><a href="#para-60" class="fn-num-link">11</a><p>John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html" class="ext-link" target="_blank" rel="noopener">Pacem in Terris</a></em>: AAS 55 (1963), p. 260.</p></li>
+<li id="fn-2-2-12" class="fn-item"><a href="#para-62" class="fn-num-link">12</a><p>Cf. John XXIII, prayer delivered on Oct. 11, 1962, at the beginning of the council: AAS 54 (1962), p. 792.</p></li>
+<li id="fn-2-2-13" class="fn-item"><a href="#para-62" class="fn-num-link">13</a><p>Cf. <a href="/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19631204_sacrosanctum-concilium_en.html" class="ext-link" target="_blank" rel="noopener">Constitution on the Sacred Liturgy</a>, n. 123: AAS 56 (1964), p. 131; Paul VI, Discourse to the artists of Rome: AAS 56 (1964), pp. 439-442.</p></li>
+<li id="fn-2-2-14" class="fn-item"><a href="#para-62" class="fn-num-link">14</a><p>Cf. Second Vatican Council, <a href="/archive/hist_councils/ii_vatican_council/documents/vat-ii_decree_19651028_optatam-totius_en.html" class="ext-link" target="_blank" rel="noopener">Decree on Priestly Training</a> and <a href="/archive/hist_councils/ii_vatican_council/documents/vat-ii_decl_19651028_gravissimum-educationis_en.html" class="ext-link" target="_blank" rel="noopener">Declaration on Christian Education</a>.</p></li>
+</ol>
+<h3 class="fn-group"><a href="#ch-10" class="fn-ch-link">Economic and Social Life</a></h3>
+<ol class="fn-list">
+<li id="fn-2-3-1" class="fn-item"><a href="#para-63" class="fn-num-link">1</a><p>Cf. Pius XII, Address on March 23, 1952: AAS 44 (1953), p. 273; John XXIII, Allocution to the Catholic Association of Italian Workers, May 1, 1959: AAS 51 (1959), p. 358.</p></li>
+<li id="fn-2-3-2" class="fn-item"><span class="fn-num-link">2</span><p>Cf. Pius XI, encyclical letter <em><a href="/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html" class="ext-link" target="_blank" rel="noopener">Quadragesimo Anno</a></em>: AAS 23 (1931), p. 190 ff; Pius XII, Address of March 23, 1952: AAS 44 (1952), p. 276 ff; John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html" class="ext-link" target="_blank" rel="noopener">Mater et Magistra</a></em>: AAS 53 (19ffl), p. 450; Vatican Council II, <a href="/archive/hist_councils/ii_vatican_council/documents/vat-ii_decree_19631204_inter-mirifica_en.html" class="ext-link" target="_blank" rel="noopener">Decree on the Media of Social Communication</a>, Chapter I, n. 6 AAS 56 (1964), p. 147.</p></li>
+</ol>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-2-3-1">Section 1: Economic Development</a></p>
+<ol class="fn-list">
+<li id="fn-2-3-3" class="fn-item"><a href="#para-64" class="fn-num-link">3</a><p>Cf. Matt. 16:26, Luke 16:1-31, Col. 3:17.</p></li>
+<li id="fn-2-3-4" class="fn-item"><a href="#para-65" class="fn-num-link">4</a><p>Cf. Leo XIII, encyclical letter <em><a href="/holy_father/leo_xiii/encyclicals/documents/hf_l-xiii_enc_20061888_libertas_en.html" class="ext-link" target="_blank" rel="noopener">Libertas</a></em>, in Acta Leonis XIII, t. VIII, p. 220 ff; Pius XI, encyclical letter <em><a href="/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html" class="ext-link" target="_blank" rel="noopener">Quadragesimo Anno</a></em>: AAS 23 (1931), p. 191 ff; Pius XI, encyclical letter <em><a href="/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19031937_divini-redemptoris_en.html" class="ext-link" target="_blank" rel="noopener">Divini Redemptoris</a></em>: AAS 39 (1937), p. 65 ff; Pius XII, Nuntius natalicius 1941: AAS 34 (1942), p. 10 ff: John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html" class="ext-link" target="_blank" rel="noopener">Mater et Magistra</a></em>: AAS 53 (1961), pp. 401-464.</p></li>
+<li id="fn-2-3-5" class="fn-item"><a href="#para-66" class="fn-num-link">5</a><p>In reference to agricultural problems cf. especially John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html" class="ext-link" target="_blank" rel="noopener">Mater et Magistra</a></em>: AAS 53 (1961),</p></li>
+</ol>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-2-3-2">Section 2: Certain Principles Governing Socio-economic Life as a Whole</a></p>
+<ol class="fn-list">
+<li id="fn-2-3-6" class="fn-item"><a href="#para-67" class="fn-num-link">6</a><p>Cf. Leo XIII, encyclical letter <em><a href="/holy_father/leo_xiii/encyclicals/documents/hf_l-xiii_enc_15051891_rerum-novarum_en.html" class="ext-link" target="_blank" rel="noopener">Rerum Novarum</a></em>: AAS 23 (1890-91), p. 649, p. 662; Pius XI, encyclical letter <em><a href="/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html" class="ext-link" target="_blank" rel="noopener">Quadragesimo Anno</a></em>: AAS 23 (193-1), pp. 200-201; Pius XI, encyclical letter <em><a href="/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19031937_divini-redemptoris_en.html" class="ext-link" target="_blank" rel="noopener">Divini Redemptoris</a></em>: AAS 29 (1937), p. 92; Pius XII, Radio address on Christmas Eve 1942: AAS 35 (1943) p. 20; Pius XII, Allocution of June 13, 1943: AAS 35 (1943), p. 172; Pius XII, Radio address to the workers of Spain, March 11, 1951: AAS 43 (1951), p. 215; John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html" class="ext-link" target="_blank" rel="noopener">Mater et Magistra</a></em>: AAS 53 (1961), p. 419.</p></li>
+<li id="fn-2-3-7" class="fn-item"><a href="#para-68" class="fn-num-link">7</a><p>Cf. John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html" class="ext-link" target="_blank" rel="noopener">Mater et Magistra</a></em>: AAS 53 (1961), pp. 408, 424, 427; however, the word &quot;curatione&quot; has been taken from the Latin text of the encyclical letter <em><a href="/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html" class="ext-link" target="_blank" rel="noopener">Quadragesimo Anno</a></em>: AAS 23 (1931) p. 199. Under the aspect of the evolution of the question cf. also: Pius XII, Allocution of June 3, 1950: AAS 42 (1950) pp. 485-488; Paul VI, Allocution of June 8, 1964: AAS 56 (1964), pp. 573-579.</p></li>
+<li id="fn-2-3-8" class="fn-item"><a href="#para-69" class="fn-num-link">8</a><p>Cf. Pius XII, encyclical <em><a href="/holy_father/pius_xii/encyclicals/documents/hf_p-xii_enc_01111939_sertum-laetitiae_en.html" class="ext-link" target="_blank" rel="noopener">Sertum Laetitiae</a></em>: AAS 31 (1939), p. 642, John XXIII, Consistorial allocution: AAS 52 (1960), pp. 5-11; John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html" class="ext-link" target="_blank" rel="noopener">Mater et Magistra</a></em>: AAS 53 (1961), p. 411.</p></li>
+<li id="fn-2-3-9" class="fn-item"><a href="#para-69" class="fn-num-link">9</a><p>Cf. St. Thomas, <em>Summa Theologica</em>: II-II, q. 32, a. 5 ad 2; Ibid. q. 66, a. 2: cf. explanation in Leo XIII, encyclical letter <em><a href="/holy_father/leo_xiii/encyclicals/documents/hf_l-xiii_enc_15051891_rerum-novarum_en.html" class="ext-link" target="_blank" rel="noopener">Rerum Novarum</a></em>: AAS 23 (1890-91) p. 651; cf. also Pius XII Allocution of June 1, 1941: AAS 33 (1941), p. 199; Pius XII, Birthday radio address 1954: AAS 47 (1955), p. 27.</p></li>
+<li id="fn-2-3-10" class="fn-item"><a href="#para-69" class="fn-num-link">10</a><p>Cf. St. Basil, <em>Hom. in illud Lucae &quot;Destruam horrea mea,&quot;</em> n. 2 (PG 31, 263); Lactantius, <em>Divinarum institutionum</em>, lib. V. on justice (PL 6, 565 B); St. Augustine, <em>In Ioann. Ev.</em> tr. 50, n. 6 (PL 35, 1760); St. Augustine, <em>Enarratio in Ps. CXLVII</em>, 12 (PL 37, 192); St. Gregory the Great, <em>Homiliae in Ev</em>., hom. 20 (PL 76, 1165); St. Gregory the Great, <em>Regulae Pastoralis liber</em>, pars III c. 21 (PL 77 87); St. Bonaventure, <em>In III Sent.</em> d. 33, dub. 1 (ed Quacracchi, III, 728); St. Bonaventure, <em>In IV Sent.</em> d. 15, p. II, a. a q. 1 (ed. cit. IV, 371 b ); q. de superfluo (ms. Assisi Bibl. Comun. 186, ff. 112a-113a); St. Albert the Great, <em>In III Sent.</em>, d. 33, a.3, sol. 1 (ed. Borgnet XXVIII, 611); Id. <em>In IV Sent</em>. d. 15, a. 1 (ed. cit. XXIX, 494-497). As for the determination of what is superfluous in our day and age, cf. John XXIII, Radio-television message of Sept. 11, 1962: AAS 54 (1962) p. 682: &quot;The obligation of every man, the urgent obligation of the Christian man, is to reckon what is superfluous by the measure of the needs of others, and to see to it that the administration and the distribution of created goods serve the common good.&quot;</p></li>
+<li id="fn-2-3-11" class="fn-item"><a href="#para-69" class="fn-num-link">11</a><p>In that case, the old principle holds true: &quot;In extreme necessity all goods are common, that is, all goods are to be shared.&quot; On the other hand, for the order, extension, and manner by which the principle is applied in the proposed text, besides the modern authors: cf. St. Thomas, <em>Summa Theologica</em> II-II, q. 66, a. 7. Obviously, for the correct application of the principle, all the conditions that are morally required must be met.</p></li>
+<li id="fn-2-3-12" class="fn-item"><a href="#para-69" class="fn-num-link">12</a><p>Cf. Gratiam, <em>Decretum</em>, C. 21, dist. LXXXVI (ed. Friedberg I, 302). This axiom is also found already in PL 54, 591 A (cf. in Antonianum 27 (1952) 349-366) i.</p></li>
+<li id="fn-2-3-13" class="fn-item"><a href="#para-71" class="fn-num-link">13</a><p>Cf. Leo XIII, encyclical letter <em><a href="/holy_father/leo_xiii/encyclicals/documents/hf_l-xiii_enc_15051891_rerum-novarum_en.html" class="ext-link" target="_blank" rel="noopener">Rerum Novarum</a></em>: AAS 23 (1890-91) pp. 643-646, Pius XI, encyclical letter <em><a href="/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html" class="ext-link" target="_blank" rel="noopener">Quadragesimo Anno</a></em>: AAS 23 (1931) p. 191; Pius XII, Radio message of June 1, 1941: AAS 33 (1941), p. 199; Pius XII, Radio message on Christmas Eve 1942: AAS 35 (1943), p. 17; Pius XII, Radio message of Sept. 1, 1944: AAS 36 (1944) p. 253; John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html" class="ext-link" target="_blank" rel="noopener">Mater et Magistra</a></em>: AAS 53 (1961) pp. 428-429.</p></li>
+<li id="fn-2-3-14" class="fn-item"><a href="#para-71" class="fn-num-link">14</a><p>Cf. Pius XI, encyclical letter <em><a href="/holy_father/pius_xi/encyclicals/documents/hf_p-xi_enc_19310515_quadragesimo-anno_en.html" class="ext-link" target="_blank" rel="noopener">Quadragesimo Anno</a></em>: AAS 23 (1931) p. 214; John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html" class="ext-link" target="_blank" rel="noopener">Mater et Magistra</a></em>: AAS 53 (1961), p. 429.</p></li>
+<li id="fn-2-3-15" class="fn-item"><a href="#para-71" class="fn-num-link">15</a><p>Cf. Pius XII, Radio message of Pentecost 1941: AAS 44 (1941) p. 199, John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html" class="ext-link" target="_blank" rel="noopener">Mater et Magistra</a></em>: AAS 53 (1961) p. 430.</p></li>
+<li id="fn-2-3-16" class="fn-item"><a href="#para-72" class="fn-num-link">16</a><p>For the right use of goods according to the doctrine of the New Testament, cf. Luke 3:11, 10:30 ff; 11:41; 1 Pet. 5:3, Mark 8:36; 12:39-41; Jas. 5:1-6; 1 Tim. 6:8; Eph. 1:28; a Cor. 8:13; 1 John 3:17 ff.</p></li>
+</ol>
+<h3 class="fn-group"><a href="#ch-11" class="fn-ch-link">The Life of the Political Community</a></h3>
+<ol class="fn-list">
+<li id="fn-2-4-1" class="fn-item"><a href="#para-74" class="fn-num-link">1</a><p>Cf. John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html" class="ext-link" target="_blank" rel="noopener">Mater et Magistra</a></em>: AAS 53 (1961), p. 417.</p></li>
+<li id="fn-2-4-2" class="fn-item"><a href="#para-74" class="fn-num-link">2</a><p>Cf. John XXIII, ibid.</p></li>
+<li id="fn-2-4-3" class="fn-item"><a href="#para-74" class="fn-num-link">3</a><p>Cf. Rom. 13:1-5.</p></li>
+<li id="fn-2-4-4" class="fn-item"><a href="#para-74" class="fn-num-link">4</a><p>Cf. Rom. 13:5.</p></li>
+<li id="fn-2-4-5" class="fn-item"><a href="#para-75" class="fn-num-link">5</a><p>Cf. Pius XII, Radio message, Dec. 24, 1942: AAS 35 (1943) pp. 9-24; Dec. 24, 1944: AAS 37 (1945), pp. 11-17; John XXIII encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html" class="ext-link" target="_blank" rel="noopener">Pacem in Terris</a></em>: AAS 55 (1963), pp. 263, 271 277 and 278.</p></li>
+<li id="fn-2-4-6" class="fn-item"><a href="#para-75" class="fn-num-link">6</a><p>Cf. Pius XII, Radio message of June 7, 1941: AAS 33 (1941) p. 200: John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html" class="ext-link" target="_blank" rel="noopener">Pacem in Terris</a></em>: 1.c., p. 273 and 274.</p></li>
+<li id="fn-2-4-7" class="fn-item"><span class="fn-num-link">7</span><p>Cf. John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_15051961_mater_en.html" class="ext-link" target="_blank" rel="noopener">Mater et Magistra</a></em>: AAS 53 (1961), p. 416.</p></li>
+<li id="fn-2-4-8" class="fn-item"><a href="#para-75" class="fn-num-link">8</a><p>Pius XI, Allocution &quot;Ai dirigenti della Federazione Universitaria Cattolica&quot;. Discorsi di Pio XI (ed. Bertetto), Turin, vol. 1 (1960), p. 743.</p></li>
+<li id="fn-2-4-9" class="fn-item"><a href="#para-76" class="fn-num-link">9</a><p>Cf. Second Vatican Council, <a href="/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html" class="ext-link" target="_blank" rel="noopener">Dogmatic Constitution on the Church</a>, n. 13: AAS 57 (1965), p. 17.</p></li>
+<li id="fn-2-4-10" class="fn-item"><a href="#para-76" class="fn-num-link">10</a><p>Cf. Luke 2:14.</p></li>
+</ol>
+<h3 class="fn-group"><a href="#ch-12" class="fn-ch-link">The Fostering of Peace and the Promotion of a Community of Nations</a></h3>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-2-5-1">Section 1: The Avoidance of War</a></p>
+<ol class="fn-list">
+<li id="fn-2-5-1" class="fn-item"><a href="#para-80" class="fn-num-link">1</a><p>Cf. John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html" class="ext-link" target="_blank" rel="noopener">Pacem in Terris</a></em>, April 11, 1963: AAS 55 (1963), p. 291; &quot;Therefore in this age of ours which prides itself on its atomic power, it is irrational to believe that war is still an apt means of vindicating violated rights.&quot;</p></li>
+<li id="fn-2-5-2" class="fn-item"><a href="#para-80" class="fn-num-link">2</a><p>Cf. Pius XII, Allocution of Sept. 30, 1954: AAS 46 (1954) p. 589; Radio message of Dec. 24, 1954: AAS 47 (1955), pp. 15 ff, John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html" class="ext-link" target="_blank" rel="noopener">Pacem in Terris</a></em>: AAS 55 (1963), pp. 286-291; Paul VI, Allocution to the United Nations, Oct. 4, 1965.</p></li>
+<li id="fn-2-5-3" class="fn-item"><a href="#para-81" class="fn-num-link">3</a><p>Cf. John XXIII, encyclical letter <em><a href="/holy_father/john_xxiii/encyclicals/documents/hf_j-xxiii_enc_11041963_pacem_en.html" class="ext-link" target="_blank" rel="noopener">Pacem in Terris</a></em>, where reduction of arms is mentioned: AAS 55 (1963), p. 287.</p></li>
+<li id="fn-2-5-4" class="fn-item"><a href="#para-82" class="fn-num-link">4</a><p>Cf. 2 Cor. 2:6.</p></li>
+</ol>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-2-5-2">Section 2: Setting up an International Community</a></p>
+</section>
+</noscript>
+
 <nav id="ch-indicator"></nav>
 
 <aside id="fn-drawer">
   <div id="fn-content">
     <div class="drawer-tabs" role="tablist" aria-label="Drawer view">
-      <button class="drawer-view-tab active" type="button" role="tab" aria-controls="drawer-toc" aria-selected="true" data-drawer-view="toc">Contents</button>
-      <button class="drawer-view-tab" type="button" role="tab" aria-controls="drawer-footnotes" aria-selected="false" data-drawer-view="footnotes">Footnotes</button>
-      <button class="drawer-view-tab" type="button" role="tab" aria-controls="drawer-bookmarks" aria-selected="false" data-drawer-view="bookmarks">Bookmarks</button>
+      <button class="drawer-view-tab active" type="button" role="tab" aria-controls="drawer-toc"       aria-selected="true"  data-drawer-view="toc">Contents</button>
+      <button class="drawer-view-tab"        type="button" role="tab" aria-controls="drawer-footnotes" aria-selected="false" data-drawer-view="footnotes">Footnotes</button>
+      <button class="drawer-view-tab"        type="button" role="tab" aria-controls="drawer-bookmarks" aria-selected="false" data-drawer-view="bookmarks">Bookmarks</button>
     </div>
     <div id="drawer-toc" class="drawer-view active" role="tabpanel">
       <h3 class="fn-group toc-item" data-target="ch-0" data-label="Preface"><a href="#ch-0" class="fn-ch-link">Preface</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-0" aria-label="Bookmark Preface" aria-pressed="false"></button></h3>
@@ -1505,8 +1735,6 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     </div>
   </div>
 </aside>
-<div id="fn-tab">Index</div>
-
 <script>// ─────────────────────────────────────────────────────────────────────────
 // Vatican-document reader scripts.
 //
@@ -1658,10 +1886,7 @@ window.addEventListener('resize', () => {
 // px relative to the paragraph. CSS default (top:50%) is the JS-off
 // fallback — the first frame of scroll handler replaces it.
 if (document.body.classList.contains('doc-laudato_si') ||
-    document.body.classList.contains('doc-magnifica_humanitas') ||
-    document.body.classList.contains('doc-antiqua_et_nova') ||
-    document.body.classList.contains('doc-quo_vadis_humanitas') ||
-    document.body.classList.contains('doc-sacrosanctum_concilium')) {
+    document.body.classList.contains('doc-magnifica_humanitas')) {
   const paragraphs = Array.from(document.querySelectorAll('.paragraph'));
   let raf = 0;
   let cachedNumH = 0;   // every digit renders the same height for a given font/size
@@ -1690,10 +1915,8 @@ if (document.body.classList.contains('doc-laudato_si') ||
       updates.push((rect.bottom < -50 || rect.top > vh + 50) ? null : rect);
     }
     if (!cachedNumH) {
-      const visiblePara = paragraphs.find((para, i) =>
-        updates[i] && para.querySelector('.para-num')
-      );
-      cachedNumH = visiblePara ? visiblePara.querySelector('.para-num').offsetHeight : 16;
+      const visibleIdx = updates.findIndex(r => r);
+      cachedNumH = visibleIdx >= 0 ? paragraphs[visibleIdx].querySelector('.para-num').offsetHeight : 16;
     }
     const halfNum = cachedNumH / 2;
 
@@ -1744,7 +1967,10 @@ try {
   if (Array.isArray(stored)) bookmarks = stored.filter(id => tocByTarget.has(id));
 } catch (e) {}
 
-tab.addEventListener('click', () => drawer.classList.toggle('open'));
+tab.addEventListener('click', () => {
+  const open = drawer.classList.toggle('open');
+  tab.setAttribute('aria-expanded', String(open));
+});
 
 function showDrawerView(view) {
   drawerTabs.forEach(button => {

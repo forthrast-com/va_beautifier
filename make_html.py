@@ -569,6 +569,27 @@ if appendices:
 fn_drawer_html = '\n'.join(drawer_items)
 toc_drawer_html = '\n'.join(toc_items)
 
+# ── no-JS fallback TOC (simple link list, no bookmark widgets) ───────────────
+noscript_toc_parts = ['<ul class="noscript-toc-list">']
+for (part, chapter), ch_label in ch_order:
+    cid = part_chapter_to_cid.get((part, chapter), '')
+    if part == 0 and chapter == 0:
+        gl = ch_label or 'Preface / Introduction'
+    elif part == 0:
+        gl = ch_label or f'Chapter {chapter}'
+    else:
+        gl = ch_label or f'Part {int_to_roman(part)}, Chapter {chapter}'
+    noscript_toc_parts.append(f'<li class="ntoc-ch"><a href="#{cid}">{e(gl)}</a>')
+    secs = sorted(secs_by_ch.get((part, chapter), []), key=lambda x: x['section'])
+    if secs:
+        noscript_toc_parts.append('<ul>')
+        for s in secs:
+            noscript_toc_parts.append(f'<li class="ntoc-sec"><a href="#{s["id"]}">{e(s["label"])}</a></li>')
+        noscript_toc_parts.append('</ul>')
+    noscript_toc_parts.append('</li>')
+noscript_toc_parts.append('</ul>')
+noscript_toc_html = '\n'.join(noscript_toc_parts)
+
 # Per-chapter indicator segments. By default each para is its own seg
 # ('paragraphs' mode); for long docs that's too dense, so we can switch
 # to 'sections' where each section is a single seg covering its para
@@ -719,9 +740,22 @@ page = f"""<!DOCTYPE html>
 </div>
 
 {title_block}
+<noscript>
+<nav class="noscript-toc">
+  <h2>Contents</h2>
+  {noscript_toc_html}
+</nav>
+</noscript>
 {''.join(html_parts)}
 {appendix_html}
 {end_matter_html}
+
+<noscript>
+<section class="noscript-fn">
+  <h2>Notes</h2>
+  {fn_drawer_html}
+</section>
+</noscript>
 
 <nav id="ch-indicator"></nav>
 
