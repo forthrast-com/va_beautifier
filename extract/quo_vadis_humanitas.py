@@ -15,7 +15,10 @@ SOURCE_URL = (
     'https://www.vatican.va/roman_curia/congregations/cfaith/cti_documents/'
     'rc_cti_doc_20260304_quo-vadis-humanits_en.html'
 )
-AUTHOR = 'International Theological Commission'
+# The ITC President and the sub-commission chair are the document's two
+# primary signers, in lieu of a structured signatories table in the source.
+AUTHOR = ('Cardinal Víctor Manuel Fernández '
+          'and Rev. Javier Prades López')
 DATE = '2026-03-04'
 IDENTIFIER = 'cti:quo-vadis-humanitas:2026-03-04'
 
@@ -126,9 +129,7 @@ def extract():
         'author': AUTHOR,
         'date': DATE,
         'identifier': IDENTIFIER,
-        # The issuing body lives in the bottom signature / author metadata,
-        # so the title page top stays clean — title + subject only.
-        'desc': '',
+        'desc': 'International Theological Commission',
         'desc_post': 'Thinking through Christian Anthropology in the Face of '
                      'Certain Scenarios for the Future of Humanity',
         'paragraphs': paragraphs,

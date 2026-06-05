@@ -15,8 +15,6 @@ SOURCE_URL = (
     'https://www.vatican.va/roman_curia/congregations/cfaith/documents/'
     'rc_ddf_doc_20250128_antiqua-et-nova_en.html'
 )
-AUTHOR = ('Dicastery for the Doctrine of the Faith '
-          'and Dicastery for Culture and Education')
 DATE = '2025-01-28'
 IDENTIFIER = 'ddf-dce:antiqua-et-nova:2025-01-28'
 
@@ -110,12 +108,17 @@ def extract():
         'name': NAME,
         'hue': HUE,
         'source_url': SOURCE_URL,
-        'author': AUTHOR,
+        # The Prefects from the signatories table are the document's
+        # primary signers; render them as dc:creator rather than the
+        # institutional dicasteries that appear above the title.
+        'author': ' and '.join(
+            s['name'] for s in signatories
+            if s.get('role', '').lower() == 'prefect'
+        ),
         'date': DATE,
         'identifier': IDENTIFIER,
-        # Dicasteries appear at the foot via the signatories block — no
-        # need to also stamp them above the title.
-        'desc': '',
+        'desc': 'Dicastery for the Doctrine of the Faith\n'
+                'Dicastery for Culture and Education',
         'desc_post': 'Note on the Relationship Between Artificial Intelligence '
                      'and Human Intelligence',
         'promulgation': '\n\n'.join(promulgation_stanzas),

@@ -343,7 +343,7 @@ def _title_page_typst(name, desc, desc_post, accent, paper='a5'):
     title_pt   = round(28 * scale)
     label_pt   = round(10 * scale)
     block_gap  = f'{1.8 * scale:.2f}em'
-    line_gap   = f'{0.55 * scale:.2f}em'
+    line_gap   = f'{0.25 * scale:.2f}em'
 
     parts = ['#page(numbering: none, header: none)[', '  #set align(center)', '  #v(1fr)']
 
@@ -367,7 +367,7 @@ def _title_page_typst(name, desc, desc_post, accent, paper='a5'):
     )
     parts.append(f'  #v({line_gap})')
     parts.append(
-        f'  #line(length: 32%, stroke: (paint: rgb("{accent}"), thickness: 0.5pt))'
+        f'  #line(length: 50%, stroke: (paint: rgb("{accent}"), thickness: 0.5pt))'
     )
 
     if desc_post:
@@ -446,9 +446,9 @@ def _cover_typst(data):
         f'#text(size: 32pt, style: "italic", fill: rgb("{accent}"))'
         f'[{_typ_content(name)}]'
     )
-    parts.append('#v(0.55em)')
+    parts.append('#v(0.25em)')
     parts.append(
-        f'#line(length: 32%, stroke: (paint: rgb("{accent}"), thickness: 0.6pt))'
+        f'#line(length: 50%, stroke: (paint: rgb("{accent}"), thickness: 0.6pt))'
     )
 
     if desc_post:
