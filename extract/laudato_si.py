@@ -20,6 +20,7 @@ from core import (
     br_lines,
     chapter_word_to_int,
     clean_text,
+    encyclical_split,
     normalise_footnote_refs,
     only_child_is,
     paragraph_record,
@@ -78,6 +79,9 @@ def extract():
         pre, post = split_around_title(br_lines(fm_p), TITLE_UPPER)
         desc_pre = '\n'.join(pre)
         desc_post = '\n'.join(post)
+    # Pivot the front matter at the "On …" line so the issuer sits
+    # above the title and the subject below it.
+    desc_pre, desc_post = encyclical_split(desc_pre, desc_post)
 
     # LS ends with two appended prayers and a "Given in Rome…" promulgation
     # block. None of them are numbered, so without an end-of-body marker

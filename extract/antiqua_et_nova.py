@@ -113,8 +113,9 @@ def extract():
         'author': AUTHOR,
         'date': DATE,
         'identifier': IDENTIFIER,
-        'desc': 'Dicastery for the Doctrine of the Faith\n'
-                'Dicastery for Culture and Education',
+        # Dicasteries appear at the foot via the signatories block — no
+        # need to also stamp them above the title.
+        'desc': '',
         'desc_post': 'Note on the Relationship Between Artificial Intelligence '
                      'and Human Intelligence',
         'promulgation': '\n\n'.join(promulgation_stanzas),

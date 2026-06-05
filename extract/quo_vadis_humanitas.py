@@ -126,7 +126,9 @@ def extract():
         'author': AUTHOR,
         'date': DATE,
         'identifier': IDENTIFIER,
-        'desc': 'International Theological Commission',
+        # The issuing body lives in the bottom signature / author metadata,
+        # so the title page top stays clean — title + subject only.
+        'desc': '',
         'desc_post': 'Thinking through Christian Anthropology in the Face of '
                      'Certain Scenarios for the Future of Humanity',
         'paragraphs': paragraphs,

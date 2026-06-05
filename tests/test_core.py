@@ -9,6 +9,7 @@ from core import (
     CANONICAL_FOOTNOTE_REF,
     assign_footnote_context,
     clean_text,
+    encyclical_split,
     int_to_roman,
     normalise_footnote_refs,
     normalise_footnote_text,
@@ -92,6 +93,32 @@ class TextHelperTests(unittest.TestCase):
             normalise_footnote_text('Some Work, vol. 6. p. 11.'),
             'Some Work, vol. 6. p. 11.',
         )
+
+    def test_encyclical_split_pivots_at_on_line(self):
+        pre, post = encyclical_split(
+            'ENCYCLICAL LETTER',
+            'OF THE HOLY FATHER\nFRANCIS\nON CARE FOR OUR COMMON HOME',
+        )
+
+        self.assertEqual(
+            pre, 'ENCYCLICAL LETTER\nOF THE HOLY FATHER\nFRANCIS'
+        )
+        self.assertEqual(post, 'ON CARE FOR OUR COMMON HOME')
+
+    def test_encyclical_split_leaves_untouched_when_no_on_line(self):
+        pre, post = encyclical_split('TITLE', 'A subtitle without the pivot')
+
+        self.assertEqual(pre, 'TITLE')
+        self.assertEqual(post, 'A subtitle without the pivot')
+
+    def test_encyclical_split_no_op_when_first_line_already_on(self):
+        pre, post = encyclical_split(
+            'ENCYCLICAL LETTER\nOF HIS HOLINESS',
+            'ON SAFEGUARDING THE HUMAN PERSON',
+        )
+
+        self.assertEqual(pre, 'ENCYCLICAL LETTER\nOF HIS HOLINESS')
+        self.assertEqual(post, 'ON SAFEGUARDING THE HUMAN PERSON')
 
 
 class FootnoteTests(unittest.TestCase):

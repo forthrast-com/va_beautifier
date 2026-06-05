@@ -146,6 +146,38 @@ def split_around_title(lines, title):
     return pre, post
 
 
+def encyclical_split(desc_pre, desc_post):
+    """Pivot encyclical front matter at the first ``On …`` line.
+
+    Vatican.va serves an encyclical's front matter as a single stack of
+    ``<br>``-separated lines (``ENCYCLICAL LETTER`` / ``OF HIS HOLINESS`` /
+    ``POPE LEO XIV`` / ``ON SAFEGUARDING …``); whichever split rule the
+    extractor uses, the issuing lines and the subject line tend to end up
+    in the same bucket. The title page reads better when the issuer sits
+    above the title and the subject below: this fixup walks down
+    ``desc_post`` until it hits a line beginning with ``On `` and moves
+    everything before that to ``desc_pre``.
+
+    Returns ``(desc_pre, desc_post)`` unchanged when no ``On …`` line is
+    present (e.g. for non-encyclical fronts).
+    """
+    if not desc_post:
+        return desc_pre, desc_post
+    post_lines = [ln for ln in desc_post.splitlines() if ln.strip()]
+    on_idx = next(
+        (i for i, ln in enumerate(post_lines)
+         if ln.strip().upper().startswith('ON ')),
+        None,
+    )
+    if on_idx in (None, 0):
+        return desc_pre, desc_post
+    pre_lines = [ln for ln in (desc_pre or '').splitlines() if ln.strip()]
+    return (
+        '\n'.join(pre_lines + post_lines[:on_idx]),
+        '\n'.join(post_lines[on_idx:]),
+    )
+
+
 def roman_to_int(s):
     vals = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}
     s = s.upper().strip()
