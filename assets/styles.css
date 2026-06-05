@@ -505,14 +505,30 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     max-width: none;
     text-transform: none;
     letter-spacing: 0;
-    font-style: italic;
     font-size: 1.05rem;
+}
+.doc-signatories {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem 2rem;
+    margin: 2.5rem 0;
+}
+.doc-signatory-name,
+.doc-signatory-role {
+    display: block;
+}
+.doc-signatory-role {
+    color: var(--fg-dim);
+    font-size: .95rem;
+    font-style: italic;
 }
 .doc-signature {
     margin-top: 1.5rem;
     font-size: 1.1rem;
-    font-weight: bold;
     letter-spacing: .08em;
+}
+@media (max-width: 540px) {
+    .doc-signatories { grid-template-columns: 1fr; }
 }
 
 /* ── appendices (e.g. LS's closing prayers) ─────────────────────────────── */
@@ -532,7 +548,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     text-align: center;
     margin-bottom: 1.25rem;
 }
-.appendix p {
+.appendix-prayer p {
     font-style: italic;
     color: var(--fg);
     margin-top: 1rem;
@@ -832,3 +848,17 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .doc-antiqua_et_nova .ch-seg,
 .doc-quo_vadis_humanitas .ch-seg,
 .doc-sacrosanctum_concilium .ch-seg { flex: 1; height: auto; min-height: 1px; }
+
+/* Honour the OS-level "reduce motion" preference. Catches the drawer
+   `.3s ease` transition, hover transitions, and the smooth-scroll on
+   chapter-bar / footnote-link follows (scripts.js samples the same
+   query separately). Vestibular crowd gets the highlight affordance
+   without the slide. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -4,7 +4,7 @@ from html import escape
 import sys
 
 from core import read_toml, title_case
-from project import BUILD, SITE
+from project import BUILD, DOWNLOADS, SITE
 
 
 # Promulgation dates lifted from each source's `eventDate` meta tag. Used to
@@ -21,9 +21,9 @@ PROMULGATION_DATES = {
 
 
 # Structured card metadata per document. Each entry declares a `type`
-# whose template controls what gets bolded, where the linebreaks fall,
-# and how the subtitle attaches. Adding a doc means adding a row here;
-# adding a doc category means adding a branch in `_build_description`.
+# whose template controls what gets bolded and how the description flows.
+# Adding a doc means adding a row here; adding a doc category means adding
+# a branch in `_build_description`.
 CARD_META = {
     'gaudium_et_spes': {
         'type': 'council_constitution',
@@ -85,26 +85,22 @@ def _build_description(slug):
     kind = meta['type']
     if kind == 'council_constitution':
         return (
-            f"{meta['kind']}"
-            f"<br>of the <strong>{meta['body']}</strong>"
-            f"<br>Promulgated by {meta['promulgated_by']} "
-            f"on {meta['date']}"
+            f"{meta['kind']} "
+            f"of the <strong>{meta['body']}</strong>. "
+            f"Promulgated by {meta['promulgated_by']} on {meta['date']}."
         )
     if kind == 'encyclical':
         return (
-            f"{meta['kind']}"
-            f"<br>{meta['issuer_prefix']} "
+            f"{meta['kind']} {meta['issuer_prefix']} "
             f"<strong>{meta['issuer']}</strong>"
-            f"<br>{meta['subtitle']}"
+            f" {meta['subtitle']}."
         )
     # Organisation-issued (Curia note, Theological-Commission paper):
-    # bold every co-signing body on its own line, then the subtitle.
-    bodies = '<br>'.join(
-        f'<strong>{body}</strong>' for body in meta.get('bodies', ())
-    )
+    # Use continuous prose so line wrapping follows the available card width.
+    bodies = [f'<strong>{body}</strong>' for body in meta.get('bodies', ())]
     if not bodies:
         return None
-    return f'{bodies}<br>{meta["subtitle"]}'
+    return f'{", ".join(bodies)}. {meta["subtitle"]}.'
 
 
 SORT_ICON_SVG = (
@@ -131,11 +127,15 @@ def file_size(path):
 
 def render_downloads(slug):
     formats = []
-    for extension, label in (('pdf', 'PDF'), ('epub', 'EPUB')):
-        size = file_size(BUILD / f'{slug}.{extension}')
+    for filename, label in (
+        (f'{slug}-a5.pdf', 'PDF'),
+        (f'{slug}-a4.pdf', 'PDF (A4)'),
+        (f'{slug}.epub', 'EPUB'),
+    ):
+        size = file_size(DOWNLOADS / filename)
         if size:
             formats.append(
-                f'<a class="format" href="downloads/{slug}.{extension}">'
+                f'<a class="format" href="downloads/{filename}">'
                 f'<span>{label}</span><small>{size}</small></a>'
             )
     if not formats:

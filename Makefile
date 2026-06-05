@@ -57,8 +57,8 @@ site/downloads/%.epub: build/%.toml make_book.py templates/book.typ
 
 # `make books` emits an .epub and two .pdfs (A5 reading edition + A4
 # large-print) in one shot; declare both PDFs as side-effects of the
-# epub sibling so explicit `make site/downloads/foo.pdf` works.
-site/downloads/%.pdf: site/downloads/%.epub
+# epub sibling so explicit `make site/downloads/foo-a5.pdf` works.
+site/downloads/%-a5.pdf: site/downloads/%.epub
 	@:
 
 site/downloads/%-a4.pdf: site/downloads/%.epub

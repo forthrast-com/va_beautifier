@@ -85,10 +85,13 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
         )
     if source_url:
         lines.append(f'source: "{source_url}"')
+    # A4 is the large-print variant: bigger type and wider margins so the
+    # measure stays comfortable instead of stretching to 80+ chars at 11pt.
+    fontsize = '13pt' if paper == 'a4' else '11pt'
     lines += [
         'lang: en',
         f'mainfont: "{font}"',
-        'fontsize: 11pt',
+        f'fontsize: {fontsize}',
         f'papersize: {paper}',
         f'template: "/build/{_pdf_template_name(template_slug)}"',
         '...',
@@ -330,12 +333,23 @@ def _html_inline(s, *, preserve_breaks=False):
     return rendered.replace('\n', '<br />') if preserve_breaks else rendered
 
 
-def _title_page_typst(name, desc, desc_post, hero_image, hero_credit, accent):
+def _title_page_typst(name, desc, desc_post, hero_image, hero_credit, accent,
+                      paper='a5'):
     """Render the title page as raw typst. The 1fr vertical fillers above
     and below the title block centre it on the page; with a hero image
     the block sits a little high to give the image room to breathe. The
     typst template paths use `/`-rooted paths (typst resolves these
-    relative to the project root set via `--root`)."""
+    relative to the project root set via `--root`).
+
+    `paper` scales typography by the long-edge ratio so the A4 large-print
+    edition doesn't ring with empty space around an A5-scale title block."""
+    scale = 1.4 if paper == 'a4' else 1.0
+    title_pt   = round(28 * scale)
+    label_pt   = round(10 * scale)
+    hero_gap   = f'{2.5 * scale:.2f}em'
+    block_gap  = f'{1.8 * scale:.2f}em'
+    line_gap   = f'{1.1 * scale:.2f}em'
+
     parts = ['#page(numbering: none, header: none)[', '  #set align(center)', '  #v(1fr)']
 
     if hero_image:
@@ -346,34 +360,37 @@ def _title_page_typst(name, desc, desc_post, hero_image, hero_credit, accent):
         parts.append(f'  #image({_typ_str(path)}, width: 65%)')
         if hero_credit:
             parts.append('  #v(0.4em)')
-            parts.append(f'  #text(size: 8pt, style: "italic")[{_typ_content(hero_credit)}]')
-        parts.append('  #v(2.5em)')
+            parts.append(
+                f'  #text(size: {round(8 * scale)}pt, style: "italic")'
+                f'[{_typ_content(hero_credit)}]'
+            )
+        parts.append(f'  #v({hero_gap})')
 
     def stacked(block, size, tracking):
         bits = [_typ_content(ln.strip()) for ln in block.splitlines() if ln.strip()]
         if not bits:
             return
         inner = ' \\\n    '.join(bits)
-        parts.append(f'  #text(size: {size}, tracking: {tracking})[')
+        parts.append(f'  #text(size: {size}pt, tracking: {tracking})[')
         parts.append(f'    {inner}')
         parts.append('  ]')
 
     if desc:
-        stacked(desc.upper(), '10pt', '0.08em')
-        parts.append('  #v(1.8em)')
+        stacked(desc.upper(), label_pt, '0.08em')
+        parts.append(f'  #v({block_gap})')
 
     parts.append(
-        f'  #text(size: 28pt, style: "italic", fill: rgb("{accent}"))'
+        f'  #text(size: {title_pt}pt, style: "italic", fill: rgb("{accent}"))'
         f'[{_typ_content(name)}]'
     )
-    parts.append('  #v(1.1em)')
+    parts.append(f'  #v({line_gap})')
     parts.append(
         f'  #line(length: 18%, stroke: (paint: rgb("{accent}"), thickness: 0.5pt))'
     )
 
     if desc_post:
-        parts.append('  #v(1.8em)')
-        stacked(desc_post.upper(), '10pt', '0.08em')
+        parts.append(f'  #v({block_gap})')
+        stacked(desc_post.upper(), label_pt, '0.08em')
 
     # `#page()` configures page properties; the trailing `#pagebreak()`
     # ensures the TOC starts on the next physical page instead of
@@ -382,11 +399,12 @@ def _title_page_typst(name, desc, desc_post, hero_image, hero_credit, accent):
     return '\n'.join(parts)
 
 
-def _write_titlepage_include(data, slug):
+def _write_titlepage_include(data, slug, *, paper='a5'):
     """Write a raw typst file containing the title page. Pandoc's
     `--include-before-body` inserts file contents *verbatim* into the
     output (after pandoc's own setup, before the TOC) — so this file
-    must be valid typst, not markdown."""
+    must be valid typst, not markdown. A separate file per paper size
+    is cheap (a kilobyte) and lets the title typography scale per page."""
     title_typst = _title_page_typst(
         data['name'],
         data.get('desc', ''),
@@ -394,8 +412,9 @@ def _write_titlepage_include(data, slug):
         data.get('hero_image', ''),
         data.get('hero_credit', ''),
         _pdf_accent(data.get('hue', 42)),
+        paper=paper,
     )
-    path = BUILD / f'{slug}_titlepage.typ'
+    path = BUILD / f'{slug}_titlepage_{paper}.typ'
     path.write_text(title_typst + '\n', encoding='utf-8')
     return path
 
@@ -618,7 +637,8 @@ def main():
     md_path_a4 = emit_markdown(
         data, args.slug + '_a4', paper='a4', template_slug=args.slug
     )
-    titlepage_path = _write_titlepage_include(data, args.slug)
+    titlepage_a5 = _write_titlepage_include(data, args.slug, paper='a5')
+    titlepage_a4 = _write_titlepage_include(data, args.slug, paper='a4')
     cover_path = _write_cover(data, args.slug)
 
     if not shutil.which('pandoc'):
@@ -648,15 +668,17 @@ def main():
         if shutil.which('typst'):
             # `--root` tells typst where the project root is, so the
             # `template:` path in the markdown (which starts with `/`)
-            # resolves to <ROOT>/templates/book.typ. Two paper sizes:
-            # the A5 reading edition is canonical, the A4 is a large-
-            # print variant for readers who want bigger margins and
-            # a friendlier page.
-            for md, suffix in ((md_path, ''), (md_path_a4, '-a4')):
-                run_pandoc(md, DOWNLOADS / f'{args.slug}{suffix}.pdf',
+            # resolves to <ROOT>/templates/book.typ. Two paper sizes,
+            # both filename-tagged: A5 is the canonical reading edition,
+            # A4 is the large-print variant (bigger type, more air).
+            for md, paper, titlepage in (
+                (md_path,    'a5', titlepage_a5),
+                (md_path_a4, 'a4', titlepage_a4),
+            ):
+                run_pandoc(md, DOWNLOADS / f'{args.slug}-{paper}.pdf',
                            '--pdf-engine=typst',
                            f'--pdf-engine-opt=--root={ROOT}',
-                           f'--include-before-body={titlepage_path}',
+                           f'--include-before-body={titlepage}',
                            '--toc-depth=3')
         else:
             print('  ! typst not found, skipping PDF')

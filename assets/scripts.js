@@ -6,6 +6,13 @@
 //   __DOC_NAME__         the JSON-encoded display name (e.g. "Laudato Si'")
 // ─────────────────────────────────────────────────────────────────────────
 
+// Honour the OS-level "reduce motion" preference. Sampled once at boot —
+// the rare reader who toggles mid-session can reload. Used by scrollToEl
+// to flip smooth scrolls to instant; CSS transitions are caught by the
+// matching @media block in styles.css.
+const prefersReducedMotion =
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 // ── sticky heading bar ──
 const stickyNum   = document.getElementById('sticky-num');
 const stickyLabel = document.getElementById('sticky-label');
@@ -35,7 +42,8 @@ function updateSticky() {
 function scrollToEl(el, smooth) {
   const barH = document.getElementById('sticky-bar').offsetHeight;
   const top = el.getBoundingClientRect().top + window.scrollY - barH - 8;
-  window.scrollTo({ top, behavior: smooth ? 'smooth' : 'instant' });
+  const behavior = (smooth && !prefersReducedMotion) ? 'smooth' : 'instant';
+  window.scrollTo({ top, behavior });
   if (el.id) history.replaceState(null, '', '#' + el.id);
 }
 
@@ -44,8 +52,8 @@ const chapters = __INDICATOR_JSON__;
 const nav = document.getElementById('ch-indicator');
 
 // build bars (skip spacer entries for bar array, but insert gap divs).
-// Each ch.segs[i] = {first, last, target, label} — the [first, last] is
-// a paragraph range, target is the id to scroll to when clicked.
+// Each segment identifies either a numbered paragraph range (`first`/`last`)
+// or an appended reading region (`key`), such as a closing prayer.
 const bars = [];
 chapters.forEach(ch => {
   if (ch.spacer) {
@@ -64,8 +72,12 @@ chapters.forEach(ch => {
   ch.segs.forEach(s => {
     const seg = document.createElement('div');
     seg.className = 'ch-seg';
-    seg.dataset.first = s.first;
-    seg.dataset.last  = s.last;
+    if (s.key) {
+      seg.dataset.key = s.key;
+    } else {
+      seg.dataset.first = s.first;
+      seg.dataset.last  = s.last;
+    }
     seg.title = s.label;
     seg.addEventListener('click', e => {
       e.stopPropagation();
@@ -80,18 +92,21 @@ chapters.forEach(ch => {
   bars.push(bar);
 });
 
-// para → chapter index lookup
+// reading-region key → indicator bar index lookup
 const paraToChIdx = {};
 chapters.forEach((ch, i) => ch.paras.forEach(pn => paraToChIdx[pn] = i));
 
-// collect all para elements in order
-const paraEls = Array.from(document.querySelectorAll('.paragraph'));
+// Collect numbered paragraphs and non-paragraph appendices in reading order.
+const paraEls = Array.from(document.querySelectorAll('.paragraph, .appendix'));
+function readingKey(el) {
+  return el.classList.contains('appendix') ? el.id : el.id.replace('para-', '');
+}
 
 function updateIndicator() {
   const threshold = window.innerHeight * 0.35;
-  let curPara = paraEls[0]?.dataset?.para;
+  let curPara = paraEls[0] ? readingKey(paraEls[0]) : '';
   for (const el of paraEls) {
-    if (el.getBoundingClientRect().top <= threshold) curPara = el.id.replace('para-', '');
+    if (el.getBoundingClientRect().top <= threshold) curPara = readingKey(el);
     else break;
   }
   currentParaNum = curPara || '';
@@ -101,14 +116,13 @@ function updateIndicator() {
     const isActive = i === chIdx;
     b.classList.toggle('active', isActive);
     b.classList.toggle('part-active', !isActive && chapters[i].part === activePart);
-    if (isActive) {
-      const cp = parseInt(curPara);
-      b.querySelectorAll('.ch-seg').forEach(s => {
-        const first = parseInt(s.dataset.first);
-        const last  = parseInt(s.dataset.last);
-        s.classList.toggle('cur-para', cp >= first && cp <= last);
-      });
-    }
+    const cp = parseInt(curPara);
+    b.querySelectorAll('.ch-seg').forEach(s => {
+      const selected = s.dataset.key
+        ? s.dataset.key === curPara
+        : cp >= parseInt(s.dataset.first) && cp <= parseInt(s.dataset.last);
+      s.classList.toggle('cur-para', isActive && selected);
+    });
   });
   updateSticky();
 }
