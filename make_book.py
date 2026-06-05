@@ -331,77 +331,136 @@ def _html_inline(s, *, preserve_breaks=False):
     return rendered.replace('\n', '<br />') if preserve_breaks else rendered
 
 
-def _title_page_typst(name, desc, desc_post, accent, paper='a5'):
-    """Render the title page as raw typst. The 1fr vertical fillers above
-    and below the title block centre it on the page; typst paths use
-    `/`-rooted paths (typst resolves these relative to the project root
-    set via `--root`).
+_PAPER_SCALE = {'a4': 1.4, 'a5': 1.0, 'a6': 0.71}
 
-    `paper` scales typography by the long-edge ratio so the A4 large-print
-    edition doesn't ring with empty space around an A5-scale title block."""
-    scale = 1.4 if paper == 'a4' else 1.0
-    title_pt   = round(28 * scale)
-    label_pt   = round(10 * scale)
-    block_gap  = f'{1.8 * scale:.2f}em'
-    # Ornament sits as a typographic period to the title — tight to it
-    # above, with the full block_gap below carrying the eye on to the
-    # subject line.
+
+def _title_page_layout(data, paper='a5'):
+    """Return the raw typst lines for the title page body — desc /
+    title / ornament / desc_post stack, with the author lifted to the
+    page footer by a second #v(1fr).
+
+    Callers wrap with `#page(...)[...]` for inline include or `#set page()`
+    for a standalone doc (the EPUB cover compile). Typography scales by
+    paper long-edge ratio so the layout reads the same at A4 / A5 / A6."""
+    name        = data['name']
+    desc        = data.get('desc', '')
+    desc_post   = data.get('desc_post', '')
+    author      = data.get('author', '')
+    accent      = _pdf_accent(data.get('hue', 42))
+
+    scale = _PAPER_SCALE.get(paper, 1.0)
+    title_pt       = round(28 * scale)
+    label_pt       = round(10 * scale)
+    author_pt      = round(9 * scale)
+    block_gap      = f'{1.8 * scale:.2f}em'
     ornament_above = f'{0.5 * scale:.2f}em'
     ornament_pt    = round(24 * scale)
     ornament_track = '0.825em'
 
-    parts = ['#page(numbering: none, header: none)[', '  #set align(center)', '  #v(1fr)']
-
+    out = ['#set align(center)', '#v(1fr)']
 
     def stacked(block, size, tracking):
         bits = [_typ_content(ln.strip()) for ln in block.splitlines() if ln.strip()]
         if not bits:
             return
-        inner = ' \\\n    '.join(bits)
-        parts.append(f'  #text(size: {size}pt, tracking: {tracking})[')
-        parts.append(f'    {inner}')
-        parts.append('  ]')
+        inner = ' \\\n  '.join(bits)
+        out.append(f'#text(size: {size}pt, tracking: {tracking})[')
+        out.append(f'  {inner}')
+        out.append(']')
 
     if desc:
         stacked(desc.upper(), label_pt, '0.08em')
-        parts.append(f'  #v({block_gap})')
+        out.append(f'#v({block_gap})')
 
-    parts.append(
-        f'  #text(size: {title_pt}pt, style: "italic", fill: rgb("{accent}"))'
+    out.append(
+        f'#text(size: {title_pt}pt, style: "italic", fill: rgb("{accent}"))'
         f'[{_typ_content(name)}]'
     )
-    parts.append(f'  #v({ornament_above})')
-    parts.append(
-        f'  #text(size: {ornament_pt}pt, tracking: {ornament_track},'
+    out.append(f'#v({ornament_above})')
+    out.append(
+        f'#text(size: {ornament_pt}pt, tracking: {ornament_track},'
         f' fill: rgb("{accent}"))[· · ·]'
     )
 
     if desc_post:
-        parts.append(f'  #v({block_gap})')
+        out.append(f'#v({block_gap})')
         stacked(desc_post.upper(), label_pt, '0.08em')
 
-    # `#page()` configures page properties; the trailing `#pagebreak()`
-    # ensures the TOC starts on the next physical page instead of
-    # flowing into whatever space remains.
-    parts += ['  #v(1fr)', ']', '#pagebreak()']
-    return '\n'.join(parts)
+    out.append('#v(1fr)')
+    if author:
+        out.append(
+            f'#text(size: {author_pt}pt, tracking: 0.14em,'
+            f' fill: rgb("#5a5147"))[{_typ_content(author.upper())}]'
+        )
+
+    return out
+
+
+def _title_page_typst(data, paper='a5'):
+    """Inline title page wrapped in #page()[...] for --include-before-body."""
+    lines = _title_page_layout(data, paper=paper)
+    indented = '\n'.join('  ' + line for line in lines)
+    return (
+        '#page(numbering: none, header: none)[\n'
+        + indented + '\n'
+        + ']\n#pagebreak()'
+    )
+
+
+def _copyright_page_typst(data):
+    """Colophon page that follows the title: project blurb, link out
+    to The Circulars, link to the source on vatican.va, urn identifier."""
+    name        = data['name']
+    source_url  = data.get('source_url', '')
+    identifier  = data.get('identifier', '')
+
+    out = [
+        '#page(numbering: none, header: none)[',
+        '  #set align(center)',
+        '  #v(1fr)',
+        '  #box(width: 76%)[',
+        '    #set par(justify: false, leading: 0.7em)',
+        '    #text(size: 9.5pt)[',
+        f'      A reading edition of #emph[{_typ_content(name)}]'
+        ' typeset and prepared by',
+        '      #link("https://circulars.forthrast.com")[The Circulars]',
+        '      — a typographic press for Vatican documents.',
+        '    ]',
+        '  ]',
+        '  #v(1.6em)',
+    ]
+    if source_url:
+        out += [
+            '  #box(width: 76%)[',
+            '    #set par(justify: false, leading: 0.7em)',
+            '    #text(size: 9.5pt)[',
+            '      The text remains the property of the Holy See under its'
+            ' copyright; this edition is offered for reading and study.',
+            '      The canonical source is at',
+            f'      #link("{source_url}")[vatican.va].',
+            '    ]',
+            '  ]',
+            '  #v(2em)',
+        ]
+    if identifier:
+        out.append(
+            '  #text(size: 8pt, tracking: 0.14em, fill: rgb("#888"))['
+            f'urn:circulars:{_typ_content(identifier)}'
+            ']'
+        )
+    out += ['  #v(1fr)', ']', '#pagebreak()']
+    return '\n'.join(out)
 
 
 def _write_titlepage_include(data, slug, *, paper='a5'):
-    """Write a raw typst file containing the title page. Pandoc's
-    `--include-before-body` inserts file contents *verbatim* into the
-    output (after pandoc's own setup, before the TOC) — so this file
-    must be valid typst, not markdown. A separate file per paper size
-    is cheap (a kilobyte) and lets the title typography scale per page."""
-    title_typst = _title_page_typst(
-        data['name'],
-        data.get('desc', ''),
-        data.get('desc_post', ''),
-        _pdf_accent(data.get('hue', 42)),
-        paper=paper,
-    )
+    """Write the include-before-body file: title page followed by a
+    copyright/colophon page. Pandoc inserts file contents verbatim into
+    the output (after pandoc's own setup, before the TOC) so this must
+    be valid typst, not markdown. Separate file per paper size."""
+    title = _title_page_typst(data, paper=paper)
+    colophon = _copyright_page_typst(data)
     path = BUILD / f'{slug}_titlepage_{paper}.typ'
-    path.write_text(title_typst + '\n', encoding='utf-8')
+    path.write_text(f'{title}\n{colophon}\n', encoding='utf-8')
     return path
 
 
@@ -415,62 +474,16 @@ def _write_pdf_template(data, slug):
 
 
 def _cover_typst(data):
-    """Standalone typst doc for the EPUB cover.
-
-    Compiles at A5 aspect to match the PDF reading edition — so the
-    cover, the title page, and a printed copy all share proportions. At
-    300 ppi this renders to roughly 1748 × 2480 px, comfortably above
-    Apple Books' minimum cover spec."""
-    name        = data['name']
-    desc        = data.get('desc', '')
-    desc_post   = data.get('desc_post', '')
-    accent      = _pdf_accent(data.get('hue', 42))
-    author      = data.get('author', '')
-
-    parts = [
-        '#set page(paper: "a5", margin: (x: 18mm, y: 22mm))',
-        '#set text(font: "Hoefler Text", size: 12pt)',
-        '#set align(center)',
-    ]
-
-    parts.append('#v(1fr)')
-
-    def stacked(block, size, tracking):
-        bits = [_typ_content(ln.strip()) for ln in block.splitlines() if ln.strip()]
-        if not bits:
-            return
-        inner = ' \\\n  '.join(bits)
-        parts.append(f'#text(size: {size}, tracking: {tracking})[')
-        parts.append(f'  {inner}')
-        parts.append(']')
-
-    if desc:
-        stacked(desc.upper(), '11pt', '0.08em')
-        parts.append('#v(1.8em)')
-
-    parts.append(
-        f'#text(size: 32pt, style: "italic", fill: rgb("{accent}"))'
-        f'[{_typ_content(name)}]'
+    """Standalone typst doc for the EPUB cover: an A6 version of the PDF
+    title page, with the same layout scaled by linear ratio. Compiled at
+    300 ppi yields ~1240 × 1748 px — well above Apple Books' minimum."""
+    lines = _title_page_layout(data, paper='a6')
+    body = '\n'.join(lines)
+    return (
+        '#set page(paper: "a6", margin: 12mm)\n'
+        '#set text(font: "Hoefler Text", size: 11pt)\n'
+        + body + '\n'
     )
-    parts.append('#v(0.5em)')
-    parts.append(
-        f'#text(size: 24pt, tracking: 0.825em, fill: rgb("{accent}"))[· · ·]'
-    )
-
-    if desc_post:
-        parts.append('#v(1.8em)')
-        stacked(desc_post.upper(), '11pt', '0.08em')
-
-    parts.append('#v(1fr)')
-
-    if author:
-        parts.append(
-            f'#text(size: 9pt, tracking: 0.14em, fill: rgb("#5a5147"))'
-            f'[{_typ_content(author.upper())}]'
-        )
-        parts.append('#v(0.4em)')
-
-    return '\n'.join(parts) + '\n'
 
 
 def _write_cover(data, slug):
