@@ -343,10 +343,12 @@ def _title_page_typst(name, desc, desc_post, accent, paper='a5'):
     title_pt   = round(28 * scale)
     label_pt   = round(10 * scale)
     block_gap  = f'{1.8 * scale:.2f}em'
-    # Spacing around the centred ornament that separates the title block
-    # from the subject line beneath.
-    ornament_gap = f'{1.1 * scale:.2f}em'
-    ornament_pt  = round(11 * scale)
+    # Ornament sits as a typographic period to the title — tight to it
+    # above, with the larger block_gap below carrying the eye on to the
+    # subject line.
+    ornament_above = f'{0.7 * scale:.2f}em'
+    ornament_below = f'{1.6 * scale:.2f}em'
+    ornament_pt    = round(12 * scale)
 
     parts = ['#page(numbering: none, header: none)[', '  #set align(center)', '  #v(1fr)']
 
@@ -368,14 +370,14 @@ def _title_page_typst(name, desc, desc_post, accent, paper='a5'):
         f'  #text(size: {title_pt}pt, style: "italic", fill: rgb("{accent}"))'
         f'[{_typ_content(name)}]'
     )
-    parts.append(f'  #v({ornament_gap})')
+    parts.append(f'  #v({ornament_above})')
     parts.append(
-        f'  #text(size: {ornament_pt}pt, tracking: 0.9em,'
+        f'  #text(size: {ornament_pt}pt, tracking: 0.55em,'
         f' fill: rgb("{accent}"))[· · ·]'
     )
 
     if desc_post:
-        parts.append(f'  #v({block_gap})')
+        parts.append(f'  #v({ornament_below})')
         stacked(desc_post.upper(), label_pt, '0.08em')
 
     # `#page()` configures page properties; the trailing `#pagebreak()`
@@ -450,13 +452,13 @@ def _cover_typst(data):
         f'#text(size: 32pt, style: "italic", fill: rgb("{accent}"))'
         f'[{_typ_content(name)}]'
     )
-    parts.append('#v(1.1em)')
+    parts.append('#v(0.7em)')
     parts.append(
-        f'#text(size: 11pt, tracking: 0.9em, fill: rgb("{accent}"))[· · ·]'
+        f'#text(size: 12pt, tracking: 0.55em, fill: rgb("{accent}"))[· · ·]'
     )
 
     if desc_post:
-        parts.append('#v(1.8em)')
+        parts.append('#v(1.6em)')
         stacked(desc_post.upper(), '11pt', '0.08em')
 
     parts.append('#v(1fr)')
