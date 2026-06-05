@@ -17,6 +17,7 @@ from core import (
     parse_footnote,
     read_toml,
     roman_to_int,
+    title_case,
     write_toml,
 )
 
@@ -67,6 +68,13 @@ class TextHelperTests(unittest.TestCase):
     def test_roman_helpers_round_trip(self):
         for number in (1, 4, 9, 14, 42):
             self.assertEqual(roman_to_int(int_to_roman(number)), number)
+
+    def test_title_case_distinguishes_words_from_canonical_roman_numerals(self):
+        self.assertEqual(
+            title_case('CIVIC AND POLITICAL LOVE'),
+            'Civic and Political Love',
+        )
+        self.assertEqual(title_case('VATICAN II'), 'Vatican II')
 
     def test_footnote_text_uses_en_dash_between_numeric_ranges(self):
         self.assertEqual(
@@ -209,6 +217,8 @@ class TomlTests(unittest.TestCase):
                 date='2024-01-15',
                 identifier='papal:sample:2024-01-15',
                 rights='© 2024 Holy See',
+                chapter_style='roman',
+                book_toc_depth=4,
                 paragraphs=[],
                 footnotes=[],
             )
@@ -218,6 +228,8 @@ class TomlTests(unittest.TestCase):
         self.assertEqual(data['date'], '2024-01-15')
         self.assertEqual(data['identifier'], 'papal:sample:2024-01-15')
         self.assertEqual(data['rights'], '© 2024 Holy See')
+        self.assertEqual(data['chapter_style'], 'roman')
+        self.assertEqual(data['book_toc_depth'], 4)
         self.assertEqual(data['publisher'], 'circulars.forthrast.com')
         self.assertEqual(data['collection'], 'The Circulars (Vatican documents)')
 

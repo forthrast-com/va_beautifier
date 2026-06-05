@@ -12,6 +12,8 @@ Each `extract/<doc>.py` exposes:
         'rights':       str,        # dc:rights line for EPUB (may be '')
         'desc':         str,        # multi-line preamble shown ABOVE the title (may be '')
         'desc_post':    str,        # multi-line subtitle shown BELOW the title (may be '')
+        'chapter_style': str,        # optional numbering style, currently "roman"
+        'book_toc_depth': int,       # optional PDF contents depth (default 3)
         'promulgation': str,        # canonical inline markup; blank lines split stanzas
         'signature':    str,        # canonical inline markup; line breaks are significant
         'signatories':  list[dict], # optional end-matter name/role pairs
@@ -373,10 +375,11 @@ _SMALL = {'a', 'an', 'the', 'and', 'but', 'or', 'nor', 'for', 'yet', 'so',
 
 # Roman numerals (papal regnal numbers, council numerals like Vatican II,
 # etc.) should survive an uppercase → title-case round-trip unchanged.
-# Match the letter cluster ignoring trailing punctuation; reject the
-# degenerate single-character cases I/L/D/M that almost always mean an
-# initial or word in normal prose.
-_ROMAN = re.compile(r'^[IVXLCDM]{2,}$')
+# Require canonical numeral order so ordinary words composed only of Roman
+# letters, notably "CIVIC", are not mistaken for numerals.
+_ROMAN = re.compile(
+    r'^M{0,3}(?:CM|CD|D?C{0,3})(?:XC|XL|L?X{0,3})(?:IX|IV|V?I{0,3})$'
+)
 
 
 def title_case(s, *, cap_last=True, small_words=False):
@@ -399,7 +402,7 @@ def title_case(s, *, cap_last=True, small_words=False):
         # Strip surrounding punctuation for the Roman test so "VI," still
         # registers as a numeral.
         core = word.strip('.,;:!?"\'’“”()[]')
-        if _ROMAN.match(core):
+        if len(core) > 1 and _ROMAN.fullmatch(core):
             result.append(word)
             continue
         lo = word.lower()
@@ -454,7 +457,7 @@ DEFAULT_COLLECTION = 'The Circulars (Vatican documents)'
 def write_toml(path, *, name, hue=None, source_url='',
                author='', date='', identifier='', rights='',
                publisher=DEFAULT_PUBLISHER, collection=DEFAULT_COLLECTION,
-               desc='', desc_post='',
+               desc='', desc_post='', chapter_style='', book_toc_depth=3,
                promulgation='', signature='', show_title_author=True,
                paragraphs, footnotes, appendices=(), signatories=()):
     out = [f'name = {_toml_str(name)}']
@@ -478,6 +481,10 @@ def write_toml(path, *, name, hue=None, source_url='',
         out.append(f'desc = {_toml_multiline(desc)}')
     if desc_post:
         out.append(f'desc_post = {_toml_multiline(desc_post)}')
+    if chapter_style:
+        out.append(f'chapter_style = {_toml_str(chapter_style)}')
+    if book_toc_depth != 3:
+        out.append(f'book_toc_depth = {book_toc_depth}')
     if promulgation:
         out.append(f'promulgation = {_toml_multiline(promulgation)}')
     if signature:

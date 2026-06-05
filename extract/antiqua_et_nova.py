@@ -121,6 +121,8 @@ def extract():
                 'Dicastery for Culture and Education',
         'desc_post': 'Note on the Relationship Between Artificial Intelligence '
                      'and Human Intelligence',
+        'chapter_style': 'roman',
+        'book_toc_depth': 4,
         'promulgation': '\n\n'.join(promulgation_stanzas),
         'signature': signature,
         'signatories': signatories,
