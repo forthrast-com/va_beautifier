@@ -78,7 +78,7 @@ CARD_META = {
 }
 
 
-def _build_description(slug):
+def _build_description(slug, data):
     meta = CARD_META.get(slug)
     if not meta:
         return None
@@ -100,7 +100,16 @@ def _build_description(slug):
     bodies = [f'<strong>{body}</strong>' for body in meta.get('bodies', ())]
     if not bodies:
         return None
-    return f'{", ".join(bodies)}. {meta["subtitle"]}.'
+    description = f'{", ".join(bodies)}. {meta["subtitle"]}.'
+    # The TOML author field carries the document's primary signers
+    # (Prefects for a curia note, the President + sub-commission chair
+    # for a commission paper). Surface them here so the human voices
+    # behind the institutional issuer don't sit invisible.
+    author = data.get('author', '').strip()
+    if author:
+        lead = 'Signed by' if kind == 'curia_note' else 'Under'
+        description += f' {lead} <strong>{escape(author)}</strong>.'
+    return description
 
 
 SORT_ICON_SVG = (
@@ -156,7 +165,7 @@ def render_card(slug):
     # the council; encyclicals bold the issuer; org-issued notes stack
     # each co-signing body bolded. Docs without a CARD_META row fall
     # back to the flowed desc + desc_post from the TOML.
-    description = _build_description(slug)
+    description = _build_description(slug, data)
     if description is None:
         joined = ' '.join(
             line.strip()
