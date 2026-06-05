@@ -74,6 +74,20 @@ sub {
   line-height: 0;
 }
 
+/* Pandoc emits footnote refs as a bare `<a class="footnote-ref">N</a>`
+   with no `<sup>` wrapper, so the inherited link underline + body size
+   land the marker in mid-line. Promote it to a proper superscript and
+   strip the underline so it reads as a discreet reference rather than
+   an inline link. */
+a.footnote-ref,
+a[role="doc-noteref"],
+a[epub\:type~="noteref"] {
+  vertical-align: super;
+  font-size: 0.72em;
+  line-height: 0;
+  text-decoration: none;
+}
+
 /* Footnotes. Apple Books otherwise renders asides at the reader's full
    body size — which lands too large next to the prose, and again in the
    popover. Belt-and-braces the selector since some readers see the

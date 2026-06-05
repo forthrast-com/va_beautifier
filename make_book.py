@@ -343,10 +343,10 @@ def _title_page_typst(name, desc, desc_post, accent, paper='a5'):
     title_pt   = round(28 * scale)
     label_pt   = round(10 * scale)
     block_gap  = f'{1.8 * scale:.2f}em'
-    # Gap above the accent line is half the block_gap below it, so the line
-    # reads as belonging to the title above rather than floating between
-    # title and subject.
-    line_gap   = f'{0.9 * scale:.2f}em'
+    # Spacing around the centred ornament that separates the title block
+    # from the subject line beneath.
+    ornament_gap = f'{1.1 * scale:.2f}em'
+    ornament_pt  = round(11 * scale)
 
     parts = ['#page(numbering: none, header: none)[', '  #set align(center)', '  #v(1fr)']
 
@@ -368,9 +368,10 @@ def _title_page_typst(name, desc, desc_post, accent, paper='a5'):
         f'  #text(size: {title_pt}pt, style: "italic", fill: rgb("{accent}"))'
         f'[{_typ_content(name)}]'
     )
-    parts.append(f'  #v({line_gap})')
+    parts.append(f'  #v({ornament_gap})')
     parts.append(
-        f'  #line(length: 66%, stroke: (paint: rgb("{accent}"), thickness: 0.5pt))'
+        f'  #text(size: {ornament_pt}pt, tracking: 0.9em,'
+        f' fill: rgb("{accent}"))[· · ·]'
     )
 
     if desc_post:
@@ -449,9 +450,9 @@ def _cover_typst(data):
         f'#text(size: 32pt, style: "italic", fill: rgb("{accent}"))'
         f'[{_typ_content(name)}]'
     )
-    parts.append('#v(0.9em)')
+    parts.append('#v(1.1em)')
     parts.append(
-        f'#line(length: 66%, stroke: (paint: rgb("{accent}"), thickness: 0.6pt))'
+        f'#text(size: 11pt, tracking: 0.9em, fill: rgb("{accent}"))[· · ·]'
     )
 
     if desc_post:
