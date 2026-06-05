@@ -348,7 +348,7 @@ def _title_page_typst(name, desc, desc_post, accent, paper='a5'):
     # subject line.
     ornament_above = f'{0.7 * scale:.2f}em'
     ornament_below = f'{1.6 * scale:.2f}em'
-    ornament_pt    = round(12 * scale)
+    ornament_pt    = round(24 * scale)
 
     parts = ['#page(numbering: none, header: none)[', '  #set align(center)', '  #v(1fr)']
 
@@ -454,7 +454,7 @@ def _cover_typst(data):
     )
     parts.append('#v(0.7em)')
     parts.append(
-        f'#text(size: 12pt, tracking: 0.55em, fill: rgb("{accent}"))[· · ·]'
+        f'#text(size: 24pt, tracking: 0.55em, fill: rgb("{accent}"))[· · ·]'
     )
 
     if desc_post:
