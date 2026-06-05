@@ -408,11 +408,15 @@ def _title_page_typst(data, paper='a5'):
 
 
 def _copyright_page_typst(data):
-    """Colophon page that follows the title: project blurb, link out
-    to The Circulars, link to the source on vatican.va, urn identifier."""
+    """Colophon page that follows the title: project blurb, explicit URL
+    list (The Circulars, vatican.va source, GitHub source), then the urn
+    identifier in tracked footer greys."""
     name        = data['name']
     source_url  = data.get('source_url', '')
     identifier  = data.get('identifier', '')
+
+    circulars_url = 'https://circulars.forthrast.com'
+    repo_url      = 'https://github.com/forthrast-com/va_beautifier'
 
     out = [
         '#page(numbering: none, header: none)[',
@@ -422,26 +426,35 @@ def _copyright_page_typst(data):
         '    #set par(justify: false, leading: 0.7em)',
         '    #text(size: 9.5pt)[',
         f'      A reading edition of #emph[{_typ_content(name)}]'
-        ' typeset and prepared by',
-        '      #link("https://circulars.forthrast.com")[The Circulars]',
+        ' typeset and prepared by The Circulars',
         '      — a typographic press for Vatican documents.',
+        '      The text remains the property of the Holy See under its'
+        ' copyright; this edition is offered for reading and study.',
         '    ]',
         '  ]',
-        '  #v(1.6em)',
+        '  #v(1.8em)',
+        # Explicit URL list — printed in monospace small-caps so readers
+        # of a paper copy can transcribe them, and tapped readers of the
+        # PDF get the live link.
+        '  #set par(leading: 0.85em)',
     ]
+
+    def link_row(label, url):
+        out.append(
+            '  #text(size: 9pt, fill: rgb("#5a5147"))['
+            f'#emph[{label}]  '
+            f'#link("{url}")[#raw("{url}")]'
+            ']'
+        )
+        out.append('  \\\n')
+
+    link_row('Press', circulars_url)
     if source_url:
-        out += [
-            '  #box(width: 76%)[',
-            '    #set par(justify: false, leading: 0.7em)',
-            '    #text(size: 9.5pt)[',
-            '      The text remains the property of the Holy See under its'
-            ' copyright; this edition is offered for reading and study.',
-            '      The canonical source is at',
-            f'      #link("{source_url}")[vatican.va].',
-            '    ]',
-            '  ]',
-            '  #v(2em)',
-        ]
+        link_row('Source', source_url)
+    link_row('Code', repo_url)
+
+    out.append('  #v(1.6em)')
+
     if identifier:
         out.append(
             '  #text(size: 8pt, tracking: 0.14em, fill: rgb("#888"))['
