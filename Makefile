@@ -2,8 +2,8 @@ DOCS  := gaudium_et_spes laudato_si magnifica_humanitas antiqua_et_nova \
          quo_vadis_humanitas sacrosanctum_concilium
 HTMLS := $(DOCS:%=site/%.html)
 TOMLS := $(DOCS:%=build/%.toml)
-EPUBS := $(DOCS:%=build/%.epub)
-PDFS  := $(DOCS:%=build/%.pdf)
+EPUBS := $(DOCS:%=site/downloads/%.epub)
+PDFS  := $(DOCS:%=site/downloads/%.pdf)
 
 .PHONY: all fetch books site clean
 
@@ -52,16 +52,20 @@ site/index.html: $(HTMLS) $(EPUBS) make_index.py
 
 books: $(EPUBS)
 
-build/%.epub: build/%.toml make_book.py templates/book.typ
+site/downloads/%.epub: build/%.toml make_book.py templates/book.typ
 	python3 make_book.py $*
 
-# `make books` emits an .epub and a .pdf in one shot; declare the pdf as
-# a side-effect of its epub sibling so explicit `make build/foo.pdf` works.
-build/%.pdf: build/%.epub
+# `make books` emits an .epub and two .pdfs (A5 reading edition + A4
+# large-print) in one shot; declare both PDFs as side-effects of the
+# epub sibling so explicit `make site/downloads/foo.pdf` works.
+site/downloads/%.pdf: site/downloads/%.epub
+	@:
+
+site/downloads/%-a4.pdf: site/downloads/%.epub
 	@:
 
 # --- Housekeeping ---
 
 clean:
 	rm -f $(TOMLS) $(HTMLS) site/index.html
-	rm -rf build/
+	rm -rf build/ site/downloads/

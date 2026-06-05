@@ -9,6 +9,12 @@
 // as raw typst blocks (so `make_book.py` can build them from the TOML) —
 // this file owns the typographic frame: page geometry, font defaults,
 // heading shows, footnote entries, TOC styling.
+//
+// `make_book.py` writes a per-document copy with `__PDF_ACCENT__` replaced
+// by a restrained ink colour derived from the document's canonical hue.
+
+#let accent = rgb("__PDF_ACCENT__")
+#let accent-rule = accent.lighten(38%)
 
 #let conf(
   doc,
@@ -36,11 +42,19 @@
     numbering: pagenumbering,
     number-align: center + bottom,
     header: context {
-      if counter(page).get().first() > 1 {
+      let page_no = counter(page).get().first()
+      if page_no > 1 {
         set text(size: 8pt, style: "italic", fill: rgb("#756d60"))
-        align(left, title)
+        // Verso: doc title (left-aligned). Recto: current chapter title
+        // (right-aligned), or doc title before the first chapter starts.
+        let chapters = query(selector(heading.where(level: 2)).before(here()))
+        let recto = if chapters.len() > 0 { chapters.last().body } else { title }
+        align(
+          if calc.odd(page_no) { right } else { left },
+          if calc.odd(page_no) { recto } else { title },
+        )
         v(0.45em)
-        line(length: 100%, stroke: (paint: rgb("#c8c0b2"), thickness: 0.35pt))
+        line(length: 100%, stroke: (paint: accent-rule, thickness: 0.35pt))
       }
     },
   )
@@ -48,41 +62,45 @@
   // ── Text & paragraphs ────────────────────────────────────────────────
   set text(font: font, size: fontsize, lang: lang)
   show link: it => text(fill: rgb("#544b3f"), it)
-  // First-line indent on body paragraphs is the canonical book look;
-  // typst already suppresses the indent on the first paragraph of a
-  // section, which is what we want here.
+  // Ragged-right rather than justified — typst 0.14 still ships no
+  // microtype, so K-P with only word-space to spend produces visible
+  // rivers in a footnoted ~58 char measure. Bringhurst-blessed setting
+  // for a devotional reader, and the loose lines vanish into the medium.
   set par(
-    justify: true,
+    justify: false,
     leading: 0.72em,
     first-line-indent: 1.1em,
   )
 
   // ── Headings ─────────────────────────────────────────────────────────
-  // H1: chapter title — large italic display, centred.
+  // Heading hierarchy after the EPUB structural fix:
+  //   H1 = part (numbered parts in GeS; rare elsewhere).
+  //   H2 = chapter (the primary structural unit).
+  //   H3 = section.
+  //   H4 = sub-heading.
+  // Visual tier shifts down one slot to match, so chapters keep the
+  // display look that used to live at H1.
   show heading.where(level: 1): it => block(sticky: true, {
-    set text(size: 1.6em, weight: "regular", style: "italic")
+    set text(size: 1.9em, weight: "regular", style: "italic", fill: accent)
+    set par(first-line-indent: 0em, justify: false)
+    v(2.4em)
+    align(center, it.body)
+    v(1.4em)
+  })
+  show heading.where(level: 2): it => block(sticky: true, {
+    set text(size: 1.6em, weight: "regular", style: "italic", fill: accent)
     set par(first-line-indent: 0em, justify: false)
     v(2em)
     align(center, it.body)
     v(1.2em)
   })
-  // H2: section heading — medium italic, centred.
-  show heading.where(level: 2): it => block(sticky: true, {
-    set text(size: 1.15em, weight: "regular", style: "italic")
+  show heading.where(level: 3): it => block(sticky: true, {
+    set text(size: 1.15em, weight: "regular", style: "italic", fill: accent)
     set par(first-line-indent: 0em, justify: false)
     v(1.2em)
     align(center, it.body)
     v(0.6em)
   })
-  // H3: subsection — bold, left-aligned, tighter.
-  show heading.where(level: 3): it => block(sticky: true, {
-    set text(size: 1em, weight: "bold")
-    set par(first-line-indent: 0em, justify: false)
-    v(0.8em)
-    it.body
-    v(0.3em)
-  })
-  // H4: italic sub-heading — slight emphasis only.
   show heading.where(level: 4): it => block(sticky: true, {
     set text(size: 1em, style: "italic")
     set par(first-line-indent: 0em, justify: false)
@@ -95,7 +113,7 @@
   // Page-bottom notes; the separator line is shorter than the default rule
   // so it reads as a typographic accent rather than a structural divider.
   set footnote.entry(
-    separator: line(length: 28%, stroke: 0.4pt),
+    separator: line(length: 28%, stroke: (paint: accent-rule, thickness: 0.4pt)),
     indent: 1.2em,
     gap: 0.65em,
   )
@@ -108,7 +126,7 @@
   // Lift the "Contents" heading to chapter-style italic display.
   show outline: it => {
     show heading: h => {
-      set text(size: 1.6em, weight: "regular", style: "italic")
+      set text(size: 1.6em, weight: "regular", style: "italic", fill: accent)
       set par(first-line-indent: 0em, justify: false)
       v(2em)
       align(center, h.body)

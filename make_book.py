@@ -25,7 +25,11 @@ BUILD.mkdir(exist_ok=True)
 DOWNLOADS.mkdir(parents=True, exist_ok=True)
 
 
-def emit_markdown(data, slug):
+def emit_markdown(data, slug, *, paper='a5', template_slug=None):
+    # Output slug controls the .md filename; the template slug points at
+    # the per-doc typst module on disk. Both default to the same value
+    # unless an A4 variant is being emitted from the canonical doc.
+    template_slug = template_slug or slug
     name        = data['name']
     desc        = data.get('desc', '')
     desc_post   = data.get('desc_post', '')
@@ -85,8 +89,8 @@ def emit_markdown(data, slug):
         'lang: en',
         f'mainfont: "{font}"',
         'fontsize: 11pt',
-        'papersize: a5',
-        f'template: "/build/{_pdf_template_name(slug)}"',
+        f'papersize: {paper}',
+        f'template: "/build/{_pdf_template_name(template_slug)}"',
         '...',
         '',
     ]
@@ -405,6 +409,98 @@ def _write_pdf_template(data, slug):
     return path
 
 
+def _cover_typst(data):
+    """Standalone typst doc for the EPUB cover.
+
+    Compiles at A5 aspect to match the PDF reading edition — so the
+    cover, the title page, and a printed copy all share proportions. At
+    300 ppi this renders to roughly 1748 × 2480 px, comfortably above
+    Apple Books' minimum cover spec."""
+    name        = data['name']
+    desc        = data.get('desc', '')
+    desc_post   = data.get('desc_post', '')
+    hero_image  = data.get('hero_image', '')
+    hero_credit = data.get('hero_credit', '')
+    accent      = _pdf_accent(data.get('hue', 42))
+    author      = data.get('author', '')
+
+    parts = [
+        '#set page(paper: "a5", margin: (x: 18mm, y: 22mm))',
+        '#set text(font: "Hoefler Text", size: 12pt)',
+        '#set align(center)',
+    ]
+
+    parts.append('#v(1fr)')
+
+    if hero_image:
+        path = '/' + hero_image.lstrip('/')
+        parts.append(f'#image({_typ_str(path)}, width: 76%)')
+        if hero_credit:
+            parts.append('#v(0.5em)')
+            parts.append(
+                f'#text(size: 8pt, style: "italic")'
+                f'[{_typ_content(hero_credit)}]'
+            )
+        parts.append('#v(2em)')
+
+    def stacked(block, size, tracking):
+        bits = [_typ_content(ln.strip()) for ln in block.splitlines() if ln.strip()]
+        if not bits:
+            return
+        inner = ' \\\n  '.join(bits)
+        parts.append(f'#text(size: {size}, tracking: {tracking})[')
+        parts.append(f'  {inner}')
+        parts.append(']')
+
+    if desc:
+        stacked(desc.upper(), '11pt', '0.08em')
+        parts.append('#v(1.8em)')
+
+    parts.append(
+        f'#text(size: 32pt, style: "italic", fill: rgb("{accent}"))'
+        f'[{_typ_content(name)}]'
+    )
+    parts.append('#v(1.1em)')
+    parts.append(
+        f'#line(length: 20%, stroke: (paint: rgb("{accent}"), thickness: 0.6pt))'
+    )
+
+    if desc_post:
+        parts.append('#v(1.8em)')
+        stacked(desc_post.upper(), '11pt', '0.08em')
+
+    parts.append('#v(1fr)')
+
+    if author:
+        parts.append(
+            f'#text(size: 9pt, tracking: 0.14em, fill: rgb("#5a5147"))'
+            f'[{_typ_content(author.upper())}]'
+        )
+        parts.append('#v(0.4em)')
+
+    return '\n'.join(parts) + '\n'
+
+
+def _write_cover(data, slug):
+    """Render and compile the cover. Returns the path on success or
+    None when typst is unavailable (cover is then omitted from the EPUB
+    rather than failing the build). 300 ppi on A5 yields ~1748 × 2480 px,
+    well above Apple Books' minimum cover dimensions."""
+    if not shutil.which('typst'):
+        return None
+    typ_path = BUILD / f'{slug}_cover.typ'
+    png_path = BUILD / f'{slug}_cover.png'
+    typ_path.write_text(_cover_typst(data), encoding='utf-8')
+    cmd = [
+        'typst', 'compile',
+        '--ppi', '300',
+        '--root', str(ROOT),
+        str(typ_path), str(png_path),
+    ]
+    subprocess.run(cmd, check=True)
+    return png_path
+
+
 def _promulgation_stanzas(promulg):
     """Yield each `\\n\\n`-separated stanza of a promulgation block, with
     intra-stanza linebreaks collapsed to single spaces."""
@@ -519,7 +615,11 @@ def main():
     print(f'[{args.slug}] markdown')
     _write_pdf_template(data, args.slug)
     md_path = emit_markdown(data, args.slug)
+    md_path_a4 = emit_markdown(
+        data, args.slug + '_a4', paper='a4', template_slug=args.slug
+    )
     titlepage_path = _write_titlepage_include(data, args.slug)
+    cover_path = _write_cover(data, args.slug)
 
     if not shutil.which('pandoc'):
         sys.exit('pandoc not found on PATH — install via Home Manager or nix-shell')
@@ -534,22 +634,30 @@ def main():
         # parity ToC depth lets readers navigate to sub-headings.
         epub_css = ROOT / 'templates' / 'epub.css'
         epub_lua = ROOT / 'templates' / 'strip_fn_backlink.lua'
-        run_pandoc(md_path, DOWNLOADS / f'{args.slug}.epub',
-                   '--split-level=2',
-                   '--toc-depth=4',
-                   f'--css={epub_css}',
-                   f'--lua-filter={epub_lua}')
+        epub_flags = [
+            '--split-level=2',
+            '--toc-depth=4',
+            f'--css={epub_css}',
+            f'--lua-filter={epub_lua}',
+        ]
+        if cover_path:
+            epub_flags.append(f'--epub-cover-image={cover_path}')
+        run_pandoc(md_path, DOWNLOADS / f'{args.slug}.epub', *epub_flags)
 
     if do_pdf:
         if shutil.which('typst'):
             # `--root` tells typst where the project root is, so the
             # `template:` path in the markdown (which starts with `/`)
-            # resolves to <ROOT>/templates/book.typ.
-            run_pandoc(md_path, DOWNLOADS / f'{args.slug}.pdf',
-                       '--pdf-engine=typst',
-                       f'--pdf-engine-opt=--root={ROOT}',
-                       f'--include-before-body={titlepage_path}',
-                       '--toc-depth=3')
+            # resolves to <ROOT>/templates/book.typ. Two paper sizes:
+            # the A5 reading edition is canonical, the A4 is a large-
+            # print variant for readers who want bigger margins and
+            # a friendlier page.
+            for md, suffix in ((md_path, ''), (md_path_a4, '-a4')):
+                run_pandoc(md, DOWNLOADS / f'{args.slug}{suffix}.pdf',
+                           '--pdf-engine=typst',
+                           f'--pdf-engine-opt=--root={ROOT}',
+                           f'--include-before-body={titlepage_path}',
+                           '--toc-depth=3')
         else:
             print('  ! typst not found, skipping PDF')
 
