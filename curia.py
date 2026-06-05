@@ -4,7 +4,13 @@ import re
 
 from bs4 import BeautifulSoup
 
-from core import assign_footnote_context, clean_text, normalise_footnote_refs, title_case
+from core import (
+    assign_footnote_context,
+    clean_text,
+    normalise_footnote_refs,
+    normalise_footnote_text,
+    title_case,
+)
 
 
 NOTE_ANCHOR = re.compile(
@@ -53,7 +59,9 @@ def anchored_footnotes(soup, paragraphs):
         holder = BeautifulSoup(
             '<div>' + markup[anchor.end():end] + '</div>', 'html.parser'
         ).div
-        body = normalise_footnote_refs(prose_text(holder), bracketed=True)
+        body = normalise_footnote_text(
+            normalise_footnote_refs(prose_text(holder), bracketed=True)
+        )
         notes.append({
             'part': 0,
             'chapter': 0,

@@ -8,8 +8,9 @@ Each `extract/<doc>.py` exposes:
         'source_url':   str,        # original Vatican HTML edition
         'desc':         str,        # multi-line preamble shown ABOVE the title (may be '')
         'desc_post':    str,        # multi-line subtitle shown BELOW the title (may be '')
-        'promulgation': str,        # multi-line promulgation (may be '')
-        'signature':    str,        # papal signature line, e.g. "Franciscus" (may be '')
+        'promulgation': str,        # canonical inline markup; blank lines split stanzas
+        'signature':    str,        # canonical inline markup; line breaks are significant
+        'signatories':  list[dict], # optional end-matter name/role pairs
         'hero_image':   str,        # path to title-page image, repo-relative (may be '')
         'hero_credit':  str,        # one-line credit/caption shown beneath the image (may be '')
         'paragraphs':   list[dict], # per-paragraph dicts (see schema below)
@@ -25,6 +26,14 @@ Paragraph schema (all keys optional except number, text — defaults to 0 / ''):
 Footnote schema:
 
     part, chapter, section, sub_heading, number, text
+
+Appendix schema:
+
+    title, text, kind  # optional presentation role, e.g. "prayer"
+
+Signatory schema:
+
+    name, role
 """
 
 import re
@@ -195,11 +204,41 @@ def normalise_footnote_refs(text, *, bracketed=False):
     return _SPACE_BEFORE_FOOTNOTE_REF.sub(r'\1', text)
 
 
+# Works cited by paragraph number (`Dignitas infinita, 6. 11.` → `, nn. 6, 11`).
+# When a note mentions one of these, a trailing `N. M.` is treated as a mangled
+# paragraph list rather than a sentence boundary.
+KNOWN_PARAGRAPH_CITED = (
+    'Dignitas infinita',
+)
+
+_NUMERIC_HYPHEN = re.compile(r'(?<=\d)-(?=\d)')
+_PARAGRAPH_CITED_RANGE = re.compile(r',\s+(\d+)\.\s+(\d+)\.\s*$')
+
+
+def normalise_footnote_text(text):
+    """Repair footnote-only typographic artefacts.
+
+    Currently: en-dashes between numeric ranges (`843-844` → `843–844`,
+    `Prov 8:22-31` → `Prov 8:22–31`), and mangled paragraph citations of
+    paragraph-cited works (`Dignitas infinita, 6. 11.` → `, nn. 6, 11`).
+
+    Body prose is intentionally left alone (see paragraph_record); add an
+    explicit body-text hook only when a real artefact warrants it.
+    """
+    text = _NUMERIC_HYPHEN.sub('–', text)
+    if any(work in text for work in KNOWN_PARAGRAPH_CITED):
+        text = _PARAGRAPH_CITED_RANGE.sub(r', nn. \1, \2.', text)
+    return text
+
+
 def paragraph_record(number, text, *, part=0, part_title='', chapter=0,
                      chapter_title='', chapter_subtitle='', section=0,
                      section_title='', sub_heading='', heading_la='',
                      bracketed_refs=False):
     """Construct a canonical paragraph record from source text and context."""
+    # Body prose is *not* run through normalise_footnote_text — Word-export
+    # artefacts in body text are rare enough that a generic pass risks more
+    # false positives than fixes. Reattach if a real artefact warrants it.
     return {
         'number': number,
         'part': part,
@@ -229,8 +268,10 @@ def parse_footnote(text, pattern, *, part=0, chapter=0, bracketed_refs=False):
         'part': part,
         'chapter': chapter,
         'number': int(match.group(1)),
-        'text': normalise_footnote_refs(
-            match.group(2).strip(), bracketed=bracketed_refs
+        'text': normalise_footnote_text(
+            normalise_footnote_refs(
+                match.group(2).strip(), bracketed=bracketed_refs
+            )
         ),
     }
 
@@ -371,7 +412,7 @@ _PARA_FIELDS = [
 
 def write_toml(path, *, name, hue=None, source_url='', desc='', desc_post='',
                promulgation='', signature='', hero_image='', hero_credit='',
-               paragraphs, footnotes, appendices=()):
+               paragraphs, footnotes, appendices=(), signatories=()):
     out = [f'name = {_toml_str(name)}']
     if hue is not None:
         out.append(f'hue = {hue}')
@@ -384,7 +425,12 @@ def write_toml(path, *, name, hue=None, source_url='', desc='', desc_post='',
     if promulgation:
         out.append(f'promulgation = {_toml_multiline(promulgation)}')
     if signature:
-        out.append(f'signature = {_toml_str(signature)}')
+        # Structural line breaks in an end-matter signature must survive
+        # the canonical intermediate for each output renderer.
+        if '\n' in signature:
+            out.append(f'signature = {_toml_multiline(signature)}')
+        else:
+            out.append(f'signature = {_toml_str(signature)}')
     if hero_image:
         out.append(f'hero_image = {_toml_str(hero_image)}')
     if hero_credit:
@@ -419,7 +465,15 @@ def write_toml(path, *, name, hue=None, source_url='', desc='', desc_post='',
     for app in appendices:
         out.append('[[appendices]]')
         out.append(f'title = {_toml_str(app["title"])}')
+        if app.get('kind'):
+            out.append(f'kind = {_toml_str(app["kind"])}')
         out.append(f'text = {_toml_multiline(app["text"])}')
+        out.append('')
+
+    for signatory in signatories:
+        out.append('[[signatories]]')
+        out.append(f'name = {_toml_str(signatory.get("name", ""))}')
+        out.append(f'role = {_toml_str(signatory.get("role", ""))}')
         out.append('')
 
     with open(path, 'w', encoding='utf-8') as f:

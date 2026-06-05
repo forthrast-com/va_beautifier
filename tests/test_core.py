@@ -11,6 +11,7 @@ from core import (
     clean_text,
     int_to_roman,
     normalise_footnote_refs,
+    normalise_footnote_text,
     paragraph_record,
     parse_footnote,
     read_toml,
@@ -65,6 +66,32 @@ class TextHelperTests(unittest.TestCase):
     def test_roman_helpers_round_trip(self):
         for number in (1, 4, 9, 14, 42):
             self.assertEqual(roman_to_int(int_to_roman(number)), number)
+
+    def test_footnote_text_uses_en_dash_between_numeric_ranges(self):
+        self.assertEqual(
+            normalise_footnote_text('See pp. 843-844; Prov 8:22-31.'),
+            'See pp. 843–844; Prov 8:22–31.',
+        )
+
+    def test_footnote_text_leaves_compound_names_alone(self):
+        self.assertEqual(
+            normalise_footnote_text('See Marie-Curie and Levi-Strauss.'),
+            'See Marie-Curie and Levi-Strauss.',
+        )
+
+    def test_footnote_text_rewrites_mangled_paragraph_citation(self):
+        self.assertEqual(
+            normalise_footnote_text(
+                'Cf. Dignitas infinita, 2 April 2024, 6. 11.'
+            ),
+            'Cf. Dignitas infinita, 2 April 2024, nn. 6, 11.',
+        )
+
+    def test_footnote_text_leaves_unknown_work_trailing_numbers_alone(self):
+        self.assertEqual(
+            normalise_footnote_text('Some Work, vol. 6. p. 11.'),
+            'Some Work, vol. 6. p. 11.',
+        )
 
 
 class FootnoteTests(unittest.TestCase):
@@ -144,6 +171,31 @@ class TomlTests(unittest.TestCase):
         self.assertEqual(data['paragraphs'][0]['sub_heading'], 'A heading')
         self.assertEqual(data['footnotes'][0]['section'], 3)
         self.assertEqual(data['footnotes'][0]['sub_heading'], 'A heading')
+
+    def test_toml_round_trip_preserves_structured_end_matter(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'end-matter.toml'
+            write_toml(
+                path,
+                name='Sample',
+                promulgation='*Approved this* Note *for publication.*',
+                signature='*Ex audientia\nFranciscus*',
+                appendices=[{
+                    'title': 'Prayer',
+                    'kind': 'prayer',
+                    'text': 'First line\nSecond line',
+                }],
+                signatories=[{'name': 'A Name', 'role': 'Prefect'}],
+                paragraphs=[],
+                footnotes=[],
+            )
+            data = read_toml(path)
+
+        self.assertEqual(data['signature'], '*Ex audientia\nFranciscus*')
+        self.assertEqual(
+            data['signatories'], [{'name': 'A Name', 'role': 'Prefect'}]
+        )
+        self.assertEqual(data['appendices'][0]['kind'], 'prayer')
 
 
 if __name__ == '__main__':
