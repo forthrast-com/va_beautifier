@@ -38,6 +38,9 @@ NAME = "Laudato Si'"
 HUE = 140
 SOURCE_URL = ('https://www.vatican.va/content/francesco/en/encyclicals/documents/'
               'papa-francesco_20150524_enciclica-laudato-si.html')
+AUTHOR = 'Francis'
+DATE = '2015-05-24'
+IDENTIFIER = 'papal:laudato-si:2015-05-24'
 
 # Front matter is the first centred <p> whose text contains "ENCYCLICAL
 # LETTER" — its lines (separated by <br/>) carry the title in the middle.
@@ -199,10 +202,10 @@ def extract():
         if only_child_is(p, 'i'):
             if text.startswith('Given in') or text.startswith('Given at'):
                 _flush()
-                promulgation = text
+                promulgation = clean_text(p, preserve_formatting=True)
                 continue
             _flush()
-            current = {'title': text, 'text': ''}
+            current = {'title': text, 'kind': 'prayer', 'text': ''}
             continue
 
         # Centred bold trailer: the papal signature ("Franciscus"). Capture
@@ -211,7 +214,7 @@ def extract():
         align = (p.get('align') or '').lower()
         if align == 'center' and p.find('b'):
             if promulgation and not signature:
-                signature = text
+                signature = clean_text(p, preserve_formatting=True)
             continue
 
         # body of current prayer
@@ -232,6 +235,9 @@ def extract():
         'name': NAME,
         'hue': HUE,
         'source_url': SOURCE_URL,
+        'author': AUTHOR,
+        'date': DATE,
+        'identifier': IDENTIFIER,
         'desc': desc_pre,
         'desc_post': desc_post,
         'promulgation': promulgation,

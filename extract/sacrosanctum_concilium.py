@@ -15,8 +15,8 @@ Shape:
   - Inline footnote refs use `[N]` (LS-style); normalised to canonical
     `(N)`. Notes block has no chapter delimiters — context is recovered
     from the first citing paragraph.
-  - An appendix follows chapter VII as a single unnumbered prose block;
-    rendered with `hide_number` under a chapter=8 scope so the TOC sees it.
+  - A ruled-off calendar declaration follows chapter VII; emitted through
+    `appendices[]`, not invented as an eighth chapter.
 """
 
 import re
@@ -41,9 +41,9 @@ NAME = 'Sacrosanctum Concilium'
 HUE = 268
 SOURCE_URL = ('https://www.vatican.va/archive/hist_councils/ii_vatican_council/'
               'documents/vat-ii_const_19631204_sacrosanctum-concilium_en.html')
-
-APPENDIX_CHAPTER = 8
-
+AUTHOR = 'Second Vatican Council'
+DATE = '1963-12-04'
+IDENTIFIER = 'council:sacrosanctum-concilium:1963-12-04'
 
 RE_CHAPTER_BARE = re.compile(r'^CHAPTER\s+([IVX]+)\s*$')
 RE_CHAPTER_COMBINED = re.compile(r'^CHAPTER\s+([IVX]+)\s+(.+)$', re.DOTALL)
@@ -69,7 +69,7 @@ def _extract_frontmatter(body_html):
     """The SC front matter is one <p> whose text concatenates the alt-language
     bar, 'CONSTITUTION ON THE SACRED LITURGY', 'SACROSANCTUM CONCILIUM',
     and 'SOLEMNLY PROMULGATED BY HIS HOLINESS POPE PAUL VI ON DECEMBER 4,
-    1963'. Split around the title."""
+    1963'. Split the display title from its semantic promulgation."""
     soup = BeautifulSoup(body_html, 'html.parser')
     fm = next((p for p in soup.find_all('p')
                if 'CONSTITUTION ON THE SACRED LITURGY' in p.get_text()), None)
@@ -101,9 +101,13 @@ def _walk_body(corpo):
         'sub_heading': '',
     }
     paragraphs = []
+    appendices = []
     current = None
     seen_frontmatter = False
     appendix_active = False
+    appendix_title = ''
+    appendix_blocks = []
+    appendix_item_num = 0
     # SC numbers paragraphs globally 1..130. A few paragraphs (notably ¶22
     # under chapter 1, section 3) carry an internal `1.` / `2.` / `3.` list
     # that the source renders as siblings of the parent paragraph. Track
@@ -120,7 +124,12 @@ def _walk_body(corpo):
                      section=0, section_title='',
                      sub_heading='')
 
-    for tag in corpo.find_all(['p', 'center']):
+    for tag in corpo.find_all(['p', 'center', 'li', 'hr']):
+        if tag.name == 'hr':
+            # The source rules off the calendar declaration from article 130.
+            if current is not None and not appendix_active:
+                current['break_after'] = True
+            continue
         if tag.name == 'center':
             joined = _joined_bolds(tag)
             if not joined:
@@ -152,7 +161,7 @@ def _walk_body(corpo):
                 flush()
                 current = None
                 title = (ma.group(1) or '').strip()
-                set_chapter(APPENDIX_CHAPTER, title_case(title) if title else 'Appendix')
+                appendix_title = title_case(title) if title else 'Appendix'
                 appendix_active = True
                 continue
             continue
@@ -173,6 +182,18 @@ def _walk_body(corpo):
         if text.startswith('['):
             continue
         if 'CONSTITUTION ON THE SACRED LITURGY' in text:
+            continue
+
+        if appendix_active:
+            # The centred bold title was already captured from its parent
+            # `<center>`; retain the appendix prose and numbered list items.
+            if all_bold:
+                continue
+            rich = clean_text(tag, preserve_formatting=True)
+            if tag.name == 'li':
+                appendix_item_num += 1
+                rich = f'{appendix_item_num}. {rich}'
+            appendix_blocks.append(rich)
             continue
 
         # Sub-heading: italic+bold A)..F)
@@ -218,18 +239,6 @@ def _walk_body(corpo):
             last_num = int(mp.group(1))
             continue
 
-        if appendix_active:
-            # Render each appendix <p> as its own hide_number record so the
-            # natural prose breaks survive into TOML/HTML/book.
-            rich = clean_text(tag, preserve_formatting=True)
-            record = paragraph_record(
-                len(paragraphs) + 1, rich,
-                bracketed_refs=True, **state
-            )
-            record['hide_number'] = True
-            paragraphs.append(record)
-            continue
-
         # Continuation line under the currently open paragraph
         if current is not None and seen_frontmatter:
             current['text'] += '\n\n' + normalise_footnote_refs(
@@ -238,7 +247,13 @@ def _walk_body(corpo):
             )
 
     flush()
-    return paragraphs
+    if appendix_blocks:
+        appendices.append({
+            'title': appendix_title,
+            'kind': 'declaration',
+            'text': '\n\n'.join(appendix_blocks),
+        })
+    return paragraphs, appendices
 
 
 def _extract_footnotes(notes_html):
@@ -260,23 +275,26 @@ def extract():
     body_html = notes_split[0]
     notes_html = notes_split[1] if len(notes_split) > 1 else ''
 
-    # SC carries its "SOLEMNLY PROMULGATED…" line in the front matter,
-    # under the title — same layout as GeS. Hand it through as desc_post
-    # so the title block stacks pre / NAME / post like the other old-flat
-    # documents, instead of dropping it into an end-of-doc dedication.
-    desc, desc_post = _extract_frontmatter(body_html)
+    # Source placement is decorative; promulgation is end matter in the
+    # canonical edition, consistently with the other document dialects.
+    desc, promulgation = _extract_frontmatter(body_html)
 
     soup = BeautifulSoup(body_html, 'html.parser')
     corpo = soup.find(id='corpo') or soup.body or soup
-    paragraphs = _walk_body(corpo)
+    paragraphs, appendices = _walk_body(corpo)
     footnotes = assign_footnote_context(_extract_footnotes(notes_html), paragraphs)
 
     return {
         'name': NAME,
         'hue': HUE,
         'source_url': SOURCE_URL,
+        'author': AUTHOR,
+        'date': DATE,
+        'identifier': IDENTIFIER,
         'desc': desc,
-        'desc_post': desc_post,
+        'desc_post': '',
+        'promulgation': title_case(promulgation),
         'paragraphs': paragraphs,
         'footnotes': footnotes,
+        'appendices': appendices,
     }

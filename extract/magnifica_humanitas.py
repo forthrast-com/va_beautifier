@@ -29,6 +29,9 @@ NAME = 'Magnifica Humanitas'
 HUE = 230
 SOURCE_URL = ('https://www.vatican.va/content/leo-xiv/en/encyclicals/documents/'
               '20260515-magnifica-humanitas.html')
+AUTHOR = 'Leo XIV'
+DATE = '2026-05-15'
+IDENTIFIER = 'papal:magnifica-humanitas:2026-05-15'
 
 # Front-matter signal: the abstract block sits in a div whose class list
 # includes "abstract"; its first <p> carries the encyclical-letter preamble
@@ -79,8 +82,11 @@ def extract():
     chapter = 0
     chapter_title = ''
     chapter_subtitle = ''
-    section = 1
-    section_title = 'Introduction'
+    # The source has opening prose before its first primary heading. The
+    # renderer supplies the top-level Introduction label for that scope;
+    # do not manufacture a duplicate nested section here.
+    section = 0
+    section_title = ''
     sub_heading = ''
     pending_chapter_title = False
 
@@ -135,7 +141,7 @@ def extract():
             continue
 
         if text.startswith('Given in ') or text.startswith('Given at '):
-            promulgation = text
+            promulgation = clean_text(p, preserve_formatting=True)
             continue
 
         # Papal signature: a short centred trailer after the dedication line,
@@ -143,7 +149,7 @@ def extract():
         # MS-Word centred-paragraph style so we don't catch stray prose.
         style = (p.get('style') or '').lower().replace(' ', '')
         if promulgation and 'text-align:center' in style and text:
-            signature = text
+            signature = clean_text(p, preserve_formatting=True)
 
     footnotes = extract_footnotes(
         ps[first_note_idx:], RE_FOOTNOTE, bracketed_refs=True
@@ -154,6 +160,9 @@ def extract():
         'name': NAME,
         'hue': HUE,
         'source_url': SOURCE_URL,
+        'author': AUTHOR,
+        'date': DATE,
+        'identifier': IDENTIFIER,
         'desc': desc_pre,
         'desc_post': desc_post,
         'promulgation': promulgation,

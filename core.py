@@ -6,6 +6,10 @@ Each `extract/<doc>.py` exposes:
         'name':         str,        # display name, e.g. "Gaudium et Spes"
         'hue':          int,        # web-edition accent hue (CSS hsl degrees)
         'source_url':   str,        # original Vatican HTML edition
+        'author':       str,        # dc:creator for EPUB; pope, council, dicastery (may be '')
+        'date':         str,        # promulgation date ISO 8601 yyyy-mm-dd (may be '')
+        'identifier':   str,        # urn suffix, e.g. "papal:laudato-si:2015-05-24" (may be '')
+        'rights':       str,        # dc:rights line for EPUB (may be '')
         'desc':         str,        # multi-line preamble shown ABOVE the title (may be '')
         'desc_post':    str,        # multi-line subtitle shown BELOW the title (may be '')
         'promulgation': str,        # canonical inline markup; blank lines split stanzas
@@ -16,6 +20,9 @@ Each `extract/<doc>.py` exposes:
         'paragraphs':   list[dict], # per-paragraph dicts (see schema below)
         'footnotes':    list[dict],
     }
+
+The imprint (`publisher`, `collection`) is taken from DEFAULT_PUBLISHER /
+DEFAULT_COLLECTION when the extractor doesn't override.
 
 Paragraph schema (all keys optional except number, text — defaults to 0 / ''):
 
@@ -410,7 +417,14 @@ _PARA_FIELDS = [
 ]
 
 
-def write_toml(path, *, name, hue=None, source_url='', desc='', desc_post='',
+DEFAULT_PUBLISHER = 'Forthrast'
+DEFAULT_COLLECTION = 'The Circulars'
+
+
+def write_toml(path, *, name, hue=None, source_url='',
+               author='', date='', identifier='', rights='',
+               publisher=DEFAULT_PUBLISHER, collection=DEFAULT_COLLECTION,
+               desc='', desc_post='',
                promulgation='', signature='', hero_image='', hero_credit='',
                paragraphs, footnotes, appendices=(), signatories=()):
     out = [f'name = {_toml_str(name)}']
@@ -418,6 +432,18 @@ def write_toml(path, *, name, hue=None, source_url='', desc='', desc_post='',
         out.append(f'hue = {hue}')
     if source_url:
         out.append(f'source_url = {_toml_str(source_url)}')
+    if author:
+        out.append(f'author = {_toml_str(author)}')
+    if date:
+        out.append(f'date = {_toml_str(date)}')
+    if identifier:
+        out.append(f'identifier = {_toml_str(identifier)}')
+    if publisher:
+        out.append(f'publisher = {_toml_str(publisher)}')
+    if collection:
+        out.append(f'collection = {_toml_str(collection)}')
+    if rights:
+        out.append(f'rights = {_toml_str(rights)}')
     if desc:
         out.append(f'desc = {_toml_multiline(desc)}')
     if desc_post:

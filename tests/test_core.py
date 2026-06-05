@@ -172,6 +172,44 @@ class TomlTests(unittest.TestCase):
         self.assertEqual(data['footnotes'][0]['section'], 3)
         self.assertEqual(data['footnotes'][0]['sub_heading'], 'A heading')
 
+    def test_toml_emits_imprint_metadata_with_defaults(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'imprint.toml'
+            write_toml(
+                path,
+                name='Sample',
+                author='A Pope',
+                date='2024-01-15',
+                identifier='papal:sample:2024-01-15',
+                rights='© 2024 Holy See',
+                paragraphs=[],
+                footnotes=[],
+            )
+            data = read_toml(path)
+
+        self.assertEqual(data['author'], 'A Pope')
+        self.assertEqual(data['date'], '2024-01-15')
+        self.assertEqual(data['identifier'], 'papal:sample:2024-01-15')
+        self.assertEqual(data['rights'], '© 2024 Holy See')
+        self.assertEqual(data['publisher'], 'Forthrast')
+        self.assertEqual(data['collection'], 'The Circulars')
+
+    def test_toml_imprint_overrides_replace_defaults(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'imprint.toml'
+            write_toml(
+                path,
+                name='Sample',
+                publisher='Custom Press',
+                collection='Other Series',
+                paragraphs=[],
+                footnotes=[],
+            )
+            data = read_toml(path)
+
+        self.assertEqual(data['publisher'], 'Custom Press')
+        self.assertEqual(data['collection'], 'Other Series')
+
     def test_toml_round_trip_preserves_structured_end_matter(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'end-matter.toml'

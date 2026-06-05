@@ -2,7 +2,7 @@
 
 import re
 
-from core import paragraph_record, roman_to_int
+from core import clean_text, paragraph_record, roman_to_int
 from curia import anchored_footnotes, heading_title, load_source, prose_text, text
 from project import SOURCES
 
@@ -15,9 +15,39 @@ SOURCE_URL = (
     'https://www.vatican.va/roman_curia/congregations/cfaith/documents/'
     'rc_ddf_doc_20250128_antiqua-et-nova_en.html'
 )
+AUTHOR = ('Dicastery for the Doctrine of the Faith '
+          'and Dicastery for Culture and Education')
+DATE = '2025-01-28'
+IDENTIFIER = 'ddf-dce:antiqua-et-nova:2025-01-28'
 
 RE_PARA = re.compile(r'^(\d+)\.\s+(.+)$', re.DOTALL)
 RE_MAJOR = re.compile(r'^([IVX]+)\.\s+(.+)$', re.DOTALL)
+
+
+_ROLE_HINT = re.compile(r'\b(Prefect|Secretary|President)\b', re.IGNORECASE)
+
+
+def _extract_signatories(soup):
+    """The 2×2 signatory table sits between the second promulgation
+    stanza and the Latin signature, wrapped in a couple of outer layout
+    tables that this source uses for centring. Pick the innermost <table>
+    (no nested <table> inside) and filter cells by a Curia role hint so
+    the language-switch bar at the top of the page doesn't sneak in."""
+    candidates = [t for t in soup.find_all('table') if not t.find('table')]
+    for table in candidates:
+        signatories = []
+        for cell in table.find_all('td'):
+            raw = clean_text(cell, preserve_formatting=False)
+            lines = [line.strip() for line in raw.splitlines() if line.strip()]
+            if not lines or not any(_ROLE_HINT.search(line) for line in lines[1:]):
+                continue
+            signatories.append({
+                'name': lines[0],
+                'role': ' '.join(lines[1:]),
+            })
+        if signatories:
+            return signatories
+    return []
 
 
 def extract():
@@ -30,7 +60,7 @@ def extract():
     chapter = 0
     chapter_title = ''
     sub_heading = ''
-    promulgation = []
+    promulgation_stanzas = []
     signature = ''
 
     for p in ps[start:end]:
@@ -55,30 +85,41 @@ def extract():
             ))
             continue
 
-        if plain.startswith('The Supreme Pontiff'):
-            promulgation.append(plain)
-            continue
-        if plain.startswith('Given in Rome'):
-            promulgation.append(plain)
+        if plain.startswith('The Supreme Pontiff') or plain.startswith('Given in Rome'):
+            # Preserve the source's italic / roman cadence — the first stanza
+            # is fully italic with "Note" set in roman, the second is plain.
+            promulgation_stanzas.append(prose_text(p))
             continue
         if plain.startswith('Ex audientia'):
-            signature = plain
+            # The source breaks "Ex audientia die 14 ianuarii 2025" and
+            # "Franciscus" onto separate lines via <br>; keep the line break
+            # so the rendered signature stacks the date over the name.
+            # Collapse `\n\n` runs introduced by leading whitespace around
+            # the break — we only want a single line break between the two.
+            raw = clean_text(p, preserve_formatting=True)
+            signature = re.sub(r'\n+', '\n', raw)
             continue
 
         # Internal topic headings in this source are italic-only paragraphs.
         sub_heading = plain
+
+    signatories = _extract_signatories(soup)
 
     footnotes = anchored_footnotes(soup, paragraphs)
     return {
         'name': NAME,
         'hue': HUE,
         'source_url': SOURCE_URL,
+        'author': AUTHOR,
+        'date': DATE,
+        'identifier': IDENTIFIER,
         'desc': 'Dicastery for the Doctrine of the Faith\n'
                 'Dicastery for Culture and Education',
         'desc_post': 'Note on the Relationship Between Artificial Intelligence '
                      'and Human Intelligence',
-        'promulgation': '\n\n'.join(promulgation),
+        'promulgation': '\n\n'.join(promulgation_stanzas),
         'signature': signature,
+        'signatories': signatories,
         'paragraphs': paragraphs,
         'footnotes': footnotes,
     }

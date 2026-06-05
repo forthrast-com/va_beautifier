@@ -15,6 +15,9 @@ SOURCE_URL = (
     'https://www.vatican.va/roman_curia/congregations/cfaith/cti_documents/'
     'rc_cti_doc_20260304_quo-vadis-humanits_en.html'
 )
+AUTHOR = 'International Theological Commission'
+DATE = '2026-03-04'
+IDENTIFIER = 'cti:quo-vadis-humanitas:2026-03-04'
 
 RE_PARA = re.compile(r'^(\d+)\.\s+(.+)$', re.DOTALL)
 RE_CHAPTER = re.compile(r'^Chapter\s+([IVX]+)$', re.IGNORECASE)
@@ -120,6 +123,9 @@ def extract():
         'name': NAME,
         'hue': HUE,
         'source_url': SOURCE_URL,
+        'author': AUTHOR,
+        'date': DATE,
+        'identifier': IDENTIFIER,
         'desc': 'International Theological Commission',
         'desc_post': 'Thinking through Christian Anthropology in the Face of '
                      'Certain Scenarios for the Future of Humanity',

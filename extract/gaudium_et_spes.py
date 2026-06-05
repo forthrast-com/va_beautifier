@@ -31,6 +31,9 @@ NAME = 'Gaudium et Spes'
 HUE = 42
 SOURCE_URL = ('https://www.vatican.va/archive/hist_councils/ii_vatican_council/'
               'documents/vat-ii_const_19651207_gaudium-et-spes_en.html')
+AUTHOR = 'Second Vatican Council'
+DATE = '1965-12-07'
+IDENTIFIER = 'council:gaudium-et-spes:1965-12-07'
 
 
 RE_PART     = re.compile(r'^PART\s+([IVX]+)\s*$')
@@ -68,10 +71,9 @@ def _br_text(tag):
 
 def _extract_frontmatter(body_html):
     """Split the GeS front-matter <p> around its 'GAUDIUM ET SPES' title.
-    Lines before the title become `desc` (preamble); lines after become
-    `desc_post` (the 'PROMULGATED BY... DECEMBER 7, 1965' block). GeS keeps
-    that date line in the front matter rather than as an end-of-doc
-    dedication, so it lives in `desc_post`, not `promulgation`."""
+    Lines before the title become `desc`; lines after carry the document's
+    promulgation. Its source placement is front-matter decoration, but its
+    semantic place in an edition is end matter."""
     soup = BeautifulSoup(body_html, 'html.parser')
     fm = next((p for p in soup.find_all('p')
                if 'PASTORAL CONSTITUTION' in p.get_text()), None)
@@ -247,7 +249,7 @@ def extract():
     notes_html = notes_split[1] if len(notes_split) > 1 else ''
     body_html = body_html[body_html.find('<hr />'):]
 
-    desc, desc_post = _extract_frontmatter(body_html)
+    desc, promulgation = _extract_frontmatter(body_html)
     paragraphs = _walk_body(BeautifulSoup(body_html, 'html.parser'))
     footnotes = assign_footnote_context(
         _extract_footnotes(notes_html), paragraphs, preserve_scope=True
@@ -261,8 +263,12 @@ def extract():
         'name': NAME,
         'hue': HUE,
         'source_url': SOURCE_URL,
+        'author': AUTHOR,
+        'date': DATE,
+        'identifier': IDENTIFIER,
         'desc': desc,
-        'desc_post': desc_post,
+        'desc_post': '',
+        'promulgation': title_case(promulgation),
         'paragraphs': paragraphs,
         'footnotes': footnotes,
     }
