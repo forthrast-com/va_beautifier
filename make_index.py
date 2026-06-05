@@ -1,5 +1,6 @@
 """Render the flat GitHub Pages landing page from document TOML metadata."""
 
+import datetime
 from html import escape
 import sys
 
@@ -23,32 +24,28 @@ PROMULGATION_DATES = {
 # Structured card metadata per document. Each entry declares a `type`
 # whose template controls what gets bolded and how the description flows.
 # Adding a doc means adding a row here; adding a doc category means adding
-# a branch in `_build_description`.
+# a branch in `_card_fields`.
 CARD_META = {
     'gaudium_et_spes': {
         'type': 'council_constitution',
-        'kind': 'Pastoral Constitution on the Church in the Modern World',
+        'kind_long': 'Pastoral Constitution on the Church in the Modern World',
         'body': 'Second Vatican Council',
         'promulgated_by': 'Pope Paul VI',
-        'date': '7 December 1965',
     },
     'sacrosanctum_concilium': {
         'type': 'council_constitution',
-        'kind': 'Constitution on the Sacred Liturgy',
+        'kind_long': 'Constitution on the Sacred Liturgy',
         'body': 'Second Vatican Council',
         'promulgated_by': 'Pope Paul VI',
-        'date': '4 December 1963',
     },
     'laudato_si': {
         'type': 'encyclical',
-        'kind': 'Encyclical Letter',
         'issuer_prefix': 'of the Holy Father',
         'issuer': 'Francis',
         'subtitle': 'on Care for Our Common Home',
     },
     'magnifica_humanitas': {
         'type': 'encyclical',
-        'kind': 'Encyclical Letter',
         'issuer_prefix': 'of His Holiness',
         'issuer': 'Pope Leo XIV',
         'subtitle': (
@@ -77,39 +74,74 @@ CARD_META = {
     },
 }
 
+# Short label that appears tracked at the head of each tile.
+TILE_KIND_LABEL = {
+    'encyclical':           'Encyclical Letter',
+    'council_constitution': 'Conciliar Constitution',
+    'curia_note':           'Doctrinal Note',
+    'commission_paper':     'Commission Paper',
+}
 
-def _build_description(slug, data):
-    meta = CARD_META.get(slug)
-    if not meta:
-        return None
-    kind = meta['type']
-    if kind == 'council_constitution':
-        return (
-            f"{meta['kind']} "
-            f"of the <strong>{meta['body']}</strong>. "
-            f"Promulgated by {meta['promulgated_by']} on {meta['date']}."
+
+def _formatted_date(iso_date):
+    """Render '2026-05-15' as '15 May 2026'. Leaves an unparseable value
+    alone so we never silently drop information."""
+    if not iso_date:
+        return ''
+    try:
+        d = datetime.date.fromisoformat(iso_date)
+    except ValueError:
+        return iso_date
+    return f'{d.day} {d.strftime("%B")} {d.year}'
+
+
+def _card_fields(slug, data):
+    """Collect all the tile-level fields for one document into one dict.
+
+    Each tile renders the same shape (kind, title, subtitle, byline,
+    date) so the layout can stay uniform across encyclicals, conciliar
+    constitutions, dicastery notes, and theological-commission papers.
+    The bolded element in each byline is the human-or-body that the
+    rendered card most wants the eye to land on."""
+    meta = CARD_META.get(slug, {})
+    kind_type = meta.get('type', '')
+    subtitle = meta.get('subtitle', '')
+    byline = ''
+
+    if kind_type == 'encyclical':
+        byline = f'{meta["issuer_prefix"]} <strong>{meta["issuer"]}</strong>'
+    elif kind_type == 'council_constitution':
+        subtitle = meta.get('kind_long', '')
+        byline = f'of the <strong>{meta["body"]}</strong>'
+        if meta.get('promulgated_by'):
+            byline += f', promulgated by {meta["promulgated_by"]}'
+    elif kind_type == 'curia_note':
+        # Signers (Prefects, sub-commission chair) ride dc:creator and
+        # appear in the PDF colophon; the tile keeps the institutional
+        # voice up top so it doesn't read like four bylines stacked.
+        byline = '<strong>' + ' &amp; '.join(meta.get('bodies', ())) + '</strong>'
+    elif kind_type == 'commission_paper':
+        byline = '<strong>' + ', '.join(meta.get('bodies', ())) + '</strong>'
+    else:
+        # No CARD_META row — flow the TOML's desc / desc_post fallback.
+        joined = ' '.join(
+            line.strip()
+            for part in (data.get('desc', ''), data.get('desc_post', ''))
+            for line in part.splitlines()
+            if line.strip()
         )
-    if kind == 'encyclical':
-        return (
-            f"{meta['kind']} {meta['issuer_prefix']} "
-            f"<strong>{meta['issuer']}</strong>"
-            f" {meta['subtitle']}."
-        )
-    # Organisation-issued (Curia note, Theological-Commission paper):
-    # Use continuous prose so line wrapping follows the available card width.
-    bodies = [f'<strong>{body}</strong>' for body in meta.get('bodies', ())]
-    if not bodies:
-        return None
-    description = f'{", ".join(bodies)}. {meta["subtitle"]}.'
-    # The TOML author field carries the document's primary signers
-    # (Prefects for a curia note, the President + sub-commission chair
-    # for a commission paper). Surface them here so the human voices
-    # behind the institutional issuer don't sit invisible.
-    author = data.get('author', '').strip()
-    if author:
-        lead = 'Signed by' if kind == 'curia_note' else 'Under'
-        description += f' {lead} <strong>{escape(author)}</strong>.'
-    return description
+        byline = escape(title_case(joined)) if joined else ''
+
+    return {
+        'name':        data['name'],
+        'kind_label':  TILE_KIND_LABEL.get(kind_type, ''),
+        'subtitle':    subtitle,
+        'byline':      byline,
+        'date':        _formatted_date(data.get('date', '')),
+        'iso_date':    data.get('date', ''),
+        'hue':         data.get('hue', 42),
+        'source_url':  data.get('source_url', ''),
+    }
 
 
 SORT_ICON_SVG = (
@@ -135,61 +167,87 @@ def file_size(path):
 
 
 def render_downloads(slug):
-    formats = []
-    for filename, label in (
-        (f'{slug}-a5.pdf', 'PDF'),
-        (f'{slug}-a4.pdf', 'PDF (A4)'),
-        (f'{slug}.epub', 'EPUB'),
-    ):
-        size = file_size(DOWNLOADS / filename)
-        if size:
-            formats.append(
-                f'<a class="format" href="downloads/{filename}">'
-                f'<span>{label}</span><small>{size}</small></a>'
-            )
-    if not formats:
-        return ''
-    return (
-        '<div class="formats" aria-label="Download formats">'
-        + ''.join(formats)
-        + '</div>'
-    )
+    """Two-row download block. Top row carries the primary formats
+    (PDF reading edition + EPUB); bottom row carries the secondary
+    A4 large-print + a link to the canonical vatican.va source."""
+    a5_size = file_size(DOWNLOADS / f'{slug}-a5.pdf')
+    a4_size = file_size(DOWNLOADS / f'{slug}-a4.pdf')
+    epub_size = file_size(DOWNLOADS / f'{slug}.epub')
+
+    primary_parts = []
+    if a5_size:
+        primary_parts.append(
+            f'<a class="dl dl-primary" href="downloads/{slug}-a5.pdf">'
+            f'<span class="dl-name">PDF</span>'
+            f'<span class="dl-size">{a5_size}</span></a>'
+        )
+    if epub_size:
+        primary_parts.append(
+            f'<a class="dl dl-primary" href="downloads/{slug}.epub">'
+            f'<span class="dl-name">EPUB</span>'
+            f'<span class="dl-size">{epub_size}</span></a>'
+        )
+
+    return primary_parts, a4_size
 
 
 def render_card(slug):
     data = read_toml(BUILD / f'{slug}.toml')
+    f = _card_fields(slug, data)
+    primary_dls, a4_size = render_downloads(slug)
 
-    name = escape(data['name'])
-    # The card description is composed from structured CARD_META by
-    # template — council constitutions append "of the …Council" and bold
-    # the council; encyclicals bold the issuer; org-issued notes stack
-    # each co-signing body bolded. Docs without a CARD_META row fall
-    # back to the flowed desc + desc_post from the TOML.
-    description = _build_description(slug, data)
-    if description is None:
-        joined = ' '.join(
-            line.strip()
-            for part in (data.get('desc', ''), data.get('desc_post', ''))
-            for line in part.splitlines()
-            if line.strip()
-        )
-        description = escape(title_case(joined)) if joined else ''
-    source_url = escape(data.get('source_url', ''), quote=True)
-    original = (
-        f'<a class="source" href="{source_url}" target="_blank" rel="noopener">'
-        'Original Vatican document</a>'
-        if source_url else ''
+    subtitle_html = (
+        f'<p class="subtitle">{escape(f["subtitle"])}</p>'
+        if f['subtitle'] else ''
     )
-    hue = data.get('hue', 42)
-    downloads = render_downloads(slug)
-    return f'''<article class="edition" style="--hue: {hue}">
+    date_html = (
+        f'<time class="date" datetime="{escape(f["iso_date"])}">'
+        f'{escape(f["date"])}</time>'
+        if f['date'] else ''
+    )
+    kind_html = (
+        f'<span class="kind">{escape(f["kind_label"])}</span>'
+        if f['kind_label'] else ''
+    )
+
+    secondary_bits = []
+    if a4_size:
+        secondary_bits.append(
+            f'<a class="dl-secondary" href="downloads/{slug}-a4.pdf">'
+            f'A4 large print <small>{a4_size}</small></a>'
+        )
+    if f['source_url']:
+        secondary_bits.append(
+            f'<a class="source-link" href="{escape(f["source_url"], quote=True)}"'
+            ' target="_blank" rel="noopener">'
+            'Vatican source <span aria-hidden="true">↗</span></a>'
+        )
+
+    return f'''<article class="edition" style="--hue: {f["hue"]}">
+  <header class="edition-head">
+    {kind_html}
+    {date_html}
+  </header>
+
   <a class="edition-link" href="{slug}.html">
-    <h2>{name}</h2>
-    <p>{description}</p>
-    <span class="read">Read edition</span>
+    <h2 class="title">{escape(f["name"])}</h2>
+    {subtitle_html}
+    <p class="byline">{f["byline"]}</p>
   </a>
-  {downloads}
-  {original}
+
+  <div class="ornament" aria-hidden="true">· · ·</div>
+
+  <div class="actions">
+    <a class="cta" href="{slug}.html">
+      <span class="cta-label">Open the reader</span>
+      <span class="cta-arrow" aria-hidden="true">→</span>
+    </a>
+    <div class="downloads">
+      <span class="downloads-label">Download</span>
+      <div class="downloads-row">{''.join(primary_dls)}</div>
+      {('<div class="downloads-row downloads-secondary">' + ''.join(secondary_bits) + '</div>') if secondary_bits else ''}
+    </div>
+  </div>
 </article>'''
 
 
@@ -217,187 +275,369 @@ def main():
 <style>
 :root {{
   color-scheme: light dark;
-  --bg: #fbfaf7;
-  --surface: #fffefa;
-  --fg: #252119;
-  --dim: #645d50;
-  --rule: #ded7ca;
+  /* Surface */
+  --bg:           #f7f4ec;
+  --paper:        #fcfaf3;
+  --paper-edge:   #e8e1cf;
+  --rule:         #d8d0bb;
+  --rule-soft:    #ebe5d4;
+  /* Ink */
+  --ink:          #1f1b13;
+  --ink-dim:      #6a6253;
+  --ink-fainter:  #948a76;
+  /* Display fallback hue when the per-tile --hue isn't set */
+  --hue: 42;
+  --accent:       hsl(calc(var(--hue) -  6),  44%, 30%);
+  --accent-soft:  hsl(calc(var(--hue) +  2),  32%, 56%);
 }}
 @media (prefers-color-scheme: dark) {{
   :root {{
-    --bg: #171614;
-    --surface: #211f1b;
-    --fg: #eee9df;
-    --dim: #b7b09f;
-    --rule: #413c33;
+    --bg:           #14120e;
+    --paper:        #1d1a14;
+    --paper-edge:   #2a261d;
+    --rule:         #3a3528;
+    --rule-soft:    #2b2620;
+    --ink:          #ece5d3;
+    --ink-dim:      #b6ad95;
+    --ink-fainter:  #807761;
+    --accent:       hsl(calc(var(--hue) -  4), 42%, 70%);
+    --accent-soft:  hsl(calc(var(--hue) +  2), 30%, 50%);
   }}
 }}
+
 * {{ box-sizing: border-box; }}
+html, body {{ margin: 0; padding: 0; }}
 body {{
-  margin: 0;
   background: var(--bg);
-  color: var(--fg);
+  color: var(--ink);
   font-family: Georgia, 'Times New Roman', serif;
+  font-feature-settings: "onum" 1, "lnum" 0;   /* oldstyle figures */
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }}
+
+::selection {{ background: var(--accent); color: var(--paper); }}
+
 main {{
-  width: min(68rem, calc(100% - 2.5rem));
+  width: min(70rem, calc(100% - 2.5rem));
   margin: 0 auto;
-  padding: clamp(1.75rem, 5vh, 3rem) 0 3rem;
+  padding: clamp(2rem, 6vh, 4rem) 0 4rem;
+}}
+
+/* ── Masthead ────────────────────────────────────────────────────────── */
+.masthead {{
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: clamp(1.6rem, 4vh, 2.6rem);
+  margin-bottom: clamp(2rem, 5vh, 3.4rem);
 }}
 .brand {{
-  color: var(--dim);
-  font-family: system-ui, -apple-system, sans-serif;
-  font-size: .85rem;
+  color: var(--ink-fainter);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: .72rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  margin: 0 0 1.1rem;
 }}
+.brand b {{ font-weight: 600; color: var(--ink-dim); letter-spacing: .15em; }}
 h1 {{
-  max-width: 15ch;
-  font-size: clamp(2.6rem, 6vw, 4.2rem);
+  max-width: 22ch;
+  font-size: clamp(2.6rem, 6.4vw, 4.4rem);
+  font-style: italic;
   font-weight: normal;
-  line-height: 1.05;
-  margin: .7rem 0 1rem;
+  line-height: 1.04;
+  letter-spacing: -0.005em;
+  margin: 0 0 1.1rem;
 }}
 .intro {{
-  max-width: 36rem;
-  color: var(--dim);
-  font-size: 1.12rem;
-  line-height: 1.55;
-  margin: 0 0 clamp(2.6rem, 6vw, 4rem);
+  max-width: 38rem;
+  color: var(--ink-dim);
+  font-size: 1.06rem;
+  line-height: 1.6;
+  margin: 0;
 }}
+.intro a {{ color: inherit; text-decoration-color: var(--ink-fainter); }}
+
+/* ── Sort bar ────────────────────────────────────────────────────────── */
 .sort-bar {{
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: .55rem;
-  margin: 0 0 .9rem;
-  color: var(--dim);
-  font-family: system-ui, -apple-system, sans-serif;
-  font-size: .8rem;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .8rem;
+  margin: 0 0 1.4rem;
+  color: var(--ink-fainter);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: .72rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
 }}
-.sort-label {{
-  letter-spacing: .02em;
-}}
+.sort-label small {{ color: var(--ink-dim); font-size: inherit; }}
 .sort-toggle {{
   background: transparent;
   border: 1px solid var(--rule);
-  border-radius: 3px;
-  color: var(--dim);
+  border-radius: 2px;
+  color: var(--ink-fainter);
   cursor: not-allowed;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: .25rem .4rem;
+  padding: .3rem .35rem;
   opacity: .85;
 }}
 .sort-icon {{
-  width: 1rem;
-  height: 1rem;
+  width: .9rem;
+  height: .9rem;
   fill: currentColor;
 }}
+
+/* ── Editions grid ───────────────────────────────────────────────────── */
 .editions {{
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
-  gap: 1.15rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(22rem, 100%), 1fr));
+  gap: 1.4rem;
 }}
+
 .edition {{
-  border: 1px solid var(--rule);
-  border-top: 4px solid hsl(var(--hue), 44%, 42%);
-  border-radius: 4px;
-  background: var(--surface);
-  padding: 0 1.3rem 1.25rem;
-}}
-.edition-link {{
-  color: inherit;
+  position: relative;
+  background: var(--paper);
+  border: 1px solid var(--paper-edge);
+  border-left: 5px solid hsl(calc(var(--hue) - 4), 42%, 40%);
+  padding: 1.6rem 1.7rem 1.4rem;
   display: flex;
   flex-direction: column;
-  min-height: 14rem;
-  padding: 1.25rem 0 .85rem;
+  min-height: 22rem;
+  box-shadow: 0 1px 0 0 var(--rule-soft);
+}}
+@media (prefers-color-scheme: dark) {{
+  .edition {{
+    border-left-color: hsl(calc(var(--hue) - 4), 42%, 56%);
+  }}
+}}
+
+.edition-head {{
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 1.2rem;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: .68rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}}
+.edition .kind {{ color: var(--ink-dim); }}
+.edition .date {{ color: var(--ink-fainter); font-variant-numeric: lining-nums tabular-nums; white-space: nowrap; }}
+
+.edition-link {{
+  color: inherit;
   text-decoration: none;
+  display: block;
 }}
-.edition h2 {{
-  font-size: 1.6rem;
+.edition .title {{
+  font-size: clamp(1.65rem, 2.4vw, 2rem);
+  font-style: italic;
   font-weight: normal;
-  line-height: 1.18;
-  margin: 0 0 .8rem;
+  line-height: 1.1;
+  letter-spacing: -0.005em;
+  margin: 0 0 .55rem;
+  color: var(--accent);
 }}
-.edition p {{
-  color: var(--dim);
-  font-family: system-ui, -apple-system, sans-serif;
+.edition-link:hover .title {{ text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }}
+
+.edition .subtitle {{
+  font-size: .98rem;
+  line-height: 1.45;
+  color: var(--ink);
+  margin: 0 0 .7rem;
+}}
+.edition .byline {{
   font-size: .9rem;
   line-height: 1.5;
-  margin: 0 0 1.35rem;
+  color: var(--ink-dim);
+  margin: 0;
 }}
-.read, .source {{
-  color: hsl(var(--hue), 50%, 35%);
-  font-family: system-ui, -apple-system, sans-serif;
-  font-size: .9rem;
+.edition .byline strong {{ font-weight: 600; color: var(--ink); }}
+.edition .signers {{
+  display: inline-block;
+  margin-top: .15rem;
+  font-style: italic;
+  color: var(--ink-dim);
 }}
-.edition-link .read {{
-  margin-top: auto;        /* anchor "Read edition" to the bottom of the card */
+
+.ornament {{
+  text-align: center;
+  color: var(--accent-soft);
+  font-size: 1.1rem;
+  letter-spacing: 0.55em;
+  margin: 1.3rem 0 1rem;
+  user-select: none;
 }}
-.formats {{
-  border-top: 1px solid var(--rule);
-  display: flex;
-  gap: .55rem;
-  padding: .85rem 0;
+
+/* ── Actions (CTA + downloads) ───────────────────────────────────────── */
+.actions {{
+  margin-top: auto;       /* push downloads to bottom of the card */
 }}
-.format {{
+.cta {{
+  display: inline-flex;
   align-items: baseline;
-  border: 1px solid var(--rule);
-  border-radius: 3px;
-  color: hsl(var(--hue), 50%, 35%);
-  display: flex;
-  flex: 1;
-  font: .82rem system-ui, -apple-system, sans-serif;
-  justify-content: space-between;
-  padding: .45rem .55rem;
+  gap: .5rem;
+  color: var(--accent);
+  font-size: 1rem;
+  font-style: italic;
   text-decoration: none;
+  margin-bottom: 1.2rem;
 }}
-.format small {{
-  color: var(--dim);
-  font-size: .76rem;
+.cta-arrow {{
+  font-style: normal;
+  transition: transform .18s ease-out;
 }}
-.source {{
-  border-top: 1px solid var(--rule);
-  display: block;
-  padding-top: .85rem;
+.cta:hover .cta-arrow {{ transform: translateX(3px); }}
+.cta:hover .cta-label {{ text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }}
+
+.downloads {{
+  border-top: 1px solid var(--rule-soft);
+  padding-top: .95rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 1.1rem;
+  row-gap: .55rem;
+  align-items: baseline;
 }}
+.downloads-label {{
+  color: var(--ink-fainter);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: .65rem;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}}
+.downloads-row {{
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem .8rem;
+  align-items: baseline;
+}}
+.downloads-secondary {{
+  grid-column: 2;
+  font-size: .8rem;
+  color: var(--ink-fainter);
+}}
+
+.dl-primary {{
+  display: inline-flex;
+  align-items: baseline;
+  gap: .4rem;
+  padding: .35rem .65rem;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: var(--paper);
+  color: var(--accent);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: .72rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: border-color .15s ease, background .15s ease;
+}}
+.dl-primary:hover {{
+  border-color: var(--accent);
+  background: hsl(calc(var(--hue) - 4), 42%, 96%);
+}}
+@media (prefers-color-scheme: dark) {{
+  .dl-primary:hover {{
+    background: hsl(calc(var(--hue) - 4), 18%, 18%);
+  }}
+}}
+.dl-name {{ font-weight: 600; }}
+.dl-size {{
+  color: var(--ink-fainter);
+  font-weight: normal;
+  letter-spacing: .08em;
+  text-transform: none;
+}}
+
+.dl-secondary,
+.source-link {{
+  color: var(--ink-dim);
+  text-decoration-color: var(--ink-fainter);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}}
+.dl-secondary small {{
+  color: var(--ink-fainter);
+  margin-left: .2rem;
+  font-size: inherit;
+}}
+.dl-secondary:hover,
+.source-link:hover {{
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}}
+
+/* ── Footer ──────────────────────────────────────────────────────────── */
 footer {{
   border-top: 1px solid var(--rule);
-  color: var(--dim);
-  font-family: system-ui, -apple-system, sans-serif;
-  font-size: .9rem;
+  margin-top: clamp(3rem, 8vh, 5rem);
+  padding-top: 1.4rem;
+  color: var(--ink-dim);
+  font-size: .88rem;
   line-height: 1.7;
-  margin-top: 4rem;
-  padding-top: 1.2rem;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 1rem 2rem;
 }}
-footer a {{ color: inherit; }}
-.attribution {{ text-align: right; font-size: .8rem; opacity: .8; }}
+footer a {{
+  color: inherit;
+  text-decoration-color: var(--ink-fainter);
+}}
+footer a:hover {{ color: var(--accent); text-decoration-color: var(--accent); }}
+.contacts {{
+  display: grid;
+  gap: .15rem;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: .78rem;
+  letter-spacing: .04em;
+}}
+.contacts span {{ color: var(--ink-fainter); text-transform: uppercase; letter-spacing: .15em; font-size: .68rem; margin-right: .6rem; }}
+.attribution {{ text-align: right; font-size: .76rem; opacity: .75; font-style: italic; }}
+
+/* ── Motion preferences ─────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {{
+  *, *::before, *::after {{
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }}
+}}
 </style>
 </head>
 <body>
 <main>
-  <p class="brand">the circulars · vatican.va, retypeset.</p>
-  <h1>Vatican documents, set for reading.</h1>
-  <p class="intro">Reader editions of a few papal and conciliar documents.<br>Generated via templater scripts from the Vatican HTML.</p>
+  <header class="masthead">
+    <p class="brand"><b>The&nbsp;Circulars</b> · vatican.va, retypeset</p>
+    <h1>Vatican documents, set for reading.</h1>
+    <p class="intro">Reading editions of papal and conciliar texts, drawn from the
+    canonical HTML on <a href="https://www.vatican.va" target="_blank" rel="noopener">vatican.va</a>
+    and run through templated extractors into a web reader, a typeset PDF,
+    and an EPUB. Source on <a href="https://github.com/forthrast-com/va_beautifier" target="_blank" rel="noopener">GitHub</a>.</p>
+  </header>
+
   <div class="sort-bar" aria-label="Sort controls">
-    <span class="sort-label">Sorted by promulgation, newest first</span>
+    <span class="sort-label"><small>Sorted by</small> Promulgation, newest first</span>
     <button class="sort-toggle" type="button" aria-label="Change sort order" disabled>
       {SORT_ICON_SVG}
     </button>
   </div>
+
   <section class="editions" aria-label="Available documents">
 {cards}
   </section>
+
   <footer>
     <div class="contacts">
-      <div>Email: <a href="mailto:me@forthrast.com">me@forthrast.com</a></div>
-      <div>Bluesky: <a href="https://bsky.app/profile/forthrast.com" target="_blank" rel="noopener">@forthrast.com</a></div>
-      <div>GitHub: <a href="https://github.com/forthrast-com" target="_blank" rel="noopener">@forthrast-com</a></div>
+      <div><span>email</span><a href="mailto:me@forthrast.com">me@forthrast.com</a></div>
+      <div><span>bsky</span><a href="https://bsky.app/profile/forthrast.com" target="_blank" rel="noopener">@forthrast.com</a></div>
+      <div><span>code</span><a href="https://github.com/forthrast-com" target="_blank" rel="noopener">@forthrast-com</a></div>
     </div>
     <div class="attribution">made with claude and codex ^•^</div>
   </footer>

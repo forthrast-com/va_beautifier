@@ -408,60 +408,90 @@ def _title_page_typst(data, paper='a5'):
 
 
 def _copyright_page_typst(data):
-    """Colophon page that follows the title: project blurb, explicit URL
-    list (The Circulars, vatican.va source, GitHub source), then the urn
-    identifier in tracked footer greys."""
+    """Colophon page following the title: a constrained-width prose
+    blurb, an accent three-dot ornament echoing the title page, a typst
+    grid roster of right-aligned tracked labels paired with monospace
+    URLs (press / source / code), and the urn identifier as a footer
+    mark in tracked greys."""
     name        = data['name']
     source_url  = data.get('source_url', '')
     identifier  = data.get('identifier', '')
+    accent      = _pdf_accent(data.get('hue', 42))
 
     circulars_url = 'https://circulars.forthrast.com'
     repo_url      = 'https://github.com/forthrast-com/va_beautifier'
+
+    def display(url):
+        url = url.removeprefix('https://').removeprefix('http://')
+        url = url.removeprefix('www.')
+        # The vatican.va paths run to 70+ chars; collapse the middle so
+        # the URL fits a single grid row alongside the tracked label.
+        # The hyperlink still points at the full URL — only the visible
+        # label is truncated.
+        if len(url) > 52:
+            host, _, path = url.partition('/')
+            last = path.rsplit('/', 1)[-1] if path else ''
+            if last and len(host) + len(last) + 6 < len(url):
+                url = f'{host}/…/{last}'
+        return url
+
+    link_rows = [('PRESS', circulars_url)]
+    if source_url:
+        link_rows.append(('SOURCE', source_url))
+    link_rows.append(('CODE', repo_url))
+
+    grid_cells = []
+    for label, url in link_rows:
+        grid_cells.append(
+            f'    text(size: 7pt, tracking: 0.2em, '
+            f'fill: rgb("#6a6253"))[{label}],'
+        )
+        grid_cells.append(
+            f'    text(size: 8.5pt, fill: rgb("#3a342b"))['
+            f'#link("{url}")[#raw("{display(url)}")]],'
+        )
+
+    blurb = (
+        f'      A reading edition of #emph[{_typ_content(name)}] typeset '
+        'and prepared by The Circulars — a typographic press for '
+        'Vatican documents. The text remains the property of the Holy '
+        'See under its copyright; this edition is offered for reading '
+        'and study.'
+    )
 
     out = [
         '#page(numbering: none, header: none)[',
         '  #set align(center)',
         '  #v(1fr)',
-        '  #box(width: 76%)[',
-        '    #set par(justify: false, leading: 0.7em)',
-        '    #text(size: 9.5pt)[',
-        f'      A reading edition of #emph[{_typ_content(name)}]'
-        ' typeset and prepared by The Circulars',
-        '      — a typographic press for Vatican documents.',
-        '      The text remains the property of the Holy See under its'
-        ' copyright; this edition is offered for reading and study.',
+        '  #box(width: 74%)[',
+        '    #set par(justify: false, leading: 0.78em)',
+        '    #text(size: 10pt)[',
+        blurb,
         '    ]',
         '  ]',
-        '  #v(1.8em)',
-        # Explicit URL list — printed in monospace small-caps so readers
-        # of a paper copy can transcribe them, and tapped readers of the
-        # PDF get the live link.
-        '  #set par(leading: 0.85em)',
+        '  #v(2.2em)',
+        f'  #text(size: 12pt, tracking: 0.825em, '
+        f'fill: rgb("{accent}"))[· · ·]',
+        '  #v(2em)',
+        '  #grid(',
+        '    columns: (auto, auto),',
+        '    column-gutter: 1.4em,',
+        '    row-gutter: 0.75em,',
+        '    align: (right + horizon, left + horizon),',
     ]
-
-    def link_row(label, url):
-        out.append(
-            '  #text(size: 9pt, fill: rgb("#5a5147"))['
-            f'#emph[{label}]  '
-            f'#link("{url}")[#raw("{url}")]'
-            ']'
-        )
-        out.append('  \\\n')
-
-    link_row('Press', circulars_url)
-    if source_url:
-        link_row('Source', source_url)
-    link_row('Code', repo_url)
-
-    out.append('  #v(1.6em)')
-
+    out += grid_cells
+    out += [
+        '  )',
+        '  #v(1fr)',
+    ]
     if identifier:
         out.append(
-            '  #text(size: 8pt, tracking: 0.14em, fill: rgb("#888"))['
+            '  #text(size: 7.5pt, tracking: 0.18em, fill: rgb("#988e75"))['
             f'urn:circulars:{_typ_content(identifier)}'
             ']'
         )
-    out += ['  #v(1fr)', ']', '#pagebreak()']
+        out.append('  #v(0.4em)')
+    out += [']', '#pagebreak()']
     return '\n'.join(out)
 
 
