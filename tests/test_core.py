@@ -191,8 +191,8 @@ class TomlTests(unittest.TestCase):
         self.assertEqual(data['date'], '2024-01-15')
         self.assertEqual(data['identifier'], 'papal:sample:2024-01-15')
         self.assertEqual(data['rights'], '© 2024 Holy See')
-        self.assertEqual(data['publisher'], 'Forthrast')
-        self.assertEqual(data['collection'], 'The Circulars')
+        self.assertEqual(data['publisher'], 'circulars.forthrast.com')
+        self.assertEqual(data['collection'], 'The Circulars (Vatican documents)')
 
     def test_toml_imprint_overrides_replace_defaults(self):
         with tempfile.TemporaryDirectory() as directory:

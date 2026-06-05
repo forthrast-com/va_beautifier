@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read <slug>.toml → emit <slug>.md → pandoc → <slug>.epub + <slug>.pdf.
+"""Read <slug>.toml -> emit intermediates and site/downloads book artefacts.
 
 Minimum viable book pipeline. The web edition leans on JS/CSS affordances
 that don't translate; here we lean on pandoc's defaults plus typst as the
@@ -11,14 +11,18 @@ the TOML as Pandoc-compatible markup for both book formats.
 """
 
 import argparse
+import colorsys
+import html
+import re
 import shutil
 import subprocess
 import sys
 
 from core import CANONICAL_FOOTNOTE_REF, int_to_roman, read_toml
-from project import BUILD, ROOT
+from project import BUILD, DOWNLOADS, ROOT
 
 BUILD.mkdir(exist_ok=True)
+DOWNLOADS.mkdir(parents=True, exist_ok=True)
 
 
 def emit_markdown(data, slug):
@@ -27,23 +31,31 @@ def emit_markdown(data, slug):
     desc_post   = data.get('desc_post', '')
     promulg     = data.get('promulgation', '')
     signature   = data.get('signature', '')
+    signatories = data.get('signatories', [])
     source_url  = data.get('source_url', '')
     hero_image  = data.get('hero_image', '')
     hero_credit = data.get('hero_credit', '')
+    pdf_accent  = _pdf_accent(data.get('hue', 42))
     paragraphs  = data.get('paragraphs', [])
     footnotes   = data.get('footnotes', [])
+    appendices  = data.get('appendices', [])
 
     fn_index = {(f['part'], f['chapter'], f['number']): f for f in footnotes}
     used = {}  # ordered: (part, chapter, n) → footnote dict
 
     lines = []
 
-    # YAML metadata block. Pandoc reads title/lang for the EPUB OPF; the
-    # `template:` field points at our custom typst module which owns book
-    # typography (page geom, headings, footnotes). Title page + end matter
-    # are emitted as raw typst inline in the body — the EPUB writer
-    # ignores raw typst, so EPUB falls back to pandoc's standalone title
-    # page generated from the title metadata.
+    # YAML metadata block. Pandoc maps these to EPUB OPF dublin-core:
+    # title → dc:title, author → dc:creator, date → dc:date, publisher
+    # → dc:publisher, identifier → dc:identifier (we prefix urn:circulars:
+    # so the identifier is globally unique under our scheme), rights →
+    # dc:rights, source → dc:source, belongs-to-collection → meta.
+    # dcterms:modified is auto-stamped from build time by pandoc.
+    # For the PDF, the `template:` field points at our custom typst module
+    # which owns book typography (page geom, headings, footnotes). Title
+    # page + end matter are emitted as raw typst inline in the body —
+    # the EPUB writer ignores raw typst, so EPUB falls back to pandoc's
+    # standalone title page generated from the title metadata.
     # Hoefler Text is the right register for an encyclical: humanist,
     # warm, oldstyle figures, the face you find in good prayer books.
     # macOS-bundled. Override via VA_BOOK_FONT for other hosts.
@@ -53,15 +65,28 @@ def emit_markdown(data, slug):
     # via `--pdf-engine-opt` in run_pandoc() and reference the template
     # as a typst-rooted path (leading `/`, relative to ROOT).
     lines += ['---', f'title: "{_yaml_q(name)}"']
+    if data.get('author'):
+        lines.append(f'author: "{_yaml_q(data["author"])}"')
+    if data.get('date'):
+        lines.append(f'date: "{data["date"]}"')
+    if data.get('publisher'):
+        lines.append(f'publisher: "{_yaml_q(data["publisher"])}"')
+    if data.get('rights'):
+        lines.append(f'rights: "{_yaml_q(data["rights"])}"')
+    if data.get('identifier'):
+        lines.append(f'identifier: "urn:circulars:{data["identifier"]}"')
+    if data.get('collection'):
+        lines.append(
+            f'belongs-to-collection: "{_yaml_q(data["collection"])}"'
+        )
     if source_url:
-        # `source` is the dublin-core field the EPUB OPF picks up.
         lines.append(f'source: "{source_url}"')
     lines += [
         'lang: en',
         f'mainfont: "{font}"',
         'fontsize: 11pt',
         'papersize: a5',
-        'template: "/templates/book.typ"',
+        f'template: "/build/{_pdf_template_name(slug)}"',
         '...',
         '',
     ]
@@ -80,6 +105,14 @@ def emit_markdown(data, slug):
     # ── Body walk ──────────────────────────────────────────────────────
     prev = {'part': None, 'chapter': None, 'section': None, 'sub': None}
 
+    # Heading levels are uniform: chapters at H2 (so --epub-chapter-level=2
+    # splits one spine file per chapter), sections at H3, sub-headings at
+    # H4. Numbered parts (only GeS has them) take H1. Prefatory part_titles
+    # (Preliminary Note, Introduction) emit at H2 when there are no numbered
+    # parts so they sit alongside chapters rather than above them; otherwise
+    # they stay at H1 alongside the numbered parts.
+    has_numbered_parts = any(p2.get('part', 0) > 0 for p2 in paragraphs)
+
     for p in paragraphs:
         part          = p.get('part', 0)
         part_title    = p.get('part_title', '')
@@ -93,42 +126,40 @@ def emit_markdown(data, slug):
         text          = p.get('text', '')
         number        = p.get('number', 0)
 
-        # Part heading. `part=0` is preface/intro — render as a bare title
-        # (no "Part N:" prefix), matching the web edition's `.part-title`.
         if part_title and part != prev['part']:
-            label = part_title if part == 0 else f'Part {int_to_roman(part)}: {part_title}'
+            if part > 0:
+                level, label = '#', f'Part {int_to_roman(part)}: {part_title}'
+            elif has_numbered_parts:
+                level, label = '#', part_title
+            else:
+                level, label = '##', part_title
             lines.append('')
-            lines.append(f'# {label}')
+            lines.append(f'{level} {label}')
             lines.append('')
             prev.update(part=part, chapter=None, section=None, sub=None)
 
         # Chapter heading. Force a fresh page on the PDF side so chapters
         # land at the top of a recto — the EPUB writer ignores raw typst.
         if ch_title and chapter != prev['chapter']:
-            level = '##' if any(p2.get('part_title') for p2 in paragraphs) else '#'
             unnumbered = ch_title.strip().lower() in ('conclusion', 'preface', 'introduction')
             label = ch_title if unnumbered or chapter == 0 else f'Chapter {chapter}: {ch_title}'
             lines += ['', '```{=typst}', '#pagebreak(weak: true)', '```', '']
-            lines.append(f'{level} {label}')
+            lines.append(f'## {label}')
             lines.append('')
             if ch_subtitle:
                 lines.append(f'*{ch_subtitle}*')
                 lines.append('')
             prev.update(chapter=chapter, section=None, sub=None)
 
-        # Section heading.
         if sec_title and section != prev['section']:
-            level = '###' if any(p2.get('part_title') for p2 in paragraphs) else '##'
             lines.append('')
-            lines.append(f'{level} {sec_title}')
+            lines.append(f'### {sec_title}')
             lines.append('')
             prev.update(section=section, sub=None)
 
-        # Sub-heading.
         if sub_heading and sub_heading != prev['sub']:
-            level = '####' if any(p2.get('part_title') for p2 in paragraphs) else '###'
             lines.append('')
-            lines.append(f'{level} {sub_heading}')
+            lines.append(f'#### {sub_heading}')
             lines.append('')
             prev['sub'] = sub_heading
 
@@ -163,14 +194,38 @@ def emit_markdown(data, slug):
             lines.append('***')
             lines.append('')
 
+    # ── Appendices ─────────────────────────────────────────────────────
+    # Appendices remain ordinary canonical text so all output formats keep
+    # them. Emit at H2 so each lands as its own EPUB spine file under
+    # `--epub-chapter-level=2`. Single line breaks are significant in LS's
+    # closing prayers.
+    for appendix in appendices:
+        lines += [
+            '',
+            f'## {appendix["title"]}',
+            '',
+            _markdown_preserve_breaks(appendix['text']),
+            '',
+        ]
+
     # ── End matter ─────────────────────────────────────────────────────
-    # Dedication + papal signature land on their own page, centred. We
+    # Promulgation, signatories and signature land on their own page, centred. We
     # emit two format-gated raw blocks (one typst, one html) so each
     # output gets the styling appropriate to its medium without the
     # other writer rendering a duplicate.
-    if promulg or signature:
-        lines += ['```{=typst}', _end_matter_typst(promulg, signature), '```', '']
-        lines += ['```{=html}', _end_matter_html(promulg, signature), '```', '']
+    if promulg or signatories or signature:
+        lines += [
+            '```{=typst}',
+            _end_matter_typst(promulg, signatories, signature, pdf_accent),
+            '```',
+            '',
+        ]
+        lines += [
+            '```{=html}',
+            _end_matter_html(promulg, signatories, signature),
+            '```',
+            '',
+        ]
 
     # ── Footnote definitions ───────────────────────────────────────────
     # Emit at the bottom of the markdown. Pandoc's EPUB writer places
@@ -202,6 +257,26 @@ def _yaml_q(s):
     return s.replace('\\', '\\\\').replace('"', '\\"')
 
 
+def _pdf_accent(hue):
+    """Derive a muted, print-friendly display ink from a document hue."""
+    r, g, b = colorsys.hls_to_rgb((float(hue) % 360) / 360, 0.34, 0.30)
+    return f'#{round(r * 255):02x}{round(g * 255):02x}{round(b * 255):02x}'
+
+
+def _pdf_template_name(slug):
+    """Avoid Pandoc escaping underscores in Typst import metadata paths."""
+    return f'{slug.replace("_", "-")}-book.typ'
+
+
+def _markdown_preserve_breaks(text):
+    """Keep canonical stanza and poetic line breaks in pandoc markdown."""
+    return '\n\n'.join(
+        '  \n'.join(line.rstrip() for line in stanza.splitlines())
+        for stanza in text.split('\n\n')
+        if stanza.strip()
+    )
+
+
 def _typ_str(s):
     r"""Quote a Python string for embedding in typst source. Typst strings
     are double-quoted with `\\` and `\"` escapes; everything else rides
@@ -211,11 +286,47 @@ def _typ_str(s):
 
 def _typ_content(s):
     """Quote a Python string for typst content (inside `[...]` brackets).
-    Backslash and bracket are the meaningful escapes inside content."""
-    return s.replace('\\', '\\\\').replace('[', '\\[').replace(']', '\\]')
+    Backslash, code markers and brackets are meaningful inside content."""
+    return (s.replace('\\', '\\\\').replace('#', '\\#')
+            .replace('[', '\\[').replace(']', '\\]'))
 
 
-def _title_page_typst(name, desc, desc_post, hero_image, hero_credit):
+INLINE_MARK_RE = re.compile(
+    r'\*\*(.+?)\*\*|(?<!\*)\*(.+?)\*(?!\*)', re.DOTALL
+)
+
+
+def _typ_inline(s, *, preserve_breaks=False):
+    """Convert canonical bold/italic content to raw typst content."""
+    def literal(text):
+        text = _typ_content(text)
+        return text.replace('\n', ' \\\n    ') if preserve_breaks else text
+
+    rendered = []
+    pos = 0
+    for match in INLINE_MARK_RE.finditer(s):
+        rendered.append(literal(s[pos:match.start()]))
+        content = literal(match.group(1) or match.group(2))
+        command = 'strong' if match.group(1) is not None else 'emph'
+        rendered.append(f'#{command}[{content}]')
+        pos = match.end()
+    rendered.append(literal(s[pos:]))
+    return ''.join(rendered)
+
+
+def _html_inline(s, *, preserve_breaks=False):
+    """Convert canonical bold/italic content to raw EPUB HTML content."""
+    rendered = html.escape(s)
+    rendered = re.sub(
+        r'\*\*(.+?)\*\*', r'<strong>\1</strong>', rendered, flags=re.DOTALL
+    )
+    rendered = re.sub(
+        r'(?<!\*)\*(.+?)\*(?!\*)', r'<em>\1</em>', rendered, flags=re.DOTALL
+    )
+    return rendered.replace('\n', '<br />') if preserve_breaks else rendered
+
+
+def _title_page_typst(name, desc, desc_post, hero_image, hero_credit, accent):
     """Render the title page as raw typst. The 1fr vertical fillers above
     and below the title block centre it on the page; with a hero image
     the block sits a little high to give the image room to breathe. The
@@ -247,9 +358,14 @@ def _title_page_typst(name, desc, desc_post, hero_image, hero_credit):
         stacked(desc.upper(), '10pt', '0.08em')
         parts.append('  #v(1.8em)')
 
-    parts.append(f'  #text(size: 28pt, style: "italic")[{_typ_content(name)}]')
+    parts.append(
+        f'  #text(size: 28pt, style: "italic", fill: rgb("{accent}"))'
+        f'[{_typ_content(name)}]'
+    )
     parts.append('  #v(1.1em)')
-    parts.append('  #line(length: 18%, stroke: 0.5pt)')
+    parts.append(
+        f'  #line(length: 18%, stroke: (paint: rgb("{accent}"), thickness: 0.5pt))'
+    )
 
     if desc_post:
         parts.append('  #v(1.8em)')
@@ -273,9 +389,19 @@ def _write_titlepage_include(data, slug):
         data.get('desc_post', ''),
         data.get('hero_image', ''),
         data.get('hero_credit', ''),
+        _pdf_accent(data.get('hue', 42)),
     )
     path = BUILD / f'{slug}_titlepage.typ'
     path.write_text(title_typst + '\n', encoding='utf-8')
+    return path
+
+
+def _write_pdf_template(data, slug):
+    """Materialise the shared Typst template with this document's accent."""
+    accent = _pdf_accent(data.get('hue', 42))
+    source = (ROOT / 'templates' / 'book.typ').read_text(encoding='utf-8')
+    path = BUILD / _pdf_template_name(slug)
+    path.write_text(source.replace('__PDF_ACCENT__', accent), encoding='utf-8')
     return path
 
 
@@ -288,11 +414,10 @@ def _promulgation_stanzas(promulg):
             yield text
 
 
-def _end_matter_typst(promulg, signature):
-    """Render dedication + signature as a centred standalone page. Multi-
+def _end_matter_typst(promulg, signatories, signature, accent='#756d60'):
+    """Render structured end matter as a centred standalone page. Multi-
     stanza promulgations (A&N: audience block + offices block) render on
-    separate lines so the source's logical paragraph break carries through
-    to the PDF."""
+    separate lines; optional signatories occupy a two-column roster."""
     parts = [
         '#pagebreak(weak: true)',
         '#page()[',
@@ -300,37 +425,74 @@ def _end_matter_typst(promulg, signature):
         '  #v(1fr)',
     ]
     stanzas = list(_promulgation_stanzas(promulg)) if promulg else []
+    if stanzas:
+        parts += [
+            f'  #line(length: 35%, stroke: (paint: rgb("{accent}"), thickness: 0.5pt))',
+            '  #v(1.5em)',
+        ]
     for index, stanza in enumerate(stanzas):
         if index:
             parts.append('  #v(0.9em)')
-        parts.append(f'  #text(style: "italic", size: 11pt)[{_typ_content(stanza)}]')
+        parts.append(f'  #text(size: 11pt)[{_typ_inline(stanza)}]')
     if stanzas:
         parts.append('  #v(2em)')
+    if signatories:
+        parts += [
+            '  #grid(',
+            '    columns: (1fr, 1fr),',
+            '    column-gutter: 1.8em,',
+            '    row-gutter: 1.3em,',
+            '    align: center,',
+        ]
+        for signatory in signatories:
+            name = _typ_content(signatory.get('name', ''))
+            role = _typ_content(signatory.get('role', ''))
+            parts.append(
+                f'    [{name} \\ #text(size: 9pt, style: "italic")[{role}]],'
+            )
+        parts += ['  )', '  #v(2em)']
     if signature:
-        parts.append(f'  #text(weight: "bold", tracking: 0.14em)[{_typ_content(signature)}]')
+        parts.append(
+            f'  #text(tracking: 0.14em)[{_typ_inline(signature, preserve_breaks=True)}]'
+        )
     parts += ['  #v(1fr)', ']']
     return '\n'.join(parts)
 
 
-def _end_matter_html(promulg, signature):
-    """EPUB end matter — semantic colophon section with centred styles."""
-    import html
+def _end_matter_html(promulg, signatories, signature):
+    """EPUB end matter: semantic colophon with optional signatory roster."""
     parts = ['<section epub:type="colophon" style="text-align:center; margin-top:4em;">']
+    if promulg:
+        parts.append('<hr style="width:35%; margin:0 auto 1.5em;" />')
     for stanza in _promulgation_stanzas(promulg) if promulg else ():
-        parts.append(f'<p style="font-style:italic;">{html.escape(stanza)}</p>')
+        parts.append(f'<p>{_html_inline(stanza)}</p>')
+    if signatories:
+        parts.append('<div style="margin:2em 0;">')
+        for signatory in signatories:
+            name = html.escape(signatory.get('name', ''))
+            role = html.escape(signatory.get('role', ''))
+            parts.append(
+                f'<p style="margin:1em 0;">{name}<br />'
+                f'<em>{role}</em></p>'
+            )
+        parts.append('</div>')
     if signature:
-        parts.append(f'<p style="font-weight:bold; letter-spacing:0.14em; margin-top:1.5em;">{html.escape(signature)}</p>')
+        parts.append(
+            '<p style="letter-spacing:0.14em; margin-top:1.5em;">'
+            f'{_html_inline(signature, preserve_breaks=True)}</p>'
+        )
     parts.append('</section>')
     return '\n'.join(parts)
 
 
 def run_pandoc(md_path, out_path, *extra):
+    # `--toc-depth` is left to the caller so EPUB (drawer-parity, depth 4)
+    # and PDF (book-convention, depth 3) can diverge.
     cmd = [
         'pandoc', str(md_path),
         '-o', str(out_path),
         '--standalone',
         '--toc',
-        '--toc-depth=2',
         '-f', 'markdown+smart',
         *extra,
     ]
@@ -352,6 +514,7 @@ def main():
     data = read_toml(toml_path)
 
     print(f'[{args.slug}] markdown')
+    _write_pdf_template(data, args.slug)
     md_path = emit_markdown(data, args.slug)
     titlepage_path = _write_titlepage_include(data, args.slug)
 
@@ -364,17 +527,22 @@ def main():
     if do_epub:
         # EPUB ignores raw typst blocks, so the title-page include is a
         # no-op; the EPUB picks up its title from YAML metadata instead.
-        run_pandoc(md_path, BUILD / f'{args.slug}.epub')
+        # Each H2 (chapter or appendix) gets its own spine file. Drawer-
+        # parity ToC depth lets readers navigate to sub-headings.
+        run_pandoc(md_path, DOWNLOADS / f'{args.slug}.epub',
+                   '--split-level=2',
+                   '--toc-depth=4')
 
     if do_pdf:
         if shutil.which('typst'):
             # `--root` tells typst where the project root is, so the
             # `template:` path in the markdown (which starts with `/`)
             # resolves to <ROOT>/templates/book.typ.
-            run_pandoc(md_path, BUILD / f'{args.slug}.pdf',
+            run_pandoc(md_path, DOWNLOADS / f'{args.slug}.pdf',
                        '--pdf-engine=typst',
                        f'--pdf-engine-opt=--root={ROOT}',
-                       f'--include-before-body={titlepage_path}')
+                       f'--include-before-body={titlepage_path}',
+                       '--toc-depth=3')
         else:
             print('  ! typst not found, skipping PDF')
 

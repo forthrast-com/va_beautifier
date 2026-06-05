@@ -417,8 +417,8 @@ _PARA_FIELDS = [
 ]
 
 
-DEFAULT_PUBLISHER = 'Forthrast'
-DEFAULT_COLLECTION = 'The Circulars'
+DEFAULT_PUBLISHER = 'circulars.forthrast.com'
+DEFAULT_COLLECTION = 'The Circulars (Vatican documents)'
 
 
 def write_toml(path, *, name, hue=None, source_url='',
