@@ -29,3 +29,18 @@ function Note (el)
   el.content = { pandoc.Para(merged) }
   return el
 end
+
+function Pandoc (doc)
+  -- Pandoc injects the metadata title as an empty-body H1 for EPUB, then
+  -- nests every real structural heading beneath it in the navigation tree.
+  -- The title already belongs to EPUB metadata and the title-page landmark;
+  -- remove only that synthetic heading, leaving genuine H1 parts untouched.
+  local title = pandoc.utils.stringify(doc.meta.title or '')
+  if title ~= '' and doc.blocks[1]
+      and doc.blocks[1].t == 'Header'
+      and doc.blocks[1].level == 1
+      and pandoc.utils.stringify(doc.blocks[1].content) == title then
+    doc.blocks:remove(1)
+  end
+  return doc
+end

@@ -36,25 +36,35 @@
 ) = {
 
   // ── Page ─────────────────────────────────────────────────────────────
+  let page-margin = if paper == "a6" {
+    (x: 9mm, top: 17mm, bottom: 11mm)
+  } else { margin }
   set page(
     paper: paper,
-    margin: margin,
+    margin: page-margin,
     numbering: pagenumbering,
     number-align: center + bottom,
+    header-ascent: if paper == "a6" { 6mm } else { 30% },
+    footer-descent: if paper == "a6" { 5mm } else { 30% },
     header: context {
       let page_no = counter(page).get().first()
-      if page_no > 1 {
+      let opens = query(selector(heading)).filter(
+        heading => heading.level <= 2 and heading.location().page() == page_no
+      )
+      if page_no > 1 and opens.len() == 0 {
         // Running head picks up the doc accent so the head and the
         // hairline under it sit in the same hue. Lightened a touch so
         // the 8pt italic stays soft against the body.
         set text(size: 8pt, style: "italic", fill: accent.lighten(15%))
-        // Verso: doc title (left-aligned). Recto: current chapter title
-        // (right-aligned), or doc title before the first chapter starts.
+        // Verso carries the current top-level region (Preface / Part);
+        // recto carries the current chapter, falling back to that region.
+        let parts = query(selector(heading.where(level: 1)).before(here()))
         let chapters = query(selector(heading.where(level: 2)).before(here()))
-        let recto = if chapters.len() > 0 { chapters.last().body } else { title }
+        let verso = if parts.len() > 0 { parts.last().body } else { title }
+        let recto = if chapters.len() > 0 { chapters.last().body } else { verso }
         align(
           if calc.odd(page_no) { right } else { left },
-          if calc.odd(page_no) { recto } else { title },
+          if calc.odd(page_no) { recto } else { verso },
         )
         v(0.45em)
         line(length: 100%, stroke: (paint: accent-rule, thickness: 0.35pt))

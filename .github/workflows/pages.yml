@@ -34,7 +34,7 @@ jobs:
           mkdir -p _site/downloads
           cp CNAME .nojekyll _site/
           cp site/*.html site/favicon.ico _site/
-          cp build/*.pdf build/*.epub _site/downloads/
+          cp site/downloads/*.pdf site/downloads/*.epub _site/downloads/
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site

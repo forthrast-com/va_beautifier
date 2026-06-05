@@ -43,6 +43,7 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
     paragraphs  = data.get('paragraphs', [])
     footnotes   = data.get('footnotes', [])
     appendices  = data.get('appendices', [])
+    chapter_style = data.get('chapter_style', '')
 
     fn_index = {(f['part'], f['chapter'], f['number']): f for f in footnotes}
     used = {}  # ordered: (part, chapter, n) → footnote dict
@@ -84,9 +85,9 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
         )
     if source_url:
         lines.append(f'source: "{source_url}"')
-    # A4 is the large-print variant: bigger type and wider margins so the
-    # measure stays comfortable instead of stretching to 80+ chars at 11pt.
-    fontsize = '13pt' if paper == 'a4' else '11pt'
+    # A4 is the printer/default edition; A5 is the reader; A6 is a compact
+    # booklet with slightly smaller type to preserve a workable measure.
+    fontsize = {'a4': '13pt', 'a6': '9pt'}.get(paper, '11pt')
     lines += [
         'lang: en',
         f'mainfont: "{font}"',
@@ -135,6 +136,7 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
         if part_title and part != prev['part']:
             if part > 0:
                 level, label = '#', f'Part {int_to_roman(part)}: {part_title}'
+                lines += ['', '```{=typst}', '#pagebreak(weak: true)', '```', '']
             elif has_numbered_parts:
                 level, label = '#', part_title
             else:
@@ -148,7 +150,10 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
         # land at the top of a recto — the EPUB writer ignores raw typst.
         if ch_title and chapter != prev['chapter']:
             unnumbered = ch_title.strip().lower() in ('conclusion', 'preface', 'introduction')
-            label = ch_title if unnumbered or chapter == 0 else f'Chapter {chapter}: {ch_title}'
+            if chapter_style == 'roman':
+                label = f'{int_to_roman(chapter)}. {ch_title}'
+            else:
+                label = ch_title if unnumbered or chapter == 0 else f'Chapter {chapter}: {ch_title}'
             lines += ['', '```{=typst}', '#pagebreak(weak: true)', '```', '']
             lines.append(f'## {label}')
             lines.append('')
@@ -332,7 +337,7 @@ def _html_inline(s, *, preserve_breaks=False):
     return rendered.replace('\n', '<br />') if preserve_breaks else rendered
 
 
-_PAPER_SCALE = {'a4': 1.4, 'a5': 1.0, 'a6': 0.71}
+_PAPER_SCALE = {'a4': 1.4, 'a5': 1.0, 'a6': 0.86}
 
 
 def _title_page_layout(data, paper='a5'):
@@ -419,16 +424,24 @@ def _title_page_typst(data, paper='a5'):
     )
 
 
-def _copyright_page_typst(data):
-    """Colophon page following the title: a constrained-width prose
-    blurb, an accent three-dot ornament echoing the title page, a typst
-    grid roster of right-aligned tracked labels paired with monospace
-    URLs (press / source / code), and the urn identifier as a footer
-    mark in tracked greys."""
+def _copyright_page_typst(data, paper='a5'):
+    """Colophon page following the title: a prose blurb, an accent
+    three-dot ornament, a doc-info grid (promulgated date + urn), a
+    second three-dot ornament, then a project-info grid (project,
+    source, code). All labels and URLs sit in the document accent."""
     name        = data['name']
     source_url  = data.get('source_url', '')
     identifier  = data.get('identifier', '')
+    iso_date    = data.get('date', '')
     accent      = _pdf_accent(data.get('hue', 42))
+    compact     = paper == 'a6'
+    label_pt    = 5.5 if compact else 7
+    value_pt    = 7 if compact else 8.5
+    blurb_pt    = 8.5 if compact else 10
+    blurb_width = '88%' if compact else '74%'
+    major_gap   = '1.1em' if compact else '1.8em'
+    blurb_gap   = '1.4em' if compact else '2.2em'
+    row_gap     = '0.45em' if compact else '0.75em'
 
     circulars_url = 'https://circulars.forthrast.com'
     repo_url      = 'https://github.com/forthrast-com/va_beautifier'
@@ -436,6 +449,11 @@ def _copyright_page_typst(data):
     def display(url):
         url = url.removeprefix('https://').removeprefix('http://')
         url = url.removeprefix('www.')
+        if compact:
+            if 'github.com/' in url:
+                return 'github.com/forthrast-com'
+            if 'vatican.va/' in url:
+                return 'vatican.va/…/' + url.rsplit('/', 1)[-1][:18] + '…'
         # The vatican.va paths run to 70+ chars; collapse the middle so
         # the URL fits a single grid row alongside the tracked label.
         # The hyperlink still points at the full URL — only the visible
@@ -447,21 +465,69 @@ def _copyright_page_typst(data):
                 url = f'{host}/…/{last}'
         return url
 
-    link_rows = [('PROJECT', circulars_url)]
-    if source_url:
-        link_rows.append(('SOURCE', source_url))
-    link_rows.append(('CODE', repo_url))
+    promulgated_label = ''
+    if iso_date:
+        try:
+            d = datetime.date.fromisoformat(iso_date)
+            promulgated_label = f'{d.day} {d.strftime("%B")} {d.year}'
+        except ValueError:
+            promulgated_label = iso_date
 
-    grid_cells = []
-    for label, url in link_rows:
-        grid_cells.append(
-            f'    text(size: 7pt, tracking: 0.2em, '
-            f'fill: rgb("#6a6253"))[{label}],'
+    def label_cell(text):
+        return (
+            f'    text(size: {label_pt}pt, tracking: 0.2em, '
+            f'fill: rgb("{accent}"))[{text}],'
         )
-        grid_cells.append(
-            f'    text(size: 8.5pt, fill: rgb("#3a342b"))['
-            f'#link("{url}")[#raw("{display(url)}")]],'
+
+    def value_cell(content_typst):
+        return (
+            f'    text(size: {value_pt}pt, fill: rgb("{accent}"))[{content_typst}],'
         )
+
+    doc_cells = []
+    if promulgated_label:
+        doc_cells.append(label_cell('PROMULGATED'))
+        doc_cells.append(value_cell(promulgated_label))
+    if identifier:
+        urn_display = f'urn:circulars:{identifier}'
+        if compact and len(urn_display) > 30:
+            urn_display = f'urn:circulars:…:{identifier.rsplit(":", 1)[-1]}'
+        doc_cells.append(label_cell('URN'))
+        doc_cells.append(value_cell(
+            f'#raw("{_typ_content(urn_display)}")'
+        ))
+
+    project_cells = []
+    project_cells.append(label_cell('PROJECT'))
+    project_cells.append(value_cell(
+        f'#link("{circulars_url}")[#raw("{display(circulars_url)}")]'
+    ))
+    if source_url:
+        project_cells.append(label_cell('SOURCE'))
+        project_cells.append(value_cell(
+            f'#link("{source_url}")[#raw("{display(source_url)}")]'
+        ))
+    project_cells.append(label_cell('CODE'))
+    project_cells.append(value_cell(
+        f'#link("{repo_url}")[#raw("{display(repo_url)}")]'
+    ))
+
+    def grid_block(cells):
+        return [
+            '  #grid(',
+            '    columns: (auto, auto),',
+            '    column-gutter: 1.4em,',
+            f'    row-gutter: {row_gap},',
+            '    align: (right + horizon, left + horizon),',
+            *cells,
+            '  )',
+        ]
+
+    def ornament():
+        return [
+            f'  #text(size: 12pt, tracking: 0.825em, '
+            f'fill: rgb("{accent}"))[· · ·]',
+        ]
 
     blurb = (
         f'      A reading edition of #emph[{_typ_content(name)}] prepared '
@@ -474,45 +540,24 @@ def _copyright_page_typst(data):
         '#page(numbering: none, header: none)[',
         '  #set align(center)',
         '  #v(1fr)',
-        '  #box(width: 74%)[',
+        f'  #box(width: {blurb_width})[',
         '    #set par(justify: false, leading: 0.78em)',
-        '    #text(size: 10pt)[',
+        f'    #text(size: {blurb_pt}pt)[',
         blurb,
         '    ]',
         '  ]',
-        '  #v(2.2em)',
-        f'  #text(size: 12pt, tracking: 0.825em, '
-        f'fill: rgb("{accent}"))[· · ·]',
-        '  #v(2em)',
-        '  #grid(',
-        '    columns: (auto, auto),',
-        '    column-gutter: 1.4em,',
-        '    row-gutter: 0.75em,',
-        '    align: (right + horizon, left + horizon),',
-    ]
-    out += grid_cells
-    out += [
-        '  )',
+        f'  #v({blurb_gap})',
+        *ornament(),
+        f'  #v({major_gap})',
+        *grid_block(doc_cells),
+        f'  #v({major_gap})',
+        *ornament(),
+        f'  #v({major_gap})',
+        *grid_block(project_cells),
         '  #v(1fr)',
+        ']',
+        '#pagebreak()',
     ]
-    # Build date — when this PDF was typeset, not when the document was
-    # promulgated (promulgation date lives in the URN).
-    today = datetime.date.today()
-    typeset_label = f'Typeset {today.day} {today.strftime("%B")} {today.year}'.upper()
-    out.append(
-        f'  #text(size: 7pt, tracking: 0.22em, fill: rgb("{accent}"))['
-        f'{typeset_label}'
-        ']'
-    )
-    out.append('  #v(0.65em)')
-    if identifier:
-        out.append(
-            f'  #text(size: 7.5pt, tracking: 0.18em, fill: rgb("{accent}"))['
-            f'urn:circulars:{_typ_content(identifier)}'
-            ']'
-        )
-        out.append('  #v(0.4em)')
-    out += [']', '#pagebreak()']
     return '\n'.join(out)
 
 
@@ -522,7 +567,7 @@ def _write_titlepage_include(data, slug, *, paper='a5'):
     the output (after pandoc's own setup, before the TOC) so this must
     be valid typst, not markdown. Separate file per paper size."""
     title = _title_page_typst(data, paper=paper)
-    colophon = _copyright_page_typst(data)
+    colophon = _copyright_page_typst(data, paper=paper)
     path = BUILD / f'{slug}_titlepage_{paper}.typ'
     path.write_text(f'{title}\n{colophon}\n', encoding='utf-8')
     return path
@@ -682,14 +727,19 @@ def main():
         sys.exit(f'no TOML for {args.slug}; run parse.py first')
 
     data = read_toml(toml_path)
+    pdf_toc_depth = data.get('book_toc_depth', 3)
 
     print(f'[{args.slug}] markdown')
     _write_pdf_template(data, args.slug)
     md_path = emit_markdown(data, args.slug)
+    md_path_a6 = emit_markdown(
+        data, args.slug + '_a6', paper='a6', template_slug=args.slug
+    )
     md_path_a4 = emit_markdown(
         data, args.slug + '_a4', paper='a4', template_slug=args.slug
     )
     titlepage_a5 = _write_titlepage_include(data, args.slug, paper='a5')
+    titlepage_a6 = _write_titlepage_include(data, args.slug, paper='a6')
     titlepage_a4 = _write_titlepage_include(data, args.slug, paper='a4')
     cover_path = _write_cover(data, args.slug)
 
@@ -720,18 +770,18 @@ def main():
         if shutil.which('typst'):
             # `--root` tells typst where the project root is, so the
             # `template:` path in the markdown (which starts with `/`)
-            # resolves to <ROOT>/templates/book.typ. Two paper sizes,
-            # both filename-tagged: A5 is the canonical reading edition,
-            # A4 is the large-print variant (bigger type, more air).
+            # resolves to <ROOT>/templates/book.typ. All paper sizes are
+            # filename-tagged: A4 printer/default, A5 reader, A6 booklet.
             for md, paper, titlepage in (
-                (md_path,    'a5', titlepage_a5),
                 (md_path_a4, 'a4', titlepage_a4),
+                (md_path,    'a5', titlepage_a5),
+                (md_path_a6, 'a6', titlepage_a6),
             ):
                 run_pandoc(md, DOWNLOADS / f'{args.slug}-{paper}.pdf',
                            '--pdf-engine=typst',
                            f'--pdf-engine-opt=--root={ROOT}',
                            f'--include-before-body={titlepage}',
-                           '--toc-depth=3')
+                           f'--toc-depth={pdf_toc_depth}')
         else:
             print('  ! typst not found, skipping PDF')
 

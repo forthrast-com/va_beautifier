@@ -7,4 +7,5 @@ ROOT = Path(__file__).resolve().parent
 ASSETS = ROOT / 'assets'
 BUILD = ROOT / 'build'
 SITE = ROOT / 'site'
+DOWNLOADS = SITE / 'downloads'
 SOURCES = ROOT / 'sources'
