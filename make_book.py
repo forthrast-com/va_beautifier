@@ -435,7 +435,7 @@ def _copyright_page_typst(data):
                 url = f'{host}/…/{last}'
         return url
 
-    link_rows = [('PRESS', circulars_url)]
+    link_rows = [('PROJECT', circulars_url)]
     if source_url:
         link_rows.append(('SOURCE', source_url))
     link_rows.append(('CODE', repo_url))
@@ -452,11 +452,10 @@ def _copyright_page_typst(data):
         )
 
     blurb = (
-        f'      A reading edition of #emph[{_typ_content(name)}] typeset '
-        'and prepared by The Circulars — a typographic press for '
-        'Vatican documents. The text remains the property of the Holy '
-        'See under its copyright; this edition is offered for reading '
-        'and study.'
+        f'      A reading edition of #emph[{_typ_content(name)}] prepared '
+        'by The Circulars with templater scripts that walk the original '
+        'Vatican HTML — recovering structure, footnotes, and signatories '
+        'into a typographic frame.'
     )
 
     out = [
