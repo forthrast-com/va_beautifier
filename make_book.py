@@ -12,6 +12,7 @@ the TOML as Pandoc-compatible markup for both book formats.
 
 import argparse
 import colorsys
+import datetime
 import html
 import os
 import re
@@ -387,11 +388,22 @@ def _title_page_layout(data, paper='a5'):
         stacked(desc_post.upper(), label_pt, '0.08em')
 
     out.append('#v(1fr)')
-    if author:
+    if author and data.get('show_title_author', True):
+        # Extractor decides: encyclicals set False because the pope is
+        # already named in `desc` ("ENCYCLICAL LETTER OF HIS HOLINESS
+        # POPE X"); committee docs leave the default so their primary
+        # signers surface at the foot in the document accent.
+        is_long = len(author) > 60
+        track = '0.08em' if is_long else '0.14em'
+        pt = round((7 if is_long else 8.5) * scale)
+        out.append('#box(width: 84%)[')
+        out.append('  #set par(justify: false, leading: 0.85em)')
+        out.append('  #set align(center)')
         out.append(
-            f'#text(size: {author_pt}pt, tracking: 0.14em,'
-            f' fill: rgb("#5a5147"))[{_typ_content(author.upper())}]'
+            f'  #text(size: {pt}pt, tracking: {track},'
+            f' fill: rgb("{accent}"))[{_typ_content(author.upper())}]'
         )
+        out.append(']')
 
     return out
 
@@ -483,9 +495,19 @@ def _copyright_page_typst(data):
         '  )',
         '  #v(1fr)',
     ]
+    # Build date — when this PDF was typeset, not when the document was
+    # promulgated (promulgation date lives in the URN).
+    today = datetime.date.today()
+    typeset_label = f'Typeset {today.day} {today.strftime("%B")} {today.year}'.upper()
+    out.append(
+        f'  #text(size: 7pt, tracking: 0.22em, fill: rgb("{accent}"))['
+        f'{typeset_label}'
+        ']'
+    )
+    out.append('  #v(0.65em)')
     if identifier:
         out.append(
-            '  #text(size: 7.5pt, tracking: 0.18em, fill: rgb("#988e75"))['
+            f'  #text(size: 7.5pt, tracking: 0.18em, fill: rgb("{accent}"))['
             f'urn:circulars:{_typ_content(identifier)}'
             ']'
         )
@@ -558,27 +580,29 @@ def _promulgation_stanzas(promulg):
 
 
 def _end_matter_typst(promulg, signatories, signature, accent='#756d60'):
-    """Render structured end matter as a centred standalone page. Multi-
-    stanza promulgations (A&N: audience block + offices block) render on
-    separate lines; optional signatories occupy a two-column roster."""
+    """End matter slotted at the bottom of the last body page via
+    typst's `#place(bottom + center, float: true)` — if there is room
+    under the body's final paragraph the dedication lands there; if
+    not, typst floats it to the next page's foot. No forced page break
+    and no page wrapper, so the running head stays consistent with the
+    body's last chapter."""
     parts = [
-        '#pagebreak(weak: true)',
-        '#page()[',
+        '#place(bottom + center, float: true, scope: "parent",'
+        ' clearance: 2em)[',
         '  #set align(center)',
-        '  #v(1fr)',
     ]
     stanzas = list(_promulgation_stanzas(promulg)) if promulg else []
     if stanzas:
         parts += [
             f'  #line(length: 35%, stroke: (paint: rgb("{accent}"), thickness: 0.5pt))',
-            '  #v(1.5em)',
+            '  #v(1.2em)',
         ]
     for index, stanza in enumerate(stanzas):
         if index:
             parts.append('  #v(0.9em)')
         parts.append(f'  #text(size: 11pt)[{_typ_inline(stanza)}]')
     if stanzas:
-        parts.append('  #v(2em)')
+        parts.append('  #v(1.6em)')
     if signatories:
         parts += [
             '  #grid(',
@@ -593,12 +617,12 @@ def _end_matter_typst(promulg, signatories, signature, accent='#756d60'):
             parts.append(
                 f'    [{name} \\ #text(size: 9pt, style: "italic")[{role}]],'
             )
-        parts += ['  )', '  #v(2em)']
+        parts += ['  )', '  #v(1.6em)']
     if signature:
         parts.append(
             f'  #text(tracking: 0.14em)[{_typ_inline(signature, preserve_breaks=True)}]'
         )
-    parts += ['  #v(1fr)', ']']
+    parts += [']']
     return '\n'.join(parts)
 
 

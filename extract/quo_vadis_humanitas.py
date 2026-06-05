@@ -15,10 +15,21 @@ SOURCE_URL = (
     'https://www.vatican.va/roman_curia/congregations/cfaith/cti_documents/'
     'rc_cti_doc_20260304_quo-vadis-humanits_en.html'
 )
-# The ITC President and the sub-commission chair are the document's two
-# primary signers, in lieu of a structured signatories table in the source.
-AUTHOR = ('Cardinal Víctor Manuel Fernández '
-          'and Rev. Javier Prades López')
+# Sub-commission membership lifted from the preliminary note: a chair
+# and eight named members. The full roster sits at the foot of the title
+# page so the document's human voices appear under the institutional
+# header up top.
+AUTHOR = (
+    'Rev. Javier Prades López, chair · '
+    'Rev. Alberto Cozzi · '
+    'Rev. Simon Francis Gaine, O.P. · '
+    'Rev. Carlos Maria Galli · '
+    'Prof. Reinhard Huetter · '
+    'Rev. Victor Ronald La Barrera Villarreal · '
+    'Prof. Isabell Naumann, I.S.S.M. · '
+    'Rev. Josée Ngalula, R.S.A. · '
+    'Rev. Bernard Pottier, S.J.'
+)
 DATE = '2026-03-04'
 IDENTIFIER = 'cti:quo-vadis-humanitas:2026-03-04'
 

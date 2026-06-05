@@ -242,6 +242,9 @@ def extract():
         'author': AUTHOR,
         'date': DATE,
         'identifier': IDENTIFIER,
+        # The pope is already named in `desc` ("ENCYCLICAL LETTER OF
+        # THE HOLY FATHER FRANCIS"), so the title-page foot stays bare.
+        'show_title_author': False,
         'desc': desc_pre,
         'desc_post': desc_post,
         'promulgation': promulgation,

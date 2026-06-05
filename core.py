@@ -455,7 +455,7 @@ def write_toml(path, *, name, hue=None, source_url='',
                author='', date='', identifier='', rights='',
                publisher=DEFAULT_PUBLISHER, collection=DEFAULT_COLLECTION,
                desc='', desc_post='',
-               promulgation='', signature='',
+               promulgation='', signature='', show_title_author=True,
                paragraphs, footnotes, appendices=(), signatories=()):
     out = [f'name = {_toml_str(name)}']
     if hue is not None:
@@ -487,6 +487,8 @@ def write_toml(path, *, name, hue=None, source_url='',
             out.append(f'signature = {_toml_multiline(signature)}')
         else:
             out.append(f'signature = {_toml_str(signature)}')
+    if not show_title_author:
+        out.append('show_title_author = false')
     out.append('')
 
     for p in paragraphs:

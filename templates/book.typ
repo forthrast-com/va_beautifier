@@ -44,7 +44,10 @@
     header: context {
       let page_no = counter(page).get().first()
       if page_no > 1 {
-        set text(size: 8pt, style: "italic", fill: rgb("#756d60"))
+        // Running head picks up the doc accent so the head and the
+        // hairline under it sit in the same hue. Lightened a touch so
+        // the 8pt italic stays soft against the body.
+        set text(size: 8pt, style: "italic", fill: accent.lighten(15%))
         // Verso: doc title (left-aligned). Recto: current chapter title
         // (right-aligned), or doc title before the first chapter starts.
         let chapters = query(selector(heading.where(level: 2)).before(here()))
