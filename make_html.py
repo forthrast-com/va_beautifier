@@ -44,6 +44,8 @@ doc_desc      = data.get('desc', '')
 doc_desc_post = data.get('desc_post', '')
 doc_promulg   = data.get('promulgation', '')
 doc_signature = data.get('signature', '')
+doc_signatories = data.get('signatories', [])
+chapter_style = data.get('chapter_style', '')
 
 # Default = warm gold for legacy TOML files without explicit document colour.
 doc_hue = data.get('hue', 42)
@@ -51,6 +53,13 @@ doc_hue = data.get('hue', 42)
 # ── helpers ──────────────────────────────────────────────────────────────────
 
 def e(s): return escape(s)
+
+def chapter_num_label(chapter):
+    return f'{int_to_roman(chapter)}.' if chapter_style == 'roman' else f'Chapter {chapter}'
+
+def chapter_full_label(chapter, title):
+    number = chapter_num_label(chapter)
+    return f'{number} {title}' if title else number
 
 def linkify_footnotes(text, part, chapter):
     """Replace (N) inline refs with linked superscripts."""
@@ -96,6 +105,15 @@ def para_html(text, part=None, chapter=None):
             rendered.append(ln)
         out.append('<p>' + '<br>'.join(rendered) + '</p>')
     return '\n'.join(out)
+
+def end_matter_inline_html(text):
+    """Render canonical inline markup while preserving authored line breaks."""
+    text = e(text)
+    text = INLINE_STRONG_RE.sub(r'<strong>\1</strong>', text)
+    text = re.sub(
+        r'(?<!\*)\*(.+?)\*(?!\*)', r'<em>\1</em>', text, flags=re.DOTALL
+    )
+    return text.replace('\n', '<br>')
 
 # ── build sections ────────────────────────────────────────────────────────────
 
@@ -171,24 +189,35 @@ if doc_desc or doc_name or doc_desc_post:
         + '</div>'
     )
 
-# Dedication + papal signature belong at the END in the Vatican sources
+# Dedication, signatories and signature belong at the END in the sources
 # (after the body, just before the footnote block), not in the front matter
 # where the dedication used to live. Multi-stanza promulgations (A&N
 # carries one stanza for the papal audience and another for the offices
 # of issuance) are split on `\n\n` so each renders on its own line.
 end_matter_html = ''
-if doc_promulg or doc_signature:
+if doc_promulg or doc_signatories or doc_signature:
     parts = ['<div class="doc-end-matter">']
     if doc_promulg:
+        parts.append('<hr class="document-break">')
         stanzas = [s.strip() for s in doc_promulg.split('\n\n') if s.strip()]
         for stanza in stanzas:
-            stanza_spans = " ".join(
-                f'<span style="display:inline-block">{e(line.strip())}</span>'
-                for line in stanza.splitlines() if line.strip()
+            parts.append(
+                f'<p class="doc-promulg">{end_matter_inline_html(stanza)}</p>'
             )
-            parts.append(f'<p class="doc-promulg">{stanza_spans}</p>')
+    if doc_signatories:
+        parts.append('<div class="doc-signatories">')
+        for signatory in doc_signatories:
+            parts.append(
+                '<div class="doc-signatory">'
+                f'<span class="doc-signatory-name">{e(signatory.get("name", ""))}</span>'
+                f'<span class="doc-signatory-role">{e(signatory.get("role", ""))}</span>'
+                '</div>'
+            )
+        parts.append('</div>')
     if doc_signature:
-        parts.append(f'<p class="doc-signature">{e(doc_signature)}</p>')
+        parts.append(
+            f'<p class="doc-signature">{end_matter_inline_html(doc_signature)}</p>'
+        )
     parts.append('</div>')
     end_matter_html = ''.join(parts)
 
@@ -220,6 +249,7 @@ def next_cid():
 
 # para → indicator chapter id (for ch_paras)
 para_ch_id: dict[int, str] = {}
+SYNTHETIC_INTRO_DOCS = {'magnifica_humanitas'}
 
 for p in paragraphs:
     part    = (p['part'], p['part_title'])
@@ -241,12 +271,15 @@ for p in paragraphs:
         cid = next_cid()
         if p['part'] == 0:
             # Preface/introduction group. Documents that name it (GeS) get
-            # the heading; documents that don't (LS) still get an indicator
-            # entry so the bars cover the unnumbered intro paragraphs.
+            # the heading; MH's source omits the otherwise necessary
+            # top-level introduction label, so supply it in the edition.
             label = p['part_title'] or 'Introduction'
             indicator_chapters.append({'id': cid, 'label': label, 'spacer': False, 'part': 0})
-            if p['part_title']:
-                html_parts.append(h('h1', 'part-title', p['part_title']).replace('<h1 ', f'<h1 id="{cid}" data-sticky '))
+            intro_heading = p['part_title']
+            if not intro_heading and args.doc in SYNTHETIC_INTRO_DOCS:
+                intro_heading = 'Introduction'
+            if intro_heading:
+                html_parts.append(h('h1', 'part-title', intro_heading).replace('<h1 ', f'<h1 id="{cid}" data-sticky '))
             else:
                 # anchor-only — give the next element the id instead of leaving an empty <h1>
                 html_parts.append(f'<a id="{cid}"></a>')
@@ -262,7 +295,7 @@ for p in paragraphs:
 
     if chapter != seen_chapter and p['chapter'] != 0:
         cid = next_cid()
-        label = p['chapter_title'] or (
+        label = chapter_full_label(p['chapter'], p['chapter_title']) if chapter_style == 'roman' else p['chapter_title'] or (
             f'Part {int_to_roman(p["part"])}, Ch. {p["chapter"]}' if p['part']
             else f'Chapter {p["chapter"]}'
         )
@@ -271,9 +304,12 @@ for p in paragraphs:
         # only 'CONCLUSION', not 'CHAPTER SIX' — suppress the "Chapter N"
         # prefix so the rendered heading matches the source. The id then
         # rides on the title <h3> instead of the (omitted) chapter-num <h2>.
-        is_unnumbered = p['chapter_title'].strip().lower() == 'conclusion'
+        is_unnumbered = (
+            chapter_style != 'roman'
+            and p['chapter_title'].strip().lower() == 'conclusion'
+        )
         if not is_unnumbered:
-            html_parts.append(h('h2', 'chapter-num', f'Chapter {p["chapter"]}').replace('<h2 ', f'<h2 id="{cid}" '))
+            html_parts.append(h('h2', 'chapter-num', chapter_num_label(p['chapter'])).replace('<h2 ', f'<h2 id="{cid}" '))
         if p['chapter_title']:
             ch_num = f'{int_to_roman(p["part"])}.{p["chapter"]}' if p['part'] else f'{p["chapter"]}'
             id_attr = f'id="{cid}" ' if is_unnumbered else ''
@@ -414,7 +450,7 @@ for p in paragraphs:
         if p['part'] == 0 and p['chapter'] == 0:
             label = p['part_title']                     # preface / introduction
         elif p['part'] == 0:
-            label = p['chapter_title'] or f'Chapter {p["chapter"]}'
+            label = p['chapter_title']
         else:
             label = p['chapter_title'] or f'Part {int_to_roman(p["part"])}, Ch. {p["chapter"]}'
         ch_order.append((key, label))
@@ -456,16 +492,24 @@ for (part, chapter), ch_label in ch_order:
                if sb['part'] == part and sb['chapter'] == chapter]
     cid = part_chapter_to_cid.get((part, chapter), '')
     if part == 0 and chapter == 0:
-        group_label = ch_label or 'Preface / Introduction'
+        group_label = ch_label or 'Introduction'
     elif part == 0:
-        group_label = ch_label or f'Chapter {chapter}'
+        group_label = chapter_full_label(chapter, ch_label)
     else:
         group_label = ch_label or f'Part {int_to_roman(part)}, Chapter {chapter}'
 
-    # An unrooted preface — chapter 0 with no part_title in the TOML but
-    # carrying its own sections (MH) — has no real heading to nest under.
-    # Render those sections flush so they don't dangle off an empty parent.
-    unrooted = (part == 0 and chapter == 0 and not ch_label and secs)
+    synthetic_intro = (
+        args.doc in SYNTHETIC_INTRO_DOCS and part == 0 and chapter == 0
+    )
+    if synthetic_intro:
+        group_label = 'Introduction'
+
+    # An unrooted preface with sections has no heading to nest under unless
+    # this edition deliberately supplies one (MH).
+    unrooted = (
+        part == 0 and chapter == 0 and not ch_label and secs
+        and not synthetic_intro
+    )
     item_cls = 'sec-nav-item unrooted' if unrooted else 'sec-nav-item'
 
     if not unrooted:
@@ -542,7 +586,7 @@ for (part, chapter), ch_label in ch_order:
 
 for idx, app in enumerate(appendices):
     toc_items.append(
-        toc_item('p', 'sec-nav-item', 'sec-nav-link',
+        toc_item('h3', 'fn-group', 'fn-ch-link',
                  f'appendix-{idx + 1}', app['title'])
     )
 
@@ -553,10 +597,14 @@ if appendices:
     parts = ['<section class="appendix-block">']
     for idx, app in enumerate(appendices):
         aid = f'appendix-{idx + 1}'
+        kind_cls = (
+            f' appendix-{e(app["kind"])}'
+            if app.get('kind') else ''
+        )
         stanzas = para_html(app['text'])    # honours \n\n and \n the same way as body paragraphs
         parts.append(
-            f'<div class="appendix" id="{aid}">'
-            f'<h2 class="appendix-title" data-sticky>{e(app["title"])}</h2>'
+            f'<div class="appendix{kind_cls}" id="{aid}">'
+            f'<h1 class="appendix-title" data-sticky>{e(app["title"])}</h1>'
             f'{stanzas}'
             f'</div>'
         )
@@ -576,7 +624,7 @@ for (part, chapter), ch_label in ch_order:
     if part == 0 and chapter == 0:
         gl = ch_label or 'Preface / Introduction'
     elif part == 0:
-        gl = ch_label or f'Chapter {chapter}'
+        gl = chapter_full_label(chapter, ch_label)
     else:
         gl = ch_label or f'Part {int_to_roman(part)}, Chapter {chapter}'
     noscript_toc_parts.append(f'<li class="ntoc-ch"><a href="#{cid}">{e(gl)}</a>')
@@ -617,9 +665,17 @@ for p in paragraphs:
         sid = f'sec-{p["part"]}-{p["chapter"]}-{p["section"]}'
         sec_paras[sid].append(p['number'])
 
+sub_paras: dict[str, list[int]] = defaultdict(list)
+for p in paragraphs:
+    sid = para_to_sub_id.get(p['number'], '')
+    if sid:
+        sub_paras[sid].append(p['number'])
+
 for ch in indicator_chapters:
     paras = sorted(ch_paras.get(ch['id'], []))
     ch_secs = [s for s in sections_for_drawer
+               if part_chapter_to_cid.get((s['part'], s['chapter'])) == ch['id']]
+    ch_subs = [s for s in subs_for_drawer
                if part_chapter_to_cid.get((s['part'], s['chapter'])) == ch['id']]
 
     if indicator_level == 'sections' and ch_secs:
@@ -642,9 +698,28 @@ for ch in indicator_chapters:
                     'first': min(sp), 'last': max(sp),
                     'target': s['id'], 'label': s['label'],
                 })
+    elif indicator_level == 'sections' and ch_subs:
+        # LS's introduction is divided by authored italic headings rather
+        # than numbered sections. Reflect that structure when it is the
+        # lowest available level instead of collapsing the introduction.
+        ch['segs'] = []
+        first_sub_para = min(
+            min(sub_paras[s['id']]) for s in ch_subs if sub_paras.get(s['id'])
+        )
+        leading = [p for p in paras if p < first_sub_para]
+        if leading:
+            ch['segs'].append({
+                'first': min(leading), 'last': max(leading),
+                'target': ch['id'], 'label': ch['label'],
+            })
+        for s in ch_subs:
+            sp = sub_paras.get(s['id'], [])
+            if sp:
+                ch['segs'].append({
+                    'first': min(sp), 'last': max(sp),
+                    'target': s['id'], 'label': s['label'],
+                })
     elif indicator_level == 'sections' and paras:
-        # chapter has paragraphs but no sections (e.g. LS preface) —
-        # one seg covering the whole chapter
         ch['segs'] = [{
             'first': min(paras), 'last': max(paras),
             'target': ch['id'], 'label': ch['label'],
@@ -658,6 +733,23 @@ for ch in indicator_chapters:
 
     # JS still wants ch.paras for the para → chapter index lookup
     ch['paras'] = paras
+
+# Appendices are rendered outside `paragraphs[]` but remain root-level
+# reading regions: include them alongside unparted chapters in the indicator.
+for idx, appendix in enumerate(appendices):
+    aid = f'appendix-{idx + 1}'
+    indicator_chapters.append({
+        'id': aid,
+        'label': appendix['title'],
+        'spacer': False,
+        'part': 0,
+        'paras': [aid],
+        'segs': [{
+            'key': aid,
+            'target': aid,
+            'label': appendix['title'],
+        }],
+    })
 
 indicator_json = json.dumps(indicator_chapters)
 
