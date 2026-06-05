@@ -8,240 +8,617 @@
 <style>
 :root {
   color-scheme: light dark;
-  --bg: #fbfaf7;
-  --surface: #fffefa;
-  --fg: #252119;
-  --dim: #645d50;
-  --rule: #ded7ca;
+  /* Surface */
+  --bg:           #f7f4ec;
+  --paper:        #fcfaf3;
+  --paper-edge:   #e8e1cf;
+  --rule:         #d8d0bb;
+  --rule-soft:    #ebe5d4;
+  /* Ink */
+  --ink:          #1f1b13;
+  --ink-dim:      #6a6253;
+  --ink-fainter:  #948a76;
+  /* Display fallback hue when the per-tile --hue isn't set */
+  --hue: 42;
+  --accent:       hsl(calc(var(--hue) -  6),  44%, 30%);
+  --accent-soft:  hsl(calc(var(--hue) +  2),  32%, 56%);
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #171614;
-    --surface: #211f1b;
-    --fg: #eee9df;
-    --dim: #b7b09f;
-    --rule: #413c33;
+    --bg:           #14120e;
+    --paper:        #1d1a14;
+    --paper-edge:   #2a261d;
+    --rule:         #3a3528;
+    --rule-soft:    #2b2620;
+    --ink:          #ece5d3;
+    --ink-dim:      #b6ad95;
+    --ink-fainter:  #807761;
+    --accent:       hsl(calc(var(--hue) -  4), 42%, 70%);
+    --accent-soft:  hsl(calc(var(--hue) +  2), 30%, 50%);
   }
 }
+
 * { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
 body {
-  margin: 0;
   background: var(--bg);
-  color: var(--fg);
+  color: var(--ink);
   font-family: Georgia, 'Times New Roman', serif;
+  font-feature-settings: "onum" 1, "lnum" 0;   /* oldstyle figures */
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+::selection { background: var(--accent); color: var(--paper); }
+
 main {
-  width: min(68rem, calc(100% - 2.5rem));
+  width: min(92rem, calc(100% - 2.5rem));
   margin: 0 auto;
-  padding: clamp(1.75rem, 5vh, 3rem) 0 3rem;
+  padding: clamp(2rem, 6vh, 4rem) 0 4rem;
+}
+
+/* ── Masthead ────────────────────────────────────────────────────────── */
+.masthead {
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: clamp(1.6rem, 4vh, 2.6rem);
+  margin-bottom: clamp(2rem, 5vh, 3.4rem);
 }
 .brand {
-  color: var(--dim);
-  font-family: system-ui, -apple-system, sans-serif;
-  font-size: .85rem;
+  color: var(--ink-fainter);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: .72rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  margin: 0 0 1.1rem;
 }
+.brand b { font-weight: 600; color: var(--ink-dim); letter-spacing: .15em; }
 h1 {
-  max-width: 15ch;
-  font-size: clamp(2.6rem, 6vw, 4.2rem);
+  max-width: 22ch;
+  font-size: clamp(2.6rem, 6.4vw, 4.4rem);
+  font-style: italic;
   font-weight: normal;
-  line-height: 1.05;
-  margin: .7rem 0 1rem;
+  line-height: 1.04;
+  letter-spacing: -0.005em;
+  margin: 0 0 1.1rem;
 }
 .intro {
-  max-width: 36rem;
-  color: var(--dim);
-  font-size: 1.12rem;
-  line-height: 1.55;
-  margin: 0 0 clamp(2.6rem, 6vw, 4rem);
+  max-width: 38rem;
+  color: var(--ink-dim);
+  font-size: 1.06rem;
+  line-height: 1.6;
+  margin: 0;
 }
+.intro a { color: inherit; text-decoration-color: var(--ink-fainter); }
+
+/* ── Sort bar ────────────────────────────────────────────────────────── */
 .sort-bar {
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: .55rem;
-  margin: 0 0 .9rem;
-  color: var(--dim);
-  font-family: system-ui, -apple-system, sans-serif;
-  font-size: .8rem;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .8rem;
+  margin: 0 0 1.4rem;
+  color: var(--ink-fainter);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: .72rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
 }
-.sort-label {
-  letter-spacing: .02em;
-}
+.sort-label small { color: var(--ink-dim); font-size: inherit; }
 .sort-toggle {
   background: transparent;
   border: 1px solid var(--rule);
-  border-radius: 3px;
-  color: var(--dim);
+  border-radius: 2px;
+  color: var(--ink-fainter);
   cursor: not-allowed;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: .25rem .4rem;
+  padding: .3rem .35rem;
   opacity: .85;
 }
 .sort-icon {
-  width: 1rem;
-  height: 1rem;
+  width: .9rem;
+  height: .9rem;
   fill: currentColor;
 }
+
+/* ── Editions grid ───────────────────────────────────────────────────── */
 .editions {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
-  gap: 1.15rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(27rem, 100%), 1fr));
+  gap: 1.4rem;
 }
+
 .edition {
-  border: 1px solid var(--rule);
-  border-top: 4px solid hsl(var(--hue), 44%, 42%);
-  border-radius: 4px;
-  background: var(--surface);
-  padding: 0 1.3rem 1.25rem;
-}
-.edition-link {
-  color: inherit;
+  position: relative;
+  background: var(--paper);
+  border: 1px solid var(--paper-edge);
+  border-left: 5px solid hsl(calc(var(--hue) - 4), 42%, 40%);
+  padding: 1.6rem 1.7rem 1.4rem;
   display: flex;
   flex-direction: column;
-  min-height: 14rem;
-  padding: 1.25rem 0 .85rem;
+  min-height: 22rem;
+  box-shadow: 0 1px 0 0 var(--rule-soft);
+}
+@media (prefers-color-scheme: dark) {
+  .edition {
+    border-left-color: hsl(calc(var(--hue) - 4), 42%, 56%);
+  }
+}
+
+.edition-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 1.2rem;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: .68rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.edition .kind { color: var(--ink-dim); }
+.edition .date { color: var(--ink-fainter); font-variant-numeric: lining-nums tabular-nums; white-space: nowrap; }
+
+.edition-link {
+  color: inherit;
   text-decoration: none;
+  display: block;
 }
-.edition h2 {
-  font-size: 1.6rem;
+.edition .title {
+  font-size: clamp(1.65rem, 2.4vw, 2rem);
+  font-style: italic;
   font-weight: normal;
-  line-height: 1.18;
-  margin: 0 0 .8rem;
+  line-height: 1.1;
+  letter-spacing: -0.005em;
+  margin: 0 0 .55rem;
+  color: var(--accent);
 }
-.edition p {
-  color: var(--dim);
-  font-family: system-ui, -apple-system, sans-serif;
+.edition-link:hover .title { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+
+.edition .subtitle {
+  font-size: .98rem;
+  line-height: 1.45;
+  color: var(--ink);
+  margin: 0 0 .7rem;
+}
+.edition .byline {
   font-size: .9rem;
   line-height: 1.5;
-  margin: 0 0 1.35rem;
+  color: var(--ink-dim);
+  margin: 0;
 }
-.read, .source {
-  color: hsl(var(--hue), 50%, 35%);
-  font-family: system-ui, -apple-system, sans-serif;
-  font-size: .9rem;
+.edition .byline strong { font-weight: 600; color: var(--ink); }
+.edition .signers {
+  display: inline-block;
+  margin-top: .15rem;
+  font-style: italic;
+  color: var(--ink-dim);
 }
-.edition-link .read {
-  margin-top: auto;        /* anchor "Read edition" to the bottom of the card */
+
+/* ── Actions (CTA + downloads) ───────────────────────────────────────── */
+.actions {
+  margin-top: auto;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--rule-soft);
+  flex: 0 0 auto;
+  display: grid;
+  gap: .85rem;
 }
-.formats {
-  border-top: 1px solid var(--rule);
-  display: flex;
+.action-group {
+  display: grid;
+  grid-template-columns: 4.7rem minmax(0, 1fr);
+  gap: .65rem;
+  align-items: center;
+}
+.action-label {
+  justify-self: start;
+  text-align: left;
+  color: var(--ink-fainter);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .15em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.action-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: .55rem;
-  padding: .85rem 0;
 }
-.format {
-  align-items: baseline;
-  border: 1px solid var(--rule);
-  border-radius: 3px;
-  color: hsl(var(--hue), 50%, 35%);
-  display: flex;
-  flex: 1;
-  font: .82rem system-ui, -apple-system, sans-serif;
+.downloads-row {
+  min-width: 0;
+}
+
+.dl-primary,
+.action-button {
+  display: inline-flex;
+  align-items: center;
   justify-content: space-between;
-  padding: .45rem .55rem;
+  gap: .4rem;
+  padding: .25rem .65rem;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: var(--paper);
+  color: var(--accent);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: .72rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: border-color .15s ease, background .15s ease;
+  height: 2.2rem;
+  min-width: 0;
+  white-space: nowrap;
+}
+.action-button {
+  width: 100%;
+}
+.action-button > [aria-hidden="true"] {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+.dl-primary:hover,
+.action-button:hover {
+  border-color: var(--accent);
+  background: hsl(calc(var(--hue) - 4), 42%, 96%);
+}
+@media (prefers-color-scheme: dark) {
+  .dl-primary:hover,
+  .action-button:hover {
+    background: hsl(calc(var(--hue) - 4), 18%, 18%);
+  }
+}
+.dl-name { font-weight: 600; }
+.dl-detail {
+  color: var(--ink-dim);
+  font-weight: normal;
+  letter-spacing: .06em;
+  text-transform: none;
+}
+.dl-size {
+  color: var(--ink-fainter);
+  font-weight: normal;
+  letter-spacing: .08em;
+  text-transform: none;
+}
+
+.pdf-control {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+@media (max-width: 38rem) {
+  .action-group {
+    grid-template-columns: 1fr;
+    gap: .5rem;
+  }
+  .action-label {
+    padding-top: 0;
+  }
+  .action-row {
+    grid-template-columns: 1fr;
+  }
+}
+.pdf-menu summary {
+  width: 100%;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.pdf-chevron {
+  width: .52rem;
+  height: .52rem;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-.14rem) rotate(45deg);
+}
+.pdf-menu summary::-webkit-details-marker { display: none; }
+.pdf-menu summary:hover,
+.pdf-menu[open] summary {
+  border-color: var(--accent);
+  background: hsl(calc(var(--hue) - 4), 42%, 96%);
+}
+.pdf-options {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  top: 100%;
+  width: 100%;
+  padding: .3rem;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  box-shadow: 0 .35rem 1rem color-mix(in srgb, var(--ink) 12%, transparent);
+}
+.pdf-options a {
+  display: flex;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: .45rem;
+  color: var(--ink-dim);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: .72rem;
   text-decoration: none;
 }
-.format small {
-  color: var(--dim);
-  font-size: .76rem;
+.pdf-options span {
+  white-space: nowrap;
 }
-.source {
-  border-top: 1px solid var(--rule);
-  display: block;
-  padding-top: .85rem;
+.pdf-options a:hover {
+  color: var(--accent);
+  background: var(--rule-soft);
 }
+.pdf-options small {
+  color: var(--ink-fainter);
+  font-size: inherit;
+  white-space: nowrap;
+}
+@media (prefers-color-scheme: dark) {
+  .pdf-menu summary:hover,
+  .pdf-menu[open] summary {
+    background: hsl(calc(var(--hue) - 4), 18%, 18%);
+  }
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────── */
 footer {
   border-top: 1px solid var(--rule);
-  color: var(--dim);
-  font-family: system-ui, -apple-system, sans-serif;
-  font-size: .9rem;
+  margin-top: clamp(3rem, 8vh, 5rem);
+  padding-top: 1.4rem;
+  color: var(--ink-dim);
+  font-size: .88rem;
   line-height: 1.7;
-  margin-top: 4rem;
-  padding-top: 1.2rem;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 1rem 2rem;
 }
-footer a { color: inherit; }
-.attribution { text-align: right; font-size: .8rem; opacity: .8; }
+footer a {
+  color: inherit;
+  text-decoration-color: var(--ink-fainter);
+}
+footer a:hover { color: var(--accent); text-decoration-color: var(--accent); }
+.contacts {
+  display: grid;
+  gap: .15rem;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: .78rem;
+  letter-spacing: .04em;
+}
+.contacts span { color: var(--ink-fainter); text-transform: uppercase; letter-spacing: .15em; font-size: .68rem; margin-right: .6rem; }
+.attribution { text-align: right; font-size: .76rem; opacity: .75; font-style: italic; }
+
+/* ── Motion preferences ─────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 </style>
 </head>
 <body>
 <main>
-  <p class="brand">the circulars · vatican.va, retypeset.</p>
-  <h1>Vatican documents, set for reading.</h1>
-  <p class="intro">Reader editions of a few papal and conciliar documents.<br>Generated via templater scripts from the Vatican HTML.</p>
+  <header class="masthead">
+    <p class="brand"><b>The&nbsp;Circulars</b> · vatican.va, retypeset</p>
+    <h1>Vatican documents, set for reading.</h1>
+    <p class="intro">Reading editions of papal and conciliar texts, drawn from the
+    canonical HTML on <a href="https://www.vatican.va" target="_blank" rel="noopener">vatican.va</a>
+    and run through templated extractors into a web reader, a typeset PDF,
+    and an EPUB. Source on <a href="https://github.com/forthrast-com/va_beautifier" target="_blank" rel="noopener">GitHub</a>.</p>
+  </header>
+
   <div class="sort-bar" aria-label="Sort controls">
-    <span class="sort-label">Sorted by promulgation, newest first</span>
+    <span class="sort-label"><small>Sorted by</small> Promulgation, newest first</span>
     <button class="sort-toggle" type="button" aria-label="Change sort order" disabled>
       <svg class="sort-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="2" y="3"  width="12" height="1.6" rx=".5" /><rect x="2" y="7"  width="8"  height="1.6" rx=".5" /><rect x="2" y="11" width="4"  height="1.6" rx=".5" /></svg>
     </button>
   </div>
+
   <section class="editions" aria-label="Available documents">
 <article class="edition" style="--hue: 230">
+  <header class="edition-head">
+    <span class="kind">Encyclical Letter</span>
+    <time class="date" datetime="2026-05-15">15 May 2026</time>
+  </header>
+
   <a class="edition-link" href="magnifica_humanitas.html">
-    <h2>Magnifica Humanitas</h2>
-    <p>Encyclical Letter<br>of His Holiness <strong>Pope Leo XIV</strong><br>on Safeguarding the Human Person in the Time of Artificial Intelligence</p>
-    <span class="read">Read edition</span>
+    <h2 class="title">Magnifica Humanitas</h2>
+    <p class="subtitle">on Safeguarding the Human Person in the Time of Artificial Intelligence</p>
+    <p class="byline">of His Holiness <strong>Pope Leo XIV</strong></p>
   </a>
-  <div class="formats" aria-label="Download formats"><a class="format" href="downloads/magnifica_humanitas.pdf"><span>PDF</span><small>860.4 KB</small></a><a class="format" href="downloads/magnifica_humanitas.epub"><span>EPUB</span><small>118.4 KB</small></a></div>
-  <a class="source" href="https://www.vatican.va/content/leo-xiv/en/encyclicals/documents/20260515-magnifica-humanitas.html" target="_blank" rel="noopener">Original Vatican document</a>
+
+  <div class="actions">
+    <div class="action-group">
+      <span class="action-label">Read</span>
+      <div class="action-row">
+        <a class="action-button reader-button" href="magnifica_humanitas.html">
+          <span class="dl-name">Web reader</span>
+          <span aria-hidden="true">→</span>
+        </a>
+        <a class="action-button source-link" href="https://www.vatican.va/content/leo-xiv/en/encyclicals/documents/20260515-magnifica-humanitas.html" target="_blank" rel="noopener"><span class="dl-name">Vatican source</span><span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+    <div class="action-group">
+      <span class="action-label">Download</span>
+      <div class="action-row">
+        <div class="downloads-row"><a class="action-button" href="downloads/magnifica_humanitas.epub"><span class="dl-name">EPUB</span><span class="dl-size">228 KB</span></a></div>
+        <div class="downloads-row"><details class="pdf-control pdf-menu"><summary class="action-button" aria-label="Choose PDF edition"><span class="dl-name">PDF</span><span class="pdf-chevron" aria-hidden="true"></span></summary><div class="pdf-options"><a href="downloads/magnifica_humanitas-a4.pdf"><span>A4 (Printer)</span><small>716 KB</small></a><a href="downloads/magnifica_humanitas-a5.pdf"><span>A5 (Reader)</span><small>798 KB</small></a><a href="downloads/magnifica_humanitas-a6.pdf"><span>A6 (Booklet)</span><small>813 KB</small></a></div></details></div>
+      </div>
+    </div>
+  </div>
 </article>
 <article class="edition" style="--hue: 18">
+  <header class="edition-head">
+    <span class="kind">Commission Paper</span>
+    <time class="date" datetime="2026-03-04">4 March 2026</time>
+  </header>
+
   <a class="edition-link" href="quo_vadis_humanitas.html">
-    <h2>Quo vadis, humanitas?</h2>
-    <p><strong>International Theological Commission</strong><br>Thinking through Christian Anthropology in the Face of Certain Scenarios for the Future of Humanity</p>
-    <span class="read">Read edition</span>
+    <h2 class="title">Quo vadis, humanitas?</h2>
+    <p class="subtitle">Thinking through Christian Anthropology in the Face of Certain Scenarios for the Future of Humanity</p>
+    <p class="byline"><strong>International Theological Commission</strong></p>
   </a>
-  <div class="formats" aria-label="Download formats"><a class="format" href="downloads/quo_vadis_humanitas.pdf"><span>PDF</span><small>625.6 KB</small></a><a class="format" href="downloads/quo_vadis_humanitas.epub"><span>EPUB</span><small>84.0 KB</small></a></div>
-  <a class="source" href="https://www.vatican.va/roman_curia/congregations/cfaith/cti_documents/rc_cti_doc_20260304_quo-vadis-humanits_en.html" target="_blank" rel="noopener">Original Vatican document</a>
+
+  <div class="actions">
+    <div class="action-group">
+      <span class="action-label">Read</span>
+      <div class="action-row">
+        <a class="action-button reader-button" href="quo_vadis_humanitas.html">
+          <span class="dl-name">Web reader</span>
+          <span aria-hidden="true">→</span>
+        </a>
+        <a class="action-button source-link" href="https://www.vatican.va/roman_curia/congregations/cfaith/cti_documents/rc_cti_doc_20260304_quo-vadis-humanits_en.html" target="_blank" rel="noopener"><span class="dl-name">Vatican source</span><span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+    <div class="action-group">
+      <span class="action-label">Download</span>
+      <div class="action-row">
+        <div class="downloads-row"><a class="action-button" href="downloads/quo_vadis_humanitas.epub"><span class="dl-name">EPUB</span><span class="dl-size">314 KB</span></a></div>
+        <div class="downloads-row"><details class="pdf-control pdf-menu"><summary class="action-button" aria-label="Choose PDF edition"><span class="dl-name">PDF</span><span class="pdf-chevron" aria-hidden="true"></span></summary><div class="pdf-options"><a href="downloads/quo_vadis_humanitas-a4.pdf"><span>A4 (Printer)</span><small>519 KB</small></a><a href="downloads/quo_vadis_humanitas-a5.pdf"><span>A5 (Reader)</span><small>582 KB</small></a><a href="downloads/quo_vadis_humanitas-a6.pdf"><span>A6 (Booklet)</span><small>587 KB</small></a></div></details></div>
+      </div>
+    </div>
+  </div>
 </article>
 <article class="edition" style="--hue: 285">
+  <header class="edition-head">
+    <span class="kind">Doctrinal Note</span>
+    <time class="date" datetime="2025-01-28">28 January 2025</time>
+  </header>
+
   <a class="edition-link" href="antiqua_et_nova.html">
-    <h2>Antiqua et Nova</h2>
-    <p><strong>Dicastery for the Doctrine of the Faith</strong><br><strong>Dicastery for Culture and Education</strong><br>Note on the Relationship Between Artificial Intelligence and Human Intelligence</p>
-    <span class="read">Read edition</span>
+    <h2 class="title">Antiqua et Nova</h2>
+    <p class="subtitle">Note on the Relationship Between Artificial Intelligence and Human Intelligence</p>
+    <p class="byline"><strong>Dicastery for the Doctrine of the Faith &amp; Dicastery for Culture and Education</strong></p>
   </a>
-  <div class="formats" aria-label="Download formats"><a class="format" href="downloads/antiqua_et_nova.pdf"><span>PDF</span><small>527.4 KB</small></a><a class="format" href="downloads/antiqua_et_nova.epub"><span>EPUB</span><small>67.1 KB</small></a></div>
-  <a class="source" href="https://www.vatican.va/roman_curia/congregations/cfaith/documents/rc_ddf_doc_20250128_antiqua-et-nova_en.html" target="_blank" rel="noopener">Original Vatican document</a>
+
+  <div class="actions">
+    <div class="action-group">
+      <span class="action-label">Read</span>
+      <div class="action-row">
+        <a class="action-button reader-button" href="antiqua_et_nova.html">
+          <span class="dl-name">Web reader</span>
+          <span aria-hidden="true">→</span>
+        </a>
+        <a class="action-button source-link" href="https://www.vatican.va/roman_curia/congregations/cfaith/documents/rc_ddf_doc_20250128_antiqua-et-nova_en.html" target="_blank" rel="noopener"><span class="dl-name">Vatican source</span><span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+    <div class="action-group">
+      <span class="action-label">Download</span>
+      <div class="action-row">
+        <div class="downloads-row"><a class="action-button" href="downloads/antiqua_et_nova.epub"><span class="dl-name">EPUB</span><span class="dl-size">216 KB</span></a></div>
+        <div class="downloads-row"><details class="pdf-control pdf-menu"><summary class="action-button" aria-label="Choose PDF edition"><span class="dl-name">PDF</span><span class="pdf-chevron" aria-hidden="true"></span></summary><div class="pdf-options"><a href="downloads/antiqua_et_nova-a4.pdf"><span>A4 (Printer)</span><small>471 KB</small></a><a href="downloads/antiqua_et_nova-a5.pdf"><span>A5 (Reader)</span><small>509 KB</small></a><a href="downloads/antiqua_et_nova-a6.pdf"><span>A6 (Booklet)</span><small>515 KB</small></a></div></details></div>
+      </div>
+    </div>
+  </div>
 </article>
 <article class="edition" style="--hue: 140">
+  <header class="edition-head">
+    <span class="kind">Encyclical Letter</span>
+    <time class="date" datetime="2015-05-24">24 May 2015</time>
+  </header>
+
   <a class="edition-link" href="laudato_si.html">
-    <h2>Laudato Si&#x27;</h2>
-    <p>Encyclical Letter<br>of the Holy Father <strong>Francis</strong><br>on Care for Our Common Home</p>
-    <span class="read">Read edition</span>
+    <h2 class="title">Laudato Si&#x27;</h2>
+    <p class="subtitle">on Care for Our Common Home</p>
+    <p class="byline">of the Holy Father <strong>Francis</strong></p>
   </a>
-  <div class="formats" aria-label="Download formats"><a class="format" href="downloads/laudato_si.pdf"><span>PDF</span><small>681.2 KB</small></a><a class="format" href="downloads/laudato_si.epub"><span>EPUB</span><small>115.0 KB</small></a></div>
-  <a class="source" href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20150524_enciclica-laudato-si.html" target="_blank" rel="noopener">Original Vatican document</a>
+
+  <div class="actions">
+    <div class="action-group">
+      <span class="action-label">Read</span>
+      <div class="action-row">
+        <a class="action-button reader-button" href="laudato_si.html">
+          <span class="dl-name">Web reader</span>
+          <span aria-hidden="true">→</span>
+        </a>
+        <a class="action-button source-link" href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20150524_enciclica-laudato-si.html" target="_blank" rel="noopener"><span class="dl-name">Vatican source</span><span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+    <div class="action-group">
+      <span class="action-label">Download</span>
+      <div class="action-row">
+        <div class="downloads-row"><a class="action-button" href="downloads/laudato_si.epub"><span class="dl-name">EPUB</span><span class="dl-size">185 KB</span></a></div>
+        <div class="downloads-row"><details class="pdf-control pdf-menu"><summary class="action-button" aria-label="Choose PDF edition"><span class="dl-name">PDF</span><span class="pdf-chevron" aria-hidden="true"></span></summary><div class="pdf-options"><a href="downloads/laudato_si-a4.pdf"><span>A4 (Printer)</span><small>569 KB</small></a><a href="downloads/laudato_si-a5.pdf"><span>A5 (Reader)</span><small>637 KB</small></a><a href="downloads/laudato_si-a6.pdf"><span>A6 (Booklet)</span><small>648 KB</small></a></div></details></div>
+      </div>
+    </div>
+  </div>
 </article>
 <article class="edition" style="--hue: 42">
+  <header class="edition-head">
+    <span class="kind">Conciliar Constitution</span>
+    <time class="date" datetime="1965-12-07">7 December 1965</time>
+  </header>
+
   <a class="edition-link" href="gaudium_et_spes.html">
-    <h2>Gaudium et Spes</h2>
-    <p>Pastoral Constitution on the Church in the Modern World<br>of the <strong>Second Vatican Council</strong><br>Promulgated by Pope Paul VI on 7 December 1965</p>
-    <span class="read">Read edition</span>
+    <h2 class="title">Gaudium et Spes</h2>
+    <p class="subtitle">Pastoral Constitution on the Church in the Modern World</p>
+    <p class="byline">of the <strong>Second Vatican Council</strong>, promulgated by Pope Paul VI</p>
   </a>
-  <div class="formats" aria-label="Download formats"><a class="format" href="downloads/gaudium_et_spes.pdf"><span>PDF</span><small>574.5 KB</small></a><a class="format" href="downloads/gaudium_et_spes.epub"><span>EPUB</span><small>90.6 KB</small></a></div>
-  <a class="source" href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" target="_blank" rel="noopener">Original Vatican document</a>
+
+  <div class="actions">
+    <div class="action-group">
+      <span class="action-label">Read</span>
+      <div class="action-row">
+        <a class="action-button reader-button" href="gaudium_et_spes.html">
+          <span class="dl-name">Web reader</span>
+          <span aria-hidden="true">→</span>
+        </a>
+        <a class="action-button source-link" href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" target="_blank" rel="noopener"><span class="dl-name">Vatican source</span><span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+    <div class="action-group">
+      <span class="action-label">Download</span>
+      <div class="action-row">
+        <div class="downloads-row"><a class="action-button" href="downloads/gaudium_et_spes.epub"><span class="dl-name">EPUB</span><span class="dl-size">181 KB</span></a></div>
+        <div class="downloads-row"><details class="pdf-control pdf-menu"><summary class="action-button" aria-label="Choose PDF edition"><span class="dl-name">PDF</span><span class="pdf-chevron" aria-hidden="true"></span></summary><div class="pdf-options"><a href="downloads/gaudium_et_spes-a4.pdf"><span>A4 (Printer)</span><small>474 KB</small></a><a href="downloads/gaudium_et_spes-a5.pdf"><span>A5 (Reader)</span><small>536 KB</small></a><a href="downloads/gaudium_et_spes-a6.pdf"><span>A6 (Booklet)</span><small>546 KB</small></a></div></details></div>
+      </div>
+    </div>
+  </div>
 </article>
 <article class="edition" style="--hue: 268">
+  <header class="edition-head">
+    <span class="kind">Conciliar Constitution</span>
+    <time class="date" datetime="1963-12-04">4 December 1963</time>
+  </header>
+
   <a class="edition-link" href="sacrosanctum_concilium.html">
-    <h2>Sacrosanctum Concilium</h2>
-    <p>Constitution on the Sacred Liturgy<br>of the <strong>Second Vatican Council</strong><br>Promulgated by Pope Paul VI on 4 December 1963</p>
-    <span class="read">Read edition</span>
+    <h2 class="title">Sacrosanctum Concilium</h2>
+    <p class="subtitle">Constitution on the Sacred Liturgy</p>
+    <p class="byline">of the <strong>Second Vatican Council</strong>, promulgated by Pope Paul VI</p>
   </a>
-  <div class="formats" aria-label="Download formats"><a class="format" href="downloads/sacrosanctum_concilium.pdf"><span>PDF</span><small>237.9 KB</small></a><a class="format" href="downloads/sacrosanctum_concilium.epub"><span>EPUB</span><small>33.9 KB</small></a></div>
-  <a class="source" href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19631204_sacrosanctum-concilium_en.html" target="_blank" rel="noopener">Original Vatican document</a>
+
+  <div class="actions">
+    <div class="action-group">
+      <span class="action-label">Read</span>
+      <div class="action-row">
+        <a class="action-button reader-button" href="sacrosanctum_concilium.html">
+          <span class="dl-name">Web reader</span>
+          <span aria-hidden="true">→</span>
+        </a>
+        <a class="action-button source-link" href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19631204_sacrosanctum-concilium_en.html" target="_blank" rel="noopener"><span class="dl-name">Vatican source</span><span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+    <div class="action-group">
+      <span class="action-label">Download</span>
+      <div class="action-row">
+        <div class="downloads-row"><a class="action-button" href="downloads/sacrosanctum_concilium.epub"><span class="dl-name">EPUB</span><span class="dl-size">119 KB</span></a></div>
+        <div class="downloads-row"><details class="pdf-control pdf-menu"><summary class="action-button" aria-label="Choose PDF edition"><span class="dl-name">PDF</span><span class="pdf-chevron" aria-hidden="true"></span></summary><div class="pdf-options"><a href="downloads/sacrosanctum_concilium-a4.pdf"><span>A4 (Printer)</span><small>203 KB</small></a><a href="downloads/sacrosanctum_concilium-a5.pdf"><span>A5 (Reader)</span><small>223 KB</small></a><a href="downloads/sacrosanctum_concilium-a6.pdf"><span>A6 (Booklet)</span><small>227 KB</small></a></div></details></div>
+      </div>
+    </div>
+  </div>
 </article>
   </section>
+
   <footer>
     <div class="contacts">
-      <div>Email: <a href="mailto:me@forthrast.com">me@forthrast.com</a></div>
-      <div>Bluesky: <a href="https://bsky.app/profile/forthrast.com" target="_blank" rel="noopener">@forthrast.com</a></div>
-      <div>GitHub: <a href="https://github.com/forthrast-com" target="_blank" rel="noopener">@forthrast-com</a></div>
+      <div><span>email</span><a href="mailto:me@forthrast.com">me@forthrast.com</a></div>
+      <div><span>bsky</span><a href="https://bsky.app/profile/forthrast.com" target="_blank" rel="noopener">@forthrast.com</a></div>
+      <div><span>code</span><a href="https://github.com/forthrast-com" target="_blank" rel="noopener">@forthrast-com</a></div>
     </div>
     <div class="attribution">made with claude and codex ^•^</div>
   </footer>

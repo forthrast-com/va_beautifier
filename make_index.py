@@ -162,39 +162,58 @@ def file_size(path):
     for unit in ('KB', 'MB', 'GB'):
         size /= 1024
         if size < 1024 or unit == 'GB':
-            return f'{size:.1f} {unit}'
+            return f'{size:.0f} {unit}'
     return ''
 
 
 def render_downloads(slug):
-    """Two-row download block. Top row carries the primary formats
-    (PDF reading edition + EPUB); bottom row carries the secondary
-    A4 large-print + a link to the canonical vatican.va source."""
+    """Primary download controls, including a no-JS PDF size menu."""
+    a6_size = file_size(DOWNLOADS / f'{slug}-a6.pdf')
     a5_size = file_size(DOWNLOADS / f'{slug}-a5.pdf')
     a4_size = file_size(DOWNLOADS / f'{slug}-a4.pdf')
     epub_size = file_size(DOWNLOADS / f'{slug}.epub')
 
-    primary_parts = []
-    if a5_size:
-        primary_parts.append(
-            f'<a class="dl dl-primary" href="downloads/{slug}-a5.pdf">'
-            f'<span class="dl-name">PDF</span>'
-            f'<span class="dl-size">{a5_size}</span></a>'
+    pdf_html = ''
+    if a4_size or a5_size or a6_size:
+        menu_parts = []
+        if a4_size:
+            menu_parts.append(
+                f'<a href="downloads/{slug}-a4.pdf">'
+                f'<span>A4 (Printer)</span><small>{a4_size}</small></a>'
+            )
+        if a5_size:
+            menu_parts.append(
+                f'<a href="downloads/{slug}-a5.pdf">'
+                f'<span>A5 (Reader)</span><small>{a5_size}</small></a>'
+            )
+        if a6_size:
+            menu_parts.append(
+                f'<a href="downloads/{slug}-a6.pdf">'
+                f'<span>A6 (Booklet)</span><small>{a6_size}</small></a>'
+            )
+        pdf_html = (
+            '<details class="pdf-control pdf-menu">'
+            '<summary class="action-button" aria-label="Choose PDF edition">'
+            '<span class="dl-name">PDF</span>'
+            '<span class="pdf-chevron" aria-hidden="true"></span></summary>'
+            f'<div class="pdf-options">{"".join(menu_parts)}</div>'
+            '</details>'
         )
+    epub_html = ''
     if epub_size:
-        primary_parts.append(
-            f'<a class="dl dl-primary" href="downloads/{slug}.epub">'
+        epub_html = (
+            f'<a class="action-button" href="downloads/{slug}.epub">'
             f'<span class="dl-name">EPUB</span>'
             f'<span class="dl-size">{epub_size}</span></a>'
         )
 
-    return primary_parts, a4_size
+    return pdf_html, epub_html
 
 
 def render_card(slug):
     data = read_toml(BUILD / f'{slug}.toml')
     f = _card_fields(slug, data)
-    primary_dls, a4_size = render_downloads(slug)
+    pdf_html, epub_html = render_downloads(slug)
 
     subtitle_html = (
         f'<p class="subtitle">{escape(f["subtitle"])}</p>'
@@ -210,17 +229,13 @@ def render_card(slug):
         if f['kind_label'] else ''
     )
 
-    secondary_bits = []
-    if a4_size:
-        secondary_bits.append(
-            f'<a class="dl-secondary" href="downloads/{slug}-a4.pdf">'
-            f'A4 large print <small>{a4_size}</small></a>'
-        )
+    source_html = ''
     if f['source_url']:
-        secondary_bits.append(
-            f'<a class="source-link" href="{escape(f["source_url"], quote=True)}"'
+        source_html = (
+            f'<a class="action-button source-link" href="{escape(f["source_url"], quote=True)}"'
             ' target="_blank" rel="noopener">'
-            'Vatican source <span aria-hidden="true">↗</span></a>'
+            '<span class="dl-name">Vatican source</span>'
+            '<span aria-hidden="true">↗</span></a>'
         )
 
     return f'''<article class="edition" style="--hue: {f["hue"]}">
@@ -235,17 +250,23 @@ def render_card(slug):
     <p class="byline">{f["byline"]}</p>
   </a>
 
-  <div class="ornament" aria-hidden="true">· · ·</div>
-
   <div class="actions">
-    <a class="cta" href="{slug}.html">
-      <span class="cta-label">Open the reader</span>
-      <span class="cta-arrow" aria-hidden="true">→</span>
-    </a>
-    <div class="downloads">
-      <span class="downloads-label">Download</span>
-      <div class="downloads-row">{''.join(primary_dls)}</div>
-      {('<div class="downloads-row downloads-secondary">' + ''.join(secondary_bits) + '</div>') if secondary_bits else ''}
+    <div class="action-group">
+      <span class="action-label">Read</span>
+      <div class="action-row">
+        <a class="action-button reader-button" href="{slug}.html">
+          <span class="dl-name">Web reader</span>
+          <span aria-hidden="true">→</span>
+        </a>
+        {source_html}
+      </div>
+    </div>
+    <div class="action-group">
+      <span class="action-label">Download</span>
+      <div class="action-row">
+        <div class="downloads-row">{epub_html}</div>
+        <div class="downloads-row">{pdf_html}</div>
+      </div>
     </div>
   </div>
 </article>'''
@@ -320,7 +341,7 @@ body {{
 ::selection {{ background: var(--accent); color: var(--paper); }}
 
 main {{
-  width: min(70rem, calc(100% - 2.5rem));
+  width: min(92rem, calc(100% - 2.5rem));
   margin: 0 auto;
   padding: clamp(2rem, 6vh, 4rem) 0 4rem;
 }}
@@ -393,7 +414,7 @@ h1 {{
 /* ── Editions grid ───────────────────────────────────────────────────── */
 .editions {{
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(22rem, 100%), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(27rem, 100%), 1fr));
   gap: 1.4rem;
 }}
 
@@ -464,69 +485,48 @@ h1 {{
   color: var(--ink-dim);
 }}
 
-.ornament {{
-  text-align: center;
-  color: var(--accent-soft);
-  font-size: 1.1rem;
-  letter-spacing: 0.55em;
-  margin: 1.3rem 0 1rem;
-  user-select: none;
-}}
-
 /* ── Actions (CTA + downloads) ───────────────────────────────────────── */
 .actions {{
-  margin-top: auto;       /* push downloads to bottom of the card */
-}}
-.cta {{
-  display: inline-flex;
-  align-items: baseline;
-  gap: .5rem;
-  color: var(--accent);
-  font-size: 1rem;
-  font-style: italic;
-  text-decoration: none;
-  margin-bottom: 1.2rem;
-}}
-.cta-arrow {{
-  font-style: normal;
-  transition: transform .18s ease-out;
-}}
-.cta:hover .cta-arrow {{ transform: translateX(3px); }}
-.cta:hover .cta-label {{ text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }}
-
-.downloads {{
+  margin-top: auto;
+  padding-top: 1.4rem;
   border-top: 1px solid var(--rule-soft);
-  padding-top: .95rem;
+  flex: 0 0 auto;
   display: grid;
-  grid-template-columns: auto 1fr;
-  column-gap: 1.1rem;
-  row-gap: .55rem;
-  align-items: baseline;
+  gap: .85rem;
 }}
-.downloads-label {{
+.action-group {{
+  display: grid;
+  grid-template-columns: 4.7rem minmax(0, 1fr);
+  gap: .65rem;
+  align-items: center;
+}}
+.action-label {{
+  justify-self: start;
+  text-align: left;
   color: var(--ink-fainter);
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: .65rem;
+  font-size: .68rem;
+  font-weight: 600;
   letter-spacing: .15em;
+  line-height: 1;
   text-transform: uppercase;
 }}
-.downloads-row {{
-  display: flex;
-  flex-wrap: wrap;
-  gap: .35rem .8rem;
-  align-items: baseline;
+.action-row {{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .55rem;
 }}
-.downloads-secondary {{
-  grid-column: 2;
-  font-size: .8rem;
-  color: var(--ink-fainter);
+.downloads-row {{
+  min-width: 0;
 }}
 
-.dl-primary {{
+.dl-primary,
+.action-button {{
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
+  justify-content: space-between;
   gap: .4rem;
-  padding: .35rem .65rem;
+  padding: .25rem .65rem;
   border: 1px solid var(--rule);
   border-radius: 2px;
   background: var(--paper);
@@ -537,17 +537,35 @@ h1 {{
   text-transform: uppercase;
   text-decoration: none;
   transition: border-color .15s ease, background .15s ease;
+  height: 2.2rem;
+  min-width: 0;
+  white-space: nowrap;
 }}
-.dl-primary:hover {{
+.action-button {{
+  width: 100%;
+}}
+.action-button > [aria-hidden="true"] {{
+  flex: 0 0 auto;
+  margin-left: auto;
+}}
+.dl-primary:hover,
+.action-button:hover {{
   border-color: var(--accent);
   background: hsl(calc(var(--hue) - 4), 42%, 96%);
 }}
 @media (prefers-color-scheme: dark) {{
-  .dl-primary:hover {{
+  .dl-primary:hover,
+  .action-button:hover {{
     background: hsl(calc(var(--hue) - 4), 18%, 18%);
   }}
 }}
 .dl-name {{ font-weight: 600; }}
+.dl-detail {{
+  color: var(--ink-dim);
+  font-weight: normal;
+  letter-spacing: .06em;
+  text-transform: none;
+}}
 .dl-size {{
   color: var(--ink-fainter);
   font-weight: normal;
@@ -555,22 +573,82 @@ h1 {{
   text-transform: none;
 }}
 
-.dl-secondary,
-.source-link {{
+.pdf-control {{
+  position: relative;
+  display: block;
+  width: 100%;
+}}
+
+@media (max-width: 38rem) {{
+  .action-group {{
+    grid-template-columns: 1fr;
+    gap: .5rem;
+  }}
+  .action-label {{
+    padding-top: 0;
+  }}
+  .action-row {{
+    grid-template-columns: 1fr;
+  }}
+}}
+.pdf-menu summary {{
+  width: 100%;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}}
+.pdf-chevron {{
+  width: .52rem;
+  height: .52rem;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-.14rem) rotate(45deg);
+}}
+.pdf-menu summary::-webkit-details-marker {{ display: none; }}
+.pdf-menu summary:hover,
+.pdf-menu[open] summary {{
+  border-color: var(--accent);
+  background: hsl(calc(var(--hue) - 4), 42%, 96%);
+}}
+.pdf-options {{
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  top: 100%;
+  width: 100%;
+  padding: .3rem;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  box-shadow: 0 .35rem 1rem color-mix(in srgb, var(--ink) 12%, transparent);
+}}
+.pdf-options a {{
+  display: flex;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: .45rem;
   color: var(--ink-dim);
-  text-decoration-color: var(--ink-fainter);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: .72rem;
+  text-decoration: none;
 }}
-.dl-secondary small {{
-  color: var(--ink-fainter);
-  margin-left: .2rem;
-  font-size: inherit;
+.pdf-options span {{
+  white-space: nowrap;
 }}
-.dl-secondary:hover,
-.source-link:hover {{
+.pdf-options a:hover {{
   color: var(--accent);
-  text-decoration-color: var(--accent);
+  background: var(--rule-soft);
+}}
+.pdf-options small {{
+  color: var(--ink-fainter);
+  font-size: inherit;
+  white-space: nowrap;
+}}
+@media (prefers-color-scheme: dark) {{
+  .pdf-menu summary:hover,
+  .pdf-menu[open] summary {{
+    background: hsl(calc(var(--hue) - 4), 18%, 18%);
+  }}
 }}
 
 /* ── Footer ──────────────────────────────────────────────────────────── */
