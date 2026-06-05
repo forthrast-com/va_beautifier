@@ -1,0 +1,120 @@
+/* The Circulars — EPUB house style. Loaded via pandoc --css and bundled
+   alongside its default sheet; rules here override the defaults by being
+   later in the cascade (same specificity, later in source). */
+
+html {
+  font-family: Georgia, "Hoefler Text", serif;
+  line-height: 1.5;
+  color: #1a1a1a;
+}
+
+body {
+  margin: 0 1em;
+}
+
+p {
+  margin: 1em 0;
+  text-indent: 0;
+}
+
+/* Pandoc's default makes links invisible (`a{color:#1a1a1a}`); restore the
+   affordance with a subtle underline that doesn't shout. */
+a, a:visited {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgba(0, 0, 0, 0.35);
+}
+
+a:hover {
+  text-decoration-color: currentColor;
+}
+
+/* Headings. h1 is reserved for the EPUB title-page wrapper; chapter
+   titles run at h2 (centred display italic, fresh page), sections at h3,
+   sub-headings at h4. */
+h1 {
+  font-size: 1.5em;
+  margin: 2em 0 0.8em;
+  text-align: center;
+  font-weight: normal;
+}
+
+h2 {
+  font-size: 1.4em;
+  font-style: italic;
+  font-weight: normal;
+  text-align: center;
+  margin: 2em 0 1.2em;
+  page-break-before: always;
+  break-before: page;
+}
+
+h3 {
+  font-size: 1.1em;
+  margin: 1.4em 0 0.4em;
+  font-weight: bold;
+}
+
+h4 {
+  font-size: 1em;
+  font-style: italic;
+  font-weight: normal;
+  margin: 1em 0 0.3em;
+}
+
+sup {
+  vertical-align: super;
+  font-size: 0.75em;
+  line-height: 0;
+}
+
+sub {
+  vertical-align: sub;
+  font-size: 0.75em;
+  line-height: 0;
+}
+
+/* Footnotes. Apple Books otherwise renders asides at the reader's full
+   body size — which lands too large next to the prose, and again in the
+   popover. Belt-and-braces the selector since some readers see the
+   `epub:type` attribute and others only see the `role`. */
+aside[role="doc-footnote"],
+aside[epub\:type~="footnote"] {
+  font-size: 0.9em;
+  line-height: 1.45;
+  margin: 0.4em 0;
+}
+
+aside[role="doc-footnote"] p,
+aside[epub\:type~="footnote"] p {
+  margin: 0.3em 0;
+}
+
+/* The leading back-link's visible "N" duplicates Apple Books' own popover
+   marker. Hide the text without removing the link element (linear-view
+   navigation still tappable) and surface a trailing return-arrow so the
+   affordance is preserved. */
+aside[role="doc-footnote"] .footnote-back,
+aside[epub\:type~="footnote"] .footnote-back {
+  color: rgba(0, 0, 0, 0.5);
+  text-decoration: none;
+}
+
+aside[role="doc-footnote"] > p:first-child .footnote-back,
+aside[epub\:type~="footnote"] > p:first-child .footnote-back {
+  font-size: 0;
+}
+
+aside[role="doc-footnote"] > p:first-child .footnote-back::after,
+aside[epub\:type~="footnote"] > p:first-child .footnote-back::after {
+  content: "↩\00A0";
+  font-size: 0.85rem;
+}
+
+/* Colophon (promulgation + signatories + signature). No leading rule —
+   the print typography keeps one because on paper the mark reads as a
+   colophon device; on screen it reads as a stray line. */
+section[epub\:type="colophon"] {
+  text-align: center;
+  margin-top: 4em;
+}

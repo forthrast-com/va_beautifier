@@ -460,10 +460,13 @@ def _end_matter_typst(promulg, signatories, signature, accent='#756d60'):
 
 
 def _end_matter_html(promulg, signatories, signature):
-    """EPUB end matter: semantic colophon with optional signatory roster."""
-    parts = ['<section epub:type="colophon" style="text-align:center; margin-top:4em;">']
-    if promulg:
-        parts.append('<hr style="width:35%; margin:0 auto 1.5em;" />')
+    """EPUB end matter: semantic colophon with optional signatory roster.
+
+    No leading rule — on a printed page the matching typst `#line(...)`
+    reads as a colophon device, but in EPUB a 35%-wide hairline before
+    a centred block reads as stray punctuation between body and ending.
+    Style hooks live in templates/epub.css via epub:type="colophon"."""
+    parts = ['<section epub:type="colophon">']
     for stanza in _promulgation_stanzas(promulg) if promulg else ():
         parts.append(f'<p>{_html_inline(stanza)}</p>')
     if signatories:
@@ -529,9 +532,13 @@ def main():
         # no-op; the EPUB picks up its title from YAML metadata instead.
         # Each H2 (chapter or appendix) gets its own spine file. Drawer-
         # parity ToC depth lets readers navigate to sub-headings.
+        epub_css = ROOT / 'templates' / 'epub.css'
+        epub_lua = ROOT / 'templates' / 'strip_fn_backlink.lua'
         run_pandoc(md_path, DOWNLOADS / f'{args.slug}.epub',
                    '--split-level=2',
-                   '--toc-depth=4')
+                   '--toc-depth=4',
+                   f'--css={epub_css}',
+                   f'--lua-filter={epub_lua}')
 
     if do_pdf:
         if shutil.which('typst'):
