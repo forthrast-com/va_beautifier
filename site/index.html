@@ -91,37 +91,156 @@ h1 {
 }
 .intro a { color: inherit; text-decoration-color: var(--ink-fainter); }
 
-/* ── Sort bar ────────────────────────────────────────────────────────── */
+/* ── Filter / sort controls ──────────────────────────────────────────── */
+.controls {
+  display: grid;
+  gap: .9rem;
+  margin: 0 0 1.6rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid var(--rule);
+}
+.search-row {
+  position: relative;
+}
+.search-icon {
+  position: absolute;
+  left: .8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  color: var(--ink-fainter);
+  pointer-events: none;
+}
+.search-input {
+  width: 100%;
+  padding: .55rem .8rem .55rem 2.3rem;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  color: var(--ink);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1rem;
+  line-height: 1.4;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.search-input::placeholder {
+  color: var(--ink-fainter);
+  font-style: italic;
+}
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
 .sort-bar {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: .8rem;
-  margin: 0 0 1.4rem;
+  gap: 1rem;
+  flex-wrap: wrap;
   color: var(--ink-fainter);
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
   font-size: .72rem;
   letter-spacing: .12em;
   text-transform: uppercase;
 }
+.sort-label {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .35rem .55rem;
+}
 .sort-label small { color: var(--ink-dim); font-size: inherit; }
-.sort-toggle {
+.sort-label .sort-current { color: var(--ink); font-weight: 600; }
+.sort-label .sort-direction {
+  color: var(--ink-fainter);
+  text-transform: none;
+  letter-spacing: .04em;
+  font-style: italic;
+}
+
+.sort-options {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  align-items: center;
+}
+.sort-option {
   background: transparent;
   border: 1px solid var(--rule);
   border-radius: 2px;
   color: var(--ink-fainter);
-  cursor: not-allowed;
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  padding: .28rem .55rem;
+  transition: border-color .15s ease, color .15s ease, background .15s ease;
+}
+.sort-option:hover {
+  border-color: var(--accent-soft);
+  color: var(--ink-dim);
+}
+.sort-option.is-active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, var(--paper));
+}
+.sort-option:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.sort-reverse {
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  color: var(--ink-fainter);
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: .3rem .35rem;
-  opacity: .85;
+  padding: .28rem .35rem;
+  transition: border-color .15s ease, color .15s ease, background .15s ease;
 }
-.sort-icon {
-  width: .9rem;
-  height: .9rem;
+.sort-reverse:hover {
+  border-color: var(--accent-soft);
+  color: var(--ink-dim);
+}
+.sort-reverse.is-reversed {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, var(--paper));
+}
+.sort-reverse:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.reverse-icon {
+  width: .85rem;
+  height: .85rem;
   fill: currentColor;
 }
+.sort-reverse.is-reversed .reverse-icon {
+  transform: scaleY(-1);
+}
+
+/* Hide controls when JS isn't available; the cards still render in
+   reverse-chronological order so the page stays useful. */
+.no-js .controls { display: none; }
+
+.empty-state {
+  display: none;
+  padding: 2.2rem 1rem;
+  text-align: center;
+  color: var(--ink-dim);
+  border: 1px dashed var(--rule);
+  border-radius: 2px;
+  font-style: italic;
+}
+.editions.is-empty + .empty-state { display: block; }
 
 /* ── Editions grid ───────────────────────────────────────────────────── */
 .editions {
@@ -130,23 +249,72 @@ h1 {
   gap: 1.4rem;
 }
 
+.group-heading {
+  grid-column: 1 / -1;
+  margin: 1rem 0 .1rem;
+  padding-bottom: .35rem;
+  border-bottom: 1px solid var(--rule);
+  color: var(--accent);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  animation: heading-drop .28s ease-out both;
+}
+.group-heading:first-child { margin-top: 0; }
+.group-heading[hidden] { display: none; }
+@keyframes heading-drop {
+  from { opacity: 0; transform: translateY(-.3rem); }
+  to   { opacity: 1; transform: none; }
+}
+
 .edition {
   position: relative;
   background: var(--paper);
   border: 1px solid var(--paper-edge);
-  border-left: 5px solid hsl(calc(var(--hue) - 4), 42%, 40%);
   padding: 1.6rem 1.7rem 1.4rem;
   display: flex;
   flex-direction: column;
   min-height: 22rem;
   box-shadow: 0 1px 0 0 var(--rule-soft);
+  /* FLIP-reorder transition. Spring-y curve + per-card stagger (set
+     inline from JS) makes a sort change feel goofily mechanical
+     rather than instant. Slightly longer than feels strictly
+     necessary so long-distance cards don't whip too cartoonishly. */
+  transition: transform .58s cubic-bezier(.34, 1.45, .64, 1),
+              box-shadow .25s ease;
+}
+/* Flat accent bar on the left edge. Lives as a pseudo so its corners
+   stay square — a 5px `border-left` against a 1px top/bottom would
+   miter at 45° and chamfer the join. The -1px overhangs put the bar
+   flush with the card's outer rectangle, covering the paper-edge
+   border on those three sides. */
+.edition::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  left: -1px;
+  width: 5px;
+  background: hsl(calc(var(--hue) - 4), 42%, 40%);
+  pointer-events: none;
 }
 @media (prefers-color-scheme: dark) {
-  .edition {
-    border-left-color: hsl(calc(var(--hue) - 4), 42%, 56%);
+  .edition::before {
+    background: hsl(calc(var(--hue) - 4), 42%, 56%);
   }
 }
-
+.edition[hidden] { display: none; }
+/* `will-change: transform` only during a shuffle. Declaring it at
+   rest would make every card its own stacking context, which traps
+   the PDF dropdown (`z-index: 2`) inside the card and lets sibling
+   cards paint over it. */
+.editions.is-shuffling .edition {
+  will-change: transform;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--ink) 14%, transparent),
+              0 1px 0 0 var(--rule-soft);
+}
 .edition-head {
   display: flex;
   align-items: baseline;
@@ -333,11 +501,19 @@ h1 {
   border: 1px solid var(--rule);
   border-radius: 2px;
   box-shadow: 0 .35rem 1rem color-mix(in srgb, var(--ink) 12%, transparent);
+  /* Parent grid: a single track for labels, one for sizes. The
+     anchors below use `grid-template-columns: subgrid` so every row
+     inherits this same pair of tracks — sizes get a shared right
+     gutter even when one is '9 KB' and the next is '1.2 MB'. */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
 }
 .pdf-options a {
-  display: flex;
-  justify-content: space-between;
-  gap: .5rem;
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  column-gap: .8rem;
+  align-items: baseline;
   padding: .45rem;
   color: var(--ink-dim);
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
@@ -355,6 +531,8 @@ h1 {
   color: var(--ink-fainter);
   font-size: inherit;
   white-space: nowrap;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 @media (prefers-color-scheme: dark) {
   .pdf-menu summary:hover,
@@ -401,7 +579,7 @@ footer a:hover { color: var(--accent); text-decoration-color: var(--accent); }
 }
 </style>
 </head>
-<body>
+<body class="no-js">
 <main>
   <header class="masthead">
     <p class="brand"><b>The&nbsp;Circulars</b> · vatican.va, retypeset</p>
@@ -412,15 +590,35 @@ footer a:hover { color: var(--accent); text-decoration-color: var(--accent); }
     and an EPUB. Source on <a href="https://github.com/forthrast-com/va_beautifier" target="_blank" rel="noopener">GitHub</a>.</p>
   </header>
 
-  <div class="sort-bar" aria-label="Sort controls">
-    <span class="sort-label"><small>Sorted by</small> Promulgation, newest first</span>
-    <button class="sort-toggle" type="button" aria-label="Change sort order" disabled>
-      <svg class="sort-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="2" y="3"  width="12" height="1.6" rx=".5" /><rect x="2" y="7"  width="8"  height="1.6" rx=".5" /><rect x="2" y="11" width="4"  height="1.6" rx=".5" /></svg>
-    </button>
-  </div>
+  <form class="controls" role="search" aria-label="Filter and sort editions"
+        onsubmit="return false">
+    <div class="search-row">
+      <svg class="search-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.4"/>
+        <line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      <input class="search-input" type="search" id="filter-input"
+             placeholder="Filter by title, pope, body, or kind…"
+             aria-label="Filter documents" autocomplete="off">
+    </div>
+    <div class="sort-bar" aria-label="Sort controls">
+      <span class="sort-label">
+        <small>Sorting by</small>
+        <span class="sort-current">Promulgation</span>
+        <span class="sort-direction">— newest first</span>
+      </span>
+      <div class="sort-options" role="group" aria-label="Sort field">
+        <button type="button" class="sort-option is-active" data-sort="date" aria-pressed="true">Promulgation</button><button type="button" class="sort-option" data-sort="pontificate" aria-pressed="false">Pontificate</button><button type="button" class="sort-option" data-sort="authority" aria-pressed="false">Authority</button><button type="button" class="sort-option" data-sort="title" aria-pressed="false">Alphabetical</button>
+        <button type="button" class="sort-reverse" aria-pressed="false"
+                aria-label="Reverse sort order" title="Reverse order">
+          <svg class="reverse-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4 2v10.2L1.7 9.9.6 11l4.2 4.2 4.2-4.2L7.9 9.9 5.6 12.2V2H4z" /><path d="M12 14V3.8l2.3 2.3 1.1-1.1L11.2.8 7 5l1.1 1.1L10.4 3.8V14H12z" /></svg>
+        </button>
+      </div>
+    </div>
+  </form>
 
   <section class="editions" aria-label="Available documents">
-<article class="edition" style="--hue: 230">
+<article class="edition" data-date="2026-05-15" data-pontificate="leo-xiv" data-pontif-name="Leo XIV" data-pontif-start="2025-05-08" data-type="encyclical" data-type-label="Encyclical Letter" data-authority-rank="2" data-title-key="magnifica humanitas" data-search="magnifica humanitas on safeguarding the human person in the time of artificial intelligence of his holiness pope leo xiv encyclical letter leo xiv" style="--hue: 230">
   <header class="edition-head">
     <span class="kind">Encyclical Letter</span>
     <time class="date" datetime="2026-05-15">15 May 2026</time>
@@ -452,7 +650,7 @@ footer a:hover { color: var(--accent); text-decoration-color: var(--accent); }
     </div>
   </div>
 </article>
-<article class="edition" style="--hue: 18">
+<article class="edition" data-date="2026-03-04" data-pontificate="leo-xiv" data-pontif-name="Leo XIV" data-pontif-start="2025-05-08" data-type="commission_paper" data-type-label="Commission Paper" data-authority-rank="4" data-title-key="quo vadis, humanitas?" data-search="quo vadis, humanitas? thinking through christian anthropology in the face of certain scenarios for the future of humanity international theological commission commission paper leo xiv" style="--hue: 18">
   <header class="edition-head">
     <span class="kind">Commission Paper</span>
     <time class="date" datetime="2026-03-04">4 March 2026</time>
@@ -479,12 +677,12 @@ footer a:hover { color: var(--accent); text-decoration-color: var(--accent); }
       <span class="action-label">Download</span>
       <div class="action-row">
         <div class="downloads-row"><a class="action-button" href="downloads/quo_vadis_humanitas.epub"><span class="dl-name">EPUB</span><span class="dl-size">314 KB</span></a></div>
-        <div class="downloads-row"><details class="pdf-control pdf-menu"><summary class="action-button" aria-label="Choose PDF edition"><span class="dl-name">PDF</span><span class="pdf-chevron" aria-hidden="true"></span></summary><div class="pdf-options"><a href="downloads/quo_vadis_humanitas-a4.pdf"><span>A4 (Printer)</span><small>519 KB</small></a><a href="downloads/quo_vadis_humanitas-a5.pdf"><span>A5 (Reader)</span><small>582 KB</small></a><a href="downloads/quo_vadis_humanitas-a6.pdf"><span>A6 (Booklet)</span><small>587 KB</small></a></div></details></div>
+        <div class="downloads-row"><details class="pdf-control pdf-menu"><summary class="action-button" aria-label="Choose PDF edition"><span class="dl-name">PDF</span><span class="pdf-chevron" aria-hidden="true"></span></summary><div class="pdf-options"><a href="downloads/quo_vadis_humanitas-a4.pdf"><span>A4 (Printer)</span><small>517 KB</small></a><a href="downloads/quo_vadis_humanitas-a5.pdf"><span>A5 (Reader)</span><small>580 KB</small></a><a href="downloads/quo_vadis_humanitas-a6.pdf"><span>A6 (Booklet)</span><small>585 KB</small></a></div></details></div>
       </div>
     </div>
   </div>
 </article>
-<article class="edition" style="--hue: 285">
+<article class="edition" data-date="2025-01-28" data-pontificate="francis" data-pontif-name="Francis" data-pontif-start="2013-03-13" data-type="curia_note" data-type-label="Doctrinal Note" data-authority-rank="3" data-title-key="antiqua et nova" data-search="antiqua et nova note on the relationship between artificial intelligence and human intelligence dicastery for the doctrine of the faith &amp; dicastery for culture and education doctrinal note francis cdf congregation for the doctrine of the faith holy office inquisition" style="--hue: 285">
   <header class="edition-head">
     <span class="kind">Doctrinal Note</span>
     <time class="date" datetime="2025-01-28">28 January 2025</time>
@@ -516,7 +714,7 @@ footer a:hover { color: var(--accent); text-decoration-color: var(--accent); }
     </div>
   </div>
 </article>
-<article class="edition" style="--hue: 140">
+<article class="edition" data-date="2015-05-24" data-pontificate="francis" data-pontif-name="Francis" data-pontif-start="2013-03-13" data-type="encyclical" data-type-label="Encyclical Letter" data-authority-rank="2" data-title-key="laudato si&#x27;" data-search="laudato si&#x27; on care for our common home of the holy father francis encyclical letter francis" style="--hue: 140">
   <header class="edition-head">
     <span class="kind">Encyclical Letter</span>
     <time class="date" datetime="2015-05-24">24 May 2015</time>
@@ -543,12 +741,12 @@ footer a:hover { color: var(--accent); text-decoration-color: var(--accent); }
       <span class="action-label">Download</span>
       <div class="action-row">
         <div class="downloads-row"><a class="action-button" href="downloads/laudato_si.epub"><span class="dl-name">EPUB</span><span class="dl-size">185 KB</span></a></div>
-        <div class="downloads-row"><details class="pdf-control pdf-menu"><summary class="action-button" aria-label="Choose PDF edition"><span class="dl-name">PDF</span><span class="pdf-chevron" aria-hidden="true"></span></summary><div class="pdf-options"><a href="downloads/laudato_si-a4.pdf"><span>A4 (Printer)</span><small>569 KB</small></a><a href="downloads/laudato_si-a5.pdf"><span>A5 (Reader)</span><small>637 KB</small></a><a href="downloads/laudato_si-a6.pdf"><span>A6 (Booklet)</span><small>648 KB</small></a></div></details></div>
+        <div class="downloads-row"><details class="pdf-control pdf-menu"><summary class="action-button" aria-label="Choose PDF edition"><span class="dl-name">PDF</span><span class="pdf-chevron" aria-hidden="true"></span></summary><div class="pdf-options"><a href="downloads/laudato_si-a4.pdf"><span>A4 (Printer)</span><small>568 KB</small></a><a href="downloads/laudato_si-a5.pdf"><span>A5 (Reader)</span><small>635 KB</small></a><a href="downloads/laudato_si-a6.pdf"><span>A6 (Booklet)</span><small>647 KB</small></a></div></details></div>
       </div>
     </div>
   </div>
 </article>
-<article class="edition" style="--hue: 42">
+<article class="edition" data-date="1965-12-07" data-pontificate="paul-vi" data-pontif-name="Paul VI" data-pontif-start="1963-06-21" data-type="council_constitution" data-type-label="Conciliar Constitution" data-authority-rank="1" data-title-key="gaudium et spes" data-search="gaudium et spes pastoral constitution on the church in the modern world of the second vatican council, promulgated by pope paul vi conciliar constitution paul vi vatican ii vatican 2 second vatican" style="--hue: 42">
   <header class="edition-head">
     <span class="kind">Conciliar Constitution</span>
     <time class="date" datetime="1965-12-07">7 December 1965</time>
@@ -580,7 +778,7 @@ footer a:hover { color: var(--accent); text-decoration-color: var(--accent); }
     </div>
   </div>
 </article>
-<article class="edition" style="--hue: 268">
+<article class="edition" data-date="1963-12-04" data-pontificate="paul-vi" data-pontif-name="Paul VI" data-pontif-start="1963-06-21" data-type="council_constitution" data-type-label="Conciliar Constitution" data-authority-rank="1" data-title-key="sacrosanctum concilium" data-search="sacrosanctum concilium constitution on the sacred liturgy of the second vatican council, promulgated by pope paul vi conciliar constitution paul vi vatican ii vatican 2 second vatican" style="--hue: 268">
   <header class="edition-head">
     <span class="kind">Conciliar Constitution</span>
     <time class="date" datetime="1963-12-04">4 December 1963</time>
@@ -613,6 +811,7 @@ footer a:hover { color: var(--accent); text-decoration-color: var(--accent); }
   </div>
 </article>
   </section>
+  <p class="empty-state" role="status">No editions match that filter.</p>
 
   <footer>
     <div class="contacts">
@@ -623,5 +822,231 @@ footer a:hover { color: var(--accent); text-decoration-color: var(--accent); }
     <div class="attribution">made with claude and codex ^•^</div>
   </footer>
 </main>
+<script>
+(function() {
+  document.body.classList.remove('no-js');
+
+  var SORT_META = {"date": {"label": "Promulgation", "default_dir": "newest first", "reversed_dir": "oldest first"}, "pontificate": {"label": "Pontificate", "default_dir": "earliest", "reversed_dir": "most recent"}, "authority": {"label": "Authority", "default_dir": "most authoritative", "reversed_dir": "least authoritative"}, "title": {"label": "Alphabetical", "default_dir": "A\u2013Z", "reversed_dir": "Z\u2013A"}};
+  var STORE_KEY = 'circulars:sort';
+
+  var grid     = document.querySelector('.editions');
+  var input    = document.getElementById('filter-input');
+  var options  = Array.prototype.slice.call(document.querySelectorAll('.sort-option'));
+  var reverse  = document.querySelector('.sort-reverse');
+  var current  = document.querySelector('.sort-current');
+  var dirLabel = document.querySelector('.sort-direction');
+  var cards    = Array.prototype.slice.call(grid.querySelectorAll('.edition'));
+
+  // Pull each card's sort handles up-front so we're not parsing data
+  // attributes on every reorder.
+  var rows = cards.map(function(el) {
+    return {
+      el:         el,
+      date:       el.dataset.date || '',
+      pontif:     el.dataset.pontifStart || '',
+      pontifName: el.dataset.pontifName || '',
+      type:       el.dataset.typeLabel || '',
+      authority:  parseInt(el.dataset.authorityRank, 10) || 99,
+      title:      el.dataset.titleKey || '',
+      search:     el.dataset.search || '',
+    };
+  });
+
+  // Which sorts get group headings. Date/alphabetical are continuous
+  // orderings where headings would be noise; pontificate and authority
+  // are the buckets the user scans by, so they get a tracked-caps
+  // label (pope name, kind label).
+  var GROUPING_KEY = {
+    pontificate: function(r) { return r.pontifName; },
+    authority:   function(r) { return r.type; },
+  };
+
+  var state = { sort: 'date', reversed: false };
+  var REDUCED_MOTION = !!(window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var shuffleTimer = null;
+
+  try {
+    var stored = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
+    if (stored && SORT_META[stored.sort]) {
+      state.sort = stored.sort;
+      state.reversed = !!stored.reversed;
+    }
+  } catch (e) { /* ignore corrupt prefs */ }
+
+  // FLIP reorder: capture each visible child's rect, mutate the DOM,
+  // then translate every moved card to its old slot and let the CSS
+  // transition spring it back. A small per-card stagger turns the
+  // batch into a cascade instead of a synchronised whoosh.
+  function animateReorder(mutate) {
+    if (REDUCED_MOTION || typeof grid.children[0] === 'undefined') {
+      mutate();
+      return;
+    }
+    var children = Array.prototype.slice.call(grid.children);
+    var firstRects = [];
+    children.forEach(function(el) {
+      // Reset leftover inline transition state before measuring so a
+      // mid-flight stagger delay doesn't poison the next pass.
+      el.style.transition = '';
+      el.style.transitionDelay = '';
+      el.style.transform = '';
+      if (!el.hidden) firstRects.push({ el: el, rect: el.getBoundingClientRect() });
+    });
+
+    mutate();
+
+    var moved = [];
+    firstRects.forEach(function(rec) {
+      if (!rec.el.isConnected || rec.el.hidden) return;
+      var last = rec.el.getBoundingClientRect();
+      var dx = rec.rect.left - last.left;
+      var dy = rec.rect.top - last.top;
+      if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return;
+      rec.el.style.transition = 'none';
+      rec.el.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
+      moved.push(rec.el);
+    });
+    if (!moved.length) return;
+
+    grid.classList.add('is-shuffling');
+    if (shuffleTimer) clearTimeout(shuffleTimer);
+
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        moved.forEach(function(el, i) {
+          el.style.transition = '';
+          el.style.transitionDelay = Math.min(i * 22, 220) + 'ms';
+          el.style.transform = '';
+        });
+        shuffleTimer = setTimeout(function() {
+          grid.classList.remove('is-shuffling');
+          moved.forEach(function(el) {
+            el.style.transitionDelay = '';
+          });
+          shuffleTimer = null;
+        }, 1100);
+      });
+    });
+  }
+
+  function compare(a, b) {
+    var sort = state.sort;
+    if (sort === 'date')        return cmp(a.date, b.date);
+    if (sort === 'pontificate') return cmp(a.pontif, b.pontif) || cmp(a.date, b.date);
+    if (sort === 'authority')   return cmp(a.authority, b.authority) || cmp(b.date, a.date);
+    if (sort === 'title')       return cmp(a.title, b.title);
+    return 0;
+  }
+  function cmp(x, y) { return x < y ? -1 : x > y ? 1 : 0; }
+
+  function applySort() {
+    // Snap any open PDF size menu shut. A floating dropdown anchored
+    // to a card mid-FLIP looks janky and the user is plainly engaged
+    // with the sort, not the download menu.
+    Array.prototype.slice.call(grid.querySelectorAll('details.pdf-menu[open]'))
+      .forEach(function(d) { d.removeAttribute('open'); });
+
+    // Only date defaults to descending (newest first). Pontificate,
+    // authority, and alphabetical all default ascending — pope from
+    // Paul VI forward, authority from conciliar constitution down,
+    // letters from A. Reverse flips whichever default applies.
+    var descByDefault = (state.sort === 'date');
+    var descending = descByDefault !== state.reversed;
+    rows.sort(function(a, b) {
+      var c = compare(a, b);
+      return descending ? -c : c;
+    });
+
+    // Remove leftover headings from the previous sort, then re-thread
+    // cards into a fragment, inserting a heading at each group break.
+    animateReorder(function() {
+      Array.prototype.slice.call(grid.querySelectorAll('.group-heading'))
+        .forEach(function(h) { h.remove(); });
+      var groupKey = GROUPING_KEY[state.sort];
+      var frag = document.createDocumentFragment();
+      var lastKey = null;
+      rows.forEach(function(r) {
+        if (groupKey) {
+          var key = groupKey(r);
+          if (key !== lastKey) {
+            var h = document.createElement('h2');
+            h.className = 'group-heading';
+            h.textContent = key;
+            h.dataset.group = key;
+            frag.appendChild(h);
+            lastKey = key;
+          }
+        }
+        frag.appendChild(r.el);
+      });
+      grid.appendChild(frag);
+    });
+
+    options.forEach(function(opt) {
+      var active = opt.dataset.sort === state.sort;
+      opt.classList.toggle('is-active', active);
+      opt.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+    reverse.classList.toggle('is-reversed', state.reversed);
+    reverse.setAttribute('aria-pressed', state.reversed ? 'true' : 'false');
+
+    var meta = SORT_META[state.sort];
+    current.textContent = meta.label;
+    dirLabel.textContent = '— ' + (state.reversed ? meta.reversed_dir : meta.default_dir);
+
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify(state));
+    } catch (e) { /* ignore quota / private mode */ }
+
+    // Refresh heading visibility against the active query.
+    applyFilter();
+  }
+
+  function applyFilter() {
+    var q = (input.value || '').trim().toLowerCase();
+    var visible = 0;
+    rows.forEach(function(r) {
+      var match = !q || r.search.indexOf(q) !== -1;
+      r.el.hidden = !match;
+      if (match) visible++;
+    });
+    // Walk the grid: each heading owns the cards between it and the
+    // next heading, so hide a heading whose group has nothing visible.
+    var children = Array.prototype.slice.call(grid.children);
+    for (var i = 0; i < children.length; i++) {
+      var node = children[i];
+      if (!node.classList.contains('group-heading')) continue;
+      var anyVisible = false;
+      for (var j = i + 1; j < children.length; j++) {
+        if (children[j].classList.contains('group-heading')) break;
+        if (!children[j].hidden) { anyVisible = true; break; }
+      }
+      node.hidden = !anyVisible;
+    }
+    grid.classList.toggle('is-empty', visible === 0);
+  }
+
+  options.forEach(function(opt) {
+    opt.addEventListener('click', function() {
+      if (state.sort === opt.dataset.sort) {
+        state.reversed = !state.reversed;
+      } else {
+        state.sort = opt.dataset.sort;
+        state.reversed = false;
+      }
+      applySort();
+    });
+  });
+  reverse.addEventListener('click', function() {
+    state.reversed = !state.reversed;
+    applySort();
+  });
+  input.addEventListener('input', applyFilter);
+
+  applySort();
+  applyFilter();
+})();
+</script>
 </body>
 </html>

@@ -1,23 +1,22 @@
 """Render the flat GitHub Pages landing page from document TOML metadata."""
 
 import datetime
-from html import escape
+from html import escape, unescape
+import json
+import re
 import sys
 
 from core import read_toml, title_case
 from project import BUILD, DOWNLOADS, SITE
 
 
-# Promulgation dates lifted from each source's `eventDate` meta tag. Used to
-# sort the landing page reverse-chronologically; missing entries sort to the
-# bottom (treated as the empty string).
-PROMULGATION_DATES = {
-    'gaudium_et_spes':       '1965-12-07',
-    'laudato_si':            '2015-05-24',
-    'magnifica_humanitas':   '2026-05-15',
-    'antiqua_et_nova':       '2025-01-28',
-    'quo_vadis_humanitas':   '2026-03-04',
-    'sacrosanctum_concilium':'1963-12-04',
+# Pontificates that have promulgated a doc in the catalogue. `start` is
+# used as the sort key when grouping by pontificate. Add an entry when
+# adding a doc under a new pope.
+PONTIFICATES = {
+    'paul-vi': {'name': 'Paul VI', 'start': '1963-06-21'},
+    'francis': {'name': 'Francis', 'start': '2013-03-13'},
+    'leo-xiv': {'name': 'Leo XIV', 'start': '2025-05-08'},
 }
 
 
@@ -28,24 +27,28 @@ PROMULGATION_DATES = {
 CARD_META = {
     'gaudium_et_spes': {
         'type': 'council_constitution',
+        'pontificate': 'paul-vi',
         'kind_long': 'Pastoral Constitution on the Church in the Modern World',
         'body': 'Second Vatican Council',
         'promulgated_by': 'Pope Paul VI',
     },
     'sacrosanctum_concilium': {
         'type': 'council_constitution',
+        'pontificate': 'paul-vi',
         'kind_long': 'Constitution on the Sacred Liturgy',
         'body': 'Second Vatican Council',
         'promulgated_by': 'Pope Paul VI',
     },
     'laudato_si': {
         'type': 'encyclical',
+        'pontificate': 'francis',
         'issuer_prefix': 'of the Holy Father',
         'issuer': 'Francis',
         'subtitle': 'on Care for Our Common Home',
     },
     'magnifica_humanitas': {
         'type': 'encyclical',
+        'pontificate': 'leo-xiv',
         'issuer_prefix': 'of His Holiness',
         'issuer': 'Pope Leo XIV',
         'subtitle': (
@@ -55,6 +58,7 @@ CARD_META = {
     },
     'antiqua_et_nova': {
         'type': 'curia_note',
+        'pontificate': 'francis',
         'bodies': (
             'Dicastery for the Doctrine of the Faith',
             'Dicastery for Culture and Education',
@@ -66,6 +70,7 @@ CARD_META = {
     },
     'quo_vadis_humanitas': {
         'type': 'commission_paper',
+        'pontificate': 'leo-xiv',
         'bodies': ('International Theological Commission',),
         'subtitle': (
             'Thinking through Christian Anthropology in the Face of '
@@ -82,6 +87,34 @@ TILE_KIND_LABEL = {
     'commission_paper':     'Commission Paper',
 }
 
+# Canonical authority ranking, low = highest authority. Conciliar
+# constitutions (ecumenical council, promulgated by the Pope) outrank a
+# papal encyclical; a dicasterial doctrinal note exercises the Pope's
+# authority without speaking in his voice; an ITC commission paper is
+# explicitly advisory, not magisterial.
+AUTHORITY_RANK = {
+    'council_constitution': 1,
+    'encyclical':           2,
+    'curia_note':           3,
+    'commission_paper':     4,
+}
+
+
+_TAG_RE = re.compile(r'<[^>]+>')
+_TITLE_PREFIX_RE = re.compile(r'^(the |a |an )', re.IGNORECASE)
+
+# Search aliases. If the blob (post-tag-strip, post-entity-decode,
+# lowercased) contains the trigger substring, the alias terms get
+# appended. Keeps 'Vatican II' searchable on the conciliar texts and
+# the DDF's older names (CDF, Holy Office, Inquisition) searchable on
+# anything currently bylined to the dicastery.
+SEARCH_ALIASES = (
+    ('second vatican council',
+     'vatican ii vatican 2 second vatican'),
+    ('dicastery for the doctrine of the faith',
+     'cdf congregation for the doctrine of the faith holy office inquisition'),
+)
+
 
 def _formatted_date(iso_date):
     """Render '2026-05-15' as '15 May 2026'. Leaves an unparseable value
@@ -93,6 +126,12 @@ def _formatted_date(iso_date):
     except ValueError:
         return iso_date
     return f'{d.day} {d.strftime("%B")} {d.year}'
+
+
+def _title_sort_key(name):
+    """Strip a leading article so 'A Note on…' sorts under N, not A."""
+    stripped = _TITLE_PREFIX_RE.sub('', name.strip())
+    return stripped.lower()
 
 
 def _card_fields(slug, data):
@@ -132,24 +171,44 @@ def _card_fields(slug, data):
         )
         byline = escape(title_case(joined)) if joined else ''
 
+    pont_slug = meta.get('pontificate', '')
+    pont = PONTIFICATES.get(pont_slug, {})
+
     return {
-        'name':        data['name'],
-        'kind_label':  TILE_KIND_LABEL.get(kind_type, ''),
-        'subtitle':    subtitle,
-        'byline':      byline,
-        'date':        _formatted_date(data.get('date', '')),
-        'iso_date':    data.get('date', ''),
-        'hue':         data.get('hue', 42),
-        'source_url':  data.get('source_url', ''),
+        'name':            data['name'],
+        'kind_type':       kind_type,
+        'kind_label':      TILE_KIND_LABEL.get(kind_type, ''),
+        'subtitle':        subtitle,
+        'byline':          byline,
+        'date':            _formatted_date(data.get('date', '')),
+        'iso_date':        data.get('date', ''),
+        'hue':             data.get('hue', 42),
+        'source_url':      data.get('source_url', ''),
+        'pontificate':     pont_slug,
+        'pontif_name':     pont.get('name', ''),
+        'pontif_start':    pont.get('start', ''),
+        'title_key':       _title_sort_key(data['name']),
     }
 
 
-SORT_ICON_SVG = (
-    '<svg class="sort-icon" viewBox="0 0 16 16" aria-hidden="true" '
+# Ordered: which sort field is active controls which label appears
+# next to "Sorting by". The two direction labels read 'default' first
+# (what you get when reverse is off) then 'reversed'. Only date
+# defaults to descending; the rest default ascending (so pontificate
+# starts at Paul VI, authority starts at the conciliar constitutions,
+# alphabetical at A).
+SORT_FIELDS = (
+    ('date',        'Promulgation', 'newest first',       'oldest first'),
+    ('pontificate', 'Pontificate',  'earliest',           'most recent'),
+    ('authority',   'Authority',    'most authoritative', 'least authoritative'),
+    ('title',       'Alphabetical', 'A–Z',                'Z–A'),
+)
+
+REVERSE_ICON_SVG = (
+    '<svg class="reverse-icon" viewBox="0 0 16 16" aria-hidden="true" '
     'focusable="false">'
-    '<rect x="2" y="3"  width="12" height="1.6" rx=".5" />'
-    '<rect x="2" y="7"  width="8"  height="1.6" rx=".5" />'
-    '<rect x="2" y="11" width="4"  height="1.6" rx=".5" />'
+    '<path d="M4 2v10.2L1.7 9.9.6 11l4.2 4.2 4.2-4.2L7.9 9.9 5.6 12.2V2H4z" />'
+    '<path d="M12 14V3.8l2.3 2.3 1.1-1.1L11.2.8 7 5l1.1 1.1L10.4 3.8V14H12z" />'
     '</svg>'
 )
 
@@ -210,9 +269,26 @@ def render_downloads(slug):
     return pdf_html, epub_html
 
 
-def render_card(slug):
-    data = read_toml(BUILD / f'{slug}.toml')
-    f = _card_fields(slug, data)
+def _search_blob(f):
+    """Lowercase, tag-stripped, entity-decoded haystack of everything a
+    user might type. Entities go through `unescape` so `&amp;` in the
+    byline doesn't haunt the matcher; SEARCH_ALIASES appends historical
+    and shorthand names for bodies the document is tied to."""
+    parts = (
+        f['name'],
+        f['subtitle'],
+        unescape(_TAG_RE.sub('', f['byline'])),
+        f['kind_label'],
+        f['pontif_name'],
+    )
+    blob = ' '.join(p for p in parts if p).lower()
+    extras = [aliases for trigger, aliases in SEARCH_ALIASES if trigger in blob]
+    if extras:
+        blob = blob + ' ' + ' '.join(extras)
+    return blob
+
+
+def render_card(slug, f):
     pdf_html, epub_html = render_downloads(slug)
 
     subtitle_html = (
@@ -238,7 +314,19 @@ def render_card(slug):
             '<span aria-hidden="true">↗</span></a>'
         )
 
-    return f'''<article class="edition" style="--hue: {f["hue"]}">
+    data_attrs = (
+        f'data-date="{escape(f["iso_date"], quote=True)}" '
+        f'data-pontificate="{escape(f["pontificate"], quote=True)}" '
+        f'data-pontif-name="{escape(f["pontif_name"], quote=True)}" '
+        f'data-pontif-start="{escape(f["pontif_start"], quote=True)}" '
+        f'data-type="{escape(f["kind_type"], quote=True)}" '
+        f'data-type-label="{escape(f["kind_label"], quote=True)}" '
+        f'data-authority-rank="{AUTHORITY_RANK.get(f["kind_type"], 99)}" '
+        f'data-title-key="{escape(f["title_key"], quote=True)}" '
+        f'data-search="{escape(_search_blob(f), quote=True)}"'
+    )
+
+    return f'''<article class="edition" {data_attrs} style="--hue: {f["hue"]}">
   <header class="edition-head">
     {kind_html}
     {date_html}
@@ -272,20 +360,49 @@ def render_card(slug):
 </article>'''
 
 
+def _sort_options_html():
+    """Render the row of sort-field buttons. The first is pre-marked
+    active; JS keeps it in sync after that."""
+    buttons = []
+    for i, (key, label, _asc_dir, _desc_dir) in enumerate(SORT_FIELDS):
+        active = ' is-active' if i == 0 else ''
+        pressed = 'true' if i == 0 else 'false'
+        buttons.append(
+            f'<button type="button" class="sort-option{active}" '
+            f'data-sort="{key}" aria-pressed="{pressed}">{label}</button>'
+        )
+    return ''.join(buttons)
+
+
+def _sort_field_meta_json():
+    """Direction labels per sort field, surfaced to JS so the 'Sorting by'
+    caption stays accurate without duplicating the table in two places."""
+    return json.dumps({
+        key: {
+            'label':        label,
+            'default_dir':  default_dir,
+            'reversed_dir': reversed_dir,
+        }
+        for key, label, default_dir, reversed_dir in SORT_FIELDS
+    })
+
+
 def main():
     slugs = sys.argv[1:]
     if not slugs:
         raise SystemExit('usage: python make_index.py DOC [DOC ...]')
 
-    # Reverse chronological by promulgation date (newest first). Unknown
-    # slugs sort to the bottom in their original order.
+    # Server-side default: reverse chronological by promulgation date. JS
+    # picks up the same default when it boots, so first paint matches.
+    fields_by_slug = {slug: _card_fields(slug, read_toml(BUILD / f'{slug}.toml'))
+                      for slug in slugs}
     slugs = sorted(
         slugs,
-        key=lambda slug: PROMULGATION_DATES.get(slug, ''),
+        key=lambda s: fields_by_slug[s]['iso_date'],
         reverse=True,
     )
 
-    cards = '\n'.join(render_card(slug) for slug in slugs)
+    cards = '\n'.join(render_card(slug, fields_by_slug[slug]) for slug in slugs)
     page = f'''<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -379,37 +496,156 @@ h1 {{
 }}
 .intro a {{ color: inherit; text-decoration-color: var(--ink-fainter); }}
 
-/* ── Sort bar ────────────────────────────────────────────────────────── */
+/* ── Filter / sort controls ──────────────────────────────────────────── */
+.controls {{
+  display: grid;
+  gap: .9rem;
+  margin: 0 0 1.6rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid var(--rule);
+}}
+.search-row {{
+  position: relative;
+}}
+.search-icon {{
+  position: absolute;
+  left: .8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  color: var(--ink-fainter);
+  pointer-events: none;
+}}
+.search-input {{
+  width: 100%;
+  padding: .55rem .8rem .55rem 2.3rem;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  color: var(--ink);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1rem;
+  line-height: 1.4;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}}
+.search-input::placeholder {{
+  color: var(--ink-fainter);
+  font-style: italic;
+}}
+.search-input:focus {{
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 14%, transparent);
+}}
+
 .sort-bar {{
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: .8rem;
-  margin: 0 0 1.4rem;
+  gap: 1rem;
+  flex-wrap: wrap;
   color: var(--ink-fainter);
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
   font-size: .72rem;
   letter-spacing: .12em;
   text-transform: uppercase;
 }}
+.sort-label {{
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .35rem .55rem;
+}}
 .sort-label small {{ color: var(--ink-dim); font-size: inherit; }}
-.sort-toggle {{
+.sort-label .sort-current {{ color: var(--ink); font-weight: 600; }}
+.sort-label .sort-direction {{
+  color: var(--ink-fainter);
+  text-transform: none;
+  letter-spacing: .04em;
+  font-style: italic;
+}}
+
+.sort-options {{
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  align-items: center;
+}}
+.sort-option {{
   background: transparent;
   border: 1px solid var(--rule);
   border-radius: 2px;
   color: var(--ink-fainter);
-  cursor: not-allowed;
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  padding: .28rem .55rem;
+  transition: border-color .15s ease, color .15s ease, background .15s ease;
+}}
+.sort-option:hover {{
+  border-color: var(--accent-soft);
+  color: var(--ink-dim);
+}}
+.sort-option.is-active {{
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, var(--paper));
+}}
+.sort-option:focus-visible {{
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}}
+
+.sort-reverse {{
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  color: var(--ink-fainter);
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: .3rem .35rem;
-  opacity: .85;
+  padding: .28rem .35rem;
+  transition: border-color .15s ease, color .15s ease, background .15s ease;
 }}
-.sort-icon {{
-  width: .9rem;
-  height: .9rem;
+.sort-reverse:hover {{
+  border-color: var(--accent-soft);
+  color: var(--ink-dim);
+}}
+.sort-reverse.is-reversed {{
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, var(--paper));
+}}
+.sort-reverse:focus-visible {{
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}}
+.reverse-icon {{
+  width: .85rem;
+  height: .85rem;
   fill: currentColor;
 }}
+.sort-reverse.is-reversed .reverse-icon {{
+  transform: scaleY(-1);
+}}
+
+/* Hide controls when JS isn't available; the cards still render in
+   reverse-chronological order so the page stays useful. */
+.no-js .controls {{ display: none; }}
+
+.empty-state {{
+  display: none;
+  padding: 2.2rem 1rem;
+  text-align: center;
+  color: var(--ink-dim);
+  border: 1px dashed var(--rule);
+  border-radius: 2px;
+  font-style: italic;
+}}
+.editions.is-empty + .empty-state {{ display: block; }}
 
 /* ── Editions grid ───────────────────────────────────────────────────── */
 .editions {{
@@ -418,23 +654,72 @@ h1 {{
   gap: 1.4rem;
 }}
 
+.group-heading {{
+  grid-column: 1 / -1;
+  margin: 1rem 0 .1rem;
+  padding-bottom: .35rem;
+  border-bottom: 1px solid var(--rule);
+  color: var(--accent);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  animation: heading-drop .28s ease-out both;
+}}
+.group-heading:first-child {{ margin-top: 0; }}
+.group-heading[hidden] {{ display: none; }}
+@keyframes heading-drop {{
+  from {{ opacity: 0; transform: translateY(-.3rem); }}
+  to   {{ opacity: 1; transform: none; }}
+}}
+
 .edition {{
   position: relative;
   background: var(--paper);
   border: 1px solid var(--paper-edge);
-  border-left: 5px solid hsl(calc(var(--hue) - 4), 42%, 40%);
   padding: 1.6rem 1.7rem 1.4rem;
   display: flex;
   flex-direction: column;
   min-height: 22rem;
   box-shadow: 0 1px 0 0 var(--rule-soft);
+  /* FLIP-reorder transition. Spring-y curve + per-card stagger (set
+     inline from JS) makes a sort change feel goofily mechanical
+     rather than instant. Slightly longer than feels strictly
+     necessary so long-distance cards don't whip too cartoonishly. */
+  transition: transform .58s cubic-bezier(.34, 1.45, .64, 1),
+              box-shadow .25s ease;
+}}
+/* Flat accent bar on the left edge. Lives as a pseudo so its corners
+   stay square — a 5px `border-left` against a 1px top/bottom would
+   miter at 45° and chamfer the join. The -1px overhangs put the bar
+   flush with the card's outer rectangle, covering the paper-edge
+   border on those three sides. */
+.edition::before {{
+  content: '';
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  left: -1px;
+  width: 5px;
+  background: hsl(calc(var(--hue) - 4), 42%, 40%);
+  pointer-events: none;
 }}
 @media (prefers-color-scheme: dark) {{
-  .edition {{
-    border-left-color: hsl(calc(var(--hue) - 4), 42%, 56%);
+  .edition::before {{
+    background: hsl(calc(var(--hue) - 4), 42%, 56%);
   }}
 }}
-
+.edition[hidden] {{ display: none; }}
+/* `will-change: transform` only during a shuffle. Declaring it at
+   rest would make every card its own stacking context, which traps
+   the PDF dropdown (`z-index: 2`) inside the card and lets sibling
+   cards paint over it. */
+.editions.is-shuffling .edition {{
+  will-change: transform;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--ink) 14%, transparent),
+              0 1px 0 0 var(--rule-soft);
+}}
 .edition-head {{
   display: flex;
   align-items: baseline;
@@ -621,11 +906,19 @@ h1 {{
   border: 1px solid var(--rule);
   border-radius: 2px;
   box-shadow: 0 .35rem 1rem color-mix(in srgb, var(--ink) 12%, transparent);
+  /* Parent grid: a single track for labels, one for sizes. The
+     anchors below use `grid-template-columns: subgrid` so every row
+     inherits this same pair of tracks — sizes get a shared right
+     gutter even when one is '9 KB' and the next is '1.2 MB'. */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
 }}
 .pdf-options a {{
-  display: flex;
-  justify-content: space-between;
-  gap: .5rem;
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  column-gap: .8rem;
+  align-items: baseline;
   padding: .45rem;
   color: var(--ink-dim);
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
@@ -643,6 +936,8 @@ h1 {{
   color: var(--ink-fainter);
   font-size: inherit;
   white-space: nowrap;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }}
 @media (prefers-color-scheme: dark) {{
   .pdf-menu summary:hover,
@@ -689,7 +984,7 @@ footer a:hover {{ color: var(--accent); text-decoration-color: var(--accent); }}
 }}
 </style>
 </head>
-<body>
+<body class="no-js">
 <main>
   <header class="masthead">
     <p class="brand"><b>The&nbsp;Circulars</b> · vatican.va, retypeset</p>
@@ -700,16 +995,37 @@ footer a:hover {{ color: var(--accent); text-decoration-color: var(--accent); }}
     and an EPUB. Source on <a href="https://github.com/forthrast-com/va_beautifier" target="_blank" rel="noopener">GitHub</a>.</p>
   </header>
 
-  <div class="sort-bar" aria-label="Sort controls">
-    <span class="sort-label"><small>Sorted by</small> Promulgation, newest first</span>
-    <button class="sort-toggle" type="button" aria-label="Change sort order" disabled>
-      {SORT_ICON_SVG}
-    </button>
-  </div>
+  <form class="controls" role="search" aria-label="Filter and sort editions"
+        onsubmit="return false">
+    <div class="search-row">
+      <svg class="search-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.4"/>
+        <line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      <input class="search-input" type="search" id="filter-input"
+             placeholder="Filter by title, pope, body, or kind…"
+             aria-label="Filter documents" autocomplete="off">
+    </div>
+    <div class="sort-bar" aria-label="Sort controls">
+      <span class="sort-label">
+        <small>Sorting by</small>
+        <span class="sort-current">Promulgation</span>
+        <span class="sort-direction">— newest first</span>
+      </span>
+      <div class="sort-options" role="group" aria-label="Sort field">
+        {_sort_options_html()}
+        <button type="button" class="sort-reverse" aria-pressed="false"
+                aria-label="Reverse sort order" title="Reverse order">
+          {REVERSE_ICON_SVG}
+        </button>
+      </div>
+    </div>
+  </form>
 
   <section class="editions" aria-label="Available documents">
 {cards}
   </section>
+  <p class="empty-state" role="status">No editions match that filter.</p>
 
   <footer>
     <div class="contacts">
@@ -720,6 +1036,232 @@ footer a:hover {{ color: var(--accent); text-decoration-color: var(--accent); }}
     <div class="attribution">made with claude and codex ^•^</div>
   </footer>
 </main>
+<script>
+(function() {{
+  document.body.classList.remove('no-js');
+
+  var SORT_META = {_sort_field_meta_json()};
+  var STORE_KEY = 'circulars:sort';
+
+  var grid     = document.querySelector('.editions');
+  var input    = document.getElementById('filter-input');
+  var options  = Array.prototype.slice.call(document.querySelectorAll('.sort-option'));
+  var reverse  = document.querySelector('.sort-reverse');
+  var current  = document.querySelector('.sort-current');
+  var dirLabel = document.querySelector('.sort-direction');
+  var cards    = Array.prototype.slice.call(grid.querySelectorAll('.edition'));
+
+  // Pull each card's sort handles up-front so we're not parsing data
+  // attributes on every reorder.
+  var rows = cards.map(function(el) {{
+    return {{
+      el:         el,
+      date:       el.dataset.date || '',
+      pontif:     el.dataset.pontifStart || '',
+      pontifName: el.dataset.pontifName || '',
+      type:       el.dataset.typeLabel || '',
+      authority:  parseInt(el.dataset.authorityRank, 10) || 99,
+      title:      el.dataset.titleKey || '',
+      search:     el.dataset.search || '',
+    }};
+  }});
+
+  // Which sorts get group headings. Date/alphabetical are continuous
+  // orderings where headings would be noise; pontificate and authority
+  // are the buckets the user scans by, so they get a tracked-caps
+  // label (pope name, kind label).
+  var GROUPING_KEY = {{
+    pontificate: function(r) {{ return r.pontifName; }},
+    authority:   function(r) {{ return r.type; }},
+  }};
+
+  var state = {{ sort: 'date', reversed: false }};
+  var REDUCED_MOTION = !!(window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var shuffleTimer = null;
+
+  try {{
+    var stored = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
+    if (stored && SORT_META[stored.sort]) {{
+      state.sort = stored.sort;
+      state.reversed = !!stored.reversed;
+    }}
+  }} catch (e) {{ /* ignore corrupt prefs */ }}
+
+  // FLIP reorder: capture each visible child's rect, mutate the DOM,
+  // then translate every moved card to its old slot and let the CSS
+  // transition spring it back. A small per-card stagger turns the
+  // batch into a cascade instead of a synchronised whoosh.
+  function animateReorder(mutate) {{
+    if (REDUCED_MOTION || typeof grid.children[0] === 'undefined') {{
+      mutate();
+      return;
+    }}
+    var children = Array.prototype.slice.call(grid.children);
+    var firstRects = [];
+    children.forEach(function(el) {{
+      // Reset leftover inline transition state before measuring so a
+      // mid-flight stagger delay doesn't poison the next pass.
+      el.style.transition = '';
+      el.style.transitionDelay = '';
+      el.style.transform = '';
+      if (!el.hidden) firstRects.push({{ el: el, rect: el.getBoundingClientRect() }});
+    }});
+
+    mutate();
+
+    var moved = [];
+    firstRects.forEach(function(rec) {{
+      if (!rec.el.isConnected || rec.el.hidden) return;
+      var last = rec.el.getBoundingClientRect();
+      var dx = rec.rect.left - last.left;
+      var dy = rec.rect.top - last.top;
+      if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return;
+      rec.el.style.transition = 'none';
+      rec.el.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
+      moved.push(rec.el);
+    }});
+    if (!moved.length) return;
+
+    grid.classList.add('is-shuffling');
+    if (shuffleTimer) clearTimeout(shuffleTimer);
+
+    requestAnimationFrame(function() {{
+      requestAnimationFrame(function() {{
+        moved.forEach(function(el, i) {{
+          el.style.transition = '';
+          el.style.transitionDelay = Math.min(i * 22, 220) + 'ms';
+          el.style.transform = '';
+        }});
+        shuffleTimer = setTimeout(function() {{
+          grid.classList.remove('is-shuffling');
+          moved.forEach(function(el) {{
+            el.style.transitionDelay = '';
+          }});
+          shuffleTimer = null;
+        }}, 1100);
+      }});
+    }});
+  }}
+
+  function compare(a, b) {{
+    var sort = state.sort;
+    if (sort === 'date')        return cmp(a.date, b.date);
+    if (sort === 'pontificate') return cmp(a.pontif, b.pontif) || cmp(a.date, b.date);
+    if (sort === 'authority')   return cmp(a.authority, b.authority) || cmp(b.date, a.date);
+    if (sort === 'title')       return cmp(a.title, b.title);
+    return 0;
+  }}
+  function cmp(x, y) {{ return x < y ? -1 : x > y ? 1 : 0; }}
+
+  function applySort() {{
+    // Snap any open PDF size menu shut. A floating dropdown anchored
+    // to a card mid-FLIP looks janky and the user is plainly engaged
+    // with the sort, not the download menu.
+    Array.prototype.slice.call(grid.querySelectorAll('details.pdf-menu[open]'))
+      .forEach(function(d) {{ d.removeAttribute('open'); }});
+
+    // Only date defaults to descending (newest first). Pontificate,
+    // authority, and alphabetical all default ascending — pope from
+    // Paul VI forward, authority from conciliar constitution down,
+    // letters from A. Reverse flips whichever default applies.
+    var descByDefault = (state.sort === 'date');
+    var descending = descByDefault !== state.reversed;
+    rows.sort(function(a, b) {{
+      var c = compare(a, b);
+      return descending ? -c : c;
+    }});
+
+    // Remove leftover headings from the previous sort, then re-thread
+    // cards into a fragment, inserting a heading at each group break.
+    animateReorder(function() {{
+      Array.prototype.slice.call(grid.querySelectorAll('.group-heading'))
+        .forEach(function(h) {{ h.remove(); }});
+      var groupKey = GROUPING_KEY[state.sort];
+      var frag = document.createDocumentFragment();
+      var lastKey = null;
+      rows.forEach(function(r) {{
+        if (groupKey) {{
+          var key = groupKey(r);
+          if (key !== lastKey) {{
+            var h = document.createElement('h2');
+            h.className = 'group-heading';
+            h.textContent = key;
+            h.dataset.group = key;
+            frag.appendChild(h);
+            lastKey = key;
+          }}
+        }}
+        frag.appendChild(r.el);
+      }});
+      grid.appendChild(frag);
+    }});
+
+    options.forEach(function(opt) {{
+      var active = opt.dataset.sort === state.sort;
+      opt.classList.toggle('is-active', active);
+      opt.setAttribute('aria-pressed', active ? 'true' : 'false');
+    }});
+    reverse.classList.toggle('is-reversed', state.reversed);
+    reverse.setAttribute('aria-pressed', state.reversed ? 'true' : 'false');
+
+    var meta = SORT_META[state.sort];
+    current.textContent = meta.label;
+    dirLabel.textContent = '— ' + (state.reversed ? meta.reversed_dir : meta.default_dir);
+
+    try {{
+      localStorage.setItem(STORE_KEY, JSON.stringify(state));
+    }} catch (e) {{ /* ignore quota / private mode */ }}
+
+    // Refresh heading visibility against the active query.
+    applyFilter();
+  }}
+
+  function applyFilter() {{
+    var q = (input.value || '').trim().toLowerCase();
+    var visible = 0;
+    rows.forEach(function(r) {{
+      var match = !q || r.search.indexOf(q) !== -1;
+      r.el.hidden = !match;
+      if (match) visible++;
+    }});
+    // Walk the grid: each heading owns the cards between it and the
+    // next heading, so hide a heading whose group has nothing visible.
+    var children = Array.prototype.slice.call(grid.children);
+    for (var i = 0; i < children.length; i++) {{
+      var node = children[i];
+      if (!node.classList.contains('group-heading')) continue;
+      var anyVisible = false;
+      for (var j = i + 1; j < children.length; j++) {{
+        if (children[j].classList.contains('group-heading')) break;
+        if (!children[j].hidden) {{ anyVisible = true; break; }}
+      }}
+      node.hidden = !anyVisible;
+    }}
+    grid.classList.toggle('is-empty', visible === 0);
+  }}
+
+  options.forEach(function(opt) {{
+    opt.addEventListener('click', function() {{
+      if (state.sort === opt.dataset.sort) {{
+        state.reversed = !state.reversed;
+      }} else {{
+        state.sort = opt.dataset.sort;
+        state.reversed = false;
+      }}
+      applySort();
+    }});
+  }});
+  reverse.addEventListener('click', function() {{
+    state.reversed = !state.reversed;
+    applySort();
+  }});
+  input.addEventListener('input', applyFilter);
+
+  applySort();
+  applyFilter();
+}})();
+</script>
 </body>
 </html>
 '''

@@ -6,19 +6,27 @@ Web/EPUB/PDF editions of Vatican documents. The implemented documents now cover 
 
 The vatican.va edition is one long page of bare text. The points of difference:
 
-- **Sidebar footnotes** — notes open in a drawer beside the text, not dumped at the bottom
-- **Contents and navbar** — sticky chapter/section header, scroll indicator, bookmarks and jump-anywhere navigation
-- **Multiple formats** — web reading edition plus downloadable EPUB and PDF books
-- **Reader toggles** — light/dark + text size, gear-icon popover top-right, persisted in `localStorage`. Driven by CSS custom properties on `:root` (write `data-theme` / `data-size` attrs, the variants override the defaults).
+- **Reader drawer** — contents, contextual footnotes, and bookmarks share a
+  three-tab drawer beside the text rather than being dumped at the bottom
+- **Navigation** — sticky chapter/section header, scroll indicator,
+  bookmarks, and jump-anywhere navigation
+- **Multiple formats** — web reader, EPUB, and A4 printer / A5 reader / A6
+  booklet PDFs
+- **Reader controls** — home, edition information, reader preferences, and
+  drawer controls live top-right. Theme, text size, font, and bookmarks persist
+  in `localStorage`; CSS custom properties and `data-theme` / `data-size` /
+  `data-font` attributes drive the variants.
+- **Browsable catalogue** — the landing page filters documents and sorts them
+  by promulgation, pontificate, authority, or title
 
 ## Pipeline
 
     download_sources.py ──▶ sources/*.html ──(parse.py <slug>)──▶ build/<slug>.toml ──(make_html.py <slug>)──▶ site/<slug>.html
                                                 │
-                                                ├──(make_index.py)────────────▶  index.html
+                                                ├──(make_index.py)────────────▶  site/index.html
                                                 │
                                                 ├──(make_book.py <slug>)─────▶  site/downloads/<slug>.epub
-                                                └──(make_book.py <slug>)─────▶  site/downloads/<slug>.pdf
+                                                └──(make_book.py <slug>)─────▶  site/downloads/<slug>-{a4,a5,a6}.pdf
 
 The TOML is the canonical intermediate. Downstream renderers consume TOML — never re-parse the Vatican HTML.
 
@@ -26,19 +34,44 @@ The TOML is the canonical intermediate. Downstream renderers consume TOML — ne
 
 - `parse.py` — thin CLI. `argparse` with `choices` discovered via `pkgutil.iter_modules(extract.__path__)`. Loads `extract.<slug>`, calls its `extract()`, writes `<slug>.toml` via `core.write_toml`.
 - `download_sources.py` — manifest-driven source fetcher. Lists or downloads implemented, queued, and reference-only Vatican pages into `sources/`; existing snapshots are preserved unless `--force` is passed.
-- `core.py` — shared text/structure helpers, canonical paragraph and footnote constructors/context assignment, TOML loading and serialisation. The serialiser is the contract: each extractor returns a dict with `name`, `desc`, `promulgation`, `signature`, `paragraphs[]`, `footnotes[]`, and optional `appendices[]` / `signatories[]`.
+- `core.py` — shared text/structure helpers, canonical paragraph and footnote
+  constructors/context assignment, TOML loading and serialisation. The
+  serialiser is the contract for document metadata, structure, appendices,
+  signatories, and book-specific options.
 - `curia.py` — shared parsing helpers for Word-export Curia pages, including whitespace repair and anchor-delimited footnote extraction.
 - `project.py` — shared repository paths used by CLI and renderer entrypoints.
 - `extract/<slug>.py` — per-document extractor. Each exposes `extract() -> dict`. Add a new document by dropping a new module here; no registry edit needed.
-- `make_html.py <slug>` — reads `<slug>.toml`, writes `<slug>.html`. Single self-contained file (CSS + JS inlined). Doc-name comes from the TOML's `name`. Body gets `class="doc-<slug>"` so per-doc CSS overrides can scope to that document only.
-- `make_book.py <slug>` — reads `<slug>.toml`, emits intermediate `build/<slug>.md` + `build/<slug>_titlepage.typ` and finished `site/downloads/<slug>.epub` / `site/downloads/<slug>.pdf` (via `--pdf-engine=typst --pdf-engine-opt=--root=<ROOT>`). The title page is raw typst fed through `--include-before-body` so it lands before the TOC. Body font is Hoefler Text by default; override with `VA_BOOK_FONT=…`. Appendices are emitted as ordinary Markdown headings/text so both book formats index them. Page breaks and PDF end matter ride as raw typst blocks, with a parallel raw-HTML end-matter block for EPUB.
-- `templates/book.typ` — source pandoc-typst `conf` module materialised to `build/<hyphenated-slug>-book.typ` with a muted document-hue accent. Owns page geometry (A5, 11pt), font defaults, heading shows for chapter/section/subsection, footnote entry styling, and the centred italic "Contents" header on the TOC page. Does *not* render the title — that's the include-before-body's job.
+- `make_html.py <slug>` — reads `<slug>.toml`, writes a self-contained
+  `site/<slug>.html` with CSS and JS inlined. It builds the sticky heading,
+  scroll indicator, drawer contents/footnotes/bookmarks, appendices, and end
+  matter. Body gets `class="doc-<slug>"` for scoped overrides.
+- `make_index.py` — renders the catalogue cards and download controls from
+  TOML plus `CARD_META`. Client-side filtering, grouping, and sort preference
+  persistence are inlined into `site/index.html`. Adding a document currently
+  requires a `CARD_META` entry for a fully authored tile.
+- `make_book.py <slug>` — emits intermediate Markdown and per-paper title-page
+  Typst includes, then writes one EPUB plus A4, A5, and A6 PDFs under
+  `site/downloads/`. Appendices enter both tables of contents; page breaks and
+  PDF end matter use raw Typst, with parallel raw HTML for EPUB.
+- `templates/book.typ` — source pandoc-typst `conf` module materialised to
+  `build/<hyphenated-slug>-book.typ` with a muted document-hue accent. Owns
+  paper geometry, running heads, heading shows, footnote styling, and TOC
+  heading. Title pages and colophons come from the include-before-body files.
 - `assets/styles.css`, `assets/scripts.js` — read by `make_html.py` and inlined into the output. The JS has two placeholders, `__INDICATOR_JSON__` and `__DOC_NAME__`, substituted at render time. Edit these files directly; the output is still self-contained.
-- `Makefile` — the build entrypoint. `make` (default `all`) builds books + every site HTML + the landing page; `make books` stops after EPUB/PDF; `make site/<slug>.html` builds a single edition. The landing page depends on the EPUBs so its download labels carry current file sizes. Each new doc gets its own explicit TOML target so source-file dependencies stay precise. Add a doc → drop extractor → add slug to `DOCS` and add a `build/<slug>.toml` rule.
+- `Makefile` — the build entrypoint. `make` builds books, every reader, and the
+  catalogue; `make books` stops after EPUB/PDF; `make site/<slug>.html` builds
+  one reader. Each new document gets an explicit TOML rule so source
+  dependencies stay precise. Add a doc → drop extractor → add slug to `DOCS`,
+  add its TOML rule, and add catalogue metadata.
 
 ## TOML schema
 
-Top-level: `name`, `hue` (web accent colour in HSL degrees), `source_url`, `desc`, optional `desc_post`, `promulgation`, `signature`, `hero_image`, `hero_credit`. Promulgation and signature use canonical inline formatting; line breaks in `signature` are significant.
+Top-level: `name`, `hue`, `source_url`, `author`, `date`, `identifier`,
+`rights`, `publisher`, `collection`, `desc`, optional `desc_post`,
+`chapter_style`, `book_toc_depth`, `promulgation`, `signature`, `hero_image`,
+and `hero_credit`. `chapter_style = "roman"` changes structural chapter
+labels; `book_toc_depth` defaults to 3. Promulgation and signature use
+canonical inline formatting; line breaks in `signature` are significant.
 
 `[[paragraphs]]` — `number`, `part`, `part_title`, `chapter`, `chapter_title`, `chapter_subtitle`, `section`, `section_title`, `sub_heading`, `heading_la`, `break_after`, `text` (multiline, `\n\n`-separated sub-paragraphs). Authored inline formatting in `text` and footnote `text` is canonical Markdown-compatible content: `*italics*`, `**bold**`, `<sup>…</sup>`, and `<sub>…</sub>`.
 
@@ -75,7 +108,12 @@ Three templates encountered so far:
 
 - **Old flat** (GeS) — 24 `<p>` tags total, structure carried by `<b>` headings inside `<center>` blocks. Latin source provides a per-paragraph micro-summary keyed by §N. Footnotes in a separate `NOTES`-marked block.
 - **Modern Bootstrap** (LS) — 788 `<p>` tags wrapped in `<main>`. Chapter delimiter is a centred `CHAPTER ONE` followed by a centred `<b>` title. Section is a `<p>` whose only child is a `<b>` matching `^[IVX]+\.`. Sub-heading is a `<p>` whose only child is an `<i>`. The `align` attribute is unreliable (set on the first heading of chapter 1, blank thereafter); use child-shape tests.
-- **Curia Word export** (*Antiqua et nova*, *Quo vadis, humanitas?*) — content is a stream of styled `<p>` tags with named anchors for footnotes. Major divisions and subsection titles are recovered from centred/bold/italic paragraph shapes; use anchor boundaries for footnotes because wrapper structure is inconsistent.
+- **Curia Word export** (*Antiqua et nova*, *Quo vadis, humanitas?*) —
+  content is a stream of styled `<p>` tags with named anchors for footnotes.
+  Major divisions and subsection titles are recovered from
+  centred/bold/italic paragraph shapes; use anchor boundaries for footnotes
+  because wrapper structure is inconsistent. Structural heading labels must
+  remain plain text even when the source wraps part of a heading in a link.
 
 Each new document is likely to be its own dialect of one of these. Drop a new file in `extract/`, look at the source's tag-shape signals, and write the walker. Don't assume what worked for GeS will work for LS or vice versa.
 
@@ -85,13 +123,24 @@ HTML output is a single self-contained file (CSS + JS inlined, no external asset
 
 - paragraph: `para-{n}`
 - footnote: `fn-{part}-{chapter}-{n}`
+- chapter/root region: generated `ch-{n}`
 - section heading: `sec-{part}-{chapter}-{section}`
+- sub-heading: generated `sub-{n}`
+- appendix: `appendix-{n}`
 
 Doc-scoped CSS lives under `.doc-<slug>` selectors. Long structured documents share gutter-style paragraph numbers, soft-anchor positioning, and a height-capped scroll indicator under their document selectors. GeS keeps the original inline `5. *Latin heading* body` layout via the default rules + `.para-num::after { content: '.' }`.
 
 JS publishes the sticky-bar's measured height to `--bar-h` so other layout (indicator centring, soft-anchor maths) can read it from CSS or JS.
 
-The web edition leans on UI affordances (sticky heading bar, scroll indicator, footnote drawer) that don't translate to EPUB/PDF — those want endnotes per section, real page breaks, no JS.
+The drawer opens from the top-right control or an inline footnote reference.
+Opening from a reference synchronises the control state and selects the note.
+On touch only, tapping document text closes the drawer; mouse clicks do not.
+The drawer grows to 75vw on mobile, and selected notes settle higher in its
+viewport than on desktop.
+
+The web edition leans on UI affordances (sticky heading bar, scroll indicator,
+drawer, bookmarks) that don't translate to EPUB/PDF — those want endnotes per
+section, real page breaks, and no JS.
 
 The flat GitHub Pages site is deployed through `.github/workflows/pages.yml`;
 `CNAME` sets `circulars.forthrast.com`. Finished HTML and book downloads are
@@ -101,7 +150,7 @@ published, while intermediate Markdown/TOML stays in `build/` only.
 
 - **Title page (PDF) — done.** `templates/book.typ` owns book
   typography (page geom, heading shows, footnote entries). The title
-  page is written to `build/<slug>_titlepage.typ` and fed in via
+  page is written to `build/<slug>_titlepage_<paper>.typ` and fed in via
   pandoc's `--include-before-body` so it lands before the TOC.
   Display-italic doc name (centred, vertically balanced), tracked-caps
   preamble and subtitle, no page number on the title page. End matter
@@ -109,9 +158,6 @@ published, while intermediate Markdown/TOML stays in `build/` only.
   block at the end of the body, with a parallel raw-HTML colophon
   block so EPUB gets the same content.
 - **Book polish (other)** —
-    - *Colophon polish:* revisit the revised PDF colophon hierarchy,
-      spacing, and compact A6 treatment after reviewing representative
-      outputs across documents.
     - *Multi-paragraph footnotes:* the few notes in LS that span two
       paragraphs render as one block — pandoc's continuation-indent
       handling needs a closer look.
@@ -123,7 +169,6 @@ published, while intermediate Markdown/TOML stays in `build/` only.
   un-extracted (likely the modern Bootstrap dialect, LS-shaped). A
   reference capture recorded by `download_sources.py` for a possible
   future edition is `francis_g7_ai_en.html`.
-
 ## JS-free drawer (not implemented — approach notes)
 
 The drawer, tabs, and footnote refs can all work without JavaScript using
