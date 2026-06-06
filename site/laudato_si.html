@@ -187,7 +187,7 @@ h1, h2, h3, h4 { font-family: var(--font-display); }
     background: var(--bar-bg, var(--bg));
     border-bottom: 1px solid var(--rule-tint);
     padding-left: max(var(--col-outer-left), 2rem);   /* floor so heading clears the screen edge at narrow widths */
-    padding-right: 7.5rem;
+    padding-right: 10.5rem;
     height: var(--bar-h-fixed);
     font-family: var(--font-display);
     font-size: 1.8rem;
@@ -314,7 +314,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     position: fixed;
     top: var(--bar-h, 3rem); right: 0;
     width: 380px;
-    max-width: 66vw;          /* cap at 2/3 viewport so narrow screens stay legible */
+    max-width: 75vw;
     height: calc(100vh - var(--bar-h, 3rem));
     background: var(--surface);
     border-left: 1px solid var(--rule-tint);
@@ -590,20 +590,20 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 #info-panel[hidden] { display: none; }
 
 #info-panel {
-    right: 3.25rem;
+    right: 5.6rem;
     width: 18rem;
     font-size: .88rem;
     line-height: 1.45;
 }
+#prefs-panel { right: 3.25rem; }
 #info-panel p { margin: 0 0 .7rem; }
 #info-panel p:last-child { margin-bottom: 0; }
 #info-panel .panel-title { font-weight: 600; color: var(--fg); }
 #info-panel a { color: var(--accent); }
 
-/* Caret centre at viewport-right − 1.9rem (= aA button centre, given
-   #bar-actions right:.9rem + half-button 1rem). Panel right is .9rem,
-   caret centre offset inside panel = .9 + caret-right + caret-half = 1.9
-   → caret-right = .575rem. */
+/* Each panel's right offset places this caret beneath its trigger button.
+   The notes button added at the right of the action row means info and
+   reader-settings sit two and one button positions further left. */
 #prefs-panel::before,
 #info-panel::before {
     content: '';
@@ -668,13 +668,13 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     .ch-bar:hover       { width: 5px; }
     .ch-bar.part-active { width: 5px; }
     .ch-bar.active      { width: 7px; }
-    #sticky-bar         { font-size: 1.1rem; padding-right: 6.5rem; }
+    #sticky-bar         { font-size: 1.1rem; padding-right: 8.75rem; }
     #sticky-num         { display: none; }
     #sticky-sub         { padding-left: 0; font-size: .62em; }
     #bar-actions        { right: .4rem; }
     #bar-actions button { width: 1.7rem; height: 1.7rem; font-size: .8rem; }
-    #prefs-panel        { right: .4rem; padding: .7rem .85rem; }
-    #info-panel         { right: 2.75rem; padding: .7rem .85rem; }
+    #prefs-panel        { right: 2.3rem; padding: .7rem .85rem; }
+    #info-panel         { right: 4.35rem; padding: .7rem .85rem; }
     .pref-row           { gap: .75rem; margin: .4rem 0; }
 }
 
@@ -979,7 +979,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
   <ul class="noscript-toc-list">
 <li class="ntoc-ch"><a href="#ch-0">Preface / Introduction</a>
 </li>
-<li class="ntoc-ch"><a href="#ch-1">Chapter 1 What Is Happening to Our Common Home</a>
+<li class="ntoc-ch"><a href="#ch-1">Chapter 1: What Is Happening to Our Common Home</a>
 <ul>
 <li class="ntoc-sec"><a href="#sec-0-1-1">Section 1: Pollution and Climate Change</a></li>
 <li class="ntoc-sec"><a href="#sec-0-1-2">Section 2: The Issue of Water</a></li>
@@ -990,7 +990,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li class="ntoc-sec"><a href="#sec-0-1-7">Section 7: A Variety of Opinions</a></li>
 </ul>
 </li>
-<li class="ntoc-ch"><a href="#ch-2">Chapter 2 The Gospel of Creation</a>
+<li class="ntoc-ch"><a href="#ch-2">Chapter 2: The Gospel of Creation</a>
 <ul>
 <li class="ntoc-sec"><a href="#sec-0-2-1">Section 1: The Light Offered by Faith</a></li>
 <li class="ntoc-sec"><a href="#sec-0-2-2">Section 2: The Wisdom of the Biblical Accounts</a></li>
@@ -1001,14 +1001,14 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li class="ntoc-sec"><a href="#sec-0-2-7">Section 7: The Gaze of Jesus</a></li>
 </ul>
 </li>
-<li class="ntoc-ch"><a href="#ch-3">Chapter 3 The Human Roots of the Ecological Crisis</a>
+<li class="ntoc-ch"><a href="#ch-3">Chapter 3: The Human Roots of the Ecological Crisis</a>
 <ul>
 <li class="ntoc-sec"><a href="#sec-0-3-1">Section 1: Technology: Creativity and Power</a></li>
 <li class="ntoc-sec"><a href="#sec-0-3-2">Section 2: The Globalization of the Technocratic Paradigm</a></li>
 <li class="ntoc-sec"><a href="#sec-0-3-3">Section 3: The Crisis and Effects of Modern Anthropocentrism</a></li>
 </ul>
 </li>
-<li class="ntoc-ch"><a href="#ch-4">Chapter 4 Integral Ecology</a>
+<li class="ntoc-ch"><a href="#ch-4">Chapter 4: Integral Ecology</a>
 <ul>
 <li class="ntoc-sec"><a href="#sec-0-4-1">Section 1: Environmental, Economic and Social Ecology</a></li>
 <li class="ntoc-sec"><a href="#sec-0-4-2">Section 2: Cultural Ecology</a></li>
@@ -1017,7 +1017,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li class="ntoc-sec"><a href="#sec-0-4-5">Section 5: Justice Between the Generations</a></li>
 </ul>
 </li>
-<li class="ntoc-ch"><a href="#ch-5">Chapter 5 Lines of Approach and Action</a>
+<li class="ntoc-ch"><a href="#ch-5">Chapter 5: Lines of Approach and Action</a>
 <ul>
 <li class="ntoc-sec"><a href="#sec-0-5-1">Section 1: Dialogue on the Environment in the International Community</a></li>
 <li class="ntoc-sec"><a href="#sec-0-5-2">Section 2: Dialogue for New National and Local Policies</a></li>
@@ -1026,7 +1026,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li class="ntoc-sec"><a href="#sec-0-5-5">Section 5: Religions in Dialogue with Science</a></li>
 </ul>
 </li>
-<li class="ntoc-ch"><a href="#ch-6">Chapter 6 Ecological Education and Spirituality</a>
+<li class="ntoc-ch"><a href="#ch-6">Chapter 6: Ecological Education and Spirituality</a>
 <ul>
 <li class="ntoc-sec"><a href="#sec-0-6-1">Section 1: Towards a New Lifestyle</a></li>
 <li class="ntoc-sec"><a href="#sec-0-6-2">Section 2: Educating for the Covenant Between Humanity and the Environment</a></li>
@@ -1340,7 +1340,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <ol class="fn-list">
 <li id="fn-0-0-22" class="fn-item"><a href="#para-14" class="fn-num-link">22</a><p>SOUTHERN AFRICAN CATHOLIC BISHOPS’ CONFERENCE, <em>Pastoral Statement on the Environmental Crisis</em> (5 September 1999).</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-1" class="fn-ch-link">Chapter 1 What Is Happening to Our Common Home</a></h3>
+<h3 class="fn-group"><a href="#ch-1" class="fn-ch-link">Chapter 1: What Is Happening to Our Common Home</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-1-1">Section 1: Pollution and Climate Change</a></p>
 <p class="sub-nav-item"><a class="sub-nav-link" href="#sub-20">Pollution, waste and the throwaway culture</a></p>
 <p class="sub-nav-item"><a class="sub-nav-link" href="#sub-23">Climate as a common good</a></p>
@@ -1373,7 +1373,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <ol class="fn-list">
 <li id="fn-0-1-35" class="fn-item"><a href="#para-61" class="fn-num-link">35</a><p>ID., <em><a href="http://w2.vatican.va/content/john-paul-ii/en/audiences/2001/documents/hf_jp-ii_aud_20010117.html" class="ext-link" target="_blank" rel="noopener">Catechesis</a></em> (17 January 2001), 3: <em>Insegnamenti</em> 24/1 (2001), 178.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-2" class="fn-ch-link">Chapter 2 The Gospel of Creation</a></h3>
+<h3 class="fn-group"><a href="#ch-2" class="fn-ch-link">Chapter 2: The Gospel of Creation</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-2-1">Section 1: The Light Offered by Faith</a></p>
 <ol class="fn-list">
 <li id="fn-0-2-36" class="fn-item"><a href="#para-64" class="fn-num-link">36</a><p>JOHN PAUL II, <em><a href="http://w2.vatican.va/content/john-paul-ii/en/messages/peace/documents/hf_jp-ii_mes_19891208_xxiii-world-day-for-peace.html" class="ext-link" target="_blank" rel="noopener">Message for the 1990 World Day of Peace</a></em>, 15: AAS 82 (1990), 156.</p></li>
@@ -1440,7 +1440,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-2-79" class="fn-item"><a href="#para-98" class="fn-num-link">79</a><p>Encyclical Letter <em><a href="http://w2.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_14091981_laborem-exercens.html" class="ext-link" target="_blank" rel="noopener">Laborem Exercens</a></em> (14 September 1981), 27: AAS 73 (1981), 645.</p></li>
 <li id="fn-0-2-80" class="fn-item"><a href="#para-99" class="fn-num-link">80</a><p>Hence Saint Justin could speak of “seeds of the Word” in the world; cf. <em>II Apologia</em> 8, 1–2; 13, 3–6: PG 6, 457–458, 467.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-3" class="fn-ch-link">Chapter 3 The Human Roots of the Ecological Crisis</a></h3>
+<h3 class="fn-group"><a href="#ch-3" class="fn-ch-link">Chapter 3: The Human Roots of the Ecological Crisis</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-3-1">Section 1: Technology: Creativity and Power</a></p>
 <ol class="fn-list">
 <li id="fn-0-3-81" class="fn-item"><a href="#para-102" class="fn-num-link">81</a><p>JOHN PAUL II, <em><a href="http://w2.vatican.va/content/john-paul-ii/en/speeches/1981/february/documents/hf_jp-ii_spe_19810225_giappone-hiroshima-scienziati-univ.html" class="ext-link" target="_blank" rel="noopener">Address to Scientists and Representatives of the United Nations University</a>,</em> Hiroshima (25 February 1981), 3: AAS 73 (1981), 422.</p></li>
@@ -1492,7 +1492,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-3-112" class="fn-item"><a href="#para-132" class="fn-num-link">112</a><p>JOHN PAUL II, <em><a href="http://w2.vatican.va/content/john-paul-ii/en/speeches/1983/october/documents/hf_jp-ii_spe_19831029_ass-medica-mondiale.html" class="ext-link" target="_blank" rel="noopener">Address to the 35<sup>th</sup> General Assembly of the World Medical Association</a></em> (29 October 1983), 6: AAS 76 (1984), 394.</p></li>
 <li id="fn-0-3-113" class="fn-item"><a href="#para-134" class="fn-num-link">113</a><p>EPISCOPAL COMMISSION FOR PASTORAL CONCERNS IN ARGENTINA, <em>Una tierra para todos</em> (June 2005), 19.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-4" class="fn-ch-link">Chapter 4 Integral Ecology</a></h3>
+<h3 class="fn-group"><a href="#ch-4" class="fn-ch-link">Chapter 4: Integral Ecology</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-4-1">Section 1: Environmental, Economic and Social Ecology</a></p>
 <ol class="fn-list">
 <li id="fn-0-4-114" class="fn-item"><a href="#para-141" class="fn-num-link">114</a><p><em>Rio Declaration on Environment and Development</em> (14 June 1992), Principle 4.</p></li>
@@ -1518,7 +1518,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-4-124" class="fn-item"><a href="#para-159" class="fn-num-link">124</a><p>PORTUGUESE BISHOPS’ CONFERENCE, Pastoral Letter <em>Responsabilidade Solidária pelo Bem Comum</em> (15 September 2003), 20.</p></li>
 <li id="fn-0-4-125" class="fn-item"><a href="#para-162" class="fn-num-link">125</a><p>BENEDICT XVI, <em><a href="http://w2.vatican.va/content/benedict-xvi/en/messages/peace/documents/hf_ben-xvi_mes_20091208_xliii-world-day-peace.html" class="ext-link" target="_blank" rel="noopener">Message for the 2010 World Day of Peace</a></em>, 8: AAS 102 (2010), 45.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-5" class="fn-ch-link">Chapter 5 Lines of Approach and Action</a></h3>
+<h3 class="fn-group"><a href="#ch-5" class="fn-ch-link">Chapter 5: Lines of Approach and Action</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-5-1">Section 1: Dialogue on the Environment in the International Community</a></p>
 <ol class="fn-list">
 <li id="fn-0-5-126" class="fn-item"><a href="#para-167" class="fn-num-link">126</a><p><em>Rio Declaration on Environment and Development</em> (14 June 1992), Principle 1.</p></li>
@@ -1552,7 +1552,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-5-142" class="fn-item"><a href="#para-199" class="fn-num-link">142</a><p>Apostolic Exhortation <em><a href="http://w2.vatican.va/content/francesco/en/apost_exhortations/documents/papa-francesco_esortazione-ap_20131124_evangelii-gaudium.html" class="ext-link" target="_blank" rel="noopener">Evangelii Gaudium</a></em> (24 November 2013), 256: AAS 105 (2013), 1123.</p></li>
 <li id="fn-0-5-143" class="fn-item"><a href="#para-201" class="fn-num-link">143</a><p><a href="http://w2.vatican.va/content/francesco/en/apost_exhortations/documents/papa-francesco_esortazione-ap_20131124_evangelii-gaudium.html" class="ext-link" target="_blank" rel="noopener">Ibid</a>., 231: p. 1114.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-6" class="fn-ch-link">Chapter 6 Ecological Education and Spirituality</a></h3>
+<h3 class="fn-group"><a href="#ch-6" class="fn-ch-link">Chapter 6: Ecological Education and Spirituality</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-6-1">Section 1: Towards a New Lifestyle</a></p>
 <ol class="fn-list">
 <li id="fn-0-6-144" class="fn-item"><a href="#para-203" class="fn-num-link">144</a><p>ROMANO GUARDINI, <em>Das Ende der Neuzeit</em>, 9<sup>th</sup> edition, Würzburg, 1965, 66–67 (English: <em>The End of the Modern World</em>, Wilmington, 1998, 60).</p></li>
@@ -1625,7 +1625,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <p class="sub-nav-item toc-item" data-target="sub-7" data-label="United by the same concern"><a href="#sub-7" class="sub-nav-link">United by the same concern</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-7" aria-label="Bookmark United by the same concern" aria-pressed="false"></button></p>
 <p class="sub-nav-item toc-item" data-target="sub-10" data-label="Saint Francis of Assisi"><a href="#sub-10" class="sub-nav-link">Saint Francis of Assisi</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-10" aria-label="Bookmark Saint Francis of Assisi" aria-pressed="false"></button></p>
 <p class="sub-nav-item toc-item" data-target="sub-13" data-label="My appeal"><a href="#sub-13" class="sub-nav-link">My appeal</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-13" aria-label="Bookmark My appeal" aria-pressed="false"></button></p>
-<h3 class="fn-group toc-item" data-target="ch-1" data-label="Chapter 1 What Is Happening to Our Common Home"><a href="#ch-1" class="fn-ch-link">Chapter 1 What Is Happening to Our Common Home</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-1" aria-label="Bookmark Chapter 1 What Is Happening to Our Common Home" aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-1" data-label="Chapter 1: What Is Happening to Our Common Home"><a href="#ch-1" class="fn-ch-link">Chapter 1: What Is Happening to Our Common Home</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-1" aria-label="Bookmark Chapter 1: What Is Happening to Our Common Home" aria-pressed="false"></button></h3>
 <p class="sec-nav-item toc-item" data-target="sec-0-1-1" data-label="Section 1: Pollution and Climate Change"><a href="#sec-0-1-1" class="sec-nav-link">Section 1: Pollution and Climate Change</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-1-1" aria-label="Bookmark Section 1: Pollution and Climate Change" aria-pressed="false"></button></p>
 <p class="sub-nav-item toc-item" data-target="sub-20" data-label="Pollution, waste and the throwaway culture"><a href="#sub-20" class="sub-nav-link">Pollution, waste and the throwaway culture</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-20" aria-label="Bookmark Pollution, waste and the throwaway culture" aria-pressed="false"></button></p>
 <p class="sub-nav-item toc-item" data-target="sub-23" data-label="Climate as a common good"><a href="#sub-23" class="sub-nav-link">Climate as a common good</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-23" aria-label="Bookmark Climate as a common good" aria-pressed="false"></button></p>
@@ -1635,7 +1635,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <p class="sec-nav-item toc-item" data-target="sec-0-1-5" data-label="Section 5: Global Inequality"><a href="#sec-0-1-5" class="sec-nav-link">Section 5: Global Inequality</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-1-5" aria-label="Bookmark Section 5: Global Inequality" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-1-6" data-label="Section 6: Weak Responses"><a href="#sec-0-1-6" class="sec-nav-link">Section 6: Weak Responses</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-1-6" aria-label="Bookmark Section 6: Weak Responses" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-1-7" data-label="Section 7: A Variety of Opinions"><a href="#sec-0-1-7" class="sec-nav-link">Section 7: A Variety of Opinions</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-1-7" aria-label="Bookmark Section 7: A Variety of Opinions" aria-pressed="false"></button></p>
-<h3 class="fn-group toc-item" data-target="ch-2" data-label="Chapter 2 The Gospel of Creation"><a href="#ch-2" class="fn-ch-link">Chapter 2 The Gospel of Creation</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-2" aria-label="Bookmark Chapter 2 The Gospel of Creation" aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-2" data-label="Chapter 2: The Gospel of Creation"><a href="#ch-2" class="fn-ch-link">Chapter 2: The Gospel of Creation</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-2" aria-label="Bookmark Chapter 2: The Gospel of Creation" aria-pressed="false"></button></h3>
 <p class="sec-nav-item toc-item" data-target="sec-0-2-1" data-label="Section 1: The Light Offered by Faith"><a href="#sec-0-2-1" class="sec-nav-link">Section 1: The Light Offered by Faith</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-2-1" aria-label="Bookmark Section 1: The Light Offered by Faith" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-2-2" data-label="Section 2: The Wisdom of the Biblical Accounts"><a href="#sec-0-2-2" class="sec-nav-link">Section 2: The Wisdom of the Biblical Accounts</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-2-2" aria-label="Bookmark Section 2: The Wisdom of the Biblical Accounts" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-2-3" data-label="Section 3: The Mystery of the Universe"><a href="#sec-0-2-3" class="sec-nav-link">Section 3: The Mystery of the Universe</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-2-3" aria-label="Bookmark Section 3: The Mystery of the Universe" aria-pressed="false"></button></p>
@@ -1643,26 +1643,26 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <p class="sec-nav-item toc-item" data-target="sec-0-2-5" data-label="Section 5: A Universal Communion"><a href="#sec-0-2-5" class="sec-nav-link">Section 5: A Universal Communion</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-2-5" aria-label="Bookmark Section 5: A Universal Communion" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-2-6" data-label="Section 6: The Common Destination of Goods"><a href="#sec-0-2-6" class="sec-nav-link">Section 6: The Common Destination of Goods</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-2-6" aria-label="Bookmark Section 6: The Common Destination of Goods" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-2-7" data-label="Section 7: The Gaze of Jesus"><a href="#sec-0-2-7" class="sec-nav-link">Section 7: The Gaze of Jesus</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-2-7" aria-label="Bookmark Section 7: The Gaze of Jesus" aria-pressed="false"></button></p>
-<h3 class="fn-group toc-item" data-target="ch-3" data-label="Chapter 3 The Human Roots of the Ecological Crisis"><a href="#ch-3" class="fn-ch-link">Chapter 3 The Human Roots of the Ecological Crisis</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-3" aria-label="Bookmark Chapter 3 The Human Roots of the Ecological Crisis" aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-3" data-label="Chapter 3: The Human Roots of the Ecological Crisis"><a href="#ch-3" class="fn-ch-link">Chapter 3: The Human Roots of the Ecological Crisis</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-3" aria-label="Bookmark Chapter 3: The Human Roots of the Ecological Crisis" aria-pressed="false"></button></h3>
 <p class="sec-nav-item toc-item" data-target="sec-0-3-1" data-label="Section 1: Technology: Creativity and Power"><a href="#sec-0-3-1" class="sec-nav-link">Section 1: Technology: Creativity and Power</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-3-1" aria-label="Bookmark Section 1: Technology: Creativity and Power" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-3-2" data-label="Section 2: The Globalization of the Technocratic Paradigm"><a href="#sec-0-3-2" class="sec-nav-link">Section 2: The Globalization of the Technocratic Paradigm</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-3-2" aria-label="Bookmark Section 2: The Globalization of the Technocratic Paradigm" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-3-3" data-label="Section 3: The Crisis and Effects of Modern Anthropocentrism"><a href="#sec-0-3-3" class="sec-nav-link">Section 3: The Crisis and Effects of Modern Anthropocentrism</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-3-3" aria-label="Bookmark Section 3: The Crisis and Effects of Modern Anthropocentrism" aria-pressed="false"></button></p>
 <p class="sub-nav-item toc-item" data-target="sub-122" data-label="Practical relativism"><a href="#sub-122" class="sub-nav-link">Practical relativism</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-122" aria-label="Bookmark Practical relativism" aria-pressed="false"></button></p>
 <p class="sub-nav-item toc-item" data-target="sub-124" data-label="The need to protect employment"><a href="#sub-124" class="sub-nav-link">The need to protect employment</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-124" aria-label="Bookmark The need to protect employment" aria-pressed="false"></button></p>
 <p class="sub-nav-item toc-item" data-target="sub-130" data-label="New biological technologies"><a href="#sub-130" class="sub-nav-link">New biological technologies</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-130" aria-label="Bookmark New biological technologies" aria-pressed="false"></button></p>
-<h3 class="fn-group toc-item" data-target="ch-4" data-label="Chapter 4 Integral Ecology"><a href="#ch-4" class="fn-ch-link">Chapter 4 Integral Ecology</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-4" aria-label="Bookmark Chapter 4 Integral Ecology" aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-4" data-label="Chapter 4: Integral Ecology"><a href="#ch-4" class="fn-ch-link">Chapter 4: Integral Ecology</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-4" aria-label="Bookmark Chapter 4: Integral Ecology" aria-pressed="false"></button></h3>
 <p class="sec-nav-item toc-item" data-target="sec-0-4-1" data-label="Section 1: Environmental, Economic and Social Ecology"><a href="#sec-0-4-1" class="sec-nav-link">Section 1: Environmental, Economic and Social Ecology</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-4-1" aria-label="Bookmark Section 1: Environmental, Economic and Social Ecology" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-4-2" data-label="Section 2: Cultural Ecology"><a href="#sec-0-4-2" class="sec-nav-link">Section 2: Cultural Ecology</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-4-2" aria-label="Bookmark Section 2: Cultural Ecology" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-4-3" data-label="Section 3: Ecology of Daily Life"><a href="#sec-0-4-3" class="sec-nav-link">Section 3: Ecology of Daily Life</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-4-3" aria-label="Bookmark Section 3: Ecology of Daily Life" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-4-4" data-label="Section 4: The Principle of the Common Good"><a href="#sec-0-4-4" class="sec-nav-link">Section 4: The Principle of the Common Good</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-4-4" aria-label="Bookmark Section 4: The Principle of the Common Good" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-4-5" data-label="Section 5: Justice Between the Generations"><a href="#sec-0-4-5" class="sec-nav-link">Section 5: Justice Between the Generations</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-4-5" aria-label="Bookmark Section 5: Justice Between the Generations" aria-pressed="false"></button></p>
-<h3 class="fn-group toc-item" data-target="ch-5" data-label="Chapter 5 Lines of Approach and Action"><a href="#ch-5" class="fn-ch-link">Chapter 5 Lines of Approach and Action</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-5" aria-label="Bookmark Chapter 5 Lines of Approach and Action" aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-5" data-label="Chapter 5: Lines of Approach and Action"><a href="#ch-5" class="fn-ch-link">Chapter 5: Lines of Approach and Action</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-5" aria-label="Bookmark Chapter 5: Lines of Approach and Action" aria-pressed="false"></button></h3>
 <p class="sec-nav-item toc-item" data-target="sec-0-5-1" data-label="Section 1: Dialogue on the Environment in the International Community"><a href="#sec-0-5-1" class="sec-nav-link">Section 1: Dialogue on the Environment in the International Community</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-5-1" aria-label="Bookmark Section 1: Dialogue on the Environment in the International Community" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-5-2" data-label="Section 2: Dialogue for New National and Local Policies"><a href="#sec-0-5-2" class="sec-nav-link">Section 2: Dialogue for New National and Local Policies</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-5-2" aria-label="Bookmark Section 2: Dialogue for New National and Local Policies" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-5-3" data-label="Section 3: Dialogue and Transparency in Decision-making"><a href="#sec-0-5-3" class="sec-nav-link">Section 3: Dialogue and Transparency in Decision-making</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-5-3" aria-label="Bookmark Section 3: Dialogue and Transparency in Decision-making" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-5-4" data-label="Section 4: Politics and Economy in Dialogue for Human Fulfilment"><a href="#sec-0-5-4" class="sec-nav-link">Section 4: Politics and Economy in Dialogue for Human Fulfilment</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-5-4" aria-label="Bookmark Section 4: Politics and Economy in Dialogue for Human Fulfilment" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-5-5" data-label="Section 5: Religions in Dialogue with Science"><a href="#sec-0-5-5" class="sec-nav-link">Section 5: Religions in Dialogue with Science</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-5-5" aria-label="Bookmark Section 5: Religions in Dialogue with Science" aria-pressed="false"></button></p>
-<h3 class="fn-group toc-item" data-target="ch-6" data-label="Chapter 6 Ecological Education and Spirituality"><a href="#ch-6" class="fn-ch-link">Chapter 6 Ecological Education and Spirituality</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-6" aria-label="Bookmark Chapter 6 Ecological Education and Spirituality" aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-6" data-label="Chapter 6: Ecological Education and Spirituality"><a href="#ch-6" class="fn-ch-link">Chapter 6: Ecological Education and Spirituality</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-6" aria-label="Bookmark Chapter 6: Ecological Education and Spirituality" aria-pressed="false"></button></h3>
 <p class="sec-nav-item toc-item" data-target="sec-0-6-1" data-label="Section 1: Towards a New Lifestyle"><a href="#sec-0-6-1" class="sec-nav-link">Section 1: Towards a New Lifestyle</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-6-1" aria-label="Bookmark Section 1: Towards a New Lifestyle" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-6-2" data-label="Section 2: Educating for the Covenant Between Humanity and the Environment"><a href="#sec-0-6-2" class="sec-nav-link">Section 2: Educating for the Covenant Between Humanity and the Environment</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-6-2" aria-label="Bookmark Section 2: Educating for the Covenant Between Humanity and the Environment" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-6-3" data-label="Section 3: Ecological Conversion"><a href="#sec-0-6-3" class="sec-nav-link">Section 3: Ecological Conversion</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-6-3" aria-label="Bookmark Section 3: Ecological Conversion" aria-pressed="false"></button></p>
@@ -1713,7 +1713,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <ol class="fn-list">
 <li id="fn-0-0-22" class="fn-item"><a href="#para-14" class="fn-num-link">22</a><p>SOUTHERN AFRICAN CATHOLIC BISHOPS’ CONFERENCE, <em>Pastoral Statement on the Environmental Crisis</em> (5 September 1999).</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-1" class="fn-ch-link">Chapter 1 What Is Happening to Our Common Home</a></h3>
+<h3 class="fn-group"><a href="#ch-1" class="fn-ch-link">Chapter 1: What Is Happening to Our Common Home</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-1-1">Section 1: Pollution and Climate Change</a></p>
 <p class="sub-nav-item"><a class="sub-nav-link" href="#sub-20">Pollution, waste and the throwaway culture</a></p>
 <p class="sub-nav-item"><a class="sub-nav-link" href="#sub-23">Climate as a common good</a></p>
@@ -1746,7 +1746,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <ol class="fn-list">
 <li id="fn-0-1-35" class="fn-item"><a href="#para-61" class="fn-num-link">35</a><p>ID., <em><a href="http://w2.vatican.va/content/john-paul-ii/en/audiences/2001/documents/hf_jp-ii_aud_20010117.html" class="ext-link" target="_blank" rel="noopener">Catechesis</a></em> (17 January 2001), 3: <em>Insegnamenti</em> 24/1 (2001), 178.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-2" class="fn-ch-link">Chapter 2 The Gospel of Creation</a></h3>
+<h3 class="fn-group"><a href="#ch-2" class="fn-ch-link">Chapter 2: The Gospel of Creation</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-2-1">Section 1: The Light Offered by Faith</a></p>
 <ol class="fn-list">
 <li id="fn-0-2-36" class="fn-item"><a href="#para-64" class="fn-num-link">36</a><p>JOHN PAUL II, <em><a href="http://w2.vatican.va/content/john-paul-ii/en/messages/peace/documents/hf_jp-ii_mes_19891208_xxiii-world-day-for-peace.html" class="ext-link" target="_blank" rel="noopener">Message for the 1990 World Day of Peace</a></em>, 15: AAS 82 (1990), 156.</p></li>
@@ -1813,7 +1813,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-2-79" class="fn-item"><a href="#para-98" class="fn-num-link">79</a><p>Encyclical Letter <em><a href="http://w2.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_14091981_laborem-exercens.html" class="ext-link" target="_blank" rel="noopener">Laborem Exercens</a></em> (14 September 1981), 27: AAS 73 (1981), 645.</p></li>
 <li id="fn-0-2-80" class="fn-item"><a href="#para-99" class="fn-num-link">80</a><p>Hence Saint Justin could speak of “seeds of the Word” in the world; cf. <em>II Apologia</em> 8, 1–2; 13, 3–6: PG 6, 457–458, 467.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-3" class="fn-ch-link">Chapter 3 The Human Roots of the Ecological Crisis</a></h3>
+<h3 class="fn-group"><a href="#ch-3" class="fn-ch-link">Chapter 3: The Human Roots of the Ecological Crisis</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-3-1">Section 1: Technology: Creativity and Power</a></p>
 <ol class="fn-list">
 <li id="fn-0-3-81" class="fn-item"><a href="#para-102" class="fn-num-link">81</a><p>JOHN PAUL II, <em><a href="http://w2.vatican.va/content/john-paul-ii/en/speeches/1981/february/documents/hf_jp-ii_spe_19810225_giappone-hiroshima-scienziati-univ.html" class="ext-link" target="_blank" rel="noopener">Address to Scientists and Representatives of the United Nations University</a>,</em> Hiroshima (25 February 1981), 3: AAS 73 (1981), 422.</p></li>
@@ -1865,7 +1865,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-3-112" class="fn-item"><a href="#para-132" class="fn-num-link">112</a><p>JOHN PAUL II, <em><a href="http://w2.vatican.va/content/john-paul-ii/en/speeches/1983/october/documents/hf_jp-ii_spe_19831029_ass-medica-mondiale.html" class="ext-link" target="_blank" rel="noopener">Address to the 35<sup>th</sup> General Assembly of the World Medical Association</a></em> (29 October 1983), 6: AAS 76 (1984), 394.</p></li>
 <li id="fn-0-3-113" class="fn-item"><a href="#para-134" class="fn-num-link">113</a><p>EPISCOPAL COMMISSION FOR PASTORAL CONCERNS IN ARGENTINA, <em>Una tierra para todos</em> (June 2005), 19.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-4" class="fn-ch-link">Chapter 4 Integral Ecology</a></h3>
+<h3 class="fn-group"><a href="#ch-4" class="fn-ch-link">Chapter 4: Integral Ecology</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-4-1">Section 1: Environmental, Economic and Social Ecology</a></p>
 <ol class="fn-list">
 <li id="fn-0-4-114" class="fn-item"><a href="#para-141" class="fn-num-link">114</a><p><em>Rio Declaration on Environment and Development</em> (14 June 1992), Principle 4.</p></li>
@@ -1891,7 +1891,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-4-124" class="fn-item"><a href="#para-159" class="fn-num-link">124</a><p>PORTUGUESE BISHOPS’ CONFERENCE, Pastoral Letter <em>Responsabilidade Solidária pelo Bem Comum</em> (15 September 2003), 20.</p></li>
 <li id="fn-0-4-125" class="fn-item"><a href="#para-162" class="fn-num-link">125</a><p>BENEDICT XVI, <em><a href="http://w2.vatican.va/content/benedict-xvi/en/messages/peace/documents/hf_ben-xvi_mes_20091208_xliii-world-day-peace.html" class="ext-link" target="_blank" rel="noopener">Message for the 2010 World Day of Peace</a></em>, 8: AAS 102 (2010), 45.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-5" class="fn-ch-link">Chapter 5 Lines of Approach and Action</a></h3>
+<h3 class="fn-group"><a href="#ch-5" class="fn-ch-link">Chapter 5: Lines of Approach and Action</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-5-1">Section 1: Dialogue on the Environment in the International Community</a></p>
 <ol class="fn-list">
 <li id="fn-0-5-126" class="fn-item"><a href="#para-167" class="fn-num-link">126</a><p><em>Rio Declaration on Environment and Development</em> (14 June 1992), Principle 1.</p></li>
@@ -1925,7 +1925,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-5-142" class="fn-item"><a href="#para-199" class="fn-num-link">142</a><p>Apostolic Exhortation <em><a href="http://w2.vatican.va/content/francesco/en/apost_exhortations/documents/papa-francesco_esortazione-ap_20131124_evangelii-gaudium.html" class="ext-link" target="_blank" rel="noopener">Evangelii Gaudium</a></em> (24 November 2013), 256: AAS 105 (2013), 1123.</p></li>
 <li id="fn-0-5-143" class="fn-item"><a href="#para-201" class="fn-num-link">143</a><p><a href="http://w2.vatican.va/content/francesco/en/apost_exhortations/documents/papa-francesco_esortazione-ap_20131124_evangelii-gaudium.html" class="ext-link" target="_blank" rel="noopener">Ibid</a>., 231: p. 1114.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-6" class="fn-ch-link">Chapter 6 Ecological Education and Spirituality</a></h3>
+<h3 class="fn-group"><a href="#ch-6" class="fn-ch-link">Chapter 6: Ecological Education and Spirituality</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-6-1">Section 1: Towards a New Lifestyle</a></p>
 <ol class="fn-list">
 <li id="fn-0-6-144" class="fn-item"><a href="#para-203" class="fn-num-link">144</a><p>ROMANO GUARDINI, <em>Das Ende der Neuzeit</em>, 9<sup>th</sup> edition, Würzburg, 1965, 66–67 (English: <em>The End of the Modern World</em>, Wilmington, 1998, 60).</p></li>
@@ -2241,9 +2241,30 @@ try {
   if (Array.isArray(stored)) bookmarks = stored.filter(id => tocByTarget.has(id));
 } catch (e) {}
 
-tab.addEventListener('click', () => {
-  const open = drawer.classList.toggle('open');
+function setDrawerOpen(open) {
+  drawer.classList.toggle('open', open);
   tab.setAttribute('aria-expanded', String(open));
+}
+
+tab.addEventListener('click', () => {
+  setDrawerOpen(!drawer.classList.contains('open'));
+});
+
+let textTapStart = null;
+document.addEventListener('pointerdown', e => {
+  if (e.pointerType !== 'touch' || !drawer.classList.contains('open')) return;
+  if (!e.target.closest('.paragraph, .doc-title, .appendix, .doc-end-matter')) return;
+  if (e.target.closest('a, button, input, summary')) return;
+  textTapStart = {id: e.pointerId, x: e.clientX, y: e.clientY};
+});
+document.addEventListener('pointerup', e => {
+  if (!textTapStart || e.pointerId !== textTapStart.id) return;
+  const moved = Math.hypot(e.clientX - textTapStart.x, e.clientY - textTapStart.y);
+  textTapStart = null;
+  if (e.pointerType === 'touch' && moved < 10) setDrawerOpen(false);
+});
+document.addEventListener('pointercancel', () => {
+  textTapStart = null;
 });
 
 function showDrawerView(view) {
@@ -2327,7 +2348,8 @@ function selectFn(id) {
   const rect = target.getBoundingClientRect();
   const cRect = notesPanel.getBoundingClientRect();
   if (rect.top < cRect.top || rect.bottom > cRect.bottom) {
-    notesPanel.scrollTop += rect.top - cRect.top - notesPanel.clientHeight / 3;
+    const divisor = window.matchMedia('(max-width: 900px)').matches ? 4.5 : 3;
+    notesPanel.scrollTop += rect.top - cRect.top - notesPanel.clientHeight / divisor;
   }
 }
 
@@ -2356,7 +2378,7 @@ document.querySelectorAll('.sec-nav-link, .sub-nav-link').forEach(a => {
 document.querySelectorAll('sup a').forEach(a => {
   a.addEventListener('click', e => {
     e.preventDefault();
-    drawer.classList.add('open');
+    setDrawerOpen(true);
     showDrawerView('footnotes');
     selectFn(a.getAttribute('href').slice(1));
   });

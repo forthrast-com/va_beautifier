@@ -187,7 +187,7 @@ h1, h2, h3, h4 { font-family: var(--font-display); }
     background: var(--bar-bg, var(--bg));
     border-bottom: 1px solid var(--rule-tint);
     padding-left: max(var(--col-outer-left), 2rem);   /* floor so heading clears the screen edge at narrow widths */
-    padding-right: 7.5rem;
+    padding-right: 10.5rem;
     height: var(--bar-h-fixed);
     font-family: var(--font-display);
     font-size: 1.8rem;
@@ -314,7 +314,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     position: fixed;
     top: var(--bar-h, 3rem); right: 0;
     width: 380px;
-    max-width: 66vw;          /* cap at 2/3 viewport so narrow screens stay legible */
+    max-width: 75vw;
     height: calc(100vh - var(--bar-h, 3rem));
     background: var(--surface);
     border-left: 1px solid var(--rule-tint);
@@ -590,20 +590,20 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 #info-panel[hidden] { display: none; }
 
 #info-panel {
-    right: 3.25rem;
+    right: 5.6rem;
     width: 18rem;
     font-size: .88rem;
     line-height: 1.45;
 }
+#prefs-panel { right: 3.25rem; }
 #info-panel p { margin: 0 0 .7rem; }
 #info-panel p:last-child { margin-bottom: 0; }
 #info-panel .panel-title { font-weight: 600; color: var(--fg); }
 #info-panel a { color: var(--accent); }
 
-/* Caret centre at viewport-right − 1.9rem (= aA button centre, given
-   #bar-actions right:.9rem + half-button 1rem). Panel right is .9rem,
-   caret centre offset inside panel = .9 + caret-right + caret-half = 1.9
-   → caret-right = .575rem. */
+/* Each panel's right offset places this caret beneath its trigger button.
+   The notes button added at the right of the action row means info and
+   reader-settings sit two and one button positions further left. */
 #prefs-panel::before,
 #info-panel::before {
     content: '';
@@ -668,13 +668,13 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     .ch-bar:hover       { width: 5px; }
     .ch-bar.part-active { width: 5px; }
     .ch-bar.active      { width: 7px; }
-    #sticky-bar         { font-size: 1.1rem; padding-right: 6.5rem; }
+    #sticky-bar         { font-size: 1.1rem; padding-right: 8.75rem; }
     #sticky-num         { display: none; }
     #sticky-sub         { padding-left: 0; font-size: .62em; }
     #bar-actions        { right: .4rem; }
     #bar-actions button { width: 1.7rem; height: 1.7rem; font-size: .8rem; }
-    #prefs-panel        { right: .4rem; padding: .7rem .85rem; }
-    #info-panel         { right: 2.75rem; padding: .7rem .85rem; }
+    #prefs-panel        { right: 2.3rem; padding: .7rem .85rem; }
+    #info-panel         { right: 4.35rem; padding: .7rem .85rem; }
     .pref-row           { gap: .75rem; margin: .4rem 0; }
 }
 
@@ -979,24 +979,24 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
   <ul class="noscript-toc-list">
 <li class="ntoc-ch"><a href="#ch-0">Introduction</a>
 </li>
-<li class="ntoc-ch"><a href="#ch-1">Chapter 1 General Principles for the Restoration and Promotion of the Sacred Liturgy</a>
+<li class="ntoc-ch"><a href="#ch-1">Chapter 1: General Principles for the Restoration and Promotion of the Sacred Liturgy</a>
 <ul>
 <li class="ntoc-sec"><a href="#sec-0-1-1">Section 1: The Nature of the Sacred Liturgy and Its Importance in the Church&#x27;s Life</a></li>
 <li class="ntoc-sec"><a href="#sec-0-1-2">Section 2: The Promotion of Liturgical Instruction and Active Participation</a></li>
 <li class="ntoc-sec"><a href="#sec-0-1-3">Section 3: The Reform of the Sacred Liturgy</a></li>
 </ul>
 </li>
-<li class="ntoc-ch"><a href="#ch-2">Chapter 2 The Most Sacred Mystery of the Eucharist</a>
+<li class="ntoc-ch"><a href="#ch-2">Chapter 2: The Most Sacred Mystery of the Eucharist</a>
 </li>
-<li class="ntoc-ch"><a href="#ch-3">Chapter 3 The Other Sacraments and the Sacramentals</a>
+<li class="ntoc-ch"><a href="#ch-3">Chapter 3: The Other Sacraments and the Sacramentals</a>
 </li>
-<li class="ntoc-ch"><a href="#ch-4">Chapter 4 The Divine Office</a>
+<li class="ntoc-ch"><a href="#ch-4">Chapter 4: The Divine Office</a>
 </li>
-<li class="ntoc-ch"><a href="#ch-5">Chapter 5 The Liturgical Year</a>
+<li class="ntoc-ch"><a href="#ch-5">Chapter 5: The Liturgical Year</a>
 </li>
-<li class="ntoc-ch"><a href="#ch-6">Chapter 6 Sacred Music</a>
+<li class="ntoc-ch"><a href="#ch-6">Chapter 6: Sacred Music</a>
 </li>
-<li class="ntoc-ch"><a href="#ch-7">Chapter 7 Sacred Art and Sacred Furnishings</a>
+<li class="ntoc-ch"><a href="#ch-7">Chapter 7: Sacred Art and Sacred Furnishings</a>
 </li>
 </ul>
 </nav>
@@ -1263,7 +1263,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-0-6" class="fn-item"><a href="#para-2" class="fn-num-link">6</a><p>Cf. <em>John</em> 11:52.</p></li>
 <li id="fn-0-0-7" class="fn-item"><a href="#para-2" class="fn-num-link">7</a><p>Cf. <em>John</em> 10:16.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-1" class="fn-ch-link">Chapter 1 General Principles for the Restoration and Promotion of the Sacred Liturgy</a></h3>
+<h3 class="fn-group"><a href="#ch-1" class="fn-ch-link">Chapter 1: General Principles for the Restoration and Promotion of the Sacred Liturgy</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-1-1">Section 1: The Nature of the Sacred Liturgy and Its Importance in the Church&#x27;s Life</a></p>
 <ol class="fn-list">
 <li id="fn-0-1-8" class="fn-item"><a href="#para-5" class="fn-num-link">8</a><p>Cf. I<em>s</em>. 61:1; <em>Luke</em> 4:18.</p></li>
@@ -1309,7 +1309,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-1-35" class="fn-item"><a href="#para-41" class="fn-num-link">35</a><p>Cf. St. Ignatius of Antioch, <em>To the Smyrnians</em>, 8; <em>To the Magnesians</em>, 7; <em>To the Philadelphians</em>, 4.</p></li>
 </ol>
 <p class="sub-nav-item"><a class="sub-nav-link" href="#sub-43">The Promotion of Pastoral-liturgical Action</a></p>
-<h3 class="fn-group"><a href="#ch-2" class="fn-ch-link">Chapter 2 The Most Sacred Mystery of the Eucharist</a></h3>
+<h3 class="fn-group"><a href="#ch-2" class="fn-ch-link">Chapter 2: The Most Sacred Mystery of the Eucharist</a></h3>
 <ol class="fn-list">
 <li id="fn-0-2-36" class="fn-item"><a href="#para-47" class="fn-num-link">36</a><p>Cf. St. Augustine, <em>Tractatus in Ioannem</em>, VI, n. 13.</p></li>
 <li id="fn-0-2-37" class="fn-item"><a href="#para-47" class="fn-num-link">37</a><p>Roman Breviary, feast of Corpus Christi, Second Vespers, antiphon to the Magnificat.</p></li>
@@ -1317,11 +1317,11 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-2-39" class="fn-item"><a href="#para-53" class="fn-num-link">39</a><p>Cf. 1 <em>Tim</em>. 2:1–2.</p></li>
 <li id="fn-0-2-40" class="fn-item"><a href="#para-55" class="fn-num-link">40</a><p>Session XXI, July 16, 1562. <em>Doctrine on Communion under Both Species</em>, chap. 1–3: Condlium Tridentinum. <em>Diariorum, Actorum, Epistolarum</em>, Tractatuum nova collectio ed. Soc. Goerresiana, tome VIII (Freiburg in Br., 1919), 698–699.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-3" class="fn-ch-link">Chapter 3 The Other Sacraments and the Sacramentals</a></h3>
+<h3 class="fn-group"><a href="#ch-3" class="fn-ch-link">Chapter 3: The Other Sacraments and the Sacramentals</a></h3>
 <ol class="fn-list">
 <li id="fn-0-3-41" class="fn-item"><a href="#para-77" class="fn-num-link">41</a><p>Council of Trent, Session XXIV, November 11, 1563, <em>On Reform</em>, chap. I. Cf. Roman Ritual, title VIII, chap. II, n. 6.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-6" class="fn-ch-link">Chapter 6 Sacred Music</a></h3>
+<h3 class="fn-group"><a href="#ch-6" class="fn-ch-link">Chapter 6: Sacred Music</a></h3>
 <ol class="fn-list">
 <li id="fn-0-6-42" class="fn-item"><a href="#para-112" class="fn-num-link">42</a><p>Cf. <em>Eph</em>. 5:19; Col. 3:16.</p></li>
 </ol>
@@ -1339,7 +1339,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     </div>
     <div id="drawer-toc" class="drawer-view active" role="tabpanel">
       <h3 class="fn-group toc-item" data-target="ch-0" data-label="Introduction"><a href="#ch-0" class="fn-ch-link">Introduction</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-0" aria-label="Bookmark Introduction" aria-pressed="false"></button></h3>
-<h3 class="fn-group toc-item" data-target="ch-1" data-label="Chapter 1 General Principles for the Restoration and Promotion of the Sacred Liturgy"><a href="#ch-1" class="fn-ch-link">Chapter 1 General Principles for the Restoration and Promotion of the Sacred Liturgy</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-1" aria-label="Bookmark Chapter 1 General Principles for the Restoration and Promotion of the Sacred Liturgy" aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-1" data-label="Chapter 1: General Principles for the Restoration and Promotion of the Sacred Liturgy"><a href="#ch-1" class="fn-ch-link">Chapter 1: General Principles for the Restoration and Promotion of the Sacred Liturgy</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-1" aria-label="Bookmark Chapter 1: General Principles for the Restoration and Promotion of the Sacred Liturgy" aria-pressed="false"></button></h3>
 <p class="sec-nav-item toc-item" data-target="sec-0-1-1" data-label="Section 1: The Nature of the Sacred Liturgy and Its Importance in the Church&#x27;s Life"><a href="#sec-0-1-1" class="sec-nav-link">Section 1: The Nature of the Sacred Liturgy and Its Importance in the Church&#x27;s Life</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-1-1" aria-label="Bookmark Section 1: The Nature of the Sacred Liturgy and Its Importance in the Church&#x27;s Life" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-1-2" data-label="Section 2: The Promotion of Liturgical Instruction and Active Participation"><a href="#sec-0-1-2" class="sec-nav-link">Section 2: The Promotion of Liturgical Instruction and Active Participation</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-1-2" aria-label="Bookmark Section 2: The Promotion of Liturgical Instruction and Active Participation" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-1-3" data-label="Section 3: The Reform of the Sacred Liturgy"><a href="#sec-0-1-3" class="sec-nav-link">Section 3: The Reform of the Sacred Liturgy</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-1-3" aria-label="Bookmark Section 3: The Reform of the Sacred Liturgy" aria-pressed="false"></button></p>
@@ -1349,12 +1349,12 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <p class="sub-nav-item toc-item" data-target="sub-37" data-label="Norms for Adapting the Liturgy to the Culture and Traditions of Peoples"><a href="#sub-37" class="sub-nav-link">Norms for Adapting the Liturgy to the Culture and Traditions of Peoples</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-37" aria-label="Bookmark Norms for Adapting the Liturgy to the Culture and Traditions of Peoples" aria-pressed="false"></button></p>
 <p class="sub-nav-item toc-item" data-target="sub-41" data-label="Promotion of Liturgical Life in Diocese and Parish"><a href="#sub-41" class="sub-nav-link">Promotion of Liturgical Life in Diocese and Parish</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-41" aria-label="Bookmark Promotion of Liturgical Life in Diocese and Parish" aria-pressed="false"></button></p>
 <p class="sub-nav-item toc-item" data-target="sub-43" data-label="The Promotion of Pastoral-liturgical Action"><a href="#sub-43" class="sub-nav-link">The Promotion of Pastoral-liturgical Action</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-43" aria-label="Bookmark The Promotion of Pastoral-liturgical Action" aria-pressed="false"></button></p>
-<h3 class="fn-group toc-item" data-target="ch-2" data-label="Chapter 2 The Most Sacred Mystery of the Eucharist"><a href="#ch-2" class="fn-ch-link">Chapter 2 The Most Sacred Mystery of the Eucharist</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-2" aria-label="Bookmark Chapter 2 The Most Sacred Mystery of the Eucharist" aria-pressed="false"></button></h3>
-<h3 class="fn-group toc-item" data-target="ch-3" data-label="Chapter 3 The Other Sacraments and the Sacramentals"><a href="#ch-3" class="fn-ch-link">Chapter 3 The Other Sacraments and the Sacramentals</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-3" aria-label="Bookmark Chapter 3 The Other Sacraments and the Sacramentals" aria-pressed="false"></button></h3>
-<h3 class="fn-group toc-item" data-target="ch-4" data-label="Chapter 4 The Divine Office"><a href="#ch-4" class="fn-ch-link">Chapter 4 The Divine Office</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-4" aria-label="Bookmark Chapter 4 The Divine Office" aria-pressed="false"></button></h3>
-<h3 class="fn-group toc-item" data-target="ch-5" data-label="Chapter 5 The Liturgical Year"><a href="#ch-5" class="fn-ch-link">Chapter 5 The Liturgical Year</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-5" aria-label="Bookmark Chapter 5 The Liturgical Year" aria-pressed="false"></button></h3>
-<h3 class="fn-group toc-item" data-target="ch-6" data-label="Chapter 6 Sacred Music"><a href="#ch-6" class="fn-ch-link">Chapter 6 Sacred Music</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-6" aria-label="Bookmark Chapter 6 Sacred Music" aria-pressed="false"></button></h3>
-<h3 class="fn-group toc-item" data-target="ch-7" data-label="Chapter 7 Sacred Art and Sacred Furnishings"><a href="#ch-7" class="fn-ch-link">Chapter 7 Sacred Art and Sacred Furnishings</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-7" aria-label="Bookmark Chapter 7 Sacred Art and Sacred Furnishings" aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-2" data-label="Chapter 2: The Most Sacred Mystery of the Eucharist"><a href="#ch-2" class="fn-ch-link">Chapter 2: The Most Sacred Mystery of the Eucharist</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-2" aria-label="Bookmark Chapter 2: The Most Sacred Mystery of the Eucharist" aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-3" data-label="Chapter 3: The Other Sacraments and the Sacramentals"><a href="#ch-3" class="fn-ch-link">Chapter 3: The Other Sacraments and the Sacramentals</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-3" aria-label="Bookmark Chapter 3: The Other Sacraments and the Sacramentals" aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-4" data-label="Chapter 4: The Divine Office"><a href="#ch-4" class="fn-ch-link">Chapter 4: The Divine Office</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-4" aria-label="Bookmark Chapter 4: The Divine Office" aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-5" data-label="Chapter 5: The Liturgical Year"><a href="#ch-5" class="fn-ch-link">Chapter 5: The Liturgical Year</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-5" aria-label="Bookmark Chapter 5: The Liturgical Year" aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-6" data-label="Chapter 6: Sacred Music"><a href="#ch-6" class="fn-ch-link">Chapter 6: Sacred Music</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-6" aria-label="Bookmark Chapter 6: Sacred Music" aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-7" data-label="Chapter 7: Sacred Art and Sacred Furnishings"><a href="#ch-7" class="fn-ch-link">Chapter 7: Sacred Art and Sacred Furnishings</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-7" aria-label="Bookmark Chapter 7: Sacred Art and Sacred Furnishings" aria-pressed="false"></button></h3>
 <h3 class="fn-group toc-item" data-target="appendix-1" data-label="A Declaration of the Second Ecumenical Council of the Vatican on Revision of the Calendar"><a href="#appendix-1" class="fn-ch-link">A Declaration of the Second Ecumenical Council of the Vatican on Revision of the Calendar</a><button class="bookmark-toggle" type="button" data-bookmark-target="appendix-1" aria-label="Bookmark A Declaration of the Second Ecumenical Council of the Vatican on Revision of the Calendar" aria-pressed="false"></button></h3>
     </div>
     <div id="drawer-footnotes" class="drawer-view" role="tabpanel" hidden>
@@ -1368,7 +1368,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-0-6" class="fn-item"><a href="#para-2" class="fn-num-link">6</a><p>Cf. <em>John</em> 11:52.</p></li>
 <li id="fn-0-0-7" class="fn-item"><a href="#para-2" class="fn-num-link">7</a><p>Cf. <em>John</em> 10:16.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-1" class="fn-ch-link">Chapter 1 General Principles for the Restoration and Promotion of the Sacred Liturgy</a></h3>
+<h3 class="fn-group"><a href="#ch-1" class="fn-ch-link">Chapter 1: General Principles for the Restoration and Promotion of the Sacred Liturgy</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-1-1">Section 1: The Nature of the Sacred Liturgy and Its Importance in the Church&#x27;s Life</a></p>
 <ol class="fn-list">
 <li id="fn-0-1-8" class="fn-item"><a href="#para-5" class="fn-num-link">8</a><p>Cf. I<em>s</em>. 61:1; <em>Luke</em> 4:18.</p></li>
@@ -1414,7 +1414,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-1-35" class="fn-item"><a href="#para-41" class="fn-num-link">35</a><p>Cf. St. Ignatius of Antioch, <em>To the Smyrnians</em>, 8; <em>To the Magnesians</em>, 7; <em>To the Philadelphians</em>, 4.</p></li>
 </ol>
 <p class="sub-nav-item"><a class="sub-nav-link" href="#sub-43">The Promotion of Pastoral-liturgical Action</a></p>
-<h3 class="fn-group"><a href="#ch-2" class="fn-ch-link">Chapter 2 The Most Sacred Mystery of the Eucharist</a></h3>
+<h3 class="fn-group"><a href="#ch-2" class="fn-ch-link">Chapter 2: The Most Sacred Mystery of the Eucharist</a></h3>
 <ol class="fn-list">
 <li id="fn-0-2-36" class="fn-item"><a href="#para-47" class="fn-num-link">36</a><p>Cf. St. Augustine, <em>Tractatus in Ioannem</em>, VI, n. 13.</p></li>
 <li id="fn-0-2-37" class="fn-item"><a href="#para-47" class="fn-num-link">37</a><p>Roman Breviary, feast of Corpus Christi, Second Vespers, antiphon to the Magnificat.</p></li>
@@ -1422,11 +1422,11 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-2-39" class="fn-item"><a href="#para-53" class="fn-num-link">39</a><p>Cf. 1 <em>Tim</em>. 2:1–2.</p></li>
 <li id="fn-0-2-40" class="fn-item"><a href="#para-55" class="fn-num-link">40</a><p>Session XXI, July 16, 1562. <em>Doctrine on Communion under Both Species</em>, chap. 1–3: Condlium Tridentinum. <em>Diariorum, Actorum, Epistolarum</em>, Tractatuum nova collectio ed. Soc. Goerresiana, tome VIII (Freiburg in Br., 1919), 698–699.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-3" class="fn-ch-link">Chapter 3 The Other Sacraments and the Sacramentals</a></h3>
+<h3 class="fn-group"><a href="#ch-3" class="fn-ch-link">Chapter 3: The Other Sacraments and the Sacramentals</a></h3>
 <ol class="fn-list">
 <li id="fn-0-3-41" class="fn-item"><a href="#para-77" class="fn-num-link">41</a><p>Council of Trent, Session XXIV, November 11, 1563, <em>On Reform</em>, chap. I. Cf. Roman Ritual, title VIII, chap. II, n. 6.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-6" class="fn-ch-link">Chapter 6 Sacred Music</a></h3>
+<h3 class="fn-group"><a href="#ch-6" class="fn-ch-link">Chapter 6: Sacred Music</a></h3>
 <ol class="fn-list">
 <li id="fn-0-6-42" class="fn-item"><a href="#para-112" class="fn-num-link">42</a><p>Cf. <em>Eph</em>. 5:19; Col. 3:16.</p></li>
 </ol>
@@ -1691,9 +1691,30 @@ try {
   if (Array.isArray(stored)) bookmarks = stored.filter(id => tocByTarget.has(id));
 } catch (e) {}
 
-tab.addEventListener('click', () => {
-  const open = drawer.classList.toggle('open');
+function setDrawerOpen(open) {
+  drawer.classList.toggle('open', open);
   tab.setAttribute('aria-expanded', String(open));
+}
+
+tab.addEventListener('click', () => {
+  setDrawerOpen(!drawer.classList.contains('open'));
+});
+
+let textTapStart = null;
+document.addEventListener('pointerdown', e => {
+  if (e.pointerType !== 'touch' || !drawer.classList.contains('open')) return;
+  if (!e.target.closest('.paragraph, .doc-title, .appendix, .doc-end-matter')) return;
+  if (e.target.closest('a, button, input, summary')) return;
+  textTapStart = {id: e.pointerId, x: e.clientX, y: e.clientY};
+});
+document.addEventListener('pointerup', e => {
+  if (!textTapStart || e.pointerId !== textTapStart.id) return;
+  const moved = Math.hypot(e.clientX - textTapStart.x, e.clientY - textTapStart.y);
+  textTapStart = null;
+  if (e.pointerType === 'touch' && moved < 10) setDrawerOpen(false);
+});
+document.addEventListener('pointercancel', () => {
+  textTapStart = null;
 });
 
 function showDrawerView(view) {
@@ -1777,7 +1798,8 @@ function selectFn(id) {
   const rect = target.getBoundingClientRect();
   const cRect = notesPanel.getBoundingClientRect();
   if (rect.top < cRect.top || rect.bottom > cRect.bottom) {
-    notesPanel.scrollTop += rect.top - cRect.top - notesPanel.clientHeight / 3;
+    const divisor = window.matchMedia('(max-width: 900px)').matches ? 4.5 : 3;
+    notesPanel.scrollTop += rect.top - cRect.top - notesPanel.clientHeight / divisor;
   }
 }
 
@@ -1806,7 +1828,7 @@ document.querySelectorAll('.sec-nav-link, .sub-nav-link').forEach(a => {
 document.querySelectorAll('sup a').forEach(a => {
   a.addEventListener('click', e => {
     e.preventDefault();
-    drawer.classList.add('open');
+    setDrawerOpen(true);
     showDrawerView('footnotes');
     selectFn(a.getAttribute('href').slice(1));
   });

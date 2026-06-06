@@ -59,7 +59,8 @@ def chapter_num_label(chapter):
 
 def chapter_full_label(chapter, title):
     number = chapter_num_label(chapter)
-    return f'{number} {title}' if title else number
+    separator = ' ' if chapter_style == 'roman' else ': '
+    return f'{number}{separator}{title}' if title else number
 
 def linkify_footnotes(text, part, chapter):
     """Replace (N) inline refs with linked superscripts."""

@@ -187,7 +187,7 @@ h1, h2, h3, h4 { font-family: var(--font-display); }
     background: var(--bar-bg, var(--bg));
     border-bottom: 1px solid var(--rule-tint);
     padding-left: max(var(--col-outer-left), 2rem);   /* floor so heading clears the screen edge at narrow widths */
-    padding-right: 7.5rem;
+    padding-right: 10.5rem;
     height: var(--bar-h-fixed);
     font-family: var(--font-display);
     font-size: 1.8rem;
@@ -314,7 +314,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     position: fixed;
     top: var(--bar-h, 3rem); right: 0;
     width: 380px;
-    max-width: 66vw;          /* cap at 2/3 viewport so narrow screens stay legible */
+    max-width: 75vw;
     height: calc(100vh - var(--bar-h, 3rem));
     background: var(--surface);
     border-left: 1px solid var(--rule-tint);
@@ -590,20 +590,20 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 #info-panel[hidden] { display: none; }
 
 #info-panel {
-    right: 3.25rem;
+    right: 5.6rem;
     width: 18rem;
     font-size: .88rem;
     line-height: 1.45;
 }
+#prefs-panel { right: 3.25rem; }
 #info-panel p { margin: 0 0 .7rem; }
 #info-panel p:last-child { margin-bottom: 0; }
 #info-panel .panel-title { font-weight: 600; color: var(--fg); }
 #info-panel a { color: var(--accent); }
 
-/* Caret centre at viewport-right − 1.9rem (= aA button centre, given
-   #bar-actions right:.9rem + half-button 1rem). Panel right is .9rem,
-   caret centre offset inside panel = .9 + caret-right + caret-half = 1.9
-   → caret-right = .575rem. */
+/* Each panel's right offset places this caret beneath its trigger button.
+   The notes button added at the right of the action row means info and
+   reader-settings sit two and one button positions further left. */
 #prefs-panel::before,
 #info-panel::before {
     content: '';
@@ -668,13 +668,13 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     .ch-bar:hover       { width: 5px; }
     .ch-bar.part-active { width: 5px; }
     .ch-bar.active      { width: 7px; }
-    #sticky-bar         { font-size: 1.1rem; padding-right: 6.5rem; }
+    #sticky-bar         { font-size: 1.1rem; padding-right: 8.75rem; }
     #sticky-num         { display: none; }
     #sticky-sub         { padding-left: 0; font-size: .62em; }
     #bar-actions        { right: .4rem; }
     #bar-actions button { width: 1.7rem; height: 1.7rem; font-size: .8rem; }
-    #prefs-panel        { right: .4rem; padding: .7rem .85rem; }
-    #info-panel         { right: 2.75rem; padding: .7rem .85rem; }
+    #prefs-panel        { right: 2.3rem; padding: .7rem .85rem; }
+    #info-panel         { right: 4.35rem; padding: .7rem .85rem; }
     .pref-row           { gap: .75rem; margin: .4rem 0; }
 }
 
@@ -1993,9 +1993,30 @@ try {
   if (Array.isArray(stored)) bookmarks = stored.filter(id => tocByTarget.has(id));
 } catch (e) {}
 
-tab.addEventListener('click', () => {
-  const open = drawer.classList.toggle('open');
+function setDrawerOpen(open) {
+  drawer.classList.toggle('open', open);
   tab.setAttribute('aria-expanded', String(open));
+}
+
+tab.addEventListener('click', () => {
+  setDrawerOpen(!drawer.classList.contains('open'));
+});
+
+let textTapStart = null;
+document.addEventListener('pointerdown', e => {
+  if (e.pointerType !== 'touch' || !drawer.classList.contains('open')) return;
+  if (!e.target.closest('.paragraph, .doc-title, .appendix, .doc-end-matter')) return;
+  if (e.target.closest('a, button, input, summary')) return;
+  textTapStart = {id: e.pointerId, x: e.clientX, y: e.clientY};
+});
+document.addEventListener('pointerup', e => {
+  if (!textTapStart || e.pointerId !== textTapStart.id) return;
+  const moved = Math.hypot(e.clientX - textTapStart.x, e.clientY - textTapStart.y);
+  textTapStart = null;
+  if (e.pointerType === 'touch' && moved < 10) setDrawerOpen(false);
+});
+document.addEventListener('pointercancel', () => {
+  textTapStart = null;
 });
 
 function showDrawerView(view) {
@@ -2079,7 +2100,8 @@ function selectFn(id) {
   const rect = target.getBoundingClientRect();
   const cRect = notesPanel.getBoundingClientRect();
   if (rect.top < cRect.top || rect.bottom > cRect.bottom) {
-    notesPanel.scrollTop += rect.top - cRect.top - notesPanel.clientHeight / 3;
+    const divisor = window.matchMedia('(max-width: 900px)').matches ? 4.5 : 3;
+    notesPanel.scrollTop += rect.top - cRect.top - notesPanel.clientHeight / divisor;
   }
 }
 
@@ -2108,7 +2130,7 @@ document.querySelectorAll('.sec-nav-link, .sub-nav-link').forEach(a => {
 document.querySelectorAll('sup a').forEach(a => {
   a.addEventListener('click', e => {
     e.preventDefault();
-    drawer.classList.add('open');
+    setDrawerOpen(true);
     showDrawerView('footnotes');
     selectFn(a.getAttribute('href').slice(1));
   });

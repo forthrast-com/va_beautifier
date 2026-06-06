@@ -38,6 +38,11 @@ RE_CHAPTER = re.compile(r'^Chapter\s+([IVX]+)$', re.IGNORECASE)
 RE_SECTION = re.compile(r'^(\d+)\.\s+(.+)$', re.DOTALL)
 
 
+def structural_text(tag):
+    """Plain text for heading detection; structural labels are not links."""
+    return re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', text(tag))
+
+
 def extract():
     soup = load_source(EN_SRC)
     ps = soup.find_all('p')
@@ -61,7 +66,7 @@ def extract():
     hidden_number = -1
 
     for p in ps[start:end]:
-        plain = text(p)
+        plain = structural_text(p)
         if not plain:
             continue
         centred = (p.get('align') or '').lower() == 'center'

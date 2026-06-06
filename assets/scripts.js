@@ -249,9 +249,30 @@ try {
   if (Array.isArray(stored)) bookmarks = stored.filter(id => tocByTarget.has(id));
 } catch (e) {}
 
-tab.addEventListener('click', () => {
-  const open = drawer.classList.toggle('open');
+function setDrawerOpen(open) {
+  drawer.classList.toggle('open', open);
   tab.setAttribute('aria-expanded', String(open));
+}
+
+tab.addEventListener('click', () => {
+  setDrawerOpen(!drawer.classList.contains('open'));
+});
+
+let textTapStart = null;
+document.addEventListener('pointerdown', e => {
+  if (e.pointerType !== 'touch' || !drawer.classList.contains('open')) return;
+  if (!e.target.closest('.paragraph, .doc-title, .appendix, .doc-end-matter')) return;
+  if (e.target.closest('a, button, input, summary')) return;
+  textTapStart = {id: e.pointerId, x: e.clientX, y: e.clientY};
+});
+document.addEventListener('pointerup', e => {
+  if (!textTapStart || e.pointerId !== textTapStart.id) return;
+  const moved = Math.hypot(e.clientX - textTapStart.x, e.clientY - textTapStart.y);
+  textTapStart = null;
+  if (e.pointerType === 'touch' && moved < 10) setDrawerOpen(false);
+});
+document.addEventListener('pointercancel', () => {
+  textTapStart = null;
 });
 
 function showDrawerView(view) {
@@ -335,7 +356,8 @@ function selectFn(id) {
   const rect = target.getBoundingClientRect();
   const cRect = notesPanel.getBoundingClientRect();
   if (rect.top < cRect.top || rect.bottom > cRect.bottom) {
-    notesPanel.scrollTop += rect.top - cRect.top - notesPanel.clientHeight / 3;
+    const divisor = window.matchMedia('(max-width: 900px)').matches ? 4.5 : 3;
+    notesPanel.scrollTop += rect.top - cRect.top - notesPanel.clientHeight / divisor;
   }
 }
 
@@ -364,7 +386,7 @@ document.querySelectorAll('.sec-nav-link, .sub-nav-link').forEach(a => {
 document.querySelectorAll('sup a').forEach(a => {
   a.addEventListener('click', e => {
     e.preventDefault();
-    drawer.classList.add('open');
+    setDrawerOpen(true);
     showDrawerView('footnotes');
     selectFn(a.getAttribute('href').slice(1));
   });

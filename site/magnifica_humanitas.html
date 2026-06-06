@@ -187,7 +187,7 @@ h1, h2, h3, h4 { font-family: var(--font-display); }
     background: var(--bar-bg, var(--bg));
     border-bottom: 1px solid var(--rule-tint);
     padding-left: max(var(--col-outer-left), 2rem);   /* floor so heading clears the screen edge at narrow widths */
-    padding-right: 7.5rem;
+    padding-right: 10.5rem;
     height: var(--bar-h-fixed);
     font-family: var(--font-display);
     font-size: 1.8rem;
@@ -314,7 +314,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     position: fixed;
     top: var(--bar-h, 3rem); right: 0;
     width: 380px;
-    max-width: 66vw;          /* cap at 2/3 viewport so narrow screens stay legible */
+    max-width: 75vw;
     height: calc(100vh - var(--bar-h, 3rem));
     background: var(--surface);
     border-left: 1px solid var(--rule-tint);
@@ -590,20 +590,20 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 #info-panel[hidden] { display: none; }
 
 #info-panel {
-    right: 3.25rem;
+    right: 5.6rem;
     width: 18rem;
     font-size: .88rem;
     line-height: 1.45;
 }
+#prefs-panel { right: 3.25rem; }
 #info-panel p { margin: 0 0 .7rem; }
 #info-panel p:last-child { margin-bottom: 0; }
 #info-panel .panel-title { font-weight: 600; color: var(--fg); }
 #info-panel a { color: var(--accent); }
 
-/* Caret centre at viewport-right − 1.9rem (= aA button centre, given
-   #bar-actions right:.9rem + half-button 1rem). Panel right is .9rem,
-   caret centre offset inside panel = .9 + caret-right + caret-half = 1.9
-   → caret-right = .575rem. */
+/* Each panel's right offset places this caret beneath its trigger button.
+   The notes button added at the right of the action row means info and
+   reader-settings sit two and one button positions further left. */
 #prefs-panel::before,
 #info-panel::before {
     content: '';
@@ -668,13 +668,13 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     .ch-bar:hover       { width: 5px; }
     .ch-bar.part-active { width: 5px; }
     .ch-bar.active      { width: 7px; }
-    #sticky-bar         { font-size: 1.1rem; padding-right: 6.5rem; }
+    #sticky-bar         { font-size: 1.1rem; padding-right: 8.75rem; }
     #sticky-num         { display: none; }
     #sticky-sub         { padding-left: 0; font-size: .62em; }
     #bar-actions        { right: .4rem; }
     #bar-actions button { width: 1.7rem; height: 1.7rem; font-size: .8rem; }
-    #prefs-panel        { right: .4rem; padding: .7rem .85rem; }
-    #info-panel         { right: 2.75rem; padding: .7rem .85rem; }
+    #prefs-panel        { right: 2.3rem; padding: .7rem .85rem; }
+    #info-panel         { right: 4.35rem; padding: .7rem .85rem; }
     .pref-row           { gap: .75rem; margin: .4rem 0; }
 }
 
@@ -985,13 +985,13 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li class="ntoc-sec"><a href="#sec-0-0-4">Remaining human</a></li>
 </ul>
 </li>
-<li class="ntoc-ch"><a href="#ch-1">Chapter 1 A Dynamic Approach Faithful to the Gospel</a>
+<li class="ntoc-ch"><a href="#ch-1">Chapter 1: A Dynamic Approach Faithful to the Gospel</a>
 <ul>
 <li class="ntoc-sec"><a href="#sec-0-1-1">A Church journeying through human history</a></li>
 <li class="ntoc-sec"><a href="#sec-0-1-2">The development of Social Doctrine from Leo XIII to the present</a></li>
 </ul>
 </li>
-<li class="ntoc-ch"><a href="#ch-2">Chapter 2 Foundations and Principles of the Social Doctrine of the Church</a>
+<li class="ntoc-ch"><a href="#ch-2">Chapter 2: Foundations and Principles of the Social Doctrine of the Church</a>
 <ul>
 <li class="ntoc-sec"><a href="#sec-0-2-1">The foundations of Social Doctrine</a></li>
 <li class="ntoc-sec"><a href="#sec-0-2-2">The principles of Social Doctrine</a></li>
@@ -999,7 +999,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li class="ntoc-sec"><a href="#sec-0-2-4">An examen for the Church</a></li>
 </ul>
 </li>
-<li class="ntoc-ch"><a href="#ch-3">Chapter 3 Technology and Dominance.</a>
+<li class="ntoc-ch"><a href="#ch-3">Chapter 3: Technology and Dominance.</a>
 <ul>
 <li class="ntoc-sec"><a href="#sec-0-3-1">The technocratic paradigm and digital power</a></li>
 <li class="ntoc-sec"><a href="#sec-0-3-2">Artificial intelligence</a></li>
@@ -1008,7 +1008,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li class="ntoc-sec"><a href="#sec-0-3-5">Two cities and two loves</a></li>
 </ul>
 </li>
-<li class="ntoc-ch"><a href="#ch-4">Chapter 4 Safeguarding Humanity at a Time of Transformation.</a>
+<li class="ntoc-ch"><a href="#ch-4">Chapter 4: Safeguarding Humanity at a Time of Transformation.</a>
 <ul>
 <li class="ntoc-sec"><a href="#sec-0-4-1">Truth as a common good</a></li>
 <li class="ntoc-sec"><a href="#sec-0-4-2">The dignity of work at a time of digital transition</a></li>
@@ -1016,7 +1016,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li class="ntoc-sec"><a href="#sec-0-4-4">A shared responsibility</a></li>
 </ul>
 </li>
-<li class="ntoc-ch"><a href="#ch-5">Chapter 5 The Culture of Power and the Civilization of Love</a>
+<li class="ntoc-ch"><a href="#ch-5">Chapter 5: The Culture of Power and the Civilization of Love</a>
 <ul>
 <li class="ntoc-sec"><a href="#sec-0-5-1">The civilization of love in the digital age</a></li>
 <li class="ntoc-sec"><a href="#sec-0-5-2">The culture of power</a></li>
@@ -1298,7 +1298,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-0-8" class="fn-item"><a href="#para-11" class="fn-num-link">8</a><p>Saint Augustine, <em>Confessions</em>, I, 1, 1: <em>CCSL</em> 27, Turnhout 1981, 1.</p></li>
 </ol>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-0-4">Remaining human</a></p>
-<h3 class="fn-group"><a href="#ch-1" class="fn-ch-link">Chapter 1 A Dynamic Approach Faithful to the Gospel</a></h3>
+<h3 class="fn-group"><a href="#ch-1" class="fn-ch-link">Chapter 1: A Dynamic Approach Faithful to the Gospel</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-1-1">A Church journeying through human history</a></p>
 <ol class="fn-list">
 <li id="fn-0-1-9" class="fn-item"><a href="#para-19" class="fn-num-link">9</a><p>Francis, Apostolic Exhortation <a href="https://www.vatican.va/content/francesco/en/apost_exhortations/documents/papa-francesco_esortazione-ap_20131124_evangelii-gaudium.html" class="ext-link" target="_blank" rel="noopener"><em>Evangelii Gaudium</em></a> (24 November 2013), 183: <em>AAS</em> 105 (2013), 1097.</p></li>
@@ -1361,7 +1361,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-1-50" class="fn-item"><a href="#para-44" class="fn-num-link">50</a><p>Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/20241024-enciclica-dilexit-nos.html" class="ext-link" target="_blank" rel="noopener"><em>Dilexit Nos</em></a> (24 October 2024), 167: <em>AAS</em> 116 (2024), 1421.</p></li>
 </ol>
 <p class="sub-nav-item"><a class="sub-nav-link" href="#sub-45">Interpreting history in the light of faith</a></p>
-<h3 class="fn-group"><a href="#ch-2" class="fn-ch-link">Chapter 2 Foundations and Principles of the Social Doctrine of the Church</a></h3>
+<h3 class="fn-group"><a href="#ch-2" class="fn-ch-link">Chapter 2: Foundations and Principles of the Social Doctrine of the Church</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-2-1">The foundations of Social Doctrine</a></p>
 <p class="sub-nav-item"><a class="sub-nav-link" href="#sub-48">The human person: image of the Triune God</a></p>
 <ol class="fn-list">
@@ -1461,7 +1461,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-2-116" class="fn-item"><a href="#para-89" class="fn-num-link">116</a><p>Cf. <a href="https://www.synod.va/content/dam/synod/news/2024–10–26_final-document/ENG---Documento-finale.pdf" class="ext-link" target="_blank" rel="noopener">ibid.</a>, 100–101.</p></li>
 <li id="fn-0-2-117" class="fn-item"><a href="#para-89" class="fn-num-link">117</a><p>Cf. Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener"><em>Fratelli Tutti</em></a> (3 October 2020), 94: <em>AAS</em> 112 (2020), 1001.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-3" class="fn-ch-link">Chapter 3 Technology and Dominance.</a></h3>
+<h3 class="fn-group"><a href="#ch-3" class="fn-ch-link">Chapter 3: Technology and Dominance.</a></h3>
 <ol class="fn-list">
 <li id="fn-0-3-118" class="fn-item"><a href="#para-91" class="fn-num-link">118</a><p>Cf. Pontifical Council for Justice and Peace, <a href="https://www.vatican.va/roman_curia/pontifical_councils/justpeace/documents/rc_pc_justpeace_doc_20060526_compendio-dott-soc_en.html" class="ext-link" target="_blank" rel="noopener"><em>Compendium of the Social Doctrine of the Church</em></a>, 53.</p></li>
 </ol>
@@ -1511,7 +1511,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-3-138" class="fn-item"><a href="#para-129" class="fn-num-link">138</a><p>Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_04031979_redemptor-hominis.html" class="ext-link" target="_blank" rel="noopener"><em>Redemptor Hominis</em></a> (4 March 1979), 15: <em>AAS</em> 71 (1979), 286–287.</p></li>
 <li id="fn-0-3-139" class="fn-item"><a href="#para-130" class="fn-num-link">139</a><p>Saint Augustine, <em>De civitate Dei</em>, XIV, 28: <em>CCSL</em> 48, Turnhout 1955, 451.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-4" class="fn-ch-link">Chapter 4 Safeguarding Humanity at a Time of Transformation.</a></h3>
+<h3 class="fn-group"><a href="#ch-4" class="fn-ch-link">Chapter 4: Safeguarding Humanity at a Time of Transformation.</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-4-1">Truth as a common good</a></p>
 <p class="sub-nav-item"><a class="sub-nav-link" href="#sub-132">Truth and democracy</a></p>
 <ol class="fn-list">
@@ -1584,7 +1584,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-4-176" class="fn-item"><a href="#para-176" class="fn-num-link">176</a><p>Cf. Saint John Paul II, Bull <a href="https://www.vatican.va/jubilee_2000/docs/documents/hf_jp-ii_doc_30111998_bolla-jubilee_en.html" class="ext-link" target="_blank" rel="noopener"><em>Incarnationis Mysterium</em></a> (29 November 1998), 11: <em>AAS</em> 91 (1999), 139–141.</p></li>
 </ol>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-4-4">A shared responsibility</a></p>
-<h3 class="fn-group"><a href="#ch-5" class="fn-ch-link">Chapter 5 The Culture of Power and the Civilization of Love</a></h3>
+<h3 class="fn-group"><a href="#ch-5" class="fn-ch-link">Chapter 5: The Culture of Power and the Civilization of Love</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-5-1">The civilization of love in the digital age</a></p>
 <ol class="fn-list">
 <li id="fn-0-5-177" class="fn-item"><a href="#para-186" class="fn-num-link">177</a><p>Cf. Saint Paul VI, <em>Regina Caeli</em> (17 May 1970): <em>Insegnamenti di Paolo VI,</em> vol.  VIII, 506.</p></li>
@@ -1704,7 +1704,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <p class="sec-nav-item toc-item" data-target="sec-0-0-2" data-label="Two biblical images"><a href="#sec-0-0-2" class="sec-nav-link">Two biblical images</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-0-2" aria-label="Bookmark Two biblical images" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-0-3" data-label="Building for the common good"><a href="#sec-0-0-3" class="sec-nav-link">Building for the common good</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-0-3" aria-label="Bookmark Building for the common good" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-0-4" data-label="Remaining human"><a href="#sec-0-0-4" class="sec-nav-link">Remaining human</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-0-4" aria-label="Bookmark Remaining human" aria-pressed="false"></button></p>
-<h3 class="fn-group toc-item" data-target="ch-1" data-label="Chapter 1 A Dynamic Approach Faithful to the Gospel"><a href="#ch-1" class="fn-ch-link">Chapter 1 A Dynamic Approach Faithful to the Gospel</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-1" aria-label="Bookmark Chapter 1 A Dynamic Approach Faithful to the Gospel" aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-1" data-label="Chapter 1: A Dynamic Approach Faithful to the Gospel"><a href="#ch-1" class="fn-ch-link">Chapter 1: A Dynamic Approach Faithful to the Gospel</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-1" aria-label="Bookmark Chapter 1: A Dynamic Approach Faithful to the Gospel" aria-pressed="false"></button></h3>
 <p class="sec-nav-item toc-item" data-target="sec-0-1-1" data-label="A Church journeying through human history"><a href="#sec-0-1-1" class="sec-nav-link">A Church journeying through human history</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-1-1" aria-label="Bookmark A Church journeying through human history" aria-pressed="false"></button></p>
 <p class="sub-nav-item toc-item" data-target="sub-23" data-label="The wisdom of the word of God in dialogue with the human sciences"><a href="#sub-23" class="sub-nav-link">The wisdom of the word of God in dialogue with the human sciences</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-23" aria-label="Bookmark The wisdom of the word of God in dialogue with the human sciences" aria-pressed="false"></button></p>
 <p class="sub-nav-item toc-item" data-target="sub-25" data-label="Social Doctrine as a shared discernment"><a href="#sub-25" class="sub-nav-link">Social Doctrine as a shared discernment</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-25" aria-label="Bookmark Social Doctrine as a shared discernment" aria-pressed="false"></button></p>
@@ -1713,7 +1713,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <p class="sub-nav-item toc-item" data-target="sub-33" data-label="The years of the Second Vatican Council"><a href="#sub-33" class="sub-nav-link">The years of the Second Vatican Council</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-33" aria-label="Bookmark The years of the Second Vatican Council" aria-pressed="false"></button></p>
 <p class="sub-nav-item toc-item" data-target="sub-37" data-label="The recent Magisterium"><a href="#sub-37" class="sub-nav-link">The recent Magisterium</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-37" aria-label="Bookmark The recent Magisterium" aria-pressed="false"></button></p>
 <p class="sub-nav-item toc-item" data-target="sub-45" data-label="Interpreting history in the light of faith"><a href="#sub-45" class="sub-nav-link">Interpreting history in the light of faith</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-45" aria-label="Bookmark Interpreting history in the light of faith" aria-pressed="false"></button></p>
-<h3 class="fn-group toc-item" data-target="ch-2" data-label="Chapter 2 Foundations and Principles of the Social Doctrine of the Church"><a href="#ch-2" class="fn-ch-link">Chapter 2 Foundations and Principles of the Social Doctrine of the Church</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-2" aria-label="Bookmark Chapter 2 Foundations and Principles of the Social Doctrine of the Church" aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-2" data-label="Chapter 2: Foundations and Principles of the Social Doctrine of the Church"><a href="#ch-2" class="fn-ch-link">Chapter 2: Foundations and Principles of the Social Doctrine of the Church</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-2" aria-label="Bookmark Chapter 2: Foundations and Principles of the Social Doctrine of the Church" aria-pressed="false"></button></h3>
 <p class="sec-nav-item toc-item" data-target="sec-0-2-1" data-label="The foundations of Social Doctrine"><a href="#sec-0-2-1" class="sec-nav-link">The foundations of Social Doctrine</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-2-1" aria-label="Bookmark The foundations of Social Doctrine" aria-pressed="false"></button></p>
 <p class="sub-nav-item toc-item" data-target="sub-48" data-label="The human person: image of the Triune God"><a href="#sub-48" class="sub-nav-link">The human person: image of the Triune God</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-48" aria-label="Bookmark The human person: image of the Triune God" aria-pressed="false"></button></p>
 <p class="sub-nav-item toc-item" data-target="sub-51" data-label="The equal dignity of all human beings"><a href="#sub-51" class="sub-nav-link">The equal dignity of all human beings</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-51" aria-label="Bookmark The equal dignity of all human beings" aria-pressed="false"></button></p>
@@ -1726,7 +1726,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <p class="sub-nav-item toc-item" data-target="sub-77" data-label="The principle of social justice"><a href="#sub-77" class="sub-nav-link">The principle of social justice</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-77" aria-label="Bookmark The principle of social justice" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-2-3" data-label="Integral human development"><a href="#sec-0-2-3" class="sec-nav-link">Integral human development</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-2-3" aria-label="Bookmark Integral human development" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-2-4" data-label="An examen for the Church"><a href="#sec-0-2-4" class="sec-nav-link">An examen for the Church</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-2-4" aria-label="Bookmark An examen for the Church" aria-pressed="false"></button></p>
-<h3 class="fn-group toc-item" data-target="ch-3" data-label="Chapter 3 Technology and Dominance."><a href="#ch-3" class="fn-ch-link">Chapter 3 Technology and Dominance.</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-3" aria-label="Bookmark Chapter 3 Technology and Dominance." aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-3" data-label="Chapter 3: Technology and Dominance."><a href="#ch-3" class="fn-ch-link">Chapter 3: Technology and Dominance.</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-3" aria-label="Bookmark Chapter 3: Technology and Dominance." aria-pressed="false"></button></h3>
 <p class="sec-nav-item toc-item" data-target="sec-0-3-1" data-label="The technocratic paradigm and digital power"><a href="#sec-0-3-1" class="sec-nav-link">The technocratic paradigm and digital power</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-3-1" aria-label="Bookmark The technocratic paradigm and digital power" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-3-2" data-label="Artificial intelligence"><a href="#sec-0-3-2" class="sec-nav-link">Artificial intelligence</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-3-2" aria-label="Bookmark Artificial intelligence" aria-pressed="false"></button></p>
 <p class="sub-nav-item toc-item" data-target="sub-100" data-label="A valuable tool that requires vigilance"><a href="#sub-100" class="sub-nav-link">A valuable tool that requires vigilance</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-100" aria-label="Bookmark A valuable tool that requires vigilance" aria-pressed="false"></button></p>
@@ -1736,7 +1736,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <p class="sub-nav-item toc-item" data-target="sub-118" data-label="The limit, the heart and the grandeur of the human person"><a href="#sub-118" class="sub-nav-link">The limit, the heart and the grandeur of the human person</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-118" aria-label="Bookmark The limit, the heart and the grandeur of the human person" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-3-4" data-label="The authentic “more than human”: grace and Christian humanism"><a href="#sec-0-3-4" class="sec-nav-link">The authentic “more than human”: grace and Christian humanism</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-3-4" aria-label="Bookmark The authentic “more than human”: grace and Christian humanism" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-3-5" data-label="Two cities and two loves"><a href="#sec-0-3-5" class="sec-nav-link">Two cities and two loves</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-3-5" aria-label="Bookmark Two cities and two loves" aria-pressed="false"></button></p>
-<h3 class="fn-group toc-item" data-target="ch-4" data-label="Chapter 4 Safeguarding Humanity at a Time of Transformation."><a href="#ch-4" class="fn-ch-link">Chapter 4 Safeguarding Humanity at a Time of Transformation.</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-4" aria-label="Bookmark Chapter 4 Safeguarding Humanity at a Time of Transformation." aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-4" data-label="Chapter 4: Safeguarding Humanity at a Time of Transformation."><a href="#ch-4" class="fn-ch-link">Chapter 4: Safeguarding Humanity at a Time of Transformation.</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-4" aria-label="Bookmark Chapter 4: Safeguarding Humanity at a Time of Transformation." aria-pressed="false"></button></h3>
 <p class="sec-nav-item toc-item" data-target="sec-0-4-1" data-label="Truth as a common good"><a href="#sec-0-4-1" class="sec-nav-link">Truth as a common good</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-4-1" aria-label="Bookmark Truth as a common good" aria-pressed="false"></button></p>
 <p class="sub-nav-item toc-item" data-target="sub-132" data-label="Truth and democracy"><a href="#sub-132" class="sub-nav-link">Truth and democracy</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-132" aria-label="Bookmark Truth and democracy" aria-pressed="false"></button></p>
 <p class="sub-nav-item toc-item" data-target="sub-135" data-label="Communication and the collective imagination"><a href="#sub-135" class="sub-nav-link">Communication and the collective imagination</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-135" aria-label="Bookmark Communication and the collective imagination" aria-pressed="false"></button></p>
@@ -1752,7 +1752,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <p class="sub-nav-item toc-item" data-target="sub-170" data-label="Dependencies and societal control"><a href="#sub-170" class="sub-nav-link">Dependencies and societal control</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-170" aria-label="Bookmark Dependencies and societal control" aria-pressed="false"></button></p>
 <p class="sub-nav-item toc-item" data-target="sub-173" data-label="Breaking the chains of new forms of slavery"><a href="#sub-173" class="sub-nav-link">Breaking the chains of new forms of slavery</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-173" aria-label="Bookmark Breaking the chains of new forms of slavery" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-4-4" data-label="A shared responsibility"><a href="#sec-0-4-4" class="sec-nav-link">A shared responsibility</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-4-4" aria-label="Bookmark A shared responsibility" aria-pressed="false"></button></p>
-<h3 class="fn-group toc-item" data-target="ch-5" data-label="Chapter 5 The Culture of Power and the Civilization of Love"><a href="#ch-5" class="fn-ch-link">Chapter 5 The Culture of Power and the Civilization of Love</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-5" aria-label="Bookmark Chapter 5 The Culture of Power and the Civilization of Love" aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-5" data-label="Chapter 5: The Culture of Power and the Civilization of Love"><a href="#ch-5" class="fn-ch-link">Chapter 5: The Culture of Power and the Civilization of Love</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-5" aria-label="Bookmark Chapter 5: The Culture of Power and the Civilization of Love" aria-pressed="false"></button></h3>
 <p class="sec-nav-item toc-item" data-target="sec-0-5-1" data-label="The civilization of love in the digital age"><a href="#sec-0-5-1" class="sec-nav-link">The civilization of love in the digital age</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-5-1" aria-label="Bookmark The civilization of love in the digital age" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-5-2" data-label="The culture of power"><a href="#sec-0-5-2" class="sec-nav-link">The culture of power</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-5-2" aria-label="Bookmark The culture of power" aria-pressed="false"></button></p>
 <p class="sub-nav-item toc-item" data-target="sub-189" data-label="The normalization of war"><a href="#sub-189" class="sub-nav-link">The normalization of war</a><button class="bookmark-toggle" type="button" data-bookmark-target="sub-189" aria-label="Bookmark The normalization of war" aria-pressed="false"></button></p>
@@ -1795,7 +1795,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-0-8" class="fn-item"><a href="#para-11" class="fn-num-link">8</a><p>Saint Augustine, <em>Confessions</em>, I, 1, 1: <em>CCSL</em> 27, Turnhout 1981, 1.</p></li>
 </ol>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-0-4">Remaining human</a></p>
-<h3 class="fn-group"><a href="#ch-1" class="fn-ch-link">Chapter 1 A Dynamic Approach Faithful to the Gospel</a></h3>
+<h3 class="fn-group"><a href="#ch-1" class="fn-ch-link">Chapter 1: A Dynamic Approach Faithful to the Gospel</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-1-1">A Church journeying through human history</a></p>
 <ol class="fn-list">
 <li id="fn-0-1-9" class="fn-item"><a href="#para-19" class="fn-num-link">9</a><p>Francis, Apostolic Exhortation <a href="https://www.vatican.va/content/francesco/en/apost_exhortations/documents/papa-francesco_esortazione-ap_20131124_evangelii-gaudium.html" class="ext-link" target="_blank" rel="noopener"><em>Evangelii Gaudium</em></a> (24 November 2013), 183: <em>AAS</em> 105 (2013), 1097.</p></li>
@@ -1858,7 +1858,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-1-50" class="fn-item"><a href="#para-44" class="fn-num-link">50</a><p>Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/20241024-enciclica-dilexit-nos.html" class="ext-link" target="_blank" rel="noopener"><em>Dilexit Nos</em></a> (24 October 2024), 167: <em>AAS</em> 116 (2024), 1421.</p></li>
 </ol>
 <p class="sub-nav-item"><a class="sub-nav-link" href="#sub-45">Interpreting history in the light of faith</a></p>
-<h3 class="fn-group"><a href="#ch-2" class="fn-ch-link">Chapter 2 Foundations and Principles of the Social Doctrine of the Church</a></h3>
+<h3 class="fn-group"><a href="#ch-2" class="fn-ch-link">Chapter 2: Foundations and Principles of the Social Doctrine of the Church</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-2-1">The foundations of Social Doctrine</a></p>
 <p class="sub-nav-item"><a class="sub-nav-link" href="#sub-48">The human person: image of the Triune God</a></p>
 <ol class="fn-list">
@@ -1958,7 +1958,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-2-116" class="fn-item"><a href="#para-89" class="fn-num-link">116</a><p>Cf. <a href="https://www.synod.va/content/dam/synod/news/2024–10–26_final-document/ENG---Documento-finale.pdf" class="ext-link" target="_blank" rel="noopener">ibid.</a>, 100–101.</p></li>
 <li id="fn-0-2-117" class="fn-item"><a href="#para-89" class="fn-num-link">117</a><p>Cf. Francis, Encyclical Letter <a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener"><em>Fratelli Tutti</em></a> (3 October 2020), 94: <em>AAS</em> 112 (2020), 1001.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-3" class="fn-ch-link">Chapter 3 Technology and Dominance.</a></h3>
+<h3 class="fn-group"><a href="#ch-3" class="fn-ch-link">Chapter 3: Technology and Dominance.</a></h3>
 <ol class="fn-list">
 <li id="fn-0-3-118" class="fn-item"><a href="#para-91" class="fn-num-link">118</a><p>Cf. Pontifical Council for Justice and Peace, <a href="https://www.vatican.va/roman_curia/pontifical_councils/justpeace/documents/rc_pc_justpeace_doc_20060526_compendio-dott-soc_en.html" class="ext-link" target="_blank" rel="noopener"><em>Compendium of the Social Doctrine of the Church</em></a>, 53.</p></li>
 </ol>
@@ -2008,7 +2008,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-3-138" class="fn-item"><a href="#para-129" class="fn-num-link">138</a><p>Saint John Paul II, Encyclical Letter <a href="https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/hf_jp-ii_enc_04031979_redemptor-hominis.html" class="ext-link" target="_blank" rel="noopener"><em>Redemptor Hominis</em></a> (4 March 1979), 15: <em>AAS</em> 71 (1979), 286–287.</p></li>
 <li id="fn-0-3-139" class="fn-item"><a href="#para-130" class="fn-num-link">139</a><p>Saint Augustine, <em>De civitate Dei</em>, XIV, 28: <em>CCSL</em> 48, Turnhout 1955, 451.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-4" class="fn-ch-link">Chapter 4 Safeguarding Humanity at a Time of Transformation.</a></h3>
+<h3 class="fn-group"><a href="#ch-4" class="fn-ch-link">Chapter 4: Safeguarding Humanity at a Time of Transformation.</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-4-1">Truth as a common good</a></p>
 <p class="sub-nav-item"><a class="sub-nav-link" href="#sub-132">Truth and democracy</a></p>
 <ol class="fn-list">
@@ -2081,7 +2081,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-4-176" class="fn-item"><a href="#para-176" class="fn-num-link">176</a><p>Cf. Saint John Paul II, Bull <a href="https://www.vatican.va/jubilee_2000/docs/documents/hf_jp-ii_doc_30111998_bolla-jubilee_en.html" class="ext-link" target="_blank" rel="noopener"><em>Incarnationis Mysterium</em></a> (29 November 1998), 11: <em>AAS</em> 91 (1999), 139–141.</p></li>
 </ol>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-4-4">A shared responsibility</a></p>
-<h3 class="fn-group"><a href="#ch-5" class="fn-ch-link">Chapter 5 The Culture of Power and the Civilization of Love</a></h3>
+<h3 class="fn-group"><a href="#ch-5" class="fn-ch-link">Chapter 5: The Culture of Power and the Civilization of Love</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-5-1">The civilization of love in the digital age</a></p>
 <ol class="fn-list">
 <li id="fn-0-5-177" class="fn-item"><a href="#para-186" class="fn-num-link">177</a><p>Cf. Saint Paul VI, <em>Regina Caeli</em> (17 May 1970): <em>Insegnamenti di Paolo VI,</em> vol.  VIII, 506.</p></li>
@@ -2444,9 +2444,30 @@ try {
   if (Array.isArray(stored)) bookmarks = stored.filter(id => tocByTarget.has(id));
 } catch (e) {}
 
-tab.addEventListener('click', () => {
-  const open = drawer.classList.toggle('open');
+function setDrawerOpen(open) {
+  drawer.classList.toggle('open', open);
   tab.setAttribute('aria-expanded', String(open));
+}
+
+tab.addEventListener('click', () => {
+  setDrawerOpen(!drawer.classList.contains('open'));
+});
+
+let textTapStart = null;
+document.addEventListener('pointerdown', e => {
+  if (e.pointerType !== 'touch' || !drawer.classList.contains('open')) return;
+  if (!e.target.closest('.paragraph, .doc-title, .appendix, .doc-end-matter')) return;
+  if (e.target.closest('a, button, input, summary')) return;
+  textTapStart = {id: e.pointerId, x: e.clientX, y: e.clientY};
+});
+document.addEventListener('pointerup', e => {
+  if (!textTapStart || e.pointerId !== textTapStart.id) return;
+  const moved = Math.hypot(e.clientX - textTapStart.x, e.clientY - textTapStart.y);
+  textTapStart = null;
+  if (e.pointerType === 'touch' && moved < 10) setDrawerOpen(false);
+});
+document.addEventListener('pointercancel', () => {
+  textTapStart = null;
 });
 
 function showDrawerView(view) {
@@ -2530,7 +2551,8 @@ function selectFn(id) {
   const rect = target.getBoundingClientRect();
   const cRect = notesPanel.getBoundingClientRect();
   if (rect.top < cRect.top || rect.bottom > cRect.bottom) {
-    notesPanel.scrollTop += rect.top - cRect.top - notesPanel.clientHeight / 3;
+    const divisor = window.matchMedia('(max-width: 900px)').matches ? 4.5 : 3;
+    notesPanel.scrollTop += rect.top - cRect.top - notesPanel.clientHeight / divisor;
   }
 }
 
@@ -2559,7 +2581,7 @@ document.querySelectorAll('.sec-nav-link, .sub-nav-link').forEach(a => {
 document.querySelectorAll('sup a').forEach(a => {
   a.addEventListener('click', e => {
     e.preventDefault();
-    drawer.classList.add('open');
+    setDrawerOpen(true);
     showDrawerView('footnotes');
     selectFn(a.getAttribute('href').slice(1));
   });

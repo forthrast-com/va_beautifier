@@ -187,7 +187,7 @@ h1, h2, h3, h4 { font-family: var(--font-display); }
     background: var(--bar-bg, var(--bg));
     border-bottom: 1px solid var(--rule-tint);
     padding-left: max(var(--col-outer-left), 2rem);   /* floor so heading clears the screen edge at narrow widths */
-    padding-right: 7.5rem;
+    padding-right: 10.5rem;
     height: var(--bar-h-fixed);
     font-family: var(--font-display);
     font-size: 1.8rem;
@@ -314,7 +314,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     position: fixed;
     top: var(--bar-h, 3rem); right: 0;
     width: 380px;
-    max-width: 66vw;          /* cap at 2/3 viewport so narrow screens stay legible */
+    max-width: 75vw;
     height: calc(100vh - var(--bar-h, 3rem));
     background: var(--surface);
     border-left: 1px solid var(--rule-tint);
@@ -590,20 +590,20 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 #info-panel[hidden] { display: none; }
 
 #info-panel {
-    right: 3.25rem;
+    right: 5.6rem;
     width: 18rem;
     font-size: .88rem;
     line-height: 1.45;
 }
+#prefs-panel { right: 3.25rem; }
 #info-panel p { margin: 0 0 .7rem; }
 #info-panel p:last-child { margin-bottom: 0; }
 #info-panel .panel-title { font-weight: 600; color: var(--fg); }
 #info-panel a { color: var(--accent); }
 
-/* Caret centre at viewport-right − 1.9rem (= aA button centre, given
-   #bar-actions right:.9rem + half-button 1rem). Panel right is .9rem,
-   caret centre offset inside panel = .9 + caret-right + caret-half = 1.9
-   → caret-right = .575rem. */
+/* Each panel's right offset places this caret beneath its trigger button.
+   The notes button added at the right of the action row means info and
+   reader-settings sit two and one button positions further left. */
 #prefs-panel::before,
 #info-panel::before {
     content: '';
@@ -668,13 +668,13 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     .ch-bar:hover       { width: 5px; }
     .ch-bar.part-active { width: 5px; }
     .ch-bar.active      { width: 7px; }
-    #sticky-bar         { font-size: 1.1rem; padding-right: 6.5rem; }
+    #sticky-bar         { font-size: 1.1rem; padding-right: 8.75rem; }
     #sticky-num         { display: none; }
     #sticky-sub         { padding-left: 0; font-size: .62em; }
     #bar-actions        { right: .4rem; }
     #bar-actions button { width: 1.7rem; height: 1.7rem; font-size: .8rem; }
-    #prefs-panel        { right: .4rem; padding: .7rem .85rem; }
-    #info-panel         { right: 2.75rem; padding: .7rem .85rem; }
+    #prefs-panel        { right: 2.3rem; padding: .7rem .85rem; }
+    #info-panel         { right: 4.35rem; padding: .7rem .85rem; }
     .pref-row           { gap: .75rem; margin: .4rem 0; }
 }
 
@@ -979,41 +979,41 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
   <ul class="noscript-toc-list">
 <li class="ntoc-ch"><a href="#ch-0">Preliminary Note</a>
 <ul>
-<li class="ntoc-sec"><a href="#sec-0-0-1">1. The method of the document on the sixtieth anniversary of [Gaudium et spes](https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html)</a></li>
+<li class="ntoc-sec"><a href="#sec-0-0-1">1. The method of the document on the sixtieth anniversary of Gaudium et spes</a></li>
 <li class="ntoc-sec"><a href="#sec-0-0-2">2. The structure of the document: key categories</a></li>
 <li class="ntoc-sec"><a href="#sec-0-0-3">3. The focus of the document: an engagement with the challenges of trans- and post-humanism</a></li>
 <li class="ntoc-sec"><a href="#sec-0-0-4">4. Discernment and the kerygmatic dimension of theology: the integral vocation of the human being</a></li>
 </ul>
 </li>
-<li class="ntoc-ch"><a href="#ch-2">Chapter 1 Development: Humanism and Posthumanism</a>
+<li class="ntoc-ch"><a href="#ch-2">Chapter 1: Development: Humanism and Posthumanism</a>
 <ul>
 <li class="ntoc-sec"><a href="#sec-0-1-1">1. The Magisterium’s discernment regarding development and technology</a></li>
 <li class="ntoc-sec"><a href="#sec-0-1-2">2. Some anthropological consequences of recent technological development</a></li>
 <li class="ntoc-sec"><a href="#sec-0-1-3">3. The cultural impact of technological revolutions: towards a critical discernment</a></li>
 </ul>
 </li>
-<li class="ntoc-ch"><a href="#ch-3">Chapter 2 Life as Vocation: the Human Person as an Agent in History</a>
+<li class="ntoc-ch"><a href="#ch-3">Chapter 2: Life as Vocation: the Human Person as an Agent in History</a>
 <ul>
 <li class="ntoc-sec"><a href="#sec-0-2-1">1. The historical dimension of human experience: time and space</a></li>
 <li class="ntoc-sec"><a href="#sec-0-2-2">2. Relationships and the sense of belonging: intersubjectivity</a></li>
 <li class="ntoc-sec"><a href="#sec-0-2-3">3. The integral vocation to fulfilment in love</a></li>
 </ul>
 </li>
-<li class="ntoc-ch"><a href="#ch-4">Chapter 3 The Gift of Life and Communion in the Face of Scenarios for the Future of Humanity</a>
+<li class="ntoc-ch"><a href="#ch-4">Chapter 3: The Gift of Life and Communion in the Face of Scenarios for the Future of Humanity</a>
 <ul>
 <li class="ntoc-sec"><a href="#sec-0-3-1">1. Personal identity: a gift and a task</a></li>
 <li class="ntoc-sec"><a href="#sec-0-3-2">2. The gift of life and communion in the face of transhumanism and posthumanism</a></li>
 <li class="ntoc-sec"><a href="#sec-0-3-3">3. The unique position of human beings in the cosmos</a></li>
 </ul>
 </li>
-<li class="ntoc-ch"><a href="#ch-5">Chapter 4 Humanity Affirmed, Saved and Elevated</a>
+<li class="ntoc-ch"><a href="#ch-5">Chapter 4: Humanity Affirmed, Saved and Elevated</a>
 <ul>
 <li class="ntoc-sec"><a href="#sec-0-4-1">1. The ‘polar tensions’ of our creaturely condition</a></li>
 <li class="ntoc-sec"><a href="#sec-0-4-2">2. The human experience in the drama of sin and grace</a></li>
 <li class="ntoc-sec"><a href="#sec-0-4-3">3. The new humanity in the Spirit of Jesus Christ, the Son of God</a></li>
 </ul>
 </li>
-<li class="ntoc-ch"><a href="#ch-6">Chapter 5 Conclusion</a>
+<li class="ntoc-ch"><a href="#ch-6">Chapter 5: Conclusion</a>
 <ul>
 <li class="ntoc-sec"><a href="#sec-0-5-1">1. The fully human Mother</a></li>
 <li class="ntoc-sec"><a href="#sec-0-5-2">2. The challenge of the poor</a></li>
@@ -1031,8 +1031,8 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <p>Being a human person, with infinite dignity, is not something we have constructed or acquired, but is the result of a free gift that precedes us.<sup><a href="#fn-0-0-1">1</a></sup> And it is not a gift that we simply received in the past, but something that exists for ever as a gift in every circumstance of our existence, becoming a non-transferable task. Appropriating this gift, giving shape to one’s own identity, is the adventure of life, a task to be undertaken freely and within the relationships in which we know ourselves, others and reality, so that we can make our original and unique contribution to human history, corresponding to our vocation. The gift is welcomed within a ‘we’, a community to which each person belongs and in which they grow.</p></div><div class="paragraph" id="para-3" data-sub-text=""><span class="para-num">3</span>
 <p>Religious experience, and in particular Christian faith, propose that we live, without oversimplification, this ambivalence between human greatness and limitation, interpreting it in the light of our original and fundamental relationship with God. In Psalm 8:5, addressing God in a heartfelt dialogue, the psalmist asks what human beings are such that he is mindful of them and cares for them. The psalmist responds by noting the greatness God has bestowed upon human beings in his creation: ‘You have made them a little lower than the angels; you have crowned them with glory and honour. You have given them power over the works of your hands; you have put everything under their feet.’ (<em>Ps</em> 8:6-7)<sup><a href="#fn-0-0-2">2</a></sup> This paradox receives definitive light from the Paschal Mystery of Jesus Christ, where limitation, finitude and transience, but also the disorder introduced by sin, are overcome by the work of grace with the gift of divine sonship, which makes us participants in the life of the Risen One, according to the Father’s plan and thanks to the renewal of all things in the Spirit.</p></div><div class="paragraph" id="para-4" data-sub-text=""><span class="para-num">4</span>
 <p>Pope Francis took up the question of Psalm 8, emphasising the response of biblical anthropology, centred on the fundamental elements of a free and responsible relationship with creation, with others and with God. But then he noted how ‘today we realise that the great principles and fundamental concepts of anthropology are often called into question, also on the basis of a greater knowledge of the complexity of the human condition, and they require further in-depth examination.’<sup><a href="#fn-0-0-3">3</a></sup> Pope Leo XIV justified his choice of name by recalling that ‘in our own day, the Church offers to everyone the treasury of her social teaching in response to another industrial revolution and to developments in the field of artificial intelligence that pose new challenges for the defence of human dignity, justice and labour.’<sup><a href="#fn-0-0-4">4</a></sup></p></div><div class="paragraph" id="para-5" data-sub-text=""><span class="para-num">5</span>
-<p>Reflection on anthropology in the light of revelation is called upon to interpret the complex conditions of a world that is undergoing change so profound that it can be described as ‘epochal’. Since the understanding of the human in the history of thought (particularly in the Western tradition) had achieved well-defined results, it might seem that further reflection should focus on clarifying certain particular aspects of human action. Instead, we find ourselves today once again engaged in exploring the mystery of the human being as such, in his or her identity. Today’s challenges force us to leave behind our acquired certainties and can also arouse fears, which are often not unfounded. Reflection on the human being, in various areas of personal and social life, seems to go beyond the human, questioning the specificity of human nature itself.</p></div><h4 id="sec-0-0-1" class="section-title">1. The method of the document on the sixtieth anniversary of [Gaudium et spes](https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html)</h4><div class="paragraph" id="para-6" data-sub-text="1. The method of the document on the sixtieth anniversary of [Gaudium et spes](https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html)"><span class="para-num">6</span>
-<p>Reason enlightened by faith must establish a critical comparison between new anthropological horizons and the perennial needs of the human condition: ‘Discernment must carefully distinguish between elements compatible with the Gospel and those contrary to it, between positive contributions and ideological aspects, but the more acute understanding of the world that results cannot fail to prompt a more penetrating appreciation of Christ the Lord and of the Gospel, since Christ is the Saviour of the world.’<sup><a href="#fn-0-0-5">5</a></sup></p></div><div class="paragraph" id="para-7" data-sub-text="1. The method of the document on the sixtieth anniversary of [Gaudium et spes](https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html)"><span class="para-num">7</span>
+<p>Reflection on anthropology in the light of revelation is called upon to interpret the complex conditions of a world that is undergoing change so profound that it can be described as ‘epochal’. Since the understanding of the human in the history of thought (particularly in the Western tradition) had achieved well-defined results, it might seem that further reflection should focus on clarifying certain particular aspects of human action. Instead, we find ourselves today once again engaged in exploring the mystery of the human being as such, in his or her identity. Today’s challenges force us to leave behind our acquired certainties and can also arouse fears, which are often not unfounded. Reflection on the human being, in various areas of personal and social life, seems to go beyond the human, questioning the specificity of human nature itself.</p></div><h4 id="sec-0-0-1" class="section-title">1. The method of the document on the sixtieth anniversary of Gaudium et spes</h4><div class="paragraph" id="para-6" data-sub-text="1. The method of the document on the sixtieth anniversary of Gaudium et spes"><span class="para-num">6</span>
+<p>Reason enlightened by faith must establish a critical comparison between new anthropological horizons and the perennial needs of the human condition: ‘Discernment must carefully distinguish between elements compatible with the Gospel and those contrary to it, between positive contributions and ideological aspects, but the more acute understanding of the world that results cannot fail to prompt a more penetrating appreciation of Christ the Lord and of the Gospel, since Christ is the Saviour of the world.’<sup><a href="#fn-0-0-5">5</a></sup></p></div><div class="paragraph" id="para-7" data-sub-text="1. The method of the document on the sixtieth anniversary of Gaudium et spes"><span class="para-num">7</span>
 <p>This discernment is inspired by the sixtieth anniversary of the Pastoral Constitution <em><a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener">Gaudium et spes</a></em> (1965-2025), an anniversary that points the present document towards a new reflection linked to the personal and social anthropology proposed in the Constitution and in the subsequent Magisterium that has received and developed its teaching. The unique nature of <em>Gaudium et spes</em> must be emphasised, a conciliar Constitution with specific magisterial value, expressed in its commitment to consider carefully the condition of humanity in today’s world. For the first time in history, a document of this level systematically proposed a vision of the human being illumined by the mystery of Christ. In its wake, therefore, we have the question of re-proposing Christian anthropology today in an open and critical dialogue with the more recent questions coming from human experience and cultures. Precisely in reference to <em><a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener">Gaudium et spes</a></em>, the document places at its centre the human being, ‘whole and entire, body and soul, heart and conscience, mind and will’,<sup><a href="#fn-0-0-6">6</a></sup> in order to promote that ‘<em>integral and solidary humanism</em> capable of creating a new social, economic and political order, founded on the dignity and freedom of every human person, to be brought about in peace, justice and solidarity.’<sup><a href="#fn-0-0-7">7</a></sup></p></div><h4 id="sec-0-0-2" class="section-title">2. The structure of the document: key categories</h4><div class="paragraph" id="para-8" data-sub-text="2. The structure of the document: key categories"><span class="para-num">8</span>
 <p>So as to complete in an adequate way this task of critical discernment in the face of some of the most relevant scenarios for the future of humanity, the document proposes four main categories in each of the chapters of which it is composed. It begins by considering the notion of <em>development,</em> which underpins many of the technological and social innovations currently underway. The need to ensure integral human development then leads to a reflection on the category of <em>vocation</em> as a key to anthropological understanding, which in turn refers to the question of <em>human identity</em>, on both a personal and social level. Finally, it explores the historical and free <em>dramatic condition</em> that characterises human identity, understood as vocation, and its dialogue with new techno-scientific challenges.</p></div><div class="paragraph" id="para-9" data-sub-text="2. The structure of the document: key categories"><span class="para-num">9</span>
 <p>Reflecting on <em>development</em>, we want to take note, on the one hand, of the historical-temporal condition of a humanity that has grown as never before in its history, tripling its population in the space of seventy years. On the other hand, this orientation offers an opportunity for a critical examination of the concrete conditions of life of individuals and peoples in this movement of the twenty-first century, marked as it is by the exponential growth of techno-scientific resources and their impact on the life of humanity. Current development oscillates between striving for a concrete improvement in the living conditions of peoples and dreams even of replacing humanity.</p></div><div class="paragraph" id="para-10" data-sub-text="2. The structure of the document: key categories"><span class="para-num">10</span>
@@ -1233,7 +1233,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-0-193" class="fn-item"><span class="fn-num-link">193</span><p>Cf. Second Vatican Ecumenical Council, Pastoral Constitution <em><a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener">Gaudium et spes</a></em>, 7 December 1965, 39. Francis, Encyclical Letter <em><a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20150524_enciclica-laudato-si.html" class="ext-link" target="_blank" rel="noopener">Laudato si’</a></em>, 24 May 2015, 236.</p></li>
 <li id="fn-0-0-194" class="fn-item"><span class="fn-num-link">194</span><p>Cf. Francis, Encyclical Letter <em><a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20150524_enciclica-laudato-si.html" class="ext-link" target="_blank" rel="noopener">Laudato si’</a></em>, 24 May 2015, 237.</p></li>
 </ol>
-<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-0-1">1. The method of the document on the sixtieth anniversary of [Gaudium et spes](https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html)</a></p>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-0-1">1. The method of the document on the sixtieth anniversary of Gaudium et spes</a></p>
 <ol class="fn-list">
 <li id="fn-0-0-5" class="fn-item"><a href="#para-6" class="fn-num-link">5</a><p>International Theological Commission, <em><a href="https://www.vatican.va/roman_curia/congregations/cfaith/cti_documents/rc_cti_doc_20111129_teologia-oggi_en.html" class="ext-link" target="_blank" rel="noopener">Theology Today: Perspectives, Principles and Criteria</a></em>, 2012, 55.</p></li>
 <li id="fn-0-0-6" class="fn-item"><a href="#para-7" class="fn-num-link">6</a><p>Second Vatican Ecumenical Council, Pastoral Constitution <em><a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener">Gaudium et spes</a></em>, 7 December 1965, 3.</p></li>
@@ -1257,7 +1257,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-0-16" class="fn-item"><a href="#para-19" class="fn-num-link">16</a><p>Second Vatican Ecumenical Council, Pastoral Constitution <em><a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener">Gaudium et spes</a></em>, 7 December 1965, 11.</p></li>
 <li id="fn-0-0-17" class="fn-item"><a href="#para-19" class="fn-num-link">17</a><p>Francis, Apostolic Exhortation <em><a href="https://www.vatican.va/content/francesco/en/apost_exhortations/documents/20231004-laudate-deum.html" class="ext-link" target="_blank" rel="noopener">Laudate Deum</a>,</em> 4 October 2023, 67, citing Encyclical Letter <em><a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20150524_enciclica-laudato-si.html" class="ext-link" target="_blank" rel="noopener">Laudato si’</a></em>, 24 May 2015, 89. Cf. Second Vatican Ecumenical Council, Pastoral Constitution <em><a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener">Gaudium et spes</a></em>, 7 December 1965, 2 and 57.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-2" class="fn-ch-link">Chapter 1 Development: Humanism and Posthumanism</a></h3>
+<h3 class="fn-group"><a href="#ch-2" class="fn-ch-link">Chapter 1: Development: Humanism and Posthumanism</a></h3>
 <ol class="fn-list">
 <li id="fn-0-1-18" class="fn-item"><a href="#para-21" class="fn-num-link">18</a><p>The Council had already asked questions about the future of humanity: Second Vatican Ecumenical Council, Pastoral Constitution <em><a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener">Gaudium et spes</a></em>, 7 December 1965, 11.</p></li>
 <li id="fn-0-1-19" class="fn-item"><a href="#para-23" class="fn-num-link">19</a><p>Cf. Dicastery for the Doctrine of the Faith – Dicastery for Culture and Education, Note <em><a href="https://www.vatican.va/roman_curia/congregations/cfaith/documents/rc_ddf_doc_20250128_antiqua-et-nova_en.html" class="ext-link" target="_blank" rel="noopener">Antiqua et Nova</a></em>, 28 January 2025, note 9.</p></li>
@@ -1314,7 +1314,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-1-64" class="fn-item"><a href="#para-61" class="fn-num-link">64</a><p>Cf. Francis, Apostolic Exhortation <em><a href="https://www.vatican.va/content/francesco/en/apost_exhortations/documents/papa-francesco_esortazione-ap_20180319_gaudete-et-exsultate.html" class="ext-link" target="_blank" rel="noopener">Gaudete et exsultate</a></em>, 19 March 2018, 36–39; see also Apostolic Constitution <em><a href="https://www.vatican.va/content/francesco/en/apost_exhortations/documents/papa-francesco_esortazione-ap_20131124_evangelii-gaudium.html" class="ext-link" target="_blank" rel="noopener">Evangelii gaudium</a></em>, 24 November 2013, 94.</p></li>
 <li id="fn-0-1-65" class="fn-item"><a href="#para-61" class="fn-num-link">65</a><p>Congregation for the Doctrine of the Faith, Letter <em><a href="https://www.vatican.va/roman_curia/congregations/cfaith/documents/rc_con_cfaith_doc_20180222_placuit-deo_en.html" class="ext-link" target="_blank" rel="noopener">Placuit Deo</a></em>, 22 February 2018, 3, which specifies both the similarities and differences between the forms of Gnosticism in antiquity and these tendencies in modern and postmodern thought.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-3" class="fn-ch-link">Chapter 2 Life as Vocation: the Human Person as an Agent in History</a></h3>
+<h3 class="fn-group"><a href="#ch-3" class="fn-ch-link">Chapter 2: Life as Vocation: the Human Person as an Agent in History</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-2-1">1. The historical dimension of human experience: time and space</a></p>
 <ol class="fn-list">
 <li id="fn-0-2-66" class="fn-item"><a href="#para-66" class="fn-num-link">66</a><p>The notion of a ‘people’ is not synonymous with that of a ‘nation’, which has a more political and legal meaning, even if the two are not mutually exclusive. On the meaning proposed here, see Francis, Encyclical Letter <em><a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener">Fratelli tutti</a></em>, 3 October 2020, 157–158: ‘If we wish to maintain that society is more than a mere aggregate of individuals, the term “people” proves necessary. There are social phenomena that create majorities, as well as megatrends and communitarian aspirations. Men and women are capable of coming up with shared goals that transcend their differences and can thus engage in a common endeavour. Then, too, it is extremely difficult to carry out a long-term project unless it becomes a collective aspiration. All these factors lie behind our use of the words “people” and “popular”.’ Cf. also paragraphs 90–92 below.</p></li>
@@ -1368,7 +1368,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-2-108" class="fn-item"><a href="#para-105" class="fn-num-link">108</a><p>Cf. Francis, <em><a href="https://www.vatican.va/content/francesco/en/messages/vocations/documents/papa-francesco_20200308_57-messaggio-giornata-mondiale-vocazioni.html" class="ext-link" target="_blank" rel="noopener">Message for the 2020 World Day of Vocations</a></em>, 3 May 2020.</p></li>
 <li id="fn-0-2-109" class="fn-item"><a href="#para-105" class="fn-num-link">109</a><p>Cf. Francis, Encyclical Letter <em><a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/20241024-enciclica-dilexit-nos.html" class="ext-link" target="_blank" rel="noopener">Dilexit nos</a></em>, 24 October 2024, 19.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-4" class="fn-ch-link">Chapter 3 The Gift of Life and Communion in the Face of Scenarios for the Future of Humanity</a></h3>
+<h3 class="fn-group"><a href="#ch-4" class="fn-ch-link">Chapter 3: The Gift of Life and Communion in the Face of Scenarios for the Future of Humanity</a></h3>
 <ol class="fn-list">
 <li id="fn-0-3-110" class="fn-item"><a href="#para-107" class="fn-num-link">110</a><p>‘By exercising the freedom to cultivate the riches of our nature, we grow over time. Even if a person is unable to exercise these capabilities due to various limitations or conditions, nevertheless the person always subsists as an “individual substance” with a complete and inalienable dignity.’ Dicastery for the Doctrine of the Faith, Declaration <em><a href="https://www.vatican.va/roman_curia/congregations/cfaith/documents/rc_ddf_doc_20240402_dignitas-infinita_en.html" class="ext-link" target="_blank" rel="noopener">Dignitas infinita</a></em>, 2 April 2024, 9. The text specifies the ontological foundation of the dignity of the human person by taking up the classical definition of the person as an individual substance of a rational nature. On the human person, its uniqueness, freedom, dignity and openness to transcendence, see further: <em><a href="http://www.vatican.va/roman_curia/pontifical_councils/justpeace/documents/rc_pc_justpeace_doc_20060526_compendio-dott-soc_en.html" class="ext-link" target="_blank" rel="noopener">Compendium of the Social Doctrine of the Church</a></em>, 124–148; International Theological Commission, <em><a href="https://www.vatican.va/roman_curia/congregations/cfaith/cti_documents/rc_cti_20190426_liberta-religiosa_en.html" class="ext-link" target="_blank" rel="noopener">Religious Freedom for the Good of All</a></em>, 2019, 29–42.</p></li>
 </ol>
@@ -1419,7 +1419,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-3-147" class="fn-item"><a href="#para-127" class="fn-num-link">147</a><p>International Theological Commission, <em><a href="https://www.vatican.va/roman_curia/congregations/cfaith/cti_documents/rc_con_cfaith_doc_20040723_communion-stewardship_en.html" class="ext-link" target="_blank" rel="noopener">Communion and Stewardship: Human Persons Created in the Image of God</a></em>, 2004, 66.</p></li>
 <li id="fn-0-3-148" class="fn-item"><a href="#para-127" class="fn-num-link">148</a><p>Francis, Apostolic Exhortation <em><a href="https://www.vatican.va/content/francesco/en/apost_exhortations/documents/20231004-laudate-deum.html" class="ext-link" target="_blank" rel="noopener">Laudate Deum</a>,</em> 4 October 2023, 26–27.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-5" class="fn-ch-link">Chapter 4 Humanity Affirmed, Saved and Elevated</a></h3>
+<h3 class="fn-group"><a href="#ch-5" class="fn-ch-link">Chapter 4: Humanity Affirmed, Saved and Elevated</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-4-1">1. The ‘polar tensions’ of our creaturely condition</a></p>
 <ol class="fn-list">
 <li id="fn-0-4-149" class="fn-item"><a href="#para-130" class="fn-num-link">149</a><p>See the classic account, R. Guardini, <em>Der Gegensatz: Versuche zu einer Philosophie des Lebendig-Konkreten</em> (Romano Guardini Werke), Mainz 2025.</p></li>
@@ -1473,7 +1473,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-4-191" class="fn-item"><a href="#para-156" class="fn-num-link">191</a><p>Cf. Second Vatican Ecumenical Council, Dogmatic Constitution <em><a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html" class="ext-link" target="_blank" rel="noopener">Lumen gentium</a></em>, 21 November 1964, 3; <em>Catechism of the Catholic Church</em>, 774–776.</p></li>
 <li id="fn-0-4-195" class="fn-item"><a href="#para-157" class="fn-num-link">195</a><p>Cf. Ambrose, <em>Hexameron</em> IX, 76; <em>Explanatio Ps.</em> 39, 24; <em>De institutione virginis</em>, 104.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-6" class="fn-ch-link">Chapter 5 Conclusion</a></h3>
+<h3 class="fn-group"><a href="#ch-6" class="fn-ch-link">Chapter 5: Conclusion</a></h3>
 <ol class="fn-list">
 <li id="fn-0-5-196" class="fn-item"><a href="#para-161" class="fn-num-link">196</a><p>Cf. Thomas Aquinas, <em>Summa Theologiae,</em> I-II, q. 112, a. 1.</p></li>
 <li id="fn-0-5-197" class="fn-item"><a href="#para-162" class="fn-num-link">197</a><p>Cf. Second Vatican Ecumenical Council, Pastoral Constitution <em><a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener">Gaudium et spes</a></em>, 7 December 1965, 39, 45. Francis, Encyclical Letter <em><a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/20241024-enciclica-dilexit-nos.html" class="ext-link" target="_blank" rel="noopener">Dilexit nos</a></em>, 24 October 2024, 209.</p></li>
@@ -1501,27 +1501,27 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     </div>
     <div id="drawer-toc" class="drawer-view active" role="tabpanel">
       <h3 class="fn-group toc-item" data-target="ch-0" data-label="Preliminary Note"><a href="#ch-0" class="fn-ch-link">Preliminary Note</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-0" aria-label="Bookmark Preliminary Note" aria-pressed="false"></button></h3>
-<p class="sec-nav-item toc-item" data-target="sec-0-0-1" data-label="1. The method of the document on the sixtieth anniversary of [Gaudium et spes](https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html)"><a href="#sec-0-0-1" class="sec-nav-link">1. The method of the document on the sixtieth anniversary of [Gaudium et spes](https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html)</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-0-1" aria-label="Bookmark 1. The method of the document on the sixtieth anniversary of [Gaudium et spes](https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html)" aria-pressed="false"></button></p>
+<p class="sec-nav-item toc-item" data-target="sec-0-0-1" data-label="1. The method of the document on the sixtieth anniversary of Gaudium et spes"><a href="#sec-0-0-1" class="sec-nav-link">1. The method of the document on the sixtieth anniversary of Gaudium et spes</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-0-1" aria-label="Bookmark 1. The method of the document on the sixtieth anniversary of Gaudium et spes" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-0-2" data-label="2. The structure of the document: key categories"><a href="#sec-0-0-2" class="sec-nav-link">2. The structure of the document: key categories</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-0-2" aria-label="Bookmark 2. The structure of the document: key categories" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-0-3" data-label="3. The focus of the document: an engagement with the challenges of trans- and post-humanism"><a href="#sec-0-0-3" class="sec-nav-link">3. The focus of the document: an engagement with the challenges of trans- and post-humanism</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-0-3" aria-label="Bookmark 3. The focus of the document: an engagement with the challenges of trans- and post-humanism" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-0-4" data-label="4. Discernment and the kerygmatic dimension of theology: the integral vocation of the human being"><a href="#sec-0-0-4" class="sec-nav-link">4. Discernment and the kerygmatic dimension of theology: the integral vocation of the human being</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-0-4" aria-label="Bookmark 4. Discernment and the kerygmatic dimension of theology: the integral vocation of the human being" aria-pressed="false"></button></p>
-<h3 class="fn-group toc-item" data-target="ch-2" data-label="Chapter 1 Development: Humanism and Posthumanism"><a href="#ch-2" class="fn-ch-link">Chapter 1 Development: Humanism and Posthumanism</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-2" aria-label="Bookmark Chapter 1 Development: Humanism and Posthumanism" aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-2" data-label="Chapter 1: Development: Humanism and Posthumanism"><a href="#ch-2" class="fn-ch-link">Chapter 1: Development: Humanism and Posthumanism</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-2" aria-label="Bookmark Chapter 1: Development: Humanism and Posthumanism" aria-pressed="false"></button></h3>
 <p class="sec-nav-item toc-item" data-target="sec-0-1-1" data-label="1. The Magisterium’s discernment regarding development and technology"><a href="#sec-0-1-1" class="sec-nav-link">1. The Magisterium’s discernment regarding development and technology</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-1-1" aria-label="Bookmark 1. The Magisterium’s discernment regarding development and technology" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-1-2" data-label="2. Some anthropological consequences of recent technological development"><a href="#sec-0-1-2" class="sec-nav-link">2. Some anthropological consequences of recent technological development</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-1-2" aria-label="Bookmark 2. Some anthropological consequences of recent technological development" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-1-3" data-label="3. The cultural impact of technological revolutions: towards a critical discernment"><a href="#sec-0-1-3" class="sec-nav-link">3. The cultural impact of technological revolutions: towards a critical discernment</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-1-3" aria-label="Bookmark 3. The cultural impact of technological revolutions: towards a critical discernment" aria-pressed="false"></button></p>
-<h3 class="fn-group toc-item" data-target="ch-3" data-label="Chapter 2 Life as Vocation: the Human Person as an Agent in History"><a href="#ch-3" class="fn-ch-link">Chapter 2 Life as Vocation: the Human Person as an Agent in History</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-3" aria-label="Bookmark Chapter 2 Life as Vocation: the Human Person as an Agent in History" aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-3" data-label="Chapter 2: Life as Vocation: the Human Person as an Agent in History"><a href="#ch-3" class="fn-ch-link">Chapter 2: Life as Vocation: the Human Person as an Agent in History</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-3" aria-label="Bookmark Chapter 2: Life as Vocation: the Human Person as an Agent in History" aria-pressed="false"></button></h3>
 <p class="sec-nav-item toc-item" data-target="sec-0-2-1" data-label="1. The historical dimension of human experience: time and space"><a href="#sec-0-2-1" class="sec-nav-link">1. The historical dimension of human experience: time and space</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-2-1" aria-label="Bookmark 1. The historical dimension of human experience: time and space" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-2-2" data-label="2. Relationships and the sense of belonging: intersubjectivity"><a href="#sec-0-2-2" class="sec-nav-link">2. Relationships and the sense of belonging: intersubjectivity</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-2-2" aria-label="Bookmark 2. Relationships and the sense of belonging: intersubjectivity" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-2-3" data-label="3. The integral vocation to fulfilment in love"><a href="#sec-0-2-3" class="sec-nav-link">3. The integral vocation to fulfilment in love</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-2-3" aria-label="Bookmark 3. The integral vocation to fulfilment in love" aria-pressed="false"></button></p>
-<h3 class="fn-group toc-item" data-target="ch-4" data-label="Chapter 3 The Gift of Life and Communion in the Face of Scenarios for the Future of Humanity"><a href="#ch-4" class="fn-ch-link">Chapter 3 The Gift of Life and Communion in the Face of Scenarios for the Future of Humanity</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-4" aria-label="Bookmark Chapter 3 The Gift of Life and Communion in the Face of Scenarios for the Future of Humanity" aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-4" data-label="Chapter 3: The Gift of Life and Communion in the Face of Scenarios for the Future of Humanity"><a href="#ch-4" class="fn-ch-link">Chapter 3: The Gift of Life and Communion in the Face of Scenarios for the Future of Humanity</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-4" aria-label="Bookmark Chapter 3: The Gift of Life and Communion in the Face of Scenarios for the Future of Humanity" aria-pressed="false"></button></h3>
 <p class="sec-nav-item toc-item" data-target="sec-0-3-1" data-label="1. Personal identity: a gift and a task"><a href="#sec-0-3-1" class="sec-nav-link">1. Personal identity: a gift and a task</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-3-1" aria-label="Bookmark 1. Personal identity: a gift and a task" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-3-2" data-label="2. The gift of life and communion in the face of transhumanism and posthumanism"><a href="#sec-0-3-2" class="sec-nav-link">2. The gift of life and communion in the face of transhumanism and posthumanism</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-3-2" aria-label="Bookmark 2. The gift of life and communion in the face of transhumanism and posthumanism" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-3-3" data-label="3. The unique position of human beings in the cosmos"><a href="#sec-0-3-3" class="sec-nav-link">3. The unique position of human beings in the cosmos</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-3-3" aria-label="Bookmark 3. The unique position of human beings in the cosmos" aria-pressed="false"></button></p>
-<h3 class="fn-group toc-item" data-target="ch-5" data-label="Chapter 4 Humanity Affirmed, Saved and Elevated"><a href="#ch-5" class="fn-ch-link">Chapter 4 Humanity Affirmed, Saved and Elevated</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-5" aria-label="Bookmark Chapter 4 Humanity Affirmed, Saved and Elevated" aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-5" data-label="Chapter 4: Humanity Affirmed, Saved and Elevated"><a href="#ch-5" class="fn-ch-link">Chapter 4: Humanity Affirmed, Saved and Elevated</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-5" aria-label="Bookmark Chapter 4: Humanity Affirmed, Saved and Elevated" aria-pressed="false"></button></h3>
 <p class="sec-nav-item toc-item" data-target="sec-0-4-1" data-label="1. The ‘polar tensions’ of our creaturely condition"><a href="#sec-0-4-1" class="sec-nav-link">1. The ‘polar tensions’ of our creaturely condition</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-4-1" aria-label="Bookmark 1. The ‘polar tensions’ of our creaturely condition" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-4-2" data-label="2. The human experience in the drama of sin and grace"><a href="#sec-0-4-2" class="sec-nav-link">2. The human experience in the drama of sin and grace</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-4-2" aria-label="Bookmark 2. The human experience in the drama of sin and grace" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-4-3" data-label="3. The new humanity in the Spirit of Jesus Christ, the Son of God"><a href="#sec-0-4-3" class="sec-nav-link">3. The new humanity in the Spirit of Jesus Christ, the Son of God</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-4-3" aria-label="Bookmark 3. The new humanity in the Spirit of Jesus Christ, the Son of God" aria-pressed="false"></button></p>
-<h3 class="fn-group toc-item" data-target="ch-6" data-label="Chapter 5 Conclusion"><a href="#ch-6" class="fn-ch-link">Chapter 5 Conclusion</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-6" aria-label="Bookmark Chapter 5 Conclusion" aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-6" data-label="Chapter 5: Conclusion"><a href="#ch-6" class="fn-ch-link">Chapter 5: Conclusion</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-6" aria-label="Bookmark Chapter 5: Conclusion" aria-pressed="false"></button></h3>
 <p class="sec-nav-item toc-item" data-target="sec-0-5-1" data-label="1. The fully human Mother"><a href="#sec-0-5-1" class="sec-nav-link">1. The fully human Mother</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-5-1" aria-label="Bookmark 1. The fully human Mother" aria-pressed="false"></button></p>
 <p class="sec-nav-item toc-item" data-target="sec-0-5-2" data-label="2. The challenge of the poor"><a href="#sec-0-5-2" class="sec-nav-link">2. The challenge of the poor</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-0-5-2" aria-label="Bookmark 2. The challenge of the poor" aria-pressed="false"></button></p>
     </div>
@@ -1540,7 +1540,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-0-193" class="fn-item"><span class="fn-num-link">193</span><p>Cf. Second Vatican Ecumenical Council, Pastoral Constitution <em><a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener">Gaudium et spes</a></em>, 7 December 1965, 39. Francis, Encyclical Letter <em><a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20150524_enciclica-laudato-si.html" class="ext-link" target="_blank" rel="noopener">Laudato si’</a></em>, 24 May 2015, 236.</p></li>
 <li id="fn-0-0-194" class="fn-item"><span class="fn-num-link">194</span><p>Cf. Francis, Encyclical Letter <em><a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20150524_enciclica-laudato-si.html" class="ext-link" target="_blank" rel="noopener">Laudato si’</a></em>, 24 May 2015, 237.</p></li>
 </ol>
-<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-0-1">1. The method of the document on the sixtieth anniversary of [Gaudium et spes](https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html)</a></p>
+<p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-0-1">1. The method of the document on the sixtieth anniversary of Gaudium et spes</a></p>
 <ol class="fn-list">
 <li id="fn-0-0-5" class="fn-item"><a href="#para-6" class="fn-num-link">5</a><p>International Theological Commission, <em><a href="https://www.vatican.va/roman_curia/congregations/cfaith/cti_documents/rc_cti_doc_20111129_teologia-oggi_en.html" class="ext-link" target="_blank" rel="noopener">Theology Today: Perspectives, Principles and Criteria</a></em>, 2012, 55.</p></li>
 <li id="fn-0-0-6" class="fn-item"><a href="#para-7" class="fn-num-link">6</a><p>Second Vatican Ecumenical Council, Pastoral Constitution <em><a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener">Gaudium et spes</a></em>, 7 December 1965, 3.</p></li>
@@ -1564,7 +1564,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-0-16" class="fn-item"><a href="#para-19" class="fn-num-link">16</a><p>Second Vatican Ecumenical Council, Pastoral Constitution <em><a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener">Gaudium et spes</a></em>, 7 December 1965, 11.</p></li>
 <li id="fn-0-0-17" class="fn-item"><a href="#para-19" class="fn-num-link">17</a><p>Francis, Apostolic Exhortation <em><a href="https://www.vatican.va/content/francesco/en/apost_exhortations/documents/20231004-laudate-deum.html" class="ext-link" target="_blank" rel="noopener">Laudate Deum</a>,</em> 4 October 2023, 67, citing Encyclical Letter <em><a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20150524_enciclica-laudato-si.html" class="ext-link" target="_blank" rel="noopener">Laudato si’</a></em>, 24 May 2015, 89. Cf. Second Vatican Ecumenical Council, Pastoral Constitution <em><a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener">Gaudium et spes</a></em>, 7 December 1965, 2 and 57.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-2" class="fn-ch-link">Chapter 1 Development: Humanism and Posthumanism</a></h3>
+<h3 class="fn-group"><a href="#ch-2" class="fn-ch-link">Chapter 1: Development: Humanism and Posthumanism</a></h3>
 <ol class="fn-list">
 <li id="fn-0-1-18" class="fn-item"><a href="#para-21" class="fn-num-link">18</a><p>The Council had already asked questions about the future of humanity: Second Vatican Ecumenical Council, Pastoral Constitution <em><a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener">Gaudium et spes</a></em>, 7 December 1965, 11.</p></li>
 <li id="fn-0-1-19" class="fn-item"><a href="#para-23" class="fn-num-link">19</a><p>Cf. Dicastery for the Doctrine of the Faith – Dicastery for Culture and Education, Note <em><a href="https://www.vatican.va/roman_curia/congregations/cfaith/documents/rc_ddf_doc_20250128_antiqua-et-nova_en.html" class="ext-link" target="_blank" rel="noopener">Antiqua et Nova</a></em>, 28 January 2025, note 9.</p></li>
@@ -1621,7 +1621,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-1-64" class="fn-item"><a href="#para-61" class="fn-num-link">64</a><p>Cf. Francis, Apostolic Exhortation <em><a href="https://www.vatican.va/content/francesco/en/apost_exhortations/documents/papa-francesco_esortazione-ap_20180319_gaudete-et-exsultate.html" class="ext-link" target="_blank" rel="noopener">Gaudete et exsultate</a></em>, 19 March 2018, 36–39; see also Apostolic Constitution <em><a href="https://www.vatican.va/content/francesco/en/apost_exhortations/documents/papa-francesco_esortazione-ap_20131124_evangelii-gaudium.html" class="ext-link" target="_blank" rel="noopener">Evangelii gaudium</a></em>, 24 November 2013, 94.</p></li>
 <li id="fn-0-1-65" class="fn-item"><a href="#para-61" class="fn-num-link">65</a><p>Congregation for the Doctrine of the Faith, Letter <em><a href="https://www.vatican.va/roman_curia/congregations/cfaith/documents/rc_con_cfaith_doc_20180222_placuit-deo_en.html" class="ext-link" target="_blank" rel="noopener">Placuit Deo</a></em>, 22 February 2018, 3, which specifies both the similarities and differences between the forms of Gnosticism in antiquity and these tendencies in modern and postmodern thought.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-3" class="fn-ch-link">Chapter 2 Life as Vocation: the Human Person as an Agent in History</a></h3>
+<h3 class="fn-group"><a href="#ch-3" class="fn-ch-link">Chapter 2: Life as Vocation: the Human Person as an Agent in History</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-2-1">1. The historical dimension of human experience: time and space</a></p>
 <ol class="fn-list">
 <li id="fn-0-2-66" class="fn-item"><a href="#para-66" class="fn-num-link">66</a><p>The notion of a ‘people’ is not synonymous with that of a ‘nation’, which has a more political and legal meaning, even if the two are not mutually exclusive. On the meaning proposed here, see Francis, Encyclical Letter <em><a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/papa-francesco_20201003_enciclica-fratelli-tutti.html" class="ext-link" target="_blank" rel="noopener">Fratelli tutti</a></em>, 3 October 2020, 157–158: ‘If we wish to maintain that society is more than a mere aggregate of individuals, the term “people” proves necessary. There are social phenomena that create majorities, as well as megatrends and communitarian aspirations. Men and women are capable of coming up with shared goals that transcend their differences and can thus engage in a common endeavour. Then, too, it is extremely difficult to carry out a long-term project unless it becomes a collective aspiration. All these factors lie behind our use of the words “people” and “popular”.’ Cf. also paragraphs 90–92 below.</p></li>
@@ -1675,7 +1675,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-2-108" class="fn-item"><a href="#para-105" class="fn-num-link">108</a><p>Cf. Francis, <em><a href="https://www.vatican.va/content/francesco/en/messages/vocations/documents/papa-francesco_20200308_57-messaggio-giornata-mondiale-vocazioni.html" class="ext-link" target="_blank" rel="noopener">Message for the 2020 World Day of Vocations</a></em>, 3 May 2020.</p></li>
 <li id="fn-0-2-109" class="fn-item"><a href="#para-105" class="fn-num-link">109</a><p>Cf. Francis, Encyclical Letter <em><a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/20241024-enciclica-dilexit-nos.html" class="ext-link" target="_blank" rel="noopener">Dilexit nos</a></em>, 24 October 2024, 19.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-4" class="fn-ch-link">Chapter 3 The Gift of Life and Communion in the Face of Scenarios for the Future of Humanity</a></h3>
+<h3 class="fn-group"><a href="#ch-4" class="fn-ch-link">Chapter 3: The Gift of Life and Communion in the Face of Scenarios for the Future of Humanity</a></h3>
 <ol class="fn-list">
 <li id="fn-0-3-110" class="fn-item"><a href="#para-107" class="fn-num-link">110</a><p>‘By exercising the freedom to cultivate the riches of our nature, we grow over time. Even if a person is unable to exercise these capabilities due to various limitations or conditions, nevertheless the person always subsists as an “individual substance” with a complete and inalienable dignity.’ Dicastery for the Doctrine of the Faith, Declaration <em><a href="https://www.vatican.va/roman_curia/congregations/cfaith/documents/rc_ddf_doc_20240402_dignitas-infinita_en.html" class="ext-link" target="_blank" rel="noopener">Dignitas infinita</a></em>, 2 April 2024, 9. The text specifies the ontological foundation of the dignity of the human person by taking up the classical definition of the person as an individual substance of a rational nature. On the human person, its uniqueness, freedom, dignity and openness to transcendence, see further: <em><a href="http://www.vatican.va/roman_curia/pontifical_councils/justpeace/documents/rc_pc_justpeace_doc_20060526_compendio-dott-soc_en.html" class="ext-link" target="_blank" rel="noopener">Compendium of the Social Doctrine of the Church</a></em>, 124–148; International Theological Commission, <em><a href="https://www.vatican.va/roman_curia/congregations/cfaith/cti_documents/rc_cti_20190426_liberta-religiosa_en.html" class="ext-link" target="_blank" rel="noopener">Religious Freedom for the Good of All</a></em>, 2019, 29–42.</p></li>
 </ol>
@@ -1726,7 +1726,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-3-147" class="fn-item"><a href="#para-127" class="fn-num-link">147</a><p>International Theological Commission, <em><a href="https://www.vatican.va/roman_curia/congregations/cfaith/cti_documents/rc_con_cfaith_doc_20040723_communion-stewardship_en.html" class="ext-link" target="_blank" rel="noopener">Communion and Stewardship: Human Persons Created in the Image of God</a></em>, 2004, 66.</p></li>
 <li id="fn-0-3-148" class="fn-item"><a href="#para-127" class="fn-num-link">148</a><p>Francis, Apostolic Exhortation <em><a href="https://www.vatican.va/content/francesco/en/apost_exhortations/documents/20231004-laudate-deum.html" class="ext-link" target="_blank" rel="noopener">Laudate Deum</a>,</em> 4 October 2023, 26–27.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-5" class="fn-ch-link">Chapter 4 Humanity Affirmed, Saved and Elevated</a></h3>
+<h3 class="fn-group"><a href="#ch-5" class="fn-ch-link">Chapter 4: Humanity Affirmed, Saved and Elevated</a></h3>
 <p class="sec-nav-item"><a class="sec-nav-link" href="#sec-0-4-1">1. The ‘polar tensions’ of our creaturely condition</a></p>
 <ol class="fn-list">
 <li id="fn-0-4-149" class="fn-item"><a href="#para-130" class="fn-num-link">149</a><p>See the classic account, R. Guardini, <em>Der Gegensatz: Versuche zu einer Philosophie des Lebendig-Konkreten</em> (Romano Guardini Werke), Mainz 2025.</p></li>
@@ -1780,7 +1780,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <li id="fn-0-4-191" class="fn-item"><a href="#para-156" class="fn-num-link">191</a><p>Cf. Second Vatican Ecumenical Council, Dogmatic Constitution <em><a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19641121_lumen-gentium_en.html" class="ext-link" target="_blank" rel="noopener">Lumen gentium</a></em>, 21 November 1964, 3; <em>Catechism of the Catholic Church</em>, 774–776.</p></li>
 <li id="fn-0-4-195" class="fn-item"><a href="#para-157" class="fn-num-link">195</a><p>Cf. Ambrose, <em>Hexameron</em> IX, 76; <em>Explanatio Ps.</em> 39, 24; <em>De institutione virginis</em>, 104.</p></li>
 </ol>
-<h3 class="fn-group"><a href="#ch-6" class="fn-ch-link">Chapter 5 Conclusion</a></h3>
+<h3 class="fn-group"><a href="#ch-6" class="fn-ch-link">Chapter 5: Conclusion</a></h3>
 <ol class="fn-list">
 <li id="fn-0-5-196" class="fn-item"><a href="#para-161" class="fn-num-link">196</a><p>Cf. Thomas Aquinas, <em>Summa Theologiae,</em> I-II, q. 112, a. 1.</p></li>
 <li id="fn-0-5-197" class="fn-item"><a href="#para-162" class="fn-num-link">197</a><p>Cf. Second Vatican Ecumenical Council, Pastoral Constitution <em><a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" class="ext-link" target="_blank" rel="noopener">Gaudium et spes</a></em>, 7 December 1965, 39, 45. Francis, Encyclical Letter <em><a href="https://www.vatican.va/content/francesco/en/encyclicals/documents/20241024-enciclica-dilexit-nos.html" class="ext-link" target="_blank" rel="noopener">Dilexit nos</a></em>, 24 October 2024, 209.</p></li>
@@ -2055,9 +2055,30 @@ try {
   if (Array.isArray(stored)) bookmarks = stored.filter(id => tocByTarget.has(id));
 } catch (e) {}
 
-tab.addEventListener('click', () => {
-  const open = drawer.classList.toggle('open');
+function setDrawerOpen(open) {
+  drawer.classList.toggle('open', open);
   tab.setAttribute('aria-expanded', String(open));
+}
+
+tab.addEventListener('click', () => {
+  setDrawerOpen(!drawer.classList.contains('open'));
+});
+
+let textTapStart = null;
+document.addEventListener('pointerdown', e => {
+  if (e.pointerType !== 'touch' || !drawer.classList.contains('open')) return;
+  if (!e.target.closest('.paragraph, .doc-title, .appendix, .doc-end-matter')) return;
+  if (e.target.closest('a, button, input, summary')) return;
+  textTapStart = {id: e.pointerId, x: e.clientX, y: e.clientY};
+});
+document.addEventListener('pointerup', e => {
+  if (!textTapStart || e.pointerId !== textTapStart.id) return;
+  const moved = Math.hypot(e.clientX - textTapStart.x, e.clientY - textTapStart.y);
+  textTapStart = null;
+  if (e.pointerType === 'touch' && moved < 10) setDrawerOpen(false);
+});
+document.addEventListener('pointercancel', () => {
+  textTapStart = null;
 });
 
 function showDrawerView(view) {
@@ -2141,7 +2162,8 @@ function selectFn(id) {
   const rect = target.getBoundingClientRect();
   const cRect = notesPanel.getBoundingClientRect();
   if (rect.top < cRect.top || rect.bottom > cRect.bottom) {
-    notesPanel.scrollTop += rect.top - cRect.top - notesPanel.clientHeight / 3;
+    const divisor = window.matchMedia('(max-width: 900px)').matches ? 4.5 : 3;
+    notesPanel.scrollTop += rect.top - cRect.top - notesPanel.clientHeight / divisor;
   }
 }
 
@@ -2170,7 +2192,7 @@ document.querySelectorAll('.sec-nav-link, .sub-nav-link').forEach(a => {
 document.querySelectorAll('sup a').forEach(a => {
   a.addEventListener('click', e => {
     e.preventDefault();
-    drawer.classList.add('open');
+    setDrawerOpen(true);
     showDrawerView('footnotes');
     selectFn(a.getAttribute('href').slice(1));
   });

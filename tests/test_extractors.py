@@ -101,6 +101,12 @@ class ExtractorRegressionTests(unittest.TestCase):
         self.assertEqual(data['paragraphs'][0]['part_title'], 'Preliminary Note')
         self.assertEqual(data['footnotes'][0]['number'], 1)
         self.assertIn('*[Dignitas infinita]', data['footnotes'][0]['text'])
+        self.assertEqual(
+            next(p['section_title'] for p in data['paragraphs']
+                 if p['section_title']),
+            '1. The method of the document on the sixtieth anniversary of '
+            'Gaudium et spes',
+        )
         self.assertEqual(data['paragraphs'][-1]['chapter_title'], 'Conclusion')
 
 
