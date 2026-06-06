@@ -143,6 +143,8 @@ def extract():
         'hue': HUE,
         'source_url': SOURCE_URL,
         'author': AUTHOR,
+        'issued_by': 'International Theological Commission',
+        'pontificate': 'Leo XIV',
         'date': DATE,
         'identifier': IDENTIFIER,
         'desc': 'International Theological Commission',

@@ -115,6 +115,9 @@ def extract():
             s['name'] for s in signatories
             if s.get('role', '').lower() == 'prefect'
         ),
+        'issued_by': ('Dicastery for the Doctrine of the Faith and '
+                      'Dicastery for Culture and Education'),
+        'pontificate': 'Francis',
         'date': DATE,
         'identifier': IDENTIFIER,
         'desc': 'Dicastery for the Doctrine of the Faith\n'

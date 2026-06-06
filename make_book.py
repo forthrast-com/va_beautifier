@@ -425,23 +425,24 @@ def _title_page_typst(data, paper='a5'):
 
 
 def _copyright_page_typst(data, paper='a5'):
-    """Colophon page following the title: a prose blurb, an accent
-    three-dot ornament, a doc-info grid (promulgated date + urn), a
-    second three-dot ornament, then a project-info grid (project,
-    source, code). All labels and URLs sit in the document accent."""
+    """Colophon page following the title: an editorial note, document
+    metadata, and edition metadata in one consistent top-down layout."""
     name        = data['name']
     source_url  = data.get('source_url', '')
+    issued_by   = data.get('issued_by', data.get('author', ''))
+    pontificate = data.get('pontificate', '')
     identifier  = data.get('identifier', '')
     iso_date    = data.get('date', '')
     accent      = _pdf_accent(data.get('hue', 42))
     compact     = paper == 'a6'
-    label_pt    = 5.5 if compact else 7
+    title_pt    = 12 if compact else 15
+    label_pt    = 5.5 if compact else 6.5
     value_pt    = 7 if compact else 8.5
-    blurb_pt    = 8.5 if compact else 10
-    blurb_width = '88%' if compact else '74%'
-    major_gap   = '1.1em' if compact else '1.8em'
-    blurb_gap   = '1.4em' if compact else '2.2em'
-    row_gap     = '0.45em' if compact else '0.75em'
+    blurb_pt    = 7.5 if compact else 9.5
+    page_width  = '100%'
+    label_width = '25%' if compact else '27%'
+    section_gap = '1.1em' if compact else '1.5em'
+    row_gap     = '0.5em' if compact else '0.7em'
 
     circulars_url = 'https://circulars.forthrast.com'
     repo_url      = 'https://github.com/forthrast-com/va_beautifier'
@@ -452,8 +453,6 @@ def _copyright_page_typst(data, paper='a5'):
         if compact:
             if 'github.com/' in url:
                 return 'github.com/forthrast-com'
-            if 'vatican.va/' in url:
-                return 'vatican.va/…/' + url.rsplit('/', 1)[-1][:18] + '…'
         # The vatican.va paths run to 70+ chars; collapse the middle so
         # the URL fits a single grid row alongside the tracked label.
         # The hyperlink still points at the full URL — only the visible
@@ -475,86 +474,91 @@ def _copyright_page_typst(data, paper='a5'):
 
     def label_cell(text):
         return (
-            f'    text(size: {label_pt}pt, tracking: 0.2em, '
-            f'fill: rgb("{accent}"))[{text}],'
+            f'    text(size: {value_pt}pt, weight: "semibold", '
+            f'fill: rgb("#3a342b"))[{text.title()}],'
         )
 
     def value_cell(content_typst):
         return (
-            f'    text(size: {value_pt}pt, fill: rgb("{accent}"))[{content_typst}],'
+            f'    text(size: {value_pt}pt, fill: rgb("#3a342b"))[{content_typst}],'
         )
 
-    doc_cells = []
+    def text_value(text):
+        return value_cell(_typ_content(text))
+
+    def link_value(url):
+        return value_cell(
+            f'#link("{url}")[{_typ_content(display(url))}]'
+        )
+
+    document_cells = [label_cell('TITLE'), text_value(name)]
+    if issued_by:
+        document_cells += [label_cell('ISSUED BY'), text_value(issued_by)]
+    if pontificate and pontificate != issued_by:
+        document_cells += [label_cell('PONTIFICATE'), text_value(pontificate)]
     if promulgated_label:
-        doc_cells.append(label_cell('PROMULGATED'))
-        doc_cells.append(value_cell(promulgated_label))
+        document_cells += [label_cell('PROMULGATED'), text_value(promulgated_label)]
+    if source_url:
+        document_cells += [label_cell('ORIGINAL'), link_value(source_url)]
+
+    format_names = {
+        'a4': 'A4 printer PDF',
+        'a5': 'A5 reader PDF',
+        'a6': 'A6 booklet PDF',
+    }
+    edition_cells = [label_cell('FORMAT'), text_value(format_names[paper])]
     if identifier:
         urn_display = f'urn:circulars:{identifier}'
-        if compact and len(urn_display) > 30:
-            urn_display = f'urn:circulars:…:{identifier.rsplit(":", 1)[-1]}'
-        doc_cells.append(label_cell('URN'))
-        doc_cells.append(value_cell(
-            f'#raw("{_typ_content(urn_display)}")'
-        ))
-
-    project_cells = []
-    project_cells.append(label_cell('PROJECT'))
-    project_cells.append(value_cell(
-        f'#link("{circulars_url}")[#raw("{display(circulars_url)}")]'
-    ))
-    if source_url:
-        project_cells.append(label_cell('SOURCE'))
-        project_cells.append(value_cell(
-            f'#link("{source_url}")[#raw("{display(source_url)}")]'
-        ))
-    project_cells.append(label_cell('CODE'))
-    project_cells.append(value_cell(
-        f'#link("{repo_url}")[#raw("{display(repo_url)}")]'
-    ))
+        edition_cells += [label_cell('IDENTIFIER'), text_value(urn_display)]
+    edition_cells += [label_cell('PROJECT'), link_value(circulars_url)]
+    edition_cells += [label_cell('SOURCE CODE'), link_value(repo_url)]
 
     def grid_block(cells):
         return [
             '  #grid(',
-            '    columns: (auto, auto),',
-            '    column-gutter: 1.4em,',
+            f'    columns: ({label_width}, 1fr),',
+            '    column-gutter: 1.1em,',
             f'    row-gutter: {row_gap},',
-            '    align: (right + horizon, left + horizon),',
+            '    align: (left + top, left + top),',
             *cells,
             '  )',
         ]
 
-    def ornament():
+    def section_heading(label):
         return [
-            f'  #text(size: 12pt, tracking: 0.825em, '
-            f'fill: rgb("{accent}"))[· · ·]',
+            f'  #text(size: {label_pt}pt, weight: "semibold", '
+            f'tracking: 0.22em, fill: rgb("{accent}"))[{label}]',
+            '  #v(0.25em)',
+            f'  #line(length: 100%, stroke: (paint: rgb("{accent}"), thickness: 0.45pt))',
+            '  #v(0.45em)',
         ]
 
     blurb = (
-        f'      A reading edition of #emph[{_typ_content(name)}] prepared '
-        'by The Circulars with templater scripts that walk the original '
-        'Vatican HTML — recovering structure, footnotes, and signatories '
-        'into a typographic frame.'
+        f'This edition preserves the wording of the Vatican’s HTML text of '
+        f'#emph[{_typ_content(name)}] while rebuilding its structure for '
+        'reading. The Circulars adds clearer navigation, keeps notes and '
+        'links close at hand, and typesets the document for print.'
     )
 
     out = [
         '#page(numbering: none, header: none)[',
-        '  #set align(center)',
-        '  #v(1fr)',
-        f'  #box(width: {blurb_width})[',
-        '    #set par(justify: false, leading: 0.78em)',
-        f'    #text(size: {blurb_pt}pt)[',
-        blurb,
-        '    ]',
+        '  #set align(left)',
+        '  #v(8%)',
+        f'  #box(width: {page_width})[',
+        f'    #text(size: {title_pt}pt, style: "italic", fill: rgb("{accent}"))'
+        '[About this edition]',
+        '    #v(0.8em)',
+        '    #set par(justify: false, leading: 0.82em, first-line-indent: 0pt)',
+        f'    #text(size: {blurb_pt}pt, fill: rgb("#3a342b"))[{blurb}]',
         '  ]',
-        f'  #v({blurb_gap})',
-        *ornament(),
-        f'  #v({major_gap})',
-        *grid_block(doc_cells),
-        f'  #v({major_gap})',
-        *ornament(),
-        f'  #v({major_gap})',
-        *grid_block(project_cells),
-        '  #v(1fr)',
+        f'  #place(bottom + left, float: false)[#box(width: {page_width})[',
+        f'    #v({section_gap})',
+        *['    ' + line for line in section_heading('DOCUMENT')],
+        *['    ' + line for line in grid_block(document_cells)],
+        f'    #v({section_gap})',
+        *['    ' + line for line in section_heading('EDITION')],
+        *['    ' + line for line in grid_block(edition_cells)],
+        '  ]]',
         ']',
         '#pagebreak()',
     ]

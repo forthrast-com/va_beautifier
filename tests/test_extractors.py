@@ -17,6 +17,8 @@ class ExtractorRegressionTests(unittest.TestCase):
         self.assertEqual(len(data['paragraphs']), 93)
         self.assertEqual(len(data['footnotes']), 167)
         self.assertEqual(data['hue'], 42)
+        self.assertEqual(data['issued_by'], 'Second Vatican Council')
+        self.assertEqual(data['pontificate'], 'Paul VI')
         self.assertEqual(data['desc_post'], '')
         self.assertIn('Promulgated by His Holiness, Pope Paul VI',
                       data['promulgation'])
@@ -42,6 +44,8 @@ class ExtractorRegressionTests(unittest.TestCase):
         self.assertEqual(len(data['paragraphs']), 246)
         self.assertEqual(len(data['footnotes']), 172)
         self.assertEqual(data['hue'], 140)
+        self.assertEqual(data['issued_by'], 'Francis')
+        self.assertEqual(data['pontificate'], 'Francis')
         self.assertEqual(len(data['appendices']), 2)
         self.assertTrue(all(app['kind'] == 'prayer' for app in data['appendices']))
         self.assertTrue(any(fn['sub_heading'] for fn in data['footnotes']))
@@ -76,6 +80,9 @@ class ExtractorRegressionTests(unittest.TestCase):
         self.assertEqual(len(data['footnotes']), 215)
         self.assertEqual(data['chapter_style'], 'roman')
         self.assertEqual(data['book_toc_depth'], 4)
+        self.assertIn('Dicastery for the Doctrine of the Faith',
+                      data['issued_by'])
+        self.assertEqual(data['pontificate'], 'Francis')
         self.assertEqual(data['paragraphs'][0]['chapter_title'], 'Introduction')
         self.assertEqual(
             data['paragraphs'][-1]['chapter_title'], 'Concluding Reflections'
@@ -97,6 +104,9 @@ class ExtractorRegressionTests(unittest.TestCase):
 
         self.assertEqual(len(data['paragraphs']), 167)
         self.assertEqual(len(data['footnotes']), 200)
+        self.assertEqual(data['issued_by'],
+                         'International Theological Commission')
+        self.assertEqual(data['pontificate'], 'Leo XIV')
         self.assertTrue(data['paragraphs'][0]['hide_number'])
         self.assertEqual(data['paragraphs'][0]['part_title'], 'Preliminary Note')
         self.assertEqual(data['footnotes'][0]['number'], 1)

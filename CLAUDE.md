@@ -66,12 +66,16 @@ The TOML is the canonical intermediate. Downstream renderers consume TOML — ne
 
 ## TOML schema
 
-Top-level: `name`, `hue`, `source_url`, `author`, `date`, `identifier`,
+Top-level: `name`, `hue`, `source_url`, `author`, `issued_by`, `pontificate`,
+`date`, `identifier`,
 `rights`, `publisher`, `collection`, `desc`, optional `desc_post`,
 `chapter_style`, `book_toc_depth`, `promulgation`, `signature`, `hero_image`,
 and `hero_credit`. `chapter_style = "roman"` changes structural chapter
 labels; `book_toc_depth` defaults to 3. Promulgation and signature use
 canonical inline formatting; line breaks in `signature` are significant.
+`author` is EPUB creator/signatory metadata; `issued_by` is the institutional
+or personal voice shown in the catalogue and colophon. The colophon adds
+`pontificate` only when it differs from `issued_by`.
 
 `[[paragraphs]]` — `number`, `part`, `part_title`, `chapter`, `chapter_title`, `chapter_subtitle`, `section`, `section_title`, `sub_heading`, `heading_la`, `break_after`, `text` (multiline, `\n\n`-separated sub-paragraphs). Authored inline formatting in `text` and footnote `text` is canonical Markdown-compatible content: `*italics*`, `**bold**`, `<sup>…</sup>`, and `<sub>…</sub>`.
 

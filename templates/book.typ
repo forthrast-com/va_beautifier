@@ -136,6 +136,10 @@
   }
 
   // ── Outline / TOC ────────────────────────────────────────────────────
+  // A fixed per-level indent leaves top-level entries flush with the body
+  // text edge while preserving hierarchy below them. Typst's `auto` mode
+  // indents even unnumbered top-level headings to reserve prefix space.
+  set outline(indent: depth => (depth - 1) * 1.2em)
   // Lift the "Contents" heading to chapter-style italic display.
   show outline: it => {
     show heading: h => {

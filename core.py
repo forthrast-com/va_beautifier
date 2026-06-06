@@ -7,6 +7,8 @@ Each `extract/<doc>.py` exposes:
         'hue':          int,        # web-edition accent hue (CSS hsl degrees)
         'source_url':   str,        # original Vatican HTML edition
         'author':       str,        # dc:creator for EPUB; pope, council, dicastery (may be '')
+        'issued_by':    str,        # institutional/personal voice shown in catalogue + colophon
+        'pontificate':  str,        # pope under whom issued; omitted from display when same as issued_by
         'date':         str,        # promulgation date ISO 8601 yyyy-mm-dd (may be '')
         'identifier':   str,        # urn suffix, e.g. "papal:laudato-si:2015-05-24" (may be '')
         'rights':       str,        # dc:rights line for EPUB (may be '')
@@ -455,7 +457,7 @@ DEFAULT_COLLECTION = 'The Circulars (Vatican documents)'
 
 
 def write_toml(path, *, name, hue=None, source_url='',
-               author='', date='', identifier='', rights='',
+               author='', issued_by='', pontificate='', date='', identifier='', rights='',
                publisher=DEFAULT_PUBLISHER, collection=DEFAULT_COLLECTION,
                desc='', desc_post='', chapter_style='', book_toc_depth=3,
                promulgation='', signature='', show_title_author=True,
@@ -467,6 +469,10 @@ def write_toml(path, *, name, hue=None, source_url='',
         out.append(f'source_url = {_toml_str(source_url)}')
     if author:
         out.append(f'author = {_toml_str(author)}')
+    if issued_by:
+        out.append(f'issued_by = {_toml_str(issued_by)}')
+    if pontificate:
+        out.append(f'pontificate = {_toml_str(pontificate)}')
     if date:
         out.append(f'date = {_toml_str(date)}')
     if identifier:

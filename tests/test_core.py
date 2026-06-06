@@ -214,6 +214,8 @@ class TomlTests(unittest.TestCase):
                 path,
                 name='Sample',
                 author='A Pope',
+                issued_by='A Dicastery',
+                pontificate='A Pope',
                 date='2024-01-15',
                 identifier='papal:sample:2024-01-15',
                 rights='© 2024 Holy See',
@@ -225,6 +227,8 @@ class TomlTests(unittest.TestCase):
             data = read_toml(path)
 
         self.assertEqual(data['author'], 'A Pope')
+        self.assertEqual(data['issued_by'], 'A Dicastery')
+        self.assertEqual(data['pontificate'], 'A Pope')
         self.assertEqual(data['date'], '2024-01-15')
         self.assertEqual(data['identifier'], 'papal:sample:2024-01-15')
         self.assertEqual(data['rights'], '© 2024 Holy See')

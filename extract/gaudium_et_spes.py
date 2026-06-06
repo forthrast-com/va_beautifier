@@ -264,6 +264,8 @@ def extract():
         'hue': HUE,
         'source_url': SOURCE_URL,
         'author': AUTHOR,
+        'issued_by': 'Second Vatican Council',
+        'pontificate': 'Paul VI',
         'date': DATE,
         'identifier': IDENTIFIER,
         'desc': desc,

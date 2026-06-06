@@ -14,9 +14,9 @@ from project import BUILD, DOWNLOADS, SITE
 # used as the sort key when grouping by pontificate. Add an entry when
 # adding a doc under a new pope.
 PONTIFICATES = {
-    'paul-vi': {'name': 'Paul VI', 'start': '1963-06-21'},
-    'francis': {'name': 'Francis', 'start': '2013-03-13'},
-    'leo-xiv': {'name': 'Leo XIV', 'start': '2025-05-08'},
+    'Paul VI': {'start': '1963-06-21'},
+    'Francis': {'start': '2013-03-13'},
+    'Leo XIV': {'start': '2025-05-08'},
 }
 
 
@@ -27,30 +27,18 @@ PONTIFICATES = {
 CARD_META = {
     'gaudium_et_spes': {
         'type': 'council_constitution',
-        'pontificate': 'paul-vi',
         'kind_long': 'Pastoral Constitution on the Church in the Modern World',
-        'body': 'Second Vatican Council',
-        'promulgated_by': 'Pope Paul VI',
     },
     'sacrosanctum_concilium': {
         'type': 'council_constitution',
-        'pontificate': 'paul-vi',
         'kind_long': 'Constitution on the Sacred Liturgy',
-        'body': 'Second Vatican Council',
-        'promulgated_by': 'Pope Paul VI',
     },
     'laudato_si': {
         'type': 'encyclical',
-        'pontificate': 'francis',
-        'issuer_prefix': 'of the Holy Father',
-        'issuer': 'Francis',
         'subtitle': 'on Care for Our Common Home',
     },
     'magnifica_humanitas': {
         'type': 'encyclical',
-        'pontificate': 'leo-xiv',
-        'issuer_prefix': 'of His Holiness',
-        'issuer': 'Pope Leo XIV',
         'subtitle': (
             'on Safeguarding the Human Person '
             'in the Time of Artificial Intelligence'
@@ -58,11 +46,6 @@ CARD_META = {
     },
     'antiqua_et_nova': {
         'type': 'curia_note',
-        'pontificate': 'francis',
-        'bodies': (
-            'Dicastery for the Doctrine of the Faith',
-            'Dicastery for Culture and Education',
-        ),
         'subtitle': (
             'Note on the Relationship Between Artificial Intelligence '
             'and Human Intelligence'
@@ -70,8 +53,6 @@ CARD_META = {
     },
     'quo_vadis_humanitas': {
         'type': 'commission_paper',
-        'pontificate': 'leo-xiv',
-        'bodies': ('International Theological Commission',),
         'subtitle': (
             'Thinking through Christian Anthropology in the Face of '
             'Certain Scenarios for the Future of Humanity'
@@ -147,21 +128,12 @@ def _card_fields(slug, data):
     subtitle = meta.get('subtitle', '')
     byline = ''
 
-    if kind_type == 'encyclical':
-        byline = f'{meta["issuer_prefix"]} <strong>{meta["issuer"]}</strong>'
-    elif kind_type == 'council_constitution':
+    if kind_type == 'council_constitution':
         subtitle = meta.get('kind_long', '')
-        byline = f'of the <strong>{meta["body"]}</strong>'
-        if meta.get('promulgated_by'):
-            byline += f', promulgated by {meta["promulgated_by"]}'
-    elif kind_type == 'curia_note':
-        # Signers (Prefects, sub-commission chair) ride dc:creator and
-        # appear in the PDF colophon; the tile keeps the institutional
-        # voice up top so it doesn't read like four bylines stacked.
-        byline = '<strong>' + ' &amp; '.join(meta.get('bodies', ())) + '</strong>'
-    elif kind_type == 'commission_paper':
-        byline = '<strong>' + ', '.join(meta.get('bodies', ())) + '</strong>'
-    else:
+    issued_by = data.get('issued_by', '')
+    if issued_by:
+        byline = f'<strong>{escape(issued_by)}</strong>'
+    elif not byline:
         # No CARD_META row — flow the TOML's desc / desc_post fallback.
         joined = ' '.join(
             line.strip()
@@ -171,8 +143,8 @@ def _card_fields(slug, data):
         )
         byline = escape(title_case(joined)) if joined else ''
 
-    pont_slug = meta.get('pontificate', '')
-    pont = PONTIFICATES.get(pont_slug, {})
+    pont_name = data.get('pontificate', '')
+    pont = PONTIFICATES.get(pont_name, {})
 
     return {
         'name':            data['name'],
@@ -184,8 +156,8 @@ def _card_fields(slug, data):
         'iso_date':        data.get('date', ''),
         'hue':             data.get('hue', 42),
         'source_url':      data.get('source_url', ''),
-        'pontificate':     pont_slug,
-        'pontif_name':     pont.get('name', ''),
+        'pontificate':     pont_name,
+        'pontif_name':     pont_name,
         'pontif_start':    pont.get('start', ''),
         'title_key':       _title_sort_key(data['name']),
     }

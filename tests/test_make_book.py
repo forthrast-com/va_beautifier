@@ -1,6 +1,7 @@
 import unittest
 
 from make_book import (
+    _copyright_page_typst,
     _end_matter_html,
     _end_matter_typst,
     _markdown_preserve_breaks,
@@ -9,6 +10,38 @@ from make_book import (
 
 
 class EndMatterRenderTests(unittest.TestCase):
+    def test_pdf_colophon_has_document_and_edition_metadata(self):
+        rendered = _copyright_page_typst({
+            'name': 'Sample',
+            'author': 'An Author',
+            'issued_by': 'A Dicastery',
+            'pontificate': 'A Pope',
+            'date': '2026-03-04',
+            'source_url': 'https://www.vatican.va/sample.html',
+            'identifier': 'sample:2026-03-04',
+            'publisher': 'circulars.forthrast.com',
+            'collection': 'The Circulars (Vatican documents)',
+        })
+
+        self.assertIn('[About this edition]', rendered)
+        self.assertIn('[DOCUMENT]', rendered)
+        self.assertIn('[EDITION]', rendered)
+        self.assertIn('[Issued By]', rendered)
+        self.assertIn('[Pontificate]', rendered)
+        self.assertIn('[A5 reader PDF]', rendered)
+        self.assertIn('[Source Code]', rendered)
+        self.assertNotIn('[· · ·]', rendered)
+
+    def test_pdf_colophon_omits_duplicate_pontificate(self):
+        rendered = _copyright_page_typst({
+            'name': 'Sample',
+            'issued_by': 'A Pope',
+            'pontificate': 'A Pope',
+        })
+
+        self.assertIn('[Issued By]', rendered)
+        self.assertNotIn('[Pontificate]', rendered)
+
     def test_appendix_markdown_preserves_poetic_line_breaks(self):
         rendered = _markdown_preserve_breaks('First line\nSecond line\n\nNext stanza')
 

@@ -165,6 +165,8 @@ def extract():
         'hue': HUE,
         'source_url': SOURCE_URL,
         'author': AUTHOR,
+        'issued_by': 'Leo XIV',
+        'pontificate': 'Leo XIV',
         'date': DATE,
         'identifier': IDENTIFIER,
         # The pope is already named in `desc` ("ENCYCLICAL LETTER OF
