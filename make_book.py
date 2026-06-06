@@ -61,10 +61,9 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
     # page + end matter are emitted as raw typst inline in the body —
     # the EPUB writer ignores raw typst, so EPUB falls back to pandoc's
     # standalone title page generated from the title metadata.
-    # Hoefler Text is the right register for an encyclical: humanist,
-    # warm, oldstyle figures, the face you find in good prayer books.
-    # macOS-bundled. Override via VA_BOOK_FONT for other hosts.
-    font = os.environ.get('VA_BOOK_FONT', 'Hoefler Text')
+    # Libertinus Serif is supplied by the Nix shell on every supported host.
+    # Override via VA_BOOK_FONT when another face is installed locally.
+    font = os.environ.get('VA_BOOK_FONT', 'Libertinus Serif')
     # Typst restricts imports to the project root, so we pass `--root`
     # via `--pdf-engine-opt` in run_pandoc() and reference the template
     # as a typst-rooted path (leading `/`, relative to ROOT).
@@ -592,9 +591,10 @@ def _cover_typst(data):
     300 ppi yields ~1240 × 1748 px — well above Apple Books' minimum."""
     lines = _title_page_layout(data, paper='a6')
     body = '\n'.join(lines)
+    font = os.environ.get('VA_BOOK_FONT', 'Libertinus Serif')
     return (
         '#set page(paper: "a6", margin: 12mm)\n'
-        '#set text(font: "Hoefler Text", size: 11pt)\n'
+        f'#set text(font: "{font}", size: 11pt)\n'
         + body + '\n'
     )
 

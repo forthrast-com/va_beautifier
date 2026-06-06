@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 from core import (
     CANONICAL_FOOTNOTE_REF,
     assign_footnote_context,
+    ch_order_label,
     clean_text,
     encyclical_split,
     int_to_roman,
@@ -277,6 +278,62 @@ class TomlTests(unittest.TestCase):
             data['signatories'], [{'name': 'A Name', 'role': 'Prefect'}]
         )
         self.assertEqual(data['appendices'][0]['kind'], 'prayer')
+
+
+class ChOrderLabelTests(unittest.TestCase):
+    """Drawer/contents label for each (part, chapter) bucket.
+
+    The case the user caught: a part-intro paragraph (`part=2,
+    chapter=0`) used to fall through to the bare 'Part II, Ch. 0'
+    fallback. That entry IS the part heading, so it should read
+    'Part II: <part_title>' instead."""
+
+    @staticmethod
+    def _p(**overrides):
+        base = dict(part=0, chapter=0, part_title='', chapter_title='')
+        base.update(overrides)
+        return base
+
+    def test_part_intro_uses_part_title(self):
+        # Part II of GeS: opener has chapter=0, part_title carries the
+        # real subject. Old fallback emitted 'Part II, Ch. 0'.
+        self.assertEqual(
+            ch_order_label(self._p(
+                part=2, chapter=0,
+                part_title='Some Problems of Special Urgency')),
+            'Part II: Some Problems of Special Urgency')
+
+    def test_part_intro_without_title(self):
+        # Defensive: a partially-authored TOML with part=1, no title.
+        self.assertEqual(
+            ch_order_label(self._p(part=1, chapter=0)),
+            'Part I')
+
+    def test_top_level_preface(self):
+        self.assertEqual(
+            ch_order_label(self._p(part_title='Preface')),
+            'Preface')
+
+    def test_top_level_chapter_uses_chapter_title(self):
+        # LS: chapters live at the root (no part), drawer reads off the
+        # chapter title directly.
+        self.assertEqual(
+            ch_order_label(self._p(
+                chapter=3, chapter_title='The Human Roots of the Ecological Crisis')),
+            'The Human Roots of the Ecological Crisis')
+
+    def test_part_chapter_uses_chapter_title(self):
+        self.assertEqual(
+            ch_order_label(self._p(
+                part=1, chapter=1,
+                part_title='Ignored', chapter_title='The Dignity of the Human Person')),
+            'The Dignity of the Human Person')
+
+    def test_part_chapter_falls_back_when_title_missing(self):
+        # An untitled chapter still gets a navigable label.
+        self.assertEqual(
+            ch_order_label(self._p(part=3, chapter=4)),
+            'Part III, Ch. 4')
 
 
 if __name__ == '__main__':

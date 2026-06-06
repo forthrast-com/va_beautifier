@@ -742,6 +742,28 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     transform: translateX(-.6rem);  /* centre chapter number above gutter rule */
 }
 
+/* AeN (chapter_style = "roman"): the chapter heading's number lives in
+   the same left gutter as the paragraph numbers, picked up from
+   `data-ch-num` via attr(). The title text stands alone — no inline
+   'II. ' prefix doubling up with the gutter numeral or the sticky
+   bar. */
+.doc-antiqua_et_nova h3.chapter-title {
+    position: relative;
+}
+.doc-antiqua_et_nova h3.chapter-title::before {
+    content: attr(data-ch-num);
+    position: absolute;
+    right: calc(100% + 2rem);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--fg-faint);
+    font-weight: normal;
+    font-style: normal;
+    font-size: .95rem;
+    text-align: right;
+    white-space: nowrap;
+}
+
 /* MH uses a third visible level below chapters: section headings are the
    document's subheads; italic headings nested inside them are sub-subheads. */
 .doc-magnifica_humanitas h3.chapter-title,
@@ -804,6 +826,17 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     .doc-antiqua_et_nova .paragraph p:first-of-type,
     .doc-quo_vadis_humanitas .paragraph p:first-of-type,
     .doc-sacrosanctum_concilium .paragraph p:first-of-type { display: inline; margin-top: 0; }
+
+    /* AeN chapter heading: no gutter, prefix the Roman numeral inline. */
+    .doc-antiqua_et_nova h3.chapter-title::before {
+        content: attr(data-ch-num) '. ';
+        position: static;
+        color: inherit;
+        font-size: inherit;
+        font-weight: inherit;
+        text-align: left;
+        transform: none;
+    }
 }
 
 /* Indicator: explicit height (not max-height — flex children with basis 0
@@ -822,6 +855,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .doc-antiqua_et_nova .ch-bar,
 .doc-quo_vadis_humanitas .ch-bar,
 .doc-sacrosanctum_concilium .ch-bar { flex: 1 1 0; min-height: 8px; height: auto; }
+.doc-laudato_si .ch-seg,
 .doc-magnifica_humanitas .ch-seg,
 .doc-antiqua_et_nova .ch-seg,
 .doc-quo_vadis_humanitas .ch-seg,
@@ -979,7 +1013,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
   <ul class="noscript-toc-list">
 <li class="ntoc-ch"><a href="#ch-0">Preface</a>
 </li>
-<li class="ntoc-ch"><a href="#ch-2">Part I, Ch. 0</a>
+<li class="ntoc-ch"><a href="#ch-2">Part I: The Church and Man&#x27;s Calling</a>
 </li>
 <li class="ntoc-ch"><a href="#ch-3">The Dignity of the Human Person</a>
 </li>
@@ -989,7 +1023,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 </li>
 <li class="ntoc-ch"><a href="#ch-6">The Role of the Church in the Modern World</a>
 </li>
-<li class="ntoc-ch"><a href="#ch-7">Part II, Ch. 0</a>
+<li class="ntoc-ch"><a href="#ch-7">Part II: Some Problems of Special Urgency</a>
 </li>
 <li class="ntoc-ch"><a href="#ch-8">Fostering the Nobility of Marriage and the Family</a>
 </li>
@@ -1592,12 +1626,12 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
     </div>
     <div id="drawer-toc" class="drawer-view active" role="tabpanel">
       <h3 class="fn-group toc-item" data-target="ch-0" data-label="Preface"><a href="#ch-0" class="fn-ch-link">Preface</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-0" aria-label="Bookmark Preface" aria-pressed="false"></button></h3>
-<h3 class="fn-group toc-item" data-target="ch-2" data-label="Part I, Ch. 0"><a href="#ch-2" class="fn-ch-link">Part I, Ch. 0</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-2" aria-label="Bookmark Part I, Ch. 0" aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-2" data-label="Part I: The Church and Man&#x27;s Calling"><a href="#ch-2" class="fn-ch-link">Part I: The Church and Man&#x27;s Calling</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-2" aria-label="Bookmark Part I: The Church and Man&#x27;s Calling" aria-pressed="false"></button></h3>
 <h3 class="fn-group toc-item" data-target="ch-3" data-label="The Dignity of the Human Person"><a href="#ch-3" class="fn-ch-link">The Dignity of the Human Person</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-3" aria-label="Bookmark The Dignity of the Human Person" aria-pressed="false"></button></h3>
 <h3 class="fn-group toc-item" data-target="ch-4" data-label="The Community of Mankind"><a href="#ch-4" class="fn-ch-link">The Community of Mankind</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-4" aria-label="Bookmark The Community of Mankind" aria-pressed="false"></button></h3>
 <h3 class="fn-group toc-item" data-target="ch-5" data-label="Man&#x27;s Activity Throughout the World"><a href="#ch-5" class="fn-ch-link">Man&#x27;s Activity Throughout the World</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-5" aria-label="Bookmark Man&#x27;s Activity Throughout the World" aria-pressed="false"></button></h3>
 <h3 class="fn-group toc-item" data-target="ch-6" data-label="The Role of the Church in the Modern World"><a href="#ch-6" class="fn-ch-link">The Role of the Church in the Modern World</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-6" aria-label="Bookmark The Role of the Church in the Modern World" aria-pressed="false"></button></h3>
-<h3 class="fn-group toc-item" data-target="ch-7" data-label="Part II, Ch. 0"><a href="#ch-7" class="fn-ch-link">Part II, Ch. 0</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-7" aria-label="Bookmark Part II, Ch. 0" aria-pressed="false"></button></h3>
+<h3 class="fn-group toc-item" data-target="ch-7" data-label="Part II: Some Problems of Special Urgency"><a href="#ch-7" class="fn-ch-link">Part II: Some Problems of Special Urgency</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-7" aria-label="Bookmark Part II: Some Problems of Special Urgency" aria-pressed="false"></button></h3>
 <h3 class="fn-group toc-item" data-target="ch-8" data-label="Fostering the Nobility of Marriage and the Family"><a href="#ch-8" class="fn-ch-link">Fostering the Nobility of Marriage and the Family</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-8" aria-label="Bookmark Fostering the Nobility of Marriage and the Family" aria-pressed="false"></button></h3>
 <h3 class="fn-group toc-item" data-target="ch-9" data-label="The Proper Development of Culture"><a href="#ch-9" class="fn-ch-link">The Proper Development of Culture</a><button class="bookmark-toggle" type="button" data-bookmark-target="ch-9" aria-label="Bookmark The Proper Development of Culture" aria-pressed="false"></button></h3>
 <p class="sec-nav-item toc-item" data-target="sec-2-2-1" data-label="Section 1: The Circumstances of Culture in the World Today"><a href="#sec-2-2-1" class="sec-nav-link">Section 1: The Circumstances of Culture in the World Today</a><button class="bookmark-toggle" type="button" data-bookmark-target="sec-2-2-1" aria-label="Bookmark Section 1: The Circumstances of Culture in the World Today" aria-pressed="false"></button></p>

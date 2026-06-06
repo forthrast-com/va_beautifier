@@ -52,7 +52,9 @@ The TOML is the canonical intermediate. Downstream renderers consume TOML — ne
 - `make_book.py <slug>` — emits intermediate Markdown and per-paper title-page
   Typst includes, then writes one EPUB plus A4, A5, and A6 PDFs under
   `site/downloads/`. Appendices enter both tables of contents; page breaks and
-  PDF end matter use raw Typst, with parallel raw HTML for EPUB.
+  PDF end matter use raw Typst, with parallel raw HTML for EPUB. Libertinus
+  Serif is the reproducible default book face; override it with
+  `VA_BOOK_FONT=…` when another font is installed locally.
 - `templates/book.typ` — source pandoc-typst `conf` module materialised to
   `build/<hyphenated-slug>-book.typ` with a muted document-hue accent. Owns
   paper geometry, running heads, heading shows, footnote styling, and TOC

@@ -212,6 +212,30 @@ def parse_num(s):
     return int(s) if s.isdigit() else roman_to_int(s)
 
 
+def ch_order_label(p):
+    """Drawer/contents label for a paragraph's (part, chapter) entry.
+
+    Four cases:
+        (0, 0)         — preface / introduction; reuse the part_title.
+        (0, N)         — top-level chapter under no part; just chapter_title.
+        (P, 0), P > 0  — the part-intro paragraphs. The entry IS the part
+                         heading itself, so it should read 'Part II: Some
+                         Problems of Special Urgency', not the previous
+                         'Part II, Ch. 0' fallback.
+        (P, N), P > 0  — chapter under a part; chapter_title with a
+                         'Part X, Ch. Y' fallback when chapter_title is
+                         missing.
+    """
+    if p['part'] == 0 and p['chapter'] == 0:
+        return p['part_title']
+    if p['part'] == 0:
+        return p['chapter_title']
+    if p['chapter'] == 0:
+        roman = int_to_roman(p['part'])
+        return f'Part {roman}: {p["part_title"]}' if p['part_title'] else f'Part {roman}'
+    return p['chapter_title'] or f'Part {int_to_roman(p["part"])}, Ch. {p["chapter"]}'
+
+
 CHAPTER_WORDS = {
     'ONE': 1, 'TWO': 2, 'THREE': 3, 'FOUR': 4, 'FIVE': 5, 'SIX': 6,
     'SEVEN': 7, 'EIGHT': 8, 'NINE': 9, 'TEN': 10,

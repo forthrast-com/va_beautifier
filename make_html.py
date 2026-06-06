@@ -4,7 +4,13 @@ import re
 from collections import defaultdict
 from html import escape
 
-from core import CANONICAL_FOOTNOTE_REF, int_to_roman, read_toml, title_case
+from core import (
+    CANONICAL_FOOTNOTE_REF,
+    ch_order_label,
+    int_to_roman,
+    read_toml,
+    title_case,
+)
 from project import ASSETS, BUILD, SITE
 
 CSS         = (ASSETS / 'styles.css').read_text()
@@ -309,17 +315,31 @@ for p in paragraphs:
             chapter_style != 'roman'
             and p['chapter_title'].strip().lower() == 'conclusion'
         )
-        if not is_unnumbered:
-            html_parts.append(h('h2', 'chapter-num', chapter_num_label(p['chapter'])).replace('<h2 ', f'<h2 id="{cid}" '))
-        if p['chapter_title']:
-            ch_num = f'{int_to_roman(p["part"])}.{p["chapter"]}' if p['part'] else f'{p["chapter"]}'
-            id_attr = f'id="{cid}" ' if is_unnumbered else ''
+        if chapter_style == 'roman':
+            # Roman-numeral docs (AeN): chapter number lives in the
+            # left gutter as a Roman numeral (data-ch-num + CSS
+            # ::before), so the heading text is just the title.
+            # The sticky bar reads both attrs and renders 'II  Title'
+            # without the inline prefix doubling the numeral up.
+            ch_num = int_to_roman(p['chapter'])
             html_parts.append(
                 h('h3', 'chapter-title', p['chapter_title'])
-                .replace('<h3 ', f'<h3 {id_attr}data-sticky data-ch-num="{ch_num}" ')
+                .replace('<h3 ', f'<h3 id="{cid}" data-sticky data-ch-num="{ch_num}" ')
             )
             if p.get('chapter_subtitle', ''):
                 html_parts.append(h('p', 'chapter-subtitle', p['chapter_subtitle']))
+        else:
+            if not is_unnumbered:
+                html_parts.append(h('h2', 'chapter-num', chapter_num_label(p['chapter'])).replace('<h2 ', f'<h2 id="{cid}" '))
+            if p['chapter_title']:
+                ch_num = f'{int_to_roman(p["part"])}.{p["chapter"]}' if p['part'] else f'{p["chapter"]}'
+                id_attr = f'id="{cid}" ' if is_unnumbered else ''
+                html_parts.append(
+                    h('h3', 'chapter-title', p['chapter_title'])
+                    .replace('<h3 ', f'<h3 {id_attr}data-sticky data-ch-num="{ch_num}" ')
+                )
+                if p.get('chapter_subtitle', ''):
+                    html_parts.append(h('p', 'chapter-subtitle', p['chapter_subtitle']))
         seen_chapter     = chapter
         seen_section     = object()
         seen_sub_heading = object()
@@ -448,13 +468,7 @@ seen_ch_order = set()
 for p in paragraphs:
     key = (p['part'], p['chapter'])
     if key not in seen_ch_order:
-        if p['part'] == 0 and p['chapter'] == 0:
-            label = p['part_title']                     # preface / introduction
-        elif p['part'] == 0:
-            label = p['chapter_title']
-        else:
-            label = p['chapter_title'] or f'Part {int_to_roman(p["part"])}, Ch. {p["chapter"]}'
-        ch_order.append((key, label))
+        ch_order.append((key, ch_order_label(p)))
         seen_ch_order.add(key)
 
 def fn_item_html(part, chapter, fn):

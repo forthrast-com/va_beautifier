@@ -28,7 +28,7 @@
   abstract: none,
   margin: (x: 2.2cm, y: 2.4cm),
   paper: "a5",
-  font: ("Hoefler Text",),
+  font: ("Libertinus Serif",),
   fontsize: 11pt,
   sectionnumbering: none,
   pagenumbering: "1",

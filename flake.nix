@@ -28,6 +28,8 @@
               pkgs.gnumake
               pkgs.pandoc
               pkgs.typst
+              pkgs.google-fonts
+              pkgs.libertinus
             ];
           };
         });

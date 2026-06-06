@@ -11,12 +11,25 @@ from project import BUILD, DOWNLOADS, SITE
 
 
 # Pontificates that have promulgated a doc in the catalogue. `start` is
-# used as the sort key when grouping by pontificate. Add an entry when
-# adding a doc under a new pope.
+# the pontificate-sort key; `honorific` and `display` carry editorial
+# styling so encyclical bylines can be built purely from kind + pope.
+# Add an entry when adding a doc under a new pope.
 PONTIFICATES = {
-    'Paul VI': {'start': '1963-06-21'},
-    'Francis': {'start': '2013-03-13'},
-    'Leo XIV': {'start': '2025-05-08'},
+    'Paul VI': {
+        'start':     '1963-06-21',
+        'honorific': 'of His Holiness',
+        'display':   'Pope Paul VI',
+    },
+    'Francis': {
+        'start':     '2013-03-13',
+        'honorific': 'of the Holy Father',
+        'display':   'Francis',
+    },
+    'Leo XIV': {
+        'start':     '2025-05-08',
+        'honorific': 'of His Holiness',
+        'display':   'Pope Leo XIV',
+    },
 }
 
 
@@ -131,10 +144,27 @@ def _card_fields(slug, data):
     if kind_type == 'council_constitution':
         subtitle = meta.get('kind_long', '')
     issued_by = data.get('issued_by', '')
-    if issued_by:
+    pont_name = data.get('pontificate', '')
+    pont = PONTIFICATES.get(pont_name, {})
+
+    # Byline shape is purely a function of `kind_type` + `PONTIFICATES`:
+    #   encyclical           → '{honorific} <strong>{pope}</strong>'
+    #   council_constitution → 'of the <strong>{body}</strong>,
+    #                           promulgated by {pope.display}'
+    #   curia_note,
+    #   commission_paper     → '<strong>{body}</strong>'
+    # No per-doc editorial overrides — pope styling lives in PONTIFICATES,
+    # body name comes from the TOML's `issued_by` field.
+    if kind_type == 'encyclical' and pont:
+        byline = f'{pont["honorific"]} <strong>{escape(pont["display"])}</strong>'
+    elif kind_type == 'council_constitution' and issued_by:
+        byline = f'of the <strong>{escape(issued_by)}</strong>'
+        if pont.get('display'):
+            byline += f', promulgated by {escape(pont["display"])}'
+    elif issued_by:
         byline = f'<strong>{escape(issued_by)}</strong>'
-    elif not byline:
-        # No CARD_META row — flow the TOML's desc / desc_post fallback.
+    else:
+        # No issued_by — flow the TOML's desc / desc_post fallback.
         joined = ' '.join(
             line.strip()
             for part in (data.get('desc', ''), data.get('desc_post', ''))
@@ -142,9 +172,6 @@ def _card_fields(slug, data):
             if line.strip()
         )
         byline = escape(title_case(joined)) if joined else ''
-
-    pont_name = data.get('pontificate', '')
-    pont = PONTIFICATES.get(pont_name, {})
 
     return {
         'name':            data['name'],
@@ -451,7 +478,6 @@ main {{
 }}
 .brand b {{ font-weight: 600; color: var(--ink-dim); letter-spacing: .15em; }}
 h1 {{
-  max-width: 22ch;
   font-size: clamp(2.6rem, 6.4vw, 4.4rem);
   font-style: italic;
   font-weight: normal;
@@ -459,6 +485,10 @@ h1 {{
   letter-spacing: -0.005em;
   margin: 0 0 1.1rem;
 }}
+/* Each clause is a no-break unit, so the only legal break point is the
+   space between them — i.e. after the comma. If the viewport is wide
+   enough for both to share a line, they do. */
+h1 .clause {{ white-space: nowrap; }}
 .intro {{
   max-width: 38rem;
   color: var(--ink-dim);
@@ -960,7 +990,7 @@ footer a:hover {{ color: var(--accent); text-decoration-color: var(--accent); }}
 <main>
   <header class="masthead">
     <p class="brand"><b>The&nbsp;Circulars</b> · vatican.va, retypeset</p>
-    <h1>Vatican documents, set for reading.</h1>
+    <h1><span class="clause">Vatican documents,</span> <span class="clause">set for reading.</span></h1>
     <p class="intro">Reading editions of papal and conciliar texts, drawn from the
     canonical HTML on <a href="https://www.vatican.va" target="_blank" rel="noopener">vatican.va</a>
     and run through templated extractors into a web reader, a typeset PDF,

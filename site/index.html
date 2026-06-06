@@ -74,7 +74,6 @@ main {
 }
 .brand b { font-weight: 600; color: var(--ink-dim); letter-spacing: .15em; }
 h1 {
-  max-width: 22ch;
   font-size: clamp(2.6rem, 6.4vw, 4.4rem);
   font-style: italic;
   font-weight: normal;
@@ -82,6 +81,10 @@ h1 {
   letter-spacing: -0.005em;
   margin: 0 0 1.1rem;
 }
+/* Each clause is a no-break unit, so the only legal break point is the
+   space between them — i.e. after the comma. If the viewport is wide
+   enough for both to share a line, they do. */
+h1 .clause { white-space: nowrap; }
 .intro {
   max-width: 38rem;
   color: var(--ink-dim);
@@ -583,7 +586,7 @@ footer a:hover { color: var(--accent); text-decoration-color: var(--accent); }
 <main>
   <header class="masthead">
     <p class="brand"><b>The&nbsp;Circulars</b> · vatican.va, retypeset</p>
-    <h1>Vatican documents, set for reading.</h1>
+    <h1><span class="clause">Vatican documents,</span> <span class="clause">set for reading.</span></h1>
     <p class="intro">Reading editions of papal and conciliar texts, drawn from the
     canonical HTML on <a href="https://www.vatican.va" target="_blank" rel="noopener">vatican.va</a>
     and run through templated extractors into a web reader, a typeset PDF,
@@ -618,7 +621,7 @@ footer a:hover { color: var(--accent); text-decoration-color: var(--accent); }
   </form>
 
   <section class="editions" aria-label="Available documents">
-<article class="edition" data-date="2026-05-15" data-pontificate="Leo XIV" data-pontif-name="Leo XIV" data-pontif-start="2025-05-08" data-type="encyclical" data-type-label="Encyclical Letter" data-authority-rank="2" data-title-key="magnifica humanitas" data-search="magnifica humanitas on safeguarding the human person in the time of artificial intelligence leo xiv encyclical letter leo xiv" style="--hue: 230">
+<article class="edition" data-date="2026-05-15" data-pontificate="Leo XIV" data-pontif-name="Leo XIV" data-pontif-start="2025-05-08" data-type="encyclical" data-type-label="Encyclical Letter" data-authority-rank="2" data-title-key="magnifica humanitas" data-search="magnifica humanitas on safeguarding the human person in the time of artificial intelligence of his holiness pope leo xiv encyclical letter leo xiv" style="--hue: 230">
   <header class="edition-head">
     <span class="kind">Encyclical Letter</span>
     <time class="date" datetime="2026-05-15">15 May 2026</time>
@@ -627,7 +630,7 @@ footer a:hover { color: var(--accent); text-decoration-color: var(--accent); }
   <a class="edition-link" href="magnifica_humanitas.html">
     <h2 class="title">Magnifica Humanitas</h2>
     <p class="subtitle">on Safeguarding the Human Person in the Time of Artificial Intelligence</p>
-    <p class="byline"><strong>Leo XIV</strong></p>
+    <p class="byline">of His Holiness <strong>Pope Leo XIV</strong></p>
   </a>
 
   <div class="actions">
@@ -644,8 +647,8 @@ footer a:hover { color: var(--accent); text-decoration-color: var(--accent); }
     <div class="action-group">
       <span class="action-label">Download</span>
       <div class="action-row">
-        <div class="downloads-row"><a class="action-button" href="downloads/magnifica_humanitas.epub"><span class="dl-name">EPUB</span><span class="dl-size">228 KB</span></a></div>
-        <div class="downloads-row"><details class="pdf-control pdf-menu"><summary class="action-button" aria-label="Choose PDF edition"><span class="dl-name">PDF</span><span class="pdf-chevron" aria-hidden="true"></span></summary><div class="pdf-options"><a href="downloads/magnifica_humanitas-a4.pdf"><span>A4 (Printer)</span><small>716 KB</small></a><a href="downloads/magnifica_humanitas-a5.pdf"><span>A5 (Reader)</span><small>798 KB</small></a><a href="downloads/magnifica_humanitas-a6.pdf"><span>A6 (Booklet)</span><small>813 KB</small></a></div></details></div>
+        <div class="downloads-row"><a class="action-button" href="downloads/magnifica_humanitas.epub"><span class="dl-name">EPUB</span><span class="dl-size">216 KB</span></a></div>
+        <div class="downloads-row"><details class="pdf-control pdf-menu"><summary class="action-button" aria-label="Choose PDF edition"><span class="dl-name">PDF</span><span class="pdf-chevron" aria-hidden="true"></span></summary><div class="pdf-options"><a href="downloads/magnifica_humanitas-a4.pdf"><span>A4 (Printer)</span><small>648 KB</small></a><a href="downloads/magnifica_humanitas-a5.pdf"><span>A5 (Reader)</span><small>720 KB</small></a><a href="downloads/magnifica_humanitas-a6.pdf"><span>A6 (Booklet)</span><small>730 KB</small></a></div></details></div>
       </div>
     </div>
   </div>
@@ -676,8 +679,8 @@ footer a:hover { color: var(--accent); text-decoration-color: var(--accent); }
     <div class="action-group">
       <span class="action-label">Download</span>
       <div class="action-row">
-        <div class="downloads-row"><a class="action-button" href="downloads/quo_vadis_humanitas.epub"><span class="dl-name">EPUB</span><span class="dl-size">314 KB</span></a></div>
-        <div class="downloads-row"><details class="pdf-control pdf-menu"><summary class="action-button" aria-label="Choose PDF edition"><span class="dl-name">PDF</span><span class="pdf-chevron" aria-hidden="true"></span></summary><div class="pdf-options"><a href="downloads/quo_vadis_humanitas-a4.pdf"><span>A4 (Printer)</span><small>516 KB</small></a><a href="downloads/quo_vadis_humanitas-a5.pdf"><span>A5 (Reader)</span><small>579 KB</small></a><a href="downloads/quo_vadis_humanitas-a6.pdf"><span>A6 (Booklet)</span><small>585 KB</small></a></div></details></div>
+        <div class="downloads-row"><a class="action-button" href="downloads/quo_vadis_humanitas.epub"><span class="dl-name">EPUB</span><span class="dl-size">289 KB</span></a></div>
+        <div class="downloads-row"><details class="pdf-control pdf-menu"><summary class="action-button" aria-label="Choose PDF edition"><span class="dl-name">PDF</span><span class="pdf-chevron" aria-hidden="true"></span></summary><div class="pdf-options"><a href="downloads/quo_vadis_humanitas-a4.pdf"><span>A4 (Printer)</span><small>465 KB</small></a><a href="downloads/quo_vadis_humanitas-a5.pdf"><span>A5 (Reader)</span><small>516 KB</small></a><a href="downloads/quo_vadis_humanitas-a6.pdf"><span>A6 (Booklet)</span><small>524 KB</small></a></div></details></div>
       </div>
     </div>
   </div>
@@ -708,13 +711,13 @@ footer a:hover { color: var(--accent); text-decoration-color: var(--accent); }
     <div class="action-group">
       <span class="action-label">Download</span>
       <div class="action-row">
-        <div class="downloads-row"><a class="action-button" href="downloads/antiqua_et_nova.epub"><span class="dl-name">EPUB</span><span class="dl-size">216 KB</span></a></div>
-        <div class="downloads-row"><details class="pdf-control pdf-menu"><summary class="action-button" aria-label="Choose PDF edition"><span class="dl-name">PDF</span><span class="pdf-chevron" aria-hidden="true"></span></summary><div class="pdf-options"><a href="downloads/antiqua_et_nova-a4.pdf"><span>A4 (Printer)</span><small>470 KB</small></a><a href="downloads/antiqua_et_nova-a5.pdf"><span>A5 (Reader)</span><small>509 KB</small></a><a href="downloads/antiqua_et_nova-a6.pdf"><span>A6 (Booklet)</span><small>516 KB</small></a></div></details></div>
+        <div class="downloads-row"><a class="action-button" href="downloads/antiqua_et_nova.epub"><span class="dl-name">EPUB</span><span class="dl-size">200 KB</span></a></div>
+        <div class="downloads-row"><details class="pdf-control pdf-menu"><summary class="action-button" aria-label="Choose PDF edition"><span class="dl-name">PDF</span><span class="pdf-chevron" aria-hidden="true"></span></summary><div class="pdf-options"><a href="downloads/antiqua_et_nova-a4.pdf"><span>A4 (Printer)</span><small>419 KB</small></a><a href="downloads/antiqua_et_nova-a5.pdf"><span>A5 (Reader)</span><small>453 KB</small></a><a href="downloads/antiqua_et_nova-a6.pdf"><span>A6 (Booklet)</span><small>456 KB</small></a></div></details></div>
       </div>
     </div>
   </div>
 </article>
-<article class="edition" data-date="2015-05-24" data-pontificate="Francis" data-pontif-name="Francis" data-pontif-start="2013-03-13" data-type="encyclical" data-type-label="Encyclical Letter" data-authority-rank="2" data-title-key="laudato si&#x27;" data-search="laudato si&#x27; on care for our common home francis encyclical letter francis" style="--hue: 140">
+<article class="edition" data-date="2015-05-24" data-pontificate="Francis" data-pontif-name="Francis" data-pontif-start="2013-03-13" data-type="encyclical" data-type-label="Encyclical Letter" data-authority-rank="2" data-title-key="laudato si&#x27;" data-search="laudato si&#x27; on care for our common home of the holy father francis encyclical letter francis" style="--hue: 140">
   <header class="edition-head">
     <span class="kind">Encyclical Letter</span>
     <time class="date" datetime="2015-05-24">24 May 2015</time>
@@ -723,7 +726,7 @@ footer a:hover { color: var(--accent); text-decoration-color: var(--accent); }
   <a class="edition-link" href="laudato_si.html">
     <h2 class="title">Laudato Si&#x27;</h2>
     <p class="subtitle">on Care for Our Common Home</p>
-    <p class="byline"><strong>Francis</strong></p>
+    <p class="byline">of the Holy Father <strong>Francis</strong></p>
   </a>
 
   <div class="actions">
@@ -740,13 +743,13 @@ footer a:hover { color: var(--accent); text-decoration-color: var(--accent); }
     <div class="action-group">
       <span class="action-label">Download</span>
       <div class="action-row">
-        <div class="downloads-row"><a class="action-button" href="downloads/laudato_si.epub"><span class="dl-name">EPUB</span><span class="dl-size">185 KB</span></a></div>
-        <div class="downloads-row"><details class="pdf-control pdf-menu"><summary class="action-button" aria-label="Choose PDF edition"><span class="dl-name">PDF</span><span class="pdf-chevron" aria-hidden="true"></span></summary><div class="pdf-options"><a href="downloads/laudato_si-a4.pdf"><span>A4 (Printer)</span><small>569 KB</small></a><a href="downloads/laudato_si-a5.pdf"><span>A5 (Reader)</span><small>636 KB</small></a><a href="downloads/laudato_si-a6.pdf"><span>A6 (Booklet)</span><small>648 KB</small></a></div></details></div>
+        <div class="downloads-row"><a class="action-button" href="downloads/laudato_si.epub"><span class="dl-name">EPUB</span><span class="dl-size">178 KB</span></a></div>
+        <div class="downloads-row"><details class="pdf-control pdf-menu"><summary class="action-button" aria-label="Choose PDF edition"><span class="dl-name">PDF</span><span class="pdf-chevron" aria-hidden="true"></span></summary><div class="pdf-options"><a href="downloads/laudato_si-a4.pdf"><span>A4 (Printer)</span><small>512 KB</small></a><a href="downloads/laudato_si-a5.pdf"><span>A5 (Reader)</span><small>565 KB</small></a><a href="downloads/laudato_si-a6.pdf"><span>A6 (Booklet)</span><small>573 KB</small></a></div></details></div>
       </div>
     </div>
   </div>
 </article>
-<article class="edition" data-date="1965-12-07" data-pontificate="Paul VI" data-pontif-name="Paul VI" data-pontif-start="1963-06-21" data-type="council_constitution" data-type-label="Conciliar Constitution" data-authority-rank="1" data-title-key="gaudium et spes" data-search="gaudium et spes pastoral constitution on the church in the modern world second vatican council conciliar constitution paul vi vatican ii vatican 2 second vatican" style="--hue: 42">
+<article class="edition" data-date="1965-12-07" data-pontificate="Paul VI" data-pontif-name="Paul VI" data-pontif-start="1963-06-21" data-type="council_constitution" data-type-label="Conciliar Constitution" data-authority-rank="1" data-title-key="gaudium et spes" data-search="gaudium et spes pastoral constitution on the church in the modern world of the second vatican council, promulgated by pope paul vi conciliar constitution paul vi vatican ii vatican 2 second vatican" style="--hue: 42">
   <header class="edition-head">
     <span class="kind">Conciliar Constitution</span>
     <time class="date" datetime="1965-12-07">7 December 1965</time>
@@ -755,7 +758,7 @@ footer a:hover { color: var(--accent); text-decoration-color: var(--accent); }
   <a class="edition-link" href="gaudium_et_spes.html">
     <h2 class="title">Gaudium et Spes</h2>
     <p class="subtitle">Pastoral Constitution on the Church in the Modern World</p>
-    <p class="byline"><strong>Second Vatican Council</strong></p>
+    <p class="byline">of the <strong>Second Vatican Council</strong>, promulgated by Pope Paul VI</p>
   </a>
 
   <div class="actions">
@@ -772,13 +775,13 @@ footer a:hover { color: var(--accent); text-decoration-color: var(--accent); }
     <div class="action-group">
       <span class="action-label">Download</span>
       <div class="action-row">
-        <div class="downloads-row"><a class="action-button" href="downloads/gaudium_et_spes.epub"><span class="dl-name">EPUB</span><span class="dl-size">181 KB</span></a></div>
-        <div class="downloads-row"><details class="pdf-control pdf-menu"><summary class="action-button" aria-label="Choose PDF edition"><span class="dl-name">PDF</span><span class="pdf-chevron" aria-hidden="true"></span></summary><div class="pdf-options"><a href="downloads/gaudium_et_spes-a4.pdf"><span>A4 (Printer)</span><small>475 KB</small></a><a href="downloads/gaudium_et_spes-a5.pdf"><span>A5 (Reader)</span><small>535 KB</small></a><a href="downloads/gaudium_et_spes-a6.pdf"><span>A6 (Booklet)</span><small>546 KB</small></a></div></details></div>
+        <div class="downloads-row"><a class="action-button" href="downloads/gaudium_et_spes.epub"><span class="dl-name">EPUB</span><span class="dl-size">175 KB</span></a></div>
+        <div class="downloads-row"><details class="pdf-control pdf-menu"><summary class="action-button" aria-label="Choose PDF edition"><span class="dl-name">PDF</span><span class="pdf-chevron" aria-hidden="true"></span></summary><div class="pdf-options"><a href="downloads/gaudium_et_spes-a4.pdf"><span>A4 (Printer)</span><small>422 KB</small></a><a href="downloads/gaudium_et_spes-a5.pdf"><span>A5 (Reader)</span><small>474 KB</small></a><a href="downloads/gaudium_et_spes-a6.pdf"><span>A6 (Booklet)</span><small>482 KB</small></a></div></details></div>
       </div>
     </div>
   </div>
 </article>
-<article class="edition" data-date="1963-12-04" data-pontificate="Paul VI" data-pontif-name="Paul VI" data-pontif-start="1963-06-21" data-type="council_constitution" data-type-label="Conciliar Constitution" data-authority-rank="1" data-title-key="sacrosanctum concilium" data-search="sacrosanctum concilium constitution on the sacred liturgy second vatican council conciliar constitution paul vi vatican ii vatican 2 second vatican" style="--hue: 268">
+<article class="edition" data-date="1963-12-04" data-pontificate="Paul VI" data-pontif-name="Paul VI" data-pontif-start="1963-06-21" data-type="council_constitution" data-type-label="Conciliar Constitution" data-authority-rank="1" data-title-key="sacrosanctum concilium" data-search="sacrosanctum concilium constitution on the sacred liturgy of the second vatican council, promulgated by pope paul vi conciliar constitution paul vi vatican ii vatican 2 second vatican" style="--hue: 268">
   <header class="edition-head">
     <span class="kind">Conciliar Constitution</span>
     <time class="date" datetime="1963-12-04">4 December 1963</time>
@@ -787,7 +790,7 @@ footer a:hover { color: var(--accent); text-decoration-color: var(--accent); }
   <a class="edition-link" href="sacrosanctum_concilium.html">
     <h2 class="title">Sacrosanctum Concilium</h2>
     <p class="subtitle">Constitution on the Sacred Liturgy</p>
-    <p class="byline"><strong>Second Vatican Council</strong></p>
+    <p class="byline">of the <strong>Second Vatican Council</strong>, promulgated by Pope Paul VI</p>
   </a>
 
   <div class="actions">
@@ -804,8 +807,8 @@ footer a:hover { color: var(--accent); text-decoration-color: var(--accent); }
     <div class="action-group">
       <span class="action-label">Download</span>
       <div class="action-row">
-        <div class="downloads-row"><a class="action-button" href="downloads/sacrosanctum_concilium.epub"><span class="dl-name">EPUB</span><span class="dl-size">119 KB</span></a></div>
-        <div class="downloads-row"><details class="pdf-control pdf-menu"><summary class="action-button" aria-label="Choose PDF edition"><span class="dl-name">PDF</span><span class="pdf-chevron" aria-hidden="true"></span></summary><div class="pdf-options"><a href="downloads/sacrosanctum_concilium-a4.pdf"><span>A4 (Printer)</span><small>204 KB</small></a><a href="downloads/sacrosanctum_concilium-a5.pdf"><span>A5 (Reader)</span><small>224 KB</small></a><a href="downloads/sacrosanctum_concilium-a6.pdf"><span>A6 (Booklet)</span><small>228 KB</small></a></div></details></div>
+        <div class="downloads-row"><a class="action-button" href="downloads/sacrosanctum_concilium.epub"><span class="dl-name">EPUB</span><span class="dl-size">112 KB</span></a></div>
+        <div class="downloads-row"><details class="pdf-control pdf-menu"><summary class="action-button" aria-label="Choose PDF edition"><span class="dl-name">PDF</span><span class="pdf-chevron" aria-hidden="true"></span></summary><div class="pdf-options"><a href="downloads/sacrosanctum_concilium-a4.pdf"><span>A4 (Printer)</span><small>170 KB</small></a><a href="downloads/sacrosanctum_concilium-a5.pdf"><span>A5 (Reader)</span><small>187 KB</small></a><a href="downloads/sacrosanctum_concilium-a6.pdf"><span>A6 (Booklet)</span><small>191 KB</small></a></div></details></div>
       </div>
     </div>
   </div>
