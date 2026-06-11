@@ -37,7 +37,10 @@ The TOML is the canonical intermediate. Downstream renderers consume TOML — ne
 - `core.py` — shared text/structure helpers, canonical paragraph and footnote
   constructors/context assignment, TOML loading and serialisation. The
   serialiser is the contract for document metadata, structure, appendices,
-  signatories, and book-specific options.
+  signatories, and book-specific options. Canonical inline markup
+  (`*em*`, `**strong**`, `<sup>`/`<sub>`) is converted once here
+  (`inline_markup_to_html`, `INLINE_MARK_RE`); renderers must consume these
+  rather than re-rolling their own regexes.
 - `curia.py` — shared parsing helpers for Word-export Curia pages, including whitespace repair and anchor-delimited footnote extraction.
 - `project.py` — shared repository paths used by CLI and renderer entrypoints.
 - `extract/<slug>.py` — per-document extractor. Each exposes `extract() -> dict`. Add a new document by dropping a new module here; no registry edit needed.
