@@ -178,6 +178,62 @@ published, while intermediate Markdown/TOML stays in `build/` only.
   un-extracted (likely the modern Bootstrap dialect, LS-shaped). A
   reference capture recorded by `download_sources.py` for a possible
   future edition is `francis_g7_ai_en.html`.
+- **Audit follow-ups (2026-06)** —
+    - *CI test step:* `pages.yml` deploys without running the suite. Add
+      `nix develop --command python -m unittest discover -s tests` after
+      the source fetch — sources are present at that point, so the
+      extractor regression tests run too (locally they skip when
+      `sources/` is absent).
+    - *make_book coverage:* only end-matter/accent helpers are tested;
+      no test renders a small TOML through `emit_markdown` the way
+      `tests/test_make_html.py` golden-tests the web renderer.
+    - *CARD_META → TOML:* `make_index.py` now warns on a missing entry,
+      but the better end state is moving tile metadata (`type`,
+      `subtitle`/`kind_long`) into the document TOML so adding a doc
+      touches one place.
+    - *EPUB title strip:* `templates/strip_fn_backlink.lua` removes the
+      synthetic title H1 by text match; safe today because `make_book.py`
+      never emits a doc-name H1 (noted in the filter) — revisit if that
+      changes.
+
+## Extractor boundaries (not implemented — refactor approach notes)
+
+The right unit of sharing is the *dialect*, not a generic walker.
+`curia.py` is the model: a dialect module owns loading, text repair, and
+footnote mechanics, while the per-document extractor owns facts (metadata,
+title lines) and quirks (SC's split `CHAPTER VI`, QVH's hidden-numbered
+preliminary note). Two dialect modules are missing:
+
+- `oldflat.py` (GeS, SC) — iso-8859-1 load, `NOTES</b>` body/notes split,
+  front-matter split around the display title, `<center>`/all-bold
+  heading-shape walking (`_joined_bolds`).
+- `modern.py` (LS, MH, Fratelli tutti when implemented) — utf-8 +
+  `<main>` load, the front-matter pipeline (`br_lines` →
+  `split_around_title` → `encyclical_split`), `CHAPTER ONE`
+  pending-title handling, `only_child_is` shape tests.
+
+Mechanisms duplicated nearly verbatim across walkers, worth lifting to
+`core` regardless of dialect grouping:
+
+- the plain-then-rich double match on numbered paragraphs
+  (`RE_PARA.match(clean_text(p))`, then again with
+  `preserve_formatting=True` for the recorded text) — five copies;
+- the heading-state dict with cascading resets (set chapter → clear
+  section/sub-heading) — five hand-rolled copies; reset bugs live here;
+- `heading_title` (all-caps → title case preserving "AI") — duplicated
+  between `curia.py` and MH's `_title`;
+- `Given in/at …` promulgation + centred-signature trailer detection
+  (LS, MH, AeN each carry a variant).
+
+Do **not** build a config-driven generic walker: the dialects diverge
+exactly where a framework would need escape hatches (SC's appendix mode,
+LS's two-phase body/tail split, QVH's part-title modes), and the
+drop-a-file extractor contract is the part of the design that works.
+Refactor opportunistically — the natural forcing function is implementing
+Fratelli tutti against a new `modern.py`, moving LS and MH onto it in the
+same change. Validate by regenerating `build/*.toml` and requiring
+byte-identical output, plus the extractor regression tests.
+
 ## JS-free drawer (not implemented — approach notes)
 
 The drawer, tabs, and footnote refs can all work without JavaScript using
