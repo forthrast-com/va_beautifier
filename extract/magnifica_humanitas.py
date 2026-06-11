@@ -8,20 +8,20 @@ Bold-italic headings nested below primary headings become `sub_heading`.
 
 import re
 
-from bs4 import BeautifulSoup
-
 from core import (
+    HeadingState,
     assign_footnote_context,
-    br_lines,
-    chapter_word_to_int,
     clean_text,
-    encyclical_split,
     extract_footnotes,
+    heading_title,
+    is_centred,
+    is_promulgation,
+    numbered_paragraph,
     paragraph_record,
-    split_around_title,
-    title_case,
 )
 from project import SOURCES
+
+from ._modern import chapter_word_marker, encyclical_front_matter, load_main
 
 
 EN_SRC = SOURCES / 'magnifica_humanitas_en.html'
@@ -41,22 +41,14 @@ TITLE_UPPER = 'MAGNIFICA HUMANITAS'
 
 RE_PARA = re.compile(r'^(\d+)\.\s+(.+)$', re.DOTALL)
 RE_FOOTNOTE = re.compile(r'^\[\s*(\d+)\s*\]\s*(.+)$', re.DOTALL)
-RE_CHAPTER = re.compile(r'^CHAPTER\s+([A-Z]+)$')
 
 def _heading_text(p):
     text = re.sub(r'\s+', ' ', p.get_text(separator=' ', strip=True)).strip()
     return text.replace('R esponsibility', 'Responsibility')
 
 
-def _title(text):
-    return title_case(text).replace(' Ai', ' AI')
-
-
 def extract():
-    with open(EN_SRC, encoding='utf-8') as f:
-        soup = BeautifulSoup(f.read(), 'html.parser')
-
-    main = soup.find('main') or soup.body
+    soup, main = load_main(EN_SRC)
     ps = main.find_all('p')
     first_body_idx = next(
         (i for i, p in enumerate(ps) if RE_PARA.match(clean_text(p))), None
@@ -78,30 +70,22 @@ def extract():
 
     # Front matter: the abstract block holds the encyclical-letter preamble
     # with the title (MAGNIFICA HUMANITAS) split across its lines. Pull the
-    # text apart so the renderer can sit the title between the two halves.
+    # text apart so the renderer can sit the title between the two halves,
+    # pivoted at the "On …" line so the issuer sits above the title and
+    # the subject below it.
     abstract = soup.find('div', class_='abstract')
-    desc_pre, desc_post = '', ''
-    if abstract:
-        pre, post = split_around_title(br_lines(abstract.find('p')), TITLE_UPPER)
-        desc_pre = '\n'.join(pre)
-        desc_post = '\n'.join(post)
-    # Pivot the front matter at the "On …" line so the issuer sits
-    # above the title and the subject below it.
-    desc_pre, desc_post = encyclical_split(desc_pre, desc_post)
+    desc_pre, desc_post = encyclical_front_matter(
+        abstract.find('p') if abstract else None, TITLE_UPPER
+    )
 
     paragraphs = []
     promulgation = ''
     signature = ''
 
-    chapter = 0
-    chapter_title = ''
-    chapter_subtitle = ''
     # The source has opening prose before its first primary heading. The
     # renderer supplies the top-level Introduction label for that scope;
     # do not manufacture a duplicate nested section here.
-    section = 0
-    section_title = ''
-    sub_heading = ''
+    state = HeadingState()
     pending_chapter_title = False
 
     for p in ps[first_body_idx:first_note_idx]:
@@ -109,28 +93,18 @@ def extract():
         if not text:
             continue
 
-        m = RE_PARA.match(text)
-        if m:
+        numbered = numbered_paragraph(p, RE_PARA)
+        if numbered:
             pending_chapter_title = False
-            rich_match = RE_PARA.match(clean_text(p, preserve_formatting=True))
             paragraphs.append(paragraph_record(
-                int(m.group(1)), rich_match.group(2),
-                chapter=chapter, chapter_title=chapter_title,
-                chapter_subtitle=chapter_subtitle,
-                section=section, section_title=section_title,
-                sub_heading=sub_heading, bracketed_refs=True,
+                *numbered, bracketed_refs=True, **state.kwargs(),
             ))
             continue
 
         heading = _heading_text(p)
-        mc = RE_CHAPTER.match(heading)
-        if mc and (chapter_num := chapter_word_to_int(mc.group(1))) is not None:
-            chapter = chapter_num
-            chapter_title = ''
-            chapter_subtitle = ''
-            section = 0
-            section_title = ''
-            sub_heading = ''
+        chapter_num = chapter_word_marker(heading)
+        if chapter_num is not None:
+            state.set_chapter(chapter_num)
             pending_chapter_title = True
             continue
 
@@ -140,38 +114,33 @@ def extract():
             # across several consecutive bold-caps <p>s, and every fragment
             # accumulates here.
             if pending_chapter_title and heading.isupper():
-                if not chapter_title:
-                    chapter_title = _title(heading)
+                if not state.chapter_title:
+                    state.chapter_title = heading_title(heading)
                 else:
-                    separator = ' ' if chapter_subtitle else ''
-                    chapter_subtitle += separator + _title(heading)
+                    separator = ' ' if state.chapter_subtitle else ''
+                    state.chapter_subtitle += separator + heading_title(heading)
                 continue
 
             subordinate = (p.find('i') is not None
-                           and chapter != 0
-                           and section)
+                           and state.chapter != 0
+                           and state.section)
             if subordinate:
-                sub_heading = heading
+                state.sub_heading = heading
             else:
-                section += 1
                 # Primary headings are mixed case except the closing
-                # CONCLUSION; normalise all-caps ones the way chapter
-                # titles are.
-                section_title = (
-                    _title(heading) if heading.isupper() else heading
-                )
-                sub_heading = ''
+                # CONCLUSION; heading_title normalises all-caps ones the
+                # way chapter titles are and passes the rest through.
+                state.set_section(state.section + 1, heading_title(heading))
             continue
 
-        if text.startswith('Given in ') or text.startswith('Given at '):
+        if is_promulgation(text):
             promulgation = clean_text(p, preserve_formatting=True)
             continue
 
         # Papal signature: a short centred trailer after the dedication line,
         # e.g. "LEO PP. XIV". Match by position (post-promulgation) plus the
-        # MS-Word centred-paragraph style so we don't catch stray prose.
-        style = (p.get('style') or '').lower().replace(' ', '')
-        if promulgation and 'text-align:center' in style and text:
+        # centred-paragraph shape so we don't catch stray prose.
+        if promulgation and is_centred(p) and text:
             signature = clean_text(p, preserve_formatting=True)
 
     footnotes = extract_footnotes(

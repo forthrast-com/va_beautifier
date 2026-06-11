@@ -1,4 +1,8 @@
-"""Helpers for Curia Word-export HTML documents."""
+"""Helpers for the Curia Word-export dialect (AeN, QVH).
+
+Underscore-prefixed so `parse.py`'s module discovery doesn't offer it
+as a document.
+"""
 
 import re
 
@@ -9,7 +13,6 @@ from core import (
     clean_text,
     normalise_footnote_refs,
     normalise_footnote_text,
-    title_case,
 )
 
 
@@ -35,14 +38,6 @@ def rich_text(tag):
 def prose_text(tag):
     """Return formatted Curia prose without Word-export line wrapping."""
     return re.sub(r'\s+', ' ', rich_text(tag)).strip()
-
-
-def heading_title(value):
-    """Normalise source all-caps headings without lowercasing AI."""
-    value = re.sub(r'\s+', ' ', value).strip()
-    if value == value.upper():
-        return title_case(value).replace(' Ai', ' AI')
-    return value
 
 
 def anchored_footnotes(soup, paragraphs):

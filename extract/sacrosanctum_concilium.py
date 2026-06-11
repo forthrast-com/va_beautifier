@@ -23,10 +23,11 @@ import re
 from bs4 import BeautifulSoup
 
 from core import (
+    HeadingState,
     assign_footnote_context,
-    br_text,
     clean_text,
     normalise_footnote_refs,
+    numbered_paragraph,
     paragraph_record,
     parse_footnote,
     parse_num,
@@ -34,6 +35,8 @@ from core import (
     title_case,
 )
 from project import SOURCES
+
+from ._oldflat import front_matter_text, load_split
 
 
 EN_SRC = SOURCES / 'Sacrosanctum Concilium_en.html'
@@ -61,12 +64,10 @@ def _extract_frontmatter(body_html):
     bar, 'CONSTITUTION ON THE SACRED LITURGY', 'SACROSANCTUM CONCILIUM',
     and 'SOLEMNLY PROMULGATED BY HIS HOLINESS POPE PAUL VI ON DECEMBER 4,
     1963'. Split the display title from its semantic promulgation."""
-    soup = BeautifulSoup(body_html, 'html.parser')
-    fm = next((p for p in soup.find_all('p')
-               if 'CONSTITUTION ON THE SACRED LITURGY' in p.get_text()), None)
-    if not fm:
+    text = front_matter_text(body_html, 'CONSTITUTION ON THE SACRED LITURGY')
+    if not text:
         return '', ''
-    text = re.sub(r'\s+', ' ', br_text(fm)).strip()
+    text = re.sub(r'\s+', ' ', text).strip()
     text = re.sub(r'^\[.*?\]\s*', '', text)
     m = re.match(
         r'(.+?)\s+SACROSANCTUM CONCILIUM\s+(.+)$', text, re.DOTALL
@@ -85,12 +86,7 @@ def _joined_bolds(tag):
 
 
 def _walk_body(corpo):
-    state = {
-        'part': 0, 'part_title': '',
-        'chapter': 0, 'chapter_title': '',
-        'section': 0, 'section_title': '',
-        'sub_heading': '',
-    }
+    state = HeadingState()
     paragraphs = []
     appendices = []
     current = None
@@ -110,11 +106,6 @@ def _walk_body(corpo):
         if current is not None:
             paragraphs.append(dict(current))
 
-    def set_chapter(num, title=''):
-        state.update(chapter=num, chapter_title=title,
-                     section=0, section_title='',
-                     sub_heading='')
-
     for tag in corpo.find_all(['p', 'center', 'li', 'hr']):
         if tag.name == 'hr':
             # The source rules off the calendar declaration from article 130.
@@ -129,22 +120,20 @@ def _walk_body(corpo):
             if 'CONSTITUTION ON THE SACRED LITURGY' in joined:
                 continue
             if joined == 'INTRODUCTION':
-                state.update(part=0, part_title='Introduction',
-                             chapter=0, chapter_title='',
-                             section=0, section_title='', sub_heading='')
+                state.set_part(0, 'Introduction')
                 seen_frontmatter = True
                 continue
 
             mc = RE_CHAPTER_BARE.match(joined)
             if mc:
-                set_chapter(roman_to_int(mc.group(1)))
-                state['part_title'] = ''
+                state.set_chapter(roman_to_int(mc.group(1)))
+                state.part_title = ''
                 continue
             mc = RE_CHAPTER_COMBINED.match(joined)
             if mc:
-                set_chapter(roman_to_int(mc.group(1)),
-                            title_case(mc.group(2).strip()))
-                state['part_title'] = ''
+                state.set_chapter(roman_to_int(mc.group(1)),
+                                  title_case(mc.group(2).strip()))
+                state.part_title = ''
                 continue
 
             ma = RE_APPENDIX_LINE.match(joined)
@@ -191,7 +180,7 @@ def _walk_body(corpo):
         if italic_bold:
             ms = RE_SUBHEADING.match(text)
             if ms:
-                state['sub_heading'] = title_case(ms.group(2).strip())
+                state.sub_heading = title_case(ms.group(2).strip())
                 continue
 
         # Standalone bold heading (no italic wrap)
@@ -199,15 +188,12 @@ def _walk_body(corpo):
             # Section heading: leading "N." or "II."
             msec = RE_SECTION_BOLD.match(text)
             if msec:
-                state.update(
-                    section=parse_num(msec.group(1)),
-                    section_title=title_case(msec.group(2).strip()),
-                    sub_heading='',
-                )
+                state.set_section(parse_num(msec.group(1)),
+                                  title_case(msec.group(2).strip()))
                 continue
             # Chapter-title row that follows a bare "CHAPTER N" center
-            if state['chapter'] and not state['chapter_title']:
-                state['chapter_title'] = title_case(text)
+            if state.chapter and not state.chapter_title:
+                state.chapter_title = title_case(text)
                 continue
             # Chapter-title row already set but a second centred title repeats
             # — ignore quietly.
@@ -218,16 +204,13 @@ def _walk_body(corpo):
         # numbered norms etc.) don't fork off as new records; source typos
         # that skip an index (¶87 is mislabelled "81." in the snapshot
         # then resumes at 88) survive as a gap rather than a stuck parser.
-        mp = RE_PARA_NUM.match(text)
-        if mp and not appendix_active and int(mp.group(1)) > last_num:
+        numbered = numbered_paragraph(tag, RE_PARA_NUM)
+        if numbered and not appendix_active and numbered[0] > last_num:
             flush()
-            rich = clean_text(tag, preserve_formatting=True)
-            mr = RE_PARA_NUM.match(rich)
             current = paragraph_record(
-                int(mp.group(1)), mr.group(2),
-                bracketed_refs=True, **state
+                *numbered, bracketed_refs=True, **state.kwargs()
             )
-            last_num = int(mp.group(1))
+            last_num = numbered[0]
             continue
 
         # Continuation line under the currently open paragraph
@@ -259,12 +242,7 @@ def _extract_footnotes(notes_html):
 
 
 def extract():
-    with open(EN_SRC, encoding='iso-8859-1') as f:
-        html = f.read()
-
-    notes_split = html.split('NOTES</b>', 1)
-    body_html = notes_split[0]
-    notes_html = notes_split[1] if len(notes_split) > 1 else ''
+    body_html, notes_html = load_split(EN_SRC)
 
     # Source placement is decorative; promulgation is end matter in the
     # canonical edition, consistently with the other document dialects.

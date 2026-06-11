@@ -12,10 +12,11 @@ import re
 from bs4 import BeautifulSoup, NavigableString, Tag
 
 from core import (
+    HeadingState,
     assign_footnote_context,
-    br_text,
     clean_text,
     normalise_footnote_refs,
+    numbered_paragraph,
     paragraph_record,
     parse_num,
     parse_footnote,
@@ -23,6 +24,8 @@ from core import (
     title_case,
 )
 from project import SOURCES
+
+from ._oldflat import front_matter_text, load_split
 
 
 EN_SRC = SOURCES / 'gaudium_et_spes_en.html'
@@ -64,12 +67,9 @@ def _extract_frontmatter(body_html):
     Lines before the title become `desc`; lines after carry the document's
     promulgation. Its source placement is front-matter decoration, but its
     semantic place in an edition is end matter."""
-    soup = BeautifulSoup(body_html, 'html.parser')
-    fm = next((p for p in soup.find_all('p')
-               if 'PASTORAL CONSTITUTION' in p.get_text()), None)
-    if not fm:
+    text = front_matter_text(body_html, 'PASTORAL CONSTITUTION')
+    if not text:
         return '', ''
-    text = br_text(fm)
     desc_m = re.match(r'(.+?)\s*GAUDIUM ET SPES', text, re.DOTALL)
     post_m = re.search(r'GAUDIUM ET SPES\s*\n(.+)', text, re.DOTALL)
     desc = desc_m.group(1).strip() if desc_m else ''
@@ -78,11 +78,7 @@ def _extract_frontmatter(body_html):
 
 
 def _walk_body(body_soup):
-    state = {
-        'part': 0, 'part_title': '',
-        'chapter': 0, 'chapter_title': '',
-        'section': 0, 'section_title': '',
-    }
+    state = HeadingState()
     paragraphs = []
     current = None
 
@@ -90,39 +86,34 @@ def _walk_body(body_soup):
         text = re.sub(r'\s+', ' ', text).strip()
 
         if text == 'PREFACE':
-            state.update(part=0, part_title='Preface',
-                         chapter=0, chapter_title='',
-                         section=0, section_title='')
+            state.set_part(0, 'Preface')
             return True
         if text == 'INTRODUCTORY STATEMENT THE SITUATION OF MEN IN THE MODERN WORLD':
-            state.update(part=0, part_title=title_case(text),
-                         chapter=0, chapter_title='',
-                         section=0, section_title='')
+            state.set_part(0, title_case(text))
             return True
 
         m = RE_PART.match(text)
         if m:
-            state.update(part=roman_to_int(m.group(1)), part_title='',
-                         chapter=0, chapter_title='',
-                         section=0, section_title='')
+            state.set_part(roman_to_int(m.group(1)))
             return True
         if text in PART_TITLES:
-            state['part_title'] = title_case(text)
+            state.part_title = title_case(text)
             return True
 
         m = RE_CHAPTER.match(text)
         if m:
-            state.update(chapter=roman_to_int(m.group(1)), chapter_title='',
-                         section=0, section_title='')
+            state.set_chapter(roman_to_int(m.group(1)))
             return True
         if text in CHAPTER_TITLES:
-            state['chapter_title'] = title_case(text)
+            state.chapter_title = title_case(text)
             return True
 
         m = RE_SECTION.match(text)
         if m:
-            state.update(section=parse_num(m.group(1)),
-                         section_title=title_case(re.sub(r'\s+', ' ', m.group(2)).strip()))
+            state.set_section(
+                parse_num(m.group(1)),
+                title_case(re.sub(r'\s+', ' ', m.group(2)).strip()),
+            )
             return True
         return False
 
@@ -150,14 +141,10 @@ def _walk_body(body_soup):
             ):
                 continue
 
-        m = RE_PARA_NUM.match(text)
-        if m:
+        numbered = numbered_paragraph(tag, RE_PARA_NUM)
+        if numbered:
             flush()
-            rich = clean_text(tag, preserve_formatting=True)
-            rich_match = RE_PARA_NUM.match(rich)
-            current = paragraph_record(
-                int(m.group(1)), rich_match.group(2), **state
-            )
+            current = paragraph_record(*numbered, **state.kwargs())
         elif current is not None and not any(
             text.startswith(h) for h in ['[', 'Print', 'Index']
         ):
@@ -231,12 +218,7 @@ def _extract_latin_headings():
 
 
 def extract():
-    with open(EN_SRC, encoding='iso-8859-1') as f:
-        html = f.read()
-
-    notes_split = html.split('NOTES</b>', 1)
-    body_html = notes_split[0]
-    notes_html = notes_split[1] if len(notes_split) > 1 else ''
+    body_html, notes_html = load_split(EN_SRC)
     body_html = body_html[body_html.find('<hr />'):]
 
     desc, promulgation = _extract_frontmatter(body_html)

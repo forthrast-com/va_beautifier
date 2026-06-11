@@ -16,7 +16,9 @@ from project import BUILD
 
 
 def _available():
-    return sorted(m.name for m in pkgutil.iter_modules(extract.__path__))
+    # Underscore-prefixed modules are dialect helpers, not documents.
+    return sorted(m.name for m in pkgutil.iter_modules(extract.__path__)
+                  if not m.name.startswith('_'))
 
 
 def main():

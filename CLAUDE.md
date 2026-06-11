@@ -32,7 +32,7 @@ The TOML is the canonical intermediate. Downstream renderers consume TOML — ne
 
 ## Architecture
 
-- `parse.py` — thin CLI. `argparse` with `choices` discovered via `pkgutil.iter_modules(extract.__path__)`. Loads `extract.<slug>`, calls its `extract()`, writes `<slug>.toml` via `core.write_toml`.
+- `parse.py` — thin CLI. `argparse` with `choices` discovered via `pkgutil.iter_modules(extract.__path__)`; underscore-prefixed modules are dialect helpers and are filtered out. Loads `extract.<slug>`, calls its `extract()`, writes `<slug>.toml` via `core.write_toml`.
 - `download_sources.py` — manifest-driven source fetcher. Lists or downloads implemented, queued, and reference-only Vatican pages into `sources/`; existing snapshots are preserved unless `--force` is passed.
 - `core.py` — shared text/structure helpers, canonical paragraph and footnote
   constructors/context assignment, TOML loading and serialisation. The
@@ -40,8 +40,17 @@ The TOML is the canonical intermediate. Downstream renderers consume TOML — ne
   signatories, and book-specific options. Canonical inline markup
   (`*em*`, `**strong**`, `<sup>`/`<sub>`) is converted once here
   (`inline_markup_to_html`, `INLINE_MARK_RE`); renderers must consume these
-  rather than re-rolling their own regexes.
-- `curia.py` — shared parsing helpers for Word-export Curia pages, including whitespace repair and anchor-delimited footnote extraction.
+  rather than re-rolling their own regexes. Dialect-agnostic walker
+  mechanics also live here: `HeadingState` (cascading heading resets),
+  `numbered_paragraph` (the plain-then-rich double match), `heading_title`,
+  `is_centred`, and `is_promulgation`.
+- `extract/_curia.py`, `extract/_modern.py`, `extract/_oldflat.py` —
+  per-dialect helper modules beside the extractors that use them
+  (underscore-prefixed so `parse.py` discovery skips them). Curia:
+  whitespace repair + anchor-delimited footnote extraction. Modern:
+  `<main>` loading, the encyclical front-matter split, `CHAPTER ONE`
+  markers. Old-flat: ISO-8859-1 load + `NOTES</b>` body/notes split,
+  front-matter location.
 - `project.py` — shared repository paths used by CLI and renderer entrypoints.
 - `extract/<slug>.py` — per-document extractor. Each exposes `extract() -> dict`. Add a new document by dropping a new module here; no registry edit needed.
 - `make_html.py <slug>` — reads `<slug>.toml`, writes a self-contained
@@ -102,9 +111,9 @@ or personal voice shown in the catalogue and colophon. The colophon adds
 GeS is served as **ISO-8859-1** (EN) and **latin-1** (LA), not UTF-8. LS and the Curia Word-export pages are UTF-8. Sniff before assuming on any new document.
 
 The ITC export has its first footnote anchor outside the paragraph wrapper
-used by the remaining notes. `curia.anchored_footnotes()` therefore splits
-the note block at named `_ftnN` anchors instead of assuming one note per
-paragraph.
+used by the remaining notes. `extract/_curia.py`'s `anchored_footnotes()`
+therefore splits the note block at named `_ftnN` anchors instead of
+assuming one note per paragraph.
 
 Run `nix develop --command python download_sources.py --list` to see the
 source manifest and local status; omit `--list` to fetch missing sources.
@@ -179,11 +188,6 @@ published, while intermediate Markdown/TOML stays in `build/` only.
   reference capture recorded by `download_sources.py` for a possible
   future edition is `francis_g7_ai_en.html`.
 - **Audit follow-ups (2026-06)** —
-    - *CI test step:* `pages.yml` deploys without running the suite. Add
-      `nix develop --command python -m unittest discover -s tests` after
-      the source fetch — sources are present at that point, so the
-      extractor regression tests run too (locally they skip when
-      `sources/` is absent).
     - *make_book coverage:* only end-matter/accent helpers are tested;
       no test renders a small TOML through `emit_markdown` the way
       `tests/test_make_html.py` golden-tests the web renderer.
@@ -196,44 +200,38 @@ published, while intermediate Markdown/TOML stays in `build/` only.
       never emits a doc-name H1 (noted in the filter) — revisit if that
       changes.
 
-## Extractor boundaries (not implemented — refactor approach notes)
+## Extractor boundaries (implemented 2026-06)
 
-The right unit of sharing is the *dialect*, not a generic walker — but a
-dialect only earns a module when its shared mechanics are substantial.
-`curia.py` clears that bar (anchored-footnote extraction is real
-machinery shared by AeN and QVH); measured after the core lifts below,
-the old-flat dialect (GeS, SC) shares only ~20 lines (iso-8859-1 load,
-`NOTES</b>` body/notes split) and the modern dialect (LS, MH) ~30
-(utf-8 + `<main>` load, the `br_lines` → `split_around_title` →
-`encyclical_split` front-matter chain, `CHAPTER ONE` pending-title
-handling). Keep the shared surface at exactly two files — `core.py` and
-`curia.py` — and tolerate that small duplication.
+The shared surface has two tiers. Dialect-agnostic walker mechanics live
+in `core.py`: `HeadingState` (cascading part → chapter → section →
+sub-heading resets, the historical extractor bug class), `numbered_paragraph`
+(the plain-then-rich double match every walker previously hand-rolled),
+`heading_title`, `is_centred`, `is_promulgation`. Dialect mechanics live
+beside the extractors as underscore modules — `extract/_curia.py`
+(anchored footnotes, Word-export text repair), `extract/_modern.py`
+(`<main>` loading, the encyclical front-matter chain, `CHAPTER ONE`
+markers), `extract/_oldflat.py` (ISO-8859-1 load, `NOTES</b>` split,
+front-matter location). `parse.py` discovery filters underscore names so
+they are never offered as documents.
 
-Mechanisms duplicated nearly verbatim across walkers, worth lifting to
-`core` (they are dialect-agnostic and carry most of the copies):
+Extractors keep facts (metadata, title lines) and quirks (SC's appendix
+mode and split `CHAPTER VI`, LS's two-phase body/tail split, QVH's
+hidden-numbered preliminary note). There is deliberately still no
+config-driven generic walker: the dialects diverge exactly where a
+framework would need escape hatches, and the drop-a-file extractor
+contract is the part of the design that works.
 
-- the plain-then-rich double match on numbered paragraphs
-  (`RE_PARA.match(clean_text(p))`, then again with
-  `preserve_formatting=True` for the recorded text) — five copies;
-- the heading-state dict with cascading resets (set chapter → clear
-  section/sub-heading) — five hand-rolled copies; reset bugs live here;
-- `heading_title` (all-caps → title case preserving "AI") — duplicated
-  between `curia.py` and MH's `_title`;
-- `Given in/at …` promulgation + centred-signature trailer detection
-  (LS, MH, AeN each carry a variant).
+Two cautions from the refactor:
 
-Do **not** build a config-driven generic walker: the dialects diverge
-exactly where a framework would need escape hatches (SC's appendix mode,
-LS's two-phase body/tail split, QVH's part-title modes), and the
-drop-a-file extractor contract is the part of the design that works.
-Re-evaluate at Fratelli tutti time: if implementing it against LS/MH
-makes the modern-dialect duplication genuinely annoying, the module
-goes *inside* the package as `extract/_modern.py` (with an underscore
-filter in `parse.py`'s `_available()`, since module discovery currently
-treats every file in `extract/` as a document) — not a third top-level
-shared file. Validate any such refactor by regenerating `build/*.toml`
-and requiring byte-identical output, plus the extractor regression
-tests.
+- `is_centred` accepts either `align="center"` or a `text-align:center`
+  inline style; before the refactor LS/QVH tested only the attribute and
+  MH only the style. This is a deliberate (slight) widening — if a doc
+  misclassifies a paragraph, look here first.
+- The refactor was authored without source snapshots available, so the
+  byte-identical `build/*.toml` regeneration check is still **owed**:
+  before merging, fetch sources, run the extractor regression tests
+  (CI's test workflow does this on branch pushes), and ideally diff
+  regenerated TOMLs against the previous build.
 
 ## JS-free drawer (not implemented — approach notes)
 

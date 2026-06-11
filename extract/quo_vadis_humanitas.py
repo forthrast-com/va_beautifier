@@ -2,9 +2,17 @@
 
 import re
 
-from core import paragraph_record, roman_to_int
-from curia import anchored_footnotes, heading_title, load_source, prose_text, text
+from core import (
+    HeadingState,
+    heading_title,
+    is_centred,
+    numbered_paragraph,
+    paragraph_record,
+    roman_to_int,
+)
 from project import SOURCES
+
+from ._curia import anchored_footnotes, load_source, prose_text, text
 
 
 EN_SRC = SOURCES / 'quo_vadis_humanitas_en.html'
@@ -66,12 +74,7 @@ def extract():
         )
 
     paragraphs = []
-    part_title = ''
-    chapter = 0
-    chapter_title = ''
-    chapter_subtitle = ''
-    section = 0
-    section_title = ''
+    state = HeadingState()
     pending_chapter = False
     hidden_number = -1
 
@@ -79,65 +82,52 @@ def extract():
         plain = structural_text(p)
         if not plain:
             continue
-        centred = (p.get('align') or '').lower() == 'center'
+        centred = is_centred(p)
 
         if centred and plain == 'Preliminary note':
-            part_title = 'Preliminary Note'
+            state.part_title = 'Preliminary Note'
             continue
         if centred and plain == 'Introduction':
-            part_title = 'Introduction'
-            chapter = 0
-            section = 0
-            section_title = ''
+            state.set_part(0, 'Introduction')
             continue
 
         marker = RE_CHAPTER.match(plain)
         if centred and marker:
-            chapter = roman_to_int(marker.group(1))
-            chapter_title = ''
-            chapter_subtitle = ''
-            section = 0
-            section_title = ''
+            state.set_chapter(roman_to_int(marker.group(1)))
             pending_chapter = True
             continue
         if centred and plain == 'Conclusion':
-            chapter = 5
-            chapter_title = 'Conclusion'
-            chapter_subtitle = ''
-            section = 0
-            section_title = ''
+            state.set_chapter(5, 'Conclusion')
             pending_chapter = True
             continue
         if centred and pending_chapter:
-            if chapter_title == 'Conclusion':
-                chapter_subtitle = heading_title(plain)
+            if state.chapter_title == 'Conclusion':
+                state.chapter_subtitle = heading_title(plain)
             else:
-                chapter_title = heading_title(plain)
+                state.chapter_title = heading_title(plain)
             pending_chapter = False
             continue
 
         section_match = RE_SECTION.match(plain)
         if p.find('b') and section_match:
-            section = int(section_match.group(1))
-            section_title = f'{section}. {heading_title(section_match.group(2))}'
+            number = int(section_match.group(1))
+            state.set_section(
+                number, f'{number}. {heading_title(section_match.group(2))}'
+            )
             continue
 
-        para = RE_PARA.match(plain)
-        if para and not p.find('b'):
-            rich = RE_PARA.match(prose_text(p))
+        numbered = numbered_paragraph(
+            p, RE_PARA, plain_text=structural_text, rich_text=prose_text
+        )
+        if numbered and not p.find('b'):
             paragraphs.append(paragraph_record(
-                int(para.group(1)), rich.group(2),
-                part_title=part_title,
-                chapter=chapter, chapter_title=chapter_title,
-                chapter_subtitle=chapter_subtitle,
-                section=section, section_title=section_title,
-                bracketed_refs=True,
+                *numbered, bracketed_refs=True, **state.kwargs(),
             ))
             continue
 
-        if part_title == 'Preliminary Note':
+        if state.part_title == 'Preliminary Note':
             paragraph = paragraph_record(
-                hidden_number, prose_text(p), part_title=part_title
+                hidden_number, prose_text(p), part_title=state.part_title
             )
             paragraph['hide_number'] = True
             paragraphs.append(paragraph)

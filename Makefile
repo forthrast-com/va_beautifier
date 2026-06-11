@@ -17,27 +17,27 @@ fetch:
 # --- TOML targets (explicit: each doc has distinct source deps) ---
 
 build/gaudium_et_spes.toml: sources/gaudium_et_spes_en.html sources/gaudium_et_spes_lt.html \
-                             extract/gaudium_et_spes.py core.py
+                             extract/gaudium_et_spes.py extract/_oldflat.py core.py
 	python3 parse.py gaudium_et_spes
 
 build/laudato_si.toml: sources/laudato_si_en.html \
-                       extract/laudato_si.py core.py
+                       extract/laudato_si.py extract/_modern.py core.py
 	python3 parse.py laudato_si
 
 build/magnifica_humanitas.toml: sources/magnifica_humanitas_en.html \
-                                extract/magnifica_humanitas.py core.py
+                                extract/magnifica_humanitas.py extract/_modern.py core.py
 	python3 parse.py magnifica_humanitas
 
 build/antiqua_et_nova.toml: sources/antiqua_et_nova_en.html \
-                            extract/antiqua_et_nova.py curia.py core.py
+                            extract/antiqua_et_nova.py extract/_curia.py core.py
 	python3 parse.py antiqua_et_nova
 
 build/quo_vadis_humanitas.toml: sources/quo_vadis_humanitas_en.html \
-                                extract/quo_vadis_humanitas.py curia.py core.py
+                                extract/quo_vadis_humanitas.py extract/_curia.py core.py
 	python3 parse.py quo_vadis_humanitas
 
 build/sacrosanctum_concilium.toml: sources/Sacrosanctum\ Concilium_en.html \
-                                    extract/sacrosanctum_concilium.py core.py
+                                    extract/sacrosanctum_concilium.py extract/_oldflat.py core.py
 	python3 parse.py sacrosanctum_concilium
 
 # --- HTML targets ---

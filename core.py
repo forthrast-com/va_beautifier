@@ -261,6 +261,27 @@ def chapter_word_to_int(word):
     return CHAPTER_WORDS.get(word)
 
 
+PROMULGATION_PREFIXES = ('Given in ', 'Given at ')
+
+
+def is_promulgation(text):
+    """True for the `Given in/at …` dateline that opens document end matter."""
+    return text.startswith(PROMULGATION_PREFIXES)
+
+
+def is_centred(tag):
+    """True when a source paragraph is centred by attribute or inline style.
+
+    The flat and Bootstrap templates use `align="center"`; Word exports
+    carry `text-align:center` in `style`. Both signal structure (chapter
+    markers, signatures), never body prose.
+    """
+    if (tag.get('align') or '').lower() == 'center':
+        return True
+    style = (tag.get('style') or '').lower().replace(' ', '')
+    return 'text-align:center' in style
+
+
 _INLINE_FOOTNOTE_REF = re.compile(r'\[(\d{1,3})\]')
 _SPACE_BEFORE_FOOTNOTE_REF = re.compile(r' +(\(\d{1,3}\))')
 _SUPERSCRIPT_FOOTNOTE_REF = re.compile(
@@ -308,6 +329,72 @@ def normalise_footnote_text(text):
     if any(work in text for work in KNOWN_PARAGRAPH_CITED):
         text = _PARAGRAPH_CITED_RANGE.sub(r', nn. \1, \2.', text)
     return text
+
+
+class HeadingState:
+    """Cascading heading context for extractor body walks.
+
+    Setting a level clears everything beneath it (part → chapter →
+    section → sub-heading), so a walker cannot forget a reset — the
+    historical extractor bug class. Direct attribute assignment remains
+    available for dialect quirks that genuinely don't cascade (a part
+    title arriving in the paragraph after its `PART N` marker, a
+    sub-heading observed mid-section).
+    """
+
+    def __init__(self):
+        self.part = 0
+        self.part_title = ''
+        self.set_chapter(0)
+
+    def set_part(self, number, title=''):
+        self.part = number
+        self.part_title = title
+        self.set_chapter(0)
+
+    def set_chapter(self, number, title='', subtitle=''):
+        self.chapter = number
+        self.chapter_title = title
+        self.chapter_subtitle = subtitle
+        self.set_section(0)
+
+    def set_section(self, number, title=''):
+        self.section = number
+        self.section_title = title
+        self.sub_heading = ''
+
+    def kwargs(self):
+        """The context keywords accepted by `paragraph_record`."""
+        return {
+            'part': self.part,
+            'part_title': self.part_title,
+            'chapter': self.chapter,
+            'chapter_title': self.chapter_title,
+            'chapter_subtitle': self.chapter_subtitle,
+            'section': self.section,
+            'section_title': self.section_title,
+            'sub_heading': self.sub_heading,
+        }
+
+
+def numbered_paragraph(tag, pattern, *, plain_text=None, rich_text=None):
+    """Return `(number, body)` when `tag` is a numbered body paragraph.
+
+    The dialect's plain text decides whether the paragraph matches; the
+    formatting-preserving text is then re-matched so the recorded body
+    keeps its inline markup. Dialects with their own text repair (Curia
+    whitespace collapse, QVH's link stripping) supply it via
+    `plain_text` / `rich_text`. Every extractor previously hand-rolled
+    this double match.
+    """
+    plain = plain_text(tag) if plain_text else clean_text(tag)
+    match = pattern.match(plain)
+    if not match:
+        return None
+    rich = (rich_text(tag) if rich_text
+            else clean_text(tag, preserve_formatting=True))
+    rich_match = pattern.match(rich)
+    return int(match.group(1)), (rich_match or match).group(2)
 
 
 def paragraph_record(number, text, *, part=0, part_title='', chapter=0,
@@ -491,6 +578,19 @@ def title_case(s, *, cap_last=True, small_words=False):
         else:
             result.append(lo.capitalize())
     return ' '.join(result)
+
+
+def heading_title(value):
+    """Normalise an all-caps source heading to title case, preserving "AI".
+
+    Mixed-case headings pass through untouched (beyond whitespace
+    collapse) — only fully upper-case strings are presumed to be source
+    shouting rather than authored casing.
+    """
+    value = re.sub(r'\s+', ' ', value).strip()
+    if value == value.upper():
+        return title_case(value).replace(' Ai', ' AI')
+    return value
 
 
 # ── TOML serialisation ───────────────────────────────────────────────────────

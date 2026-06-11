@@ -2,9 +2,18 @@
 
 import re
 
-from core import clean_text, paragraph_record, roman_to_int
-from curia import anchored_footnotes, heading_title, load_source, prose_text, text
+from core import (
+    HeadingState,
+    clean_text,
+    heading_title,
+    is_promulgation,
+    numbered_paragraph,
+    paragraph_record,
+    roman_to_int,
+)
 from project import SOURCES
+
+from ._curia import anchored_footnotes, load_source, prose_text, text
 
 
 EN_SRC = SOURCES / 'antiqua_et_nova_en.html'
@@ -70,9 +79,7 @@ def extract():
         )
 
     paragraphs = []
-    chapter = 0
-    chapter_title = ''
-    sub_heading = ''
+    state = HeadingState()
     promulgation_stanzas = []
     signature = ''
 
@@ -83,22 +90,19 @@ def extract():
 
         major = RE_MAJOR.match(plain)
         if p.find('b') and major:
-            chapter = roman_to_int(major.group(1))
-            chapter_title = heading_title(major.group(2))
-            sub_heading = ''
+            state.set_chapter(roman_to_int(major.group(1)),
+                              heading_title(major.group(2)))
             continue
 
-        para = RE_PARA.match(plain)
-        if para:
-            rich = RE_PARA.match(prose_text(p))
+        numbered = numbered_paragraph(p, RE_PARA,
+                                      plain_text=text, rich_text=prose_text)
+        if numbered:
             paragraphs.append(paragraph_record(
-                int(para.group(1)), rich.group(2),
-                chapter=chapter, chapter_title=chapter_title,
-                sub_heading=sub_heading, bracketed_refs=True,
+                *numbered, bracketed_refs=True, **state.kwargs(),
             ))
             continue
 
-        if plain.startswith('The Supreme Pontiff') or plain.startswith('Given in Rome'):
+        if plain.startswith('The Supreme Pontiff') or is_promulgation(plain):
             # Preserve the source's italic / roman cadence — the first stanza
             # is fully italic with "Note" set in roman, the second is plain.
             promulgation_stanzas.append(prose_text(p))
@@ -114,7 +118,7 @@ def extract():
             continue
 
         # Internal topic headings in this source are italic-only paragraphs.
-        sub_heading = plain
+        state.sub_heading = plain
 
     signatories = _extract_signatories(soup)
 

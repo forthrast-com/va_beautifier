@@ -13,23 +13,24 @@ No PART tier; no per-paragraph Latin micro-summary.
 """
 
 import re
-from bs4 import BeautifulSoup
 
 from core import (
+    HeadingState,
     assign_footnote_context,
-    br_lines,
-    chapter_word_to_int,
     clean_text,
-    encyclical_split,
+    is_centred,
+    is_promulgation,
     normalise_footnote_refs,
+    numbered_paragraph,
     only_child_is,
     paragraph_record,
     parse_footnote,
     roman_to_int,
-    split_around_title,
     title_case,
 )
 from project import SOURCES
+
+from ._modern import chapter_word_marker, encyclical_front_matter, load_main
 
 
 EN_SRC = SOURCES / 'laudato_si_en.html'
@@ -56,32 +57,16 @@ TITLE_UPPER = "LAUDATO SI"
 RE_PARA       = re.compile(r'^(\d+)\s*\.\s+(.+)$', re.DOTALL)
 RE_FOOTNOTE   = re.compile(r'^\[\s*(\d+)\s*\]\s+(.+)$', re.DOTALL)
 RE_SECTION_B  = re.compile(r'^([IVX]+)\s*\.\s+(.+)$')
-RE_CHAPTER_C  = re.compile(r'^CHAPTER\s+([A-Z]+)$')
-
-CHROME = ['script', 'style', 'meta', 'link', 'img', 'header',
-          'footer', 'nav', 'svg', 'input', 'button', 'figure']
 
 
 def extract():
-    with open(EN_SRC, encoding='utf-8') as f:
-        soup = BeautifulSoup(f.read(), 'html.parser')
-    for t in soup(CHROME):
-        t.decompose()
-
-    main = soup.find('main') or soup.body
+    soup, main = load_main(EN_SRC, drop_chrome=True)
     ps = main.find_all('p')
 
     # Front matter: the first centred <p> containing "ENCYCLICAL LETTER"
     # carries the preamble + title + subtitle as <br/>-separated lines.
-    desc_pre, desc_post = '', ''
     fm_p = next((p for p in ps if 'ENCYCLICAL LETTER' in p.get_text()), None)
-    if fm_p:
-        pre, post = split_around_title(br_lines(fm_p), TITLE_UPPER)
-        desc_pre = '\n'.join(pre)
-        desc_post = '\n'.join(post)
-    # Pivot the front matter at the "On …" line so the issuer sits
-    # above the title and the subject below it.
-    desc_pre, desc_post = encyclical_split(desc_pre, desc_post)
+    desc_pre, desc_post = encyclical_front_matter(fm_p, TITLE_UPPER)
 
     # LS ends with two appended prayers and a "Given in Rome…" promulgation
     # block. None of them are numbered, so without an end-of-body marker
@@ -99,11 +84,7 @@ def extract():
     signature = ''
 
     # ─── Phase 1: body walk (idx 0 .. last_body_idx) ─────────────────────
-    chapter = 0
-    chapter_title = ''
-    section = 0
-    section_title = ''
-    sub_heading = ''
+    state = HeadingState()
     pending_chapter_num = None
 
     for i in range(last_body_idx + 1):
@@ -112,24 +93,20 @@ def extract():
         if not text:
             continue
 
-        align = (p.get('align') or '').lower()
         has_b = bool(p.find('b'))
 
         # chapter marker: <p align="center">CHAPTER ONE</p> (no <b>)
-        if align == 'center' and not has_b:
-            mc = RE_CHAPTER_C.match(text)
-            if mc and (chapter_num := chapter_word_to_int(mc.group(1))) is not None:
+        if is_centred(p) and not has_b:
+            chapter_num = chapter_word_marker(text)
+            if chapter_num is not None:
                 pending_chapter_num = chapter_num
                 continue
 
         # centred bold: chapter title (after CHAPTER N) or encyclical title (skip)
-        if align == 'center' and has_b:
+        if is_centred(p) and has_b:
             if pending_chapter_num is not None:
-                chapter = pending_chapter_num
-                chapter_title = title_case(text)
+                state.set_chapter(pending_chapter_num, title_case(text))
                 pending_chapter_num = None
-                section = 0; section_title = ''
-                sub_heading = ''
             continue
 
         # section heading: <p>'s only child is a <b> whose text matches "I. TITLE".
@@ -139,27 +116,21 @@ def extract():
         if only_child_is(p, 'b'):
             ms = RE_SECTION_B.match(text)
             if ms:
-                section = roman_to_int(ms.group(1))
-                section_title = title_case(ms.group(2))
-                sub_heading = ''
+                state.set_section(roman_to_int(ms.group(1)),
+                                  title_case(ms.group(2)))
                 continue
 
         # sub-heading: <p> whose only non-whitespace child is an <i>.
         # The `align` attribute is unreliable: the first sub-heading in a
         # section gets align="left" but subsequent ones come back blank.
         if only_child_is(p, 'i'):
-            sub_heading = text
+            state.sub_heading = text
             continue
 
-        # numbered paragraph
-        m = RE_PARA.match(text)
-        if m:
-            rich_match = RE_PARA.match(clean_text(p, preserve_formatting=True))
+        numbered = numbered_paragraph(p, RE_PARA)
+        if numbered:
             paragraphs.append(paragraph_record(
-                int(m.group(1)), rich_match.group(2),
-                chapter=chapter, chapter_title=chapter_title,
-                section=section, section_title=section_title,
-                sub_heading=sub_heading, bracketed_refs=True,
+                *numbered, bracketed_refs=True, **state.kwargs(),
             ))
             continue
 
@@ -204,7 +175,7 @@ def extract():
 
         # italic-only block: prayer title, the promulgation, or signature
         if only_child_is(p, 'i'):
-            if text.startswith('Given in') or text.startswith('Given at'):
+            if is_promulgation(text):
                 _flush()
                 promulgation = clean_text(p, preserve_formatting=True)
                 continue
@@ -215,8 +186,7 @@ def extract():
         # Centred bold trailer: the papal signature ("Franciscus"). Capture
         # the first one we hit after the promulgation so it can be rendered
         # in the end matter, then keep ignoring any later trailers.
-        align = (p.get('align') or '').lower()
-        if align == 'center' and p.find('b'):
+        if is_centred(p) and p.find('b'):
             if promulgation and not signature:
                 signature = clean_text(p, preserve_formatting=True)
             continue

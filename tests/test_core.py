@@ -7,15 +7,20 @@ from bs4 import BeautifulSoup
 
 from core import (
     CANONICAL_FOOTNOTE_REF,
+    HeadingState,
     assign_footnote_context,
     br_text,
     ch_order_label,
     clean_text,
     encyclical_split,
+    heading_title,
     inline_markup_to_html,
     int_to_roman,
+    is_centred,
+    is_promulgation,
     normalise_footnote_refs,
     normalise_footnote_text,
+    numbered_paragraph,
     paragraph_record,
     parse_footnote,
     read_toml,
@@ -364,6 +369,106 @@ class InlineMarkupTests(unittest.TestCase):
             inline_markup_to_html('**bold** and *ital*'),
             '<strong>bold</strong> and <em>ital</em>',
         )
+
+
+class HeadingStateTests(unittest.TestCase):
+    def test_chapter_clears_section_and_sub_heading(self):
+        state = HeadingState()
+        state.set_chapter(1, 'First')
+        state.set_section(2, 'A Section')
+        state.sub_heading = 'Topic'
+
+        state.set_chapter(2, 'Second')
+
+        self.assertEqual(state.chapter, 2)
+        self.assertEqual(state.section, 0)
+        self.assertEqual(state.section_title, '')
+        self.assertEqual(state.sub_heading, '')
+
+    def test_part_clears_chapter_but_section_keeps_part(self):
+        state = HeadingState()
+        state.set_part(1, 'Part One')
+        state.set_chapter(3, 'Ch')
+
+        state.set_part(2)
+        self.assertEqual(state.chapter, 0)
+        self.assertEqual(state.chapter_title, '')
+
+        state.set_section(1, 'Sec')
+        self.assertEqual(state.part, 2)
+
+    def test_kwargs_round_trip_through_paragraph_record(self):
+        state = HeadingState()
+        state.set_chapter(1, 'Title', 'Subtitle')
+        record = paragraph_record(7, 'Body.', **state.kwargs())
+
+        self.assertEqual(record['chapter'], 1)
+        self.assertEqual(record['chapter_subtitle'], 'Subtitle')
+        self.assertEqual(record['section'], 0)
+
+
+class NumberedParagraphTests(unittest.TestCase):
+    PATTERN = re.compile(r'^(\d+)\.\s+(.+)$', re.DOTALL)
+
+    def test_matches_and_keeps_inline_markup(self):
+        soup = BeautifulSoup('<p>12. The <i>earth</i> cries out.</p>',
+                             'html.parser')
+
+        self.assertEqual(
+            numbered_paragraph(soup.p, self.PATTERN),
+            (12, 'The *earth* cries out.'),
+        )
+
+    def test_non_numbered_paragraph_returns_none(self):
+        soup = BeautifulSoup('<p>A heading</p>', 'html.parser')
+
+        self.assertIsNone(numbered_paragraph(soup.p, self.PATTERN))
+
+    def test_custom_text_functions_decide_the_match(self):
+        soup = BeautifulSoup('<p>3.\nWrapped   line.</p>', 'html.parser')
+        collapse = lambda tag: re.sub(r'\s+', ' ', clean_text(tag)).strip()
+
+        # Default plain text keeps the Word-export line break, so the
+        # pattern's `\.\s+` still matches; a collapsing dialect repairs it.
+        self.assertEqual(
+            numbered_paragraph(soup.p, self.PATTERN,
+                               plain_text=collapse, rich_text=collapse),
+            (3, 'Wrapped line.'),
+        )
+
+
+class HeadingTitleTests(unittest.TestCase):
+    def test_all_caps_is_title_cased_preserving_ai(self):
+        self.assertEqual(
+            heading_title('TECHNOLOGY  AND THE FUTURE OF AI'),
+            'Technology and the Future of AI',
+        )
+
+    def test_mixed_case_passes_through(self):
+        self.assertEqual(
+            heading_title('The res novae of our time'),
+            'The res novae of our time',
+        )
+
+
+class EndMatterSignalTests(unittest.TestCase):
+    def test_promulgation_datelines(self):
+        self.assertTrue(is_promulgation('Given in Rome, at Saint Peter’s'))
+        self.assertTrue(is_promulgation('Given at the Vatican, 24 May 2015'))
+        self.assertFalse(is_promulgation('Givenness is a concept'))
+
+    def test_centred_by_attribute_or_style(self):
+        soup = BeautifulSoup(
+            '<p align="CENTER">a</p>'
+            '<p style="margin:0; text-align: center;">b</p>'
+            '<p>c</p>',
+            'html.parser',
+        )
+        a, b, c = soup.find_all('p')
+
+        self.assertTrue(is_centred(a))
+        self.assertTrue(is_centred(b))
+        self.assertFalse(is_centred(c))
 
 
 class BrTextTests(unittest.TestCase):
