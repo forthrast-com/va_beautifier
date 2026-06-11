@@ -198,22 +198,19 @@ published, while intermediate Markdown/TOML stays in `build/` only.
 
 ## Extractor boundaries (not implemented — refactor approach notes)
 
-The right unit of sharing is the *dialect*, not a generic walker.
-`curia.py` is the model: a dialect module owns loading, text repair, and
-footnote mechanics, while the per-document extractor owns facts (metadata,
-title lines) and quirks (SC's split `CHAPTER VI`, QVH's hidden-numbered
-preliminary note). Two dialect modules are missing:
-
-- `oldflat.py` (GeS, SC) — iso-8859-1 load, `NOTES</b>` body/notes split,
-  front-matter split around the display title, `<center>`/all-bold
-  heading-shape walking (`_joined_bolds`).
-- `modern.py` (LS, MH, Fratelli tutti when implemented) — utf-8 +
-  `<main>` load, the front-matter pipeline (`br_lines` →
-  `split_around_title` → `encyclical_split`), `CHAPTER ONE`
-  pending-title handling, `only_child_is` shape tests.
+The right unit of sharing is the *dialect*, not a generic walker — but a
+dialect only earns a module when its shared mechanics are substantial.
+`curia.py` clears that bar (anchored-footnote extraction is real
+machinery shared by AeN and QVH); measured after the core lifts below,
+the old-flat dialect (GeS, SC) shares only ~20 lines (iso-8859-1 load,
+`NOTES</b>` body/notes split) and the modern dialect (LS, MH) ~30
+(utf-8 + `<main>` load, the `br_lines` → `split_around_title` →
+`encyclical_split` front-matter chain, `CHAPTER ONE` pending-title
+handling). Keep the shared surface at exactly two files — `core.py` and
+`curia.py` — and tolerate that small duplication.
 
 Mechanisms duplicated nearly verbatim across walkers, worth lifting to
-`core` regardless of dialect grouping:
+`core` (they are dialect-agnostic and carry most of the copies):
 
 - the plain-then-rich double match on numbered paragraphs
   (`RE_PARA.match(clean_text(p))`, then again with
@@ -229,10 +226,14 @@ Do **not** build a config-driven generic walker: the dialects diverge
 exactly where a framework would need escape hatches (SC's appendix mode,
 LS's two-phase body/tail split, QVH's part-title modes), and the
 drop-a-file extractor contract is the part of the design that works.
-Refactor opportunistically — the natural forcing function is implementing
-Fratelli tutti against a new `modern.py`, moving LS and MH onto it in the
-same change. Validate by regenerating `build/*.toml` and requiring
-byte-identical output, plus the extractor regression tests.
+Re-evaluate at Fratelli tutti time: if implementing it against LS/MH
+makes the modern-dialect duplication genuinely annoying, the module
+goes *inside* the package as `extract/_modern.py` (with an underscore
+filter in `parse.py`'s `_available()`, since module discovery currently
+treats every file in `extract/` as a document) — not a third top-level
+shared file. Validate any such refactor by regenerating `build/*.toml`
+and requiring byte-identical output, plus the extractor regression
+tests.
 
 ## JS-free drawer (not implemented — approach notes)
 
