@@ -20,7 +20,13 @@ import shutil
 import subprocess
 import sys
 
-from core import CANONICAL_FOOTNOTE_REF, int_to_roman, read_toml
+from core import (
+    CANONICAL_FOOTNOTE_REF,
+    INLINE_MARK_RE,
+    inline_markup_to_html,
+    int_to_roman,
+    read_toml,
+)
 from project import BUILD, DOWNLOADS, ROOT
 
 BUILD.mkdir(exist_ok=True)
@@ -301,11 +307,6 @@ def _typ_content(s):
             .replace('[', '\\[').replace(']', '\\]'))
 
 
-INLINE_MARK_RE = re.compile(
-    r'\*\*(.+?)\*\*|(?<!\*)\*(.+?)\*(?!\*)', re.DOTALL
-)
-
-
 def _typ_inline(s, *, preserve_breaks=False):
     """Convert canonical bold/italic content to raw typst content."""
     def literal(text):
@@ -325,15 +326,8 @@ def _typ_inline(s, *, preserve_breaks=False):
 
 
 def _html_inline(s, *, preserve_breaks=False):
-    """Convert canonical bold/italic content to raw EPUB HTML content."""
-    rendered = html.escape(s)
-    rendered = re.sub(
-        r'\*\*(.+?)\*\*', r'<strong>\1</strong>', rendered, flags=re.DOTALL
-    )
-    rendered = re.sub(
-        r'(?<!\*)\*(.+?)\*(?!\*)', r'<em>\1</em>', rendered, flags=re.DOTALL
-    )
-    return rendered.replace('\n', '<br />') if preserve_breaks else rendered
+    """Convert canonical inline content to raw EPUB HTML content."""
+    return inline_markup_to_html(s, break_tag='<br />' if preserve_breaks else '')
 
 
 _PAPER_SCALE = {'a4': 1.4, 'a5': 1.0, 'a6': 0.86}

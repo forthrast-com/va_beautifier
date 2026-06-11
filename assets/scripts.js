@@ -227,6 +227,9 @@ if (document.body.classList.contains('doc-laudato_si') ||
   }
 
   function schedule() { if (!raf) raf = requestAnimationFrame(placeNums); }
+  // Listeners live for the page's lifetime by design — each reader is a
+  // standalone document, never re-initialised in place. Add teardown here
+  // if this script is ever re-run without a full page load.
   window.addEventListener('scroll', schedule, {passive: true});
   window.addEventListener('resize', schedule);
   placeNums();

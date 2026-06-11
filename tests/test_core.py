@@ -8,9 +8,11 @@ from bs4 import BeautifulSoup
 from core import (
     CANONICAL_FOOTNOTE_REF,
     assign_footnote_context,
+    br_text,
     ch_order_label,
     clean_text,
     encyclical_split,
+    inline_markup_to_html,
     int_to_roman,
     normalise_footnote_refs,
     normalise_footnote_text,
@@ -334,6 +336,47 @@ class ChOrderLabelTests(unittest.TestCase):
         self.assertEqual(
             ch_order_label(self._p(part=3, chapter=4)),
             'Part III, Ch. 4')
+
+
+class InlineMarkupTests(unittest.TestCase):
+    def test_converts_canonical_markup_and_escapes(self):
+        self.assertEqual(
+            inline_markup_to_html('A *title*, **claim** & 35<sup>th</sup>'),
+            'A <em>title</em>, <strong>claim</strong> &amp; 35<sup>th</sup>',
+        )
+
+    def test_escaped_input_is_not_double_escaped(self):
+        self.assertEqual(
+            inline_markup_to_html('*a &amp; b*', escaped=True),
+            '<em>a &amp; b</em>',
+        )
+
+    def test_emphasis_spans_line_breaks_with_break_tag(self):
+        # Web and book editions must agree on markup that crosses a
+        # poetic line break.
+        self.assertEqual(
+            inline_markup_to_html('*one\ntwo*', break_tag='<br>'),
+            '<em>one<br>two</em>',
+        )
+
+    def test_strong_is_not_eaten_by_emphasis(self):
+        self.assertEqual(
+            inline_markup_to_html('**bold** and *ital*'),
+            '<strong>bold</strong> and <em>ital</em>',
+        )
+
+
+class BrTextTests(unittest.TestCase):
+    def test_br_tags_become_line_breaks(self):
+        soup = BeautifulSoup(
+            '<p>PASTORAL  CONSTITUTION<br>GAUDIUM ET SPES<br>PROMULGATED</p>',
+            'html.parser',
+        )
+
+        self.assertEqual(
+            br_text(soup.p),
+            'PASTORAL CONSTITUTION\nGAUDIUM ET SPES\nPROMULGATED',
+        )
 
 
 if __name__ == '__main__':

@@ -35,6 +35,11 @@ function Pandoc (doc)
   -- nests every real structural heading beneath it in the navigation tree.
   -- The title already belongs to EPUB metadata and the title-page landmark;
   -- remove only that synthetic heading, leaving genuine H1 parts untouched.
+  --
+  -- Matching is by text: a *real* leading H1 whose text equals the document
+  -- title would be eaten too. That cannot arise from make_book.py, which
+  -- only emits H1s for part headings ("Part N: …" / part titles), never the
+  -- document name — revisit this check if that ever changes.
   local title = pandoc.utils.stringify(doc.meta.title or '')
   if title ~= '' and doc.blocks[1]
       and doc.blocks[1].t == 'Header'

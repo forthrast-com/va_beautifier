@@ -7,6 +7,7 @@ from html import escape
 from core import (
     CANONICAL_FOOTNOTE_REF,
     ch_order_label,
+    inline_markup_to_html,
     int_to_roman,
     read_toml,
     title_case,
@@ -20,9 +21,10 @@ JS_TEMPLATE = (ASSETS / 'scripts.js').read_text()
 # `[^)\s]+` for the href so a stray `)` in surrounding prose can't extend
 # the match — vatican.va URLs are paren-free.
 INLINE_LINK_RE = re.compile(r'\[([^\]]+)\]\(([^)\s]+)\)')
-INLINE_STRONG_RE = re.compile(r'\*\*(.+?)\*\*')
-INLINE_EM_RE = re.compile(r'(?<!\*)\*([^*\n]+?)\*(?!\*)')
-INLINE_SCRIPT_RE = re.compile(r'&lt;(sup|sub)&gt;(.*?)&lt;/\1&gt;')
+# A markdown link target with an explicit scheme other than http(s) —
+# javascript:, data:, … — is never linkified; scheme-less (relative or
+# fragment) targets pass.
+HREF_SCHEME_RE = re.compile(r'^([a-zA-Z][a-zA-Z0-9+.\-]*):')
 
 # Retain cleanup for legacy TOML files emitted before inline source markup
 # became canonical. Use [ \t] (not \s) so poetic line breaks survive.
@@ -82,14 +84,18 @@ def linkify_anchors(text):
     footnote regex sees them and mistakes (e.g.) `(2021)` for a fn ref."""
     def replace(m):
         body, href = m.group(1), m.group(2)
+        scheme = HREF_SCHEME_RE.match(href)
+        if scheme and scheme.group(1).lower() not in ('http', 'https'):
+            return body
         return f'<a href="{href}" class="ext-link" target="_blank" rel="noopener">{body}</a>'
     return INLINE_LINK_RE.sub(replace, text)
 
 def format_inline(text):
-    """Render the restricted Markdown-compatible markup emitted by `core`."""
-    text = INLINE_SCRIPT_RE.sub(r'<\1>\2</\1>', text)
-    text = INLINE_STRONG_RE.sub(r'<strong>\1</strong>', text)
-    return INLINE_EM_RE.sub(r'<em>\1</em>', text)
+    """Render the restricted Markdown-compatible markup emitted by `core`.
+
+    Input arrives already escaped (para_html escapes each line before
+    linkifying), hence `escaped=True`."""
+    return inline_markup_to_html(text, escaped=True)
 
 def para_html(text, part=None, chapter=None):
     """Convert paragraph text to <p> tags.
@@ -115,12 +121,7 @@ def para_html(text, part=None, chapter=None):
 
 def end_matter_inline_html(text):
     """Render canonical inline markup while preserving authored line breaks."""
-    text = e(text)
-    text = INLINE_STRONG_RE.sub(r'<strong>\1</strong>', text)
-    text = re.sub(
-        r'(?<!\*)\*(.+?)\*(?!\*)', r'<em>\1</em>', text, flags=re.DOTALL
-    )
-    return text.replace('\n', '<br>')
+    return inline_markup_to_html(text, break_tag='<br>')
 
 # ── build sections ────────────────────────────────────────────────────────────
 

@@ -386,10 +386,25 @@ def _sort_field_meta_json():
     })
 
 
+def missing_card_meta(slugs):
+    """Slugs with no CARD_META entry — their tiles would silently render
+    without a kind label, subtitle, or styled byline."""
+    return [slug for slug in slugs if slug not in CARD_META]
+
+
 def main():
     slugs = sys.argv[1:]
     if not slugs:
         raise SystemExit('usage: python make_index.py DOC [DOC ...]')
+
+    unstyled = missing_card_meta(slugs)
+    if unstyled:
+        print(
+            f'make_index.py: warning: no CARD_META entry for '
+            f'{", ".join(unstyled)} — tile renders without kind/subtitle/'
+            f'byline styling',
+            file=sys.stderr,
+        )
 
     # Server-side default: reverse chronological by promulgation date. JS
     # picks up the same default when it boots, so first paint matches.

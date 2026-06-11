@@ -51,8 +51,23 @@ def _extract_signatories(soup):
 def extract():
     soup = load_source(EN_SRC)
     ps = soup.find_all('p')
-    start = next(i for i, p in enumerate(ps) if text(p) == 'I. Introduction')
-    end = next(i for i, p in enumerate(ps[start:], start) if text(p) == 'Contents')
+    start = next(
+        (i for i, p in enumerate(ps) if text(p) == 'I. Introduction'), None
+    )
+    if start is None:
+        raise ValueError(
+            f'{EN_SRC.name}: no "I. Introduction" paragraph found — '
+            'source structure has changed or the snapshot is not this dialect'
+        )
+    end = next(
+        (i for i, p in enumerate(ps[start:], start) if text(p) == 'Contents'),
+        None,
+    )
+    if end is None:
+        raise ValueError(
+            f'{EN_SRC.name}: no trailing "Contents" paragraph found — '
+            'cannot locate the end of the body text'
+        )
 
     paragraphs = []
     chapter = 0

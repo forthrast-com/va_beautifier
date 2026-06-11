@@ -59,12 +59,22 @@ def extract():
     main = soup.find('main') or soup.body
     ps = main.find_all('p')
     first_body_idx = next(
-        i for i, p in enumerate(ps) if RE_PARA.match(clean_text(p))
+        (i for i, p in enumerate(ps) if RE_PARA.match(clean_text(p))), None
     )
+    if first_body_idx is None:
+        raise ValueError(
+            f'{EN_SRC.name}: no numbered body paragraph ("N. …") found — '
+            'source structure has changed or the snapshot is not this dialect'
+        )
     first_note_idx = next(
-        i for i, p in enumerate(ps)
-        if p.find('a', attrs={'name': re.compile(r'^_ftn\d+$')})
+        (i for i, p in enumerate(ps)
+         if p.find('a', attrs={'name': re.compile(r'^_ftn\d+$')})), None
     )
+    if first_note_idx is None:
+        raise ValueError(
+            f'{EN_SRC.name}: no footnote anchor (name="_ftnN") found — '
+            'cannot locate the end of the body text'
+        )
 
     # Front matter: the abstract block holds the encyclical-letter preamble
     # with the title (MAGNIFICA HUMANITAS) split across its lines. Pull the
@@ -125,6 +135,10 @@ def extract():
             continue
 
         if p.find('b'):
+            # `pending_chapter_title` stays raised until the first numbered
+            # body paragraph: the source may split a chapter's subtitle
+            # across several consecutive bold-caps <p>s, and every fragment
+            # accumulates here.
             if pending_chapter_title and heading.isupper():
                 if not chapter_title:
                     chapter_title = _title(heading)
@@ -140,7 +154,12 @@ def extract():
                 sub_heading = heading
             else:
                 section += 1
-                section_title = heading
+                # Primary headings are mixed case except the closing
+                # CONCLUSION; normalise all-caps ones the way chapter
+                # titles are.
+                section_title = (
+                    _title(heading) if heading.isupper() else heading
+                )
                 sub_heading = ''
             continue
 

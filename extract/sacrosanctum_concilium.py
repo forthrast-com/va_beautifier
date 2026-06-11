@@ -24,6 +24,7 @@ from bs4 import BeautifulSoup
 
 from core import (
     assign_footnote_context,
+    br_text,
     clean_text,
     normalise_footnote_refs,
     paragraph_record,
@@ -55,16 +56,6 @@ RE_PARA_NUM = re.compile(r'^\s*(\d+)\s*\.\s+(.+)$', re.DOTALL)
 RE_FOOTNOTE = re.compile(r'^\[\s*(\d+)\s*\]\s*(.+)$', re.DOTALL)
 
 
-def _br_text(tag):
-    parts = []
-    for child in tag.descendants:
-        if hasattr(child, 'name') and child.name == 'br':
-            parts.append('\n')
-        elif isinstance(child, str):
-            parts.append(child)
-    return re.sub(r'[ \t]+', ' ', ''.join(parts)).strip()
-
-
 def _extract_frontmatter(body_html):
     """The SC front matter is one <p> whose text concatenates the alt-language
     bar, 'CONSTITUTION ON THE SACRED LITURGY', 'SACROSANCTUM CONCILIUM',
@@ -75,7 +66,7 @@ def _extract_frontmatter(body_html):
                if 'CONSTITUTION ON THE SACRED LITURGY' in p.get_text()), None)
     if not fm:
         return '', ''
-    text = re.sub(r'\s+', ' ', _br_text(fm)).strip()
+    text = re.sub(r'\s+', ' ', br_text(fm)).strip()
     text = re.sub(r'^\[.*?\]\s*', '', text)
     m = re.match(
         r'(.+?)\s+SACROSANCTUM CONCILIUM\s+(.+)$', text, re.DOTALL

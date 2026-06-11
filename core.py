@@ -45,6 +45,7 @@ Signatory schema:
     name, role
 """
 
+import html
 import re
 import tomllib
 from pathlib import Path
@@ -133,6 +134,19 @@ def br_lines(tag):
     return [re.sub(r'\s+', ' ', line).strip()
             for line in raw.splitlines()
             if line.strip()]
+
+
+def br_text(tag):
+    """get_text but with `<br/>` rendered as `\\n` — keeps line breaks for
+    front matter. Unlike `br_lines`, returns one string with the breaks in
+    place rather than a list of non-empty lines."""
+    parts = []
+    for child in tag.descendants:
+        if getattr(child, 'name', None) == 'br':
+            parts.append('\n')
+        elif isinstance(child, NavigableString):
+            parts.append(str(child))
+    return re.sub(r'[ \t]+', ' ', ''.join(parts)).strip()
 
 
 def split_around_title(lines, title):
@@ -394,6 +408,41 @@ def assign_footnote_context(footnotes, paragraphs, *, preserve_scope=False):
             'sub_heading': paragraph.get('sub_heading', ''),
         })
     return assigned
+
+
+# ── canonical inline markup ──────────────────────────────────────────────────
+# Authored inline formatting (`*em*`, `**strong**`, `<sup>…</sup>`,
+# `<sub>…</sub>`) is canonical content in paragraph and footnote text. The
+# renderers all consume the regexes and converter below; they previously
+# re-rolled their own copies and quietly diverged on whether emphasis could
+# span a poetic line break.
+
+INLINE_STRONG_RE = re.compile(r'\*\*(.+?)\*\*', re.DOTALL)
+INLINE_EM_RE = re.compile(r'(?<!\*)\*(.+?)\*(?!\*)', re.DOTALL)
+# Single-pass alternation for converters that walk match-by-match (Typst):
+# group 1 = strong content, group 2 = em content.
+INLINE_MARK_RE = re.compile(
+    rf'{INLINE_STRONG_RE.pattern}|{INLINE_EM_RE.pattern}', re.DOTALL
+)
+_ESCAPED_SCRIPT_RE = re.compile(r'&lt;(sup|sub)&gt;(.*?)&lt;/\1&gt;', re.DOTALL)
+
+
+def inline_markup_to_html(text, *, escaped=False, break_tag=''):
+    """Convert canonical inline markup to HTML.
+
+    `escaped=True` means the caller already HTML-escaped the text (the web
+    renderer escapes line-by-line before linkifying footnote refs, so real
+    tags are present by the time markup converts). Escaped `<sup>`/`<sub>`
+    wrappers are restored, then `**strong**` and `*em*` convert. A non-empty
+    `break_tag` (`'<br>'` for the web, `'<br />'` for EPUB XHTML) replaces
+    surviving newlines.
+    """
+    if not escaped:
+        text = html.escape(text)
+    text = _ESCAPED_SCRIPT_RE.sub(r'<\1>\2</\1>', text)
+    text = INLINE_STRONG_RE.sub(r'<strong>\1</strong>', text)
+    text = INLINE_EM_RE.sub(r'<em>\1</em>', text)
+    return text.replace('\n', break_tag) if break_tag else text
 
 
 _SMALL = {'a', 'an', 'the', 'and', 'but', 'or', 'nor', 'for', 'yet', 'so',

@@ -47,13 +47,23 @@ def extract():
     soup = load_source(EN_SRC)
     ps = soup.find_all('p')
     start = next(
-        i for i, p in enumerate(ps)
-        if p.find('a', attrs={'name': 'Preliminary_note'})
+        (i for i, p in enumerate(ps)
+         if p.find('a', attrs={'name': 'Preliminary_note'})), None
     )
+    if start is None:
+        raise ValueError(
+            f'{EN_SRC.name}: no <a name="Preliminary_note"> anchor found — '
+            'source structure has changed or the snapshot is not this dialect'
+        )
     end = next(
-        i for i, p in enumerate(ps[start:], start)
-        if p.find('a', attrs={'name': re.compile(r'^_ftn\d+$')})
+        (i for i, p in enumerate(ps[start:], start)
+         if p.find('a', attrs={'name': re.compile(r'^_ftn\d+$')})), None
     )
+    if end is None:
+        raise ValueError(
+            f'{EN_SRC.name}: no footnote anchor (name="_ftnN") found — '
+            'cannot locate the end of the body text'
+        )
 
     paragraphs = []
     part_title = ''

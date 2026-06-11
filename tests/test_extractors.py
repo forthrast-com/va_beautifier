@@ -10,7 +10,20 @@ from extract import (
 )
 
 
+def needs_sources(*paths):
+    """Skip when a source snapshot is absent. `sources/` is gitignored, so a
+    fresh clone has none until `download_sources.py` runs — these regression
+    tests should skip loudly there, not error."""
+    missing = [p.name for p in paths if not p.exists()]
+    return unittest.skipIf(
+        missing,
+        f'source snapshot(s) missing: {", ".join(missing)} — '
+        f'run download_sources.py',
+    )
+
+
 class ExtractorRegressionTests(unittest.TestCase):
+    @needs_sources(gaudium_et_spes.EN_SRC, gaudium_et_spes.LT_SRC)
     def test_gaudium_et_spes_retains_latin_headings(self):
         data = gaudium_et_spes.extract()
 
@@ -25,6 +38,7 @@ class ExtractorRegressionTests(unittest.TestCase):
         self.assertTrue(any(p['heading_la'] for p in data['paragraphs']))
         self.assertTrue(any('*Rom*' in fn['text'] for fn in data['footnotes']))
 
+    @needs_sources(sacrosanctum_concilium.EN_SRC)
     def test_sacrosanctum_concilium_treats_promulgation_as_end_matter(self):
         data = sacrosanctum_concilium.extract()
 
@@ -38,6 +52,7 @@ class ExtractorRegressionTests(unittest.TestCase):
         self.assertIn('1. The Sacred Council would not object',
                       data['appendices'][0]['text'])
 
+    @needs_sources(laudato_si.EN_SRC)
     def test_laudato_si_retains_appendices_and_note_context(self):
         data = laudato_si.extract()
 
@@ -52,6 +67,7 @@ class ExtractorRegressionTests(unittest.TestCase):
         self.assertTrue(any('*[Centesimus Annus]' in fn['text']
                             for fn in data['footnotes']))
 
+    @needs_sources(magnifica_humanitas.EN_SRC)
     def test_magnifica_humanitas_retains_modern_structure(self):
         data = magnifica_humanitas.extract()
 
@@ -67,12 +83,13 @@ class ExtractorRegressionTests(unittest.TestCase):
                             for fn in data['footnotes']))
         conclusion = {p['number']: p for p in data['paragraphs'][228:]}
         self.assertEqual(conclusion[229]['chapter'], 5)
-        self.assertEqual(conclusion[229]['section_title'], 'CONCLUSION')
+        self.assertEqual(conclusion[229]['section_title'], 'Conclusion')
         self.assertEqual(conclusion[230]['sub_heading'],
                          'The Word became flesh')
         self.assertEqual(conclusion[243]['sub_heading'],
                          'The song of hope: the Magnificat')
 
+    @needs_sources(antiqua_et_nova.EN_SRC)
     def test_antiqua_et_nova_extracts_curia_divisions_and_end_matter(self):
         data = antiqua_et_nova.extract()
 
@@ -99,6 +116,7 @@ class ExtractorRegressionTests(unittest.TestCase):
                       data['footnotes'][0]['text'])
         self.assertNotIn('\n', data['paragraphs'][0]['text'])
 
+    @needs_sources(quo_vadis_humanitas.EN_SRC)
     def test_quo_vadis_extracts_preliminary_note_and_first_footnote(self):
         data = quo_vadis_humanitas.extract()
 

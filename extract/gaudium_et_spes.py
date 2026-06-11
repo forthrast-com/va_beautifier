@@ -13,6 +13,7 @@ from bs4 import BeautifulSoup, NavigableString, Tag
 
 from core import (
     assign_footnote_context,
+    br_text,
     clean_text,
     normalise_footnote_refs,
     paragraph_record,
@@ -58,17 +59,6 @@ PART_TITLES = {
 }
 
 
-def _br_text(tag):
-    """get_text but with <br/> rendered as \\n — keeps line breaks for front matter."""
-    parts = []
-    for child in tag.descendants:
-        if hasattr(child, 'name') and child.name == 'br':
-            parts.append('\n')
-        elif isinstance(child, str):
-            parts.append(child)
-    return re.sub(r'[ \t]+', ' ', ''.join(parts)).strip()
-
-
 def _extract_frontmatter(body_html):
     """Split the GeS front-matter <p> around its 'GAUDIUM ET SPES' title.
     Lines before the title become `desc`; lines after carry the document's
@@ -79,7 +69,7 @@ def _extract_frontmatter(body_html):
                if 'PASTORAL CONSTITUTION' in p.get_text()), None)
     if not fm:
         return '', ''
-    text = _br_text(fm)
+    text = br_text(fm)
     desc_m = re.match(r'(.+?)\s*GAUDIUM ET SPES', text, re.DOTALL)
     post_m = re.search(r'GAUDIUM ET SPES\s*\n(.+)', text, re.DOTALL)
     desc = desc_m.group(1).strip() if desc_m else ''
