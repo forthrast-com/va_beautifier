@@ -14,10 +14,41 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+      - name: Restore source snapshots
+        uses: actions/cache@v4
+        with:
+          path: sources
+          key: vatican-sources-${{ hashFiles('download_sources.py') }}
+          restore-keys: |
+            vatican-sources-
       - name: Fetch sources
         run: python3 download_sources.py --category implemented
       - name: Install Nix
         uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            keep-env-derivations = true
+            keep-outputs = true
+      - name: Restore and save Nix store
+        uses: nix-community/cache-nix-action@v7
+        with:
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('flake.nix', 'flake.lock') }}
+          restore-prefixes-first-match: |
+            nix-${{ runner.os }}-
+          gc-max-store-size-linux: 2G
+      - name: Restore generated artefacts
+        id: cache-artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            build
+            site/downloads
+          key: vatican-artifacts-${{ runner.os }}-${{ hashFiles('flake.nix', 'flake.lock', 'Makefile', 'core.py', 'parse.py', 'make_html.py', 'make_index.py', 'make_book.py', 'assets/**', 'templates/**', 'extract/**/*.py', 'sources/**') }}
+      - name: Refresh cached artefact mtimes
+        if: steps.cache-artifacts.outputs.cache-hit == 'true'
+        run: |
+          find build -type f -exec touch {} +
+          find site/downloads -type f -exec touch {} +
       - name: Run tests
         run: nix develop --command python -m unittest discover -s tests -v
       - name: Build and run artifact QA
