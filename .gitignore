@@ -10,8 +10,9 @@ tmp/
 *_demo.html
 sources/*
 
-# Book artefacts and their markdown intermediates. Web HTML is the
-# canonical published output; EPUB/PDF are local-build deliverables.
+# Generated web/book artefacts. CI rebuilds these for publication.
 build/
+site/*.html
+site/downloads/
 *.epub
 *.pdf
