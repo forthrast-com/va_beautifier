@@ -1,7 +1,9 @@
 name: Deploy GitHub Pages
 
 on:
-  push:
+  workflow_run:
+    workflows: [Tests]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
@@ -16,6 +18,7 @@ concurrency:
 
 jobs:
   deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -23,6 +26,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
       - name: Restore source snapshots
         uses: actions/cache@v4
         with:
@@ -51,19 +56,17 @@ jobs:
         with:
           path: |
             build
+            site/*.html
             site/downloads
-          key: vatican-artifacts-${{ runner.os }}-${{ hashFiles('flake.nix', 'flake.lock', 'Makefile', 'core.py', 'parse.py', 'make_html.py', 'make_index.py', 'make_book.py', 'assets/**', 'templates/**', 'extract/**/*.py', 'sources/**') }}
+          key: vatican-site-artifacts-v2-${{ runner.os }}-${{ hashFiles('flake.nix', 'flake.lock', 'Makefile', 'core.py', 'parse.py', 'make_html.py', 'make_index.py', 'make_book.py', 'assets/**', 'templates/**', 'extract/**/*.py', 'sources/**') }}
       - name: Refresh cached artefact mtimes
         if: steps.cache-artifacts.outputs.cache-hit == 'true'
         run: |
           find build -type f -exec touch {} +
+          find site -maxdepth 1 -name '*.html' -exec touch {} +
           find site/downloads -type f -exec touch {} +
-      - name: Run tests
-        run: nix develop --command python -m unittest discover -s tests
       - name: Build
         run: nix develop --command make
-      - name: Run artifact QA
-        run: nix develop --command make qa
       - name: Prepare flat site
         run: |
           mkdir -p _site/downloads
