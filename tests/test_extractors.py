@@ -172,6 +172,10 @@ class ExtractorRegressionTests(unittest.TestCase):
         note_28 = next(f for f in data['footnotes'] if f['number'] == 28)
         self.assertIn("“'What is man", note_28['text'])
         self.assertNotIn("“ 'What is man", note_28['text'])
+        self.assertNotIn(
+            'Copyright © Dicastery for Communication',
+            data['paragraphs'][-1]['text'],
+        )
 
     @needs_sources(lumen_fidei.EN_SRC)
     def test_lumen_fidei_unwraps_absolute_footnote_anchors(self):

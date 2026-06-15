@@ -55,6 +55,7 @@ TITLE_UPPER = 'FIDES ET RATIO'
 
 RE_PARA = re.compile(r'^(\d+)\s*\.\s+(.+)$', re.DOTALL)
 RE_CHAPTER = re.compile(r'^CHAPTER\s+([IVXLC]+)\b\s*[-–—]\s*(.+)$', re.DOTALL)
+RE_COPYRIGHT_NOTICE = re.compile(r'^Copyright © Dicastery for Communication$')
 
 # Body footnote cites: <a name="-X">N</a> inside a <sup>, where the visible
 # number N is the anchor text and the name suffix X is the source's own
@@ -199,6 +200,8 @@ def extract():
 
         # unnumbered continuation prose following a numbered paragraph
         if paragraphs:
+            if RE_COPYRIGHT_NOTICE.fullmatch(text.strip()):
+                continue
             paragraphs[-1]['text'] += '\n\n' + normalise_footnote_refs(
                 clean_text(p, preserve_formatting=True)
             )
