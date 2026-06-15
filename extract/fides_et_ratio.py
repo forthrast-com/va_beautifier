@@ -103,6 +103,11 @@ def _footnotes(soup):
         text = normalise_footnote_text(
             normalise_footnote_refs(clean_text(body, preserve_formatting=True))
         )
+        # The source footnote blocks use line wrapping as layout noise. Flatten
+        # that noise so the extracted note reads as a single prose paragraph.
+        text = re.sub(r'\s+', ' ', text).strip()
+        text = re.sub(r'([“‘])\s+', r'\1', text)
+        text = re.sub(r'\s+([”’])', r'\1', text)
         notes.append({
             'part': 0, 'chapter': 0, 'number': int(match.group(1)), 'text': text,
         })
