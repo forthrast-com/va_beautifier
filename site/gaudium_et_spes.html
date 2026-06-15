@@ -701,11 +701,17 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .doc-magnifica_humanitas .paragraph,
 .doc-antiqua_et_nova .paragraph,
 .doc-quo_vadis_humanitas .paragraph,
+.doc-fides_et_ratio .paragraph,
+.doc-lumen_fidei .paragraph,
+.doc-verbum_domini .paragraph,
 .doc-sacrosanctum_concilium .paragraph      { position: relative; margin: 1.75rem 0; }
 .doc-laudato_si .paragraph::before,
 .doc-magnifica_humanitas .paragraph::before,
 .doc-antiqua_et_nova .paragraph::before,
 .doc-quo_vadis_humanitas .paragraph::before,
+.doc-fides_et_ratio .paragraph::before,
+.doc-lumen_fidei .paragraph::before,
+.doc-verbum_domini .paragraph::before,
 .doc-sacrosanctum_concilium .paragraph::before {
     content: '';
     position: absolute;
@@ -718,6 +724,9 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .doc-magnifica_humanitas .para-num,
 .doc-antiqua_et_nova .para-num,
 .doc-quo_vadis_humanitas .para-num,
+.doc-fides_et_ratio .para-num,
+.doc-lumen_fidei .para-num,
+.doc-verbum_domini .para-num,
 .doc-sacrosanctum_concilium .para-num {
     position: absolute;
     right: calc(100% + 2rem);   /* in the gutter, breathing room from the rule */
@@ -733,11 +742,17 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .doc-magnifica_humanitas .para-num::after,
 .doc-antiqua_et_nova .para-num::after,
 .doc-quo_vadis_humanitas .para-num::after,
+.doc-fides_et_ratio .para-num::after,
+.doc-lumen_fidei .para-num::after,
+.doc-verbum_domini .para-num::after,
 .doc-sacrosanctum_concilium .para-num::after { content: none; }
 .doc-laudato_si #sticky-num,
 .doc-magnifica_humanitas #sticky-num,
 .doc-antiqua_et_nova #sticky-num,
 .doc-quo_vadis_humanitas #sticky-num,
+.doc-fides_et_ratio #sticky-num,
+.doc-lumen_fidei #sticky-num,
+.doc-verbum_domini #sticky-num,
 .doc-sacrosanctum_concilium #sticky-num {
     transform: translateX(-.6rem);  /* centre chapter number above gutter rule */
 }
@@ -977,7 +992,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
   <p><a href="https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19651207_gaudium-et-spes_en.html" target="_blank" rel="noopener">Original Vatican document</a></p>
   <p>Email: <a href="mailto:me@forthrast.com">me@forthrast.com</a><br>
   Bluesky: <a href="https://bsky.app/profile/forthrast.com" target="_blank" rel="noopener">@forthrast.com</a><br>
-  GitHub: <a href="https://github.com/forthrast-com" target="_blank" rel="noopener">@forthrast-com</a></p>
+  GitHub: <a href="https://github.com/forthrast-com/va_beautifier" target="_blank" rel="noopener">@forthrast-com</a></p>
 </div>
 
 <div id="prefs-panel" hidden>
@@ -2099,6 +2114,9 @@ if (document.body.classList.contains('doc-laudato_si') ||
   }
 
   function schedule() { if (!raf) raf = requestAnimationFrame(placeNums); }
+  // Listeners live for the page's lifetime by design — each reader is a
+  // standalone document, never re-initialised in place. Add teardown here
+  // if this script is ever re-run without a full page load.
   window.addEventListener('scroll', schedule, {passive: true});
   window.addEventListener('resize', schedule);
   placeNums();

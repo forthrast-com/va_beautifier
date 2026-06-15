@@ -20,3 +20,5 @@ jobs:
         uses: cachix/install-nix-action@v31
       - name: Run tests
         run: nix develop --command python -m unittest discover -s tests -v
+      - name: Build and run artifact QA
+        run: nix develop --command make qa

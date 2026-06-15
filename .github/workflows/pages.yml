@@ -31,6 +31,8 @@ jobs:
         run: nix develop --command python -m unittest discover -s tests
       - name: Build
         run: nix develop --command make
+      - name: Run artifact QA
+        run: nix develop --command make qa
       - name: Prepare flat site
         run: |
           mkdir -p _site/downloads

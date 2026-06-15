@@ -2,11 +2,14 @@ import unittest
 
 from extract import (
     antiqua_et_nova,
+    fides_et_ratio,
     gaudium_et_spes,
     laudato_si,
+    lumen_fidei,
     magnifica_humanitas,
     quo_vadis_humanitas,
     sacrosanctum_concilium,
+    verbum_domini,
 )
 
 
@@ -136,6 +139,83 @@ class ExtractorRegressionTests(unittest.TestCase):
             'Gaudium et spes',
         )
         self.assertEqual(data['paragraphs'][-1]['chapter_title'], 'Conclusion')
+
+    @needs_sources(fides_et_ratio.EN_SRC)
+    def test_fides_et_ratio_canonicalises_legacy_footnote_scheme(self):
+        data = fides_et_ratio.extract()
+
+        self.assertEqual(len(data['paragraphs']), 110)
+        self.assertEqual(len(data['footnotes']), 132)
+        self.assertEqual(data['hue'], 8)
+        self.assertEqual(data['pontificate'], 'John Paul II')
+        self.assertEqual(data['signature'], '**JOHN PAUL II**')
+        # Roman-numbered chapters are kept on the arabic path so the trailing
+        # unnumbered Conclusion renders without a "Chapter N" prefix.
+        self.assertNotEqual(data.get('chapter_style'), 'roman')
+        self.assertEqual(data['paragraphs'][-1]['chapter_title'], 'Conclusion')
+        # The apostolic-blessing greeting and the "two wings" epigraph open
+        # the document as hidden-number prefatory prose.
+        self.assertEqual(sum(p.get('hide_number', False)
+                             for p in data['paragraphs']), 2)
+        self.assertTrue(data['paragraphs'][0]['hide_number'])
+        # The bespoke `$N`/`<sup>` footnote scheme must fully canonicalise:
+        # no anchor names, superscript wrappers, or markdown-link tails leak.
+        for note in (1, 10, 46, 132):
+            self.assertTrue(any(f['number'] == note for f in data['footnotes']))
+        for p in data['paragraphs']:
+            self.assertNotIn('%24', p['text'])
+            self.assertNotIn('<sup>', p['text'])
+            self.assertNotIn('](#', p['text'])
+
+    @needs_sources(lumen_fidei.EN_SRC)
+    def test_lumen_fidei_unwraps_absolute_footnote_anchors(self):
+        data = lumen_fidei.extract()
+
+        self.assertEqual(len(data['paragraphs']), 60)
+        self.assertEqual(len(data['footnotes']), 50)
+        self.assertEqual(data['hue'], 48)
+        self.assertEqual(data['pontificate'], 'Francis')
+        self.assertEqual(data['signature'], '**FRANCISCUS**')
+        # Scriptural chapter titles title-case but keep the lower-case "cf.".
+        self.assertEqual(data['paragraphs'][0]['chapter'], 0)
+        self.assertTrue(any(
+            p['chapter_title'] == 'We Have Believed in Love (cf. 1 Jn 4:16)'
+            for p in data['paragraphs']
+        ))
+        # Bold topical headers become auto-numbered sections.
+        self.assertEqual(
+            next(p['section_title'] for p in data['paragraphs']
+                 if p['section_title']),
+            'An illusory light?',
+        )
+        # Absolute-href footnote anchors must not survive as markdown links.
+        for p in data['paragraphs']:
+            self.assertNotIn('](#_ftn', p['text'])
+
+    @needs_sources(verbum_domini.EN_SRC)
+    def test_verbum_domini_recovers_parts_and_loose_first_paragraph(self):
+        data = verbum_domini.extract()
+
+        self.assertEqual(len(data['paragraphs']), 124)
+        self.assertEqual(len(data['footnotes']), 382)
+        self.assertEqual(data['hue'], 200)
+        self.assertEqual(data['pontificate'], 'Benedict XVI')
+        self.assertEqual(data['signature'], '**BENEDICT XVI**')
+        # §1 is loose inline text after the INTRODUCTION heading; recovered.
+        first = data['paragraphs'][0]
+        self.assertEqual(first['number'], 1)
+        self.assertEqual(first['part'], 0)
+        self.assertIn('abides for ever', first['text'])
+        # Three parts with their Latin titles.
+        self.assertEqual(
+            [(p, t) for p, t in dict(
+                (q['part'], q['part_title']) for q in data['paragraphs']
+            ).items() if p],
+            [(1, 'Verbum Dei'), (2, 'Verbum in Ecclesia'), (3, 'Verbum Mundo')],
+        )
+        # Trailing unnumbered Conclusion chapter under the last part.
+        self.assertEqual(data['paragraphs'][-1]['chapter_title'], 'Conclusion')
+        self.assertEqual(data['paragraphs'][-1]['part'], 3)
 
 
 if __name__ == '__main__':

@@ -30,6 +30,12 @@ Run the unit and extractor regression tests with:
 nix develop --command python -m unittest discover -s tests
 ```
 
+Build and run the full generated-site smoke check with:
+
+```sh
+nix develop --command make qa
+```
+
 For a fresh source collection, fetch the Vatican HTML snapshots first:
 
 ```sh

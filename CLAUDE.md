@@ -17,7 +17,7 @@ The vatican.va edition is one long page of bare text. The points of difference:
   in `localStorage`; CSS custom properties and `data-theme` / `data-size` /
   `data-font` attributes drive the variants.
 - **Browsable catalogue** — the landing page filters documents and sorts them
-  by promulgation, pontificate, authority, or title
+  by date, name, pope, class, or body-text word count
 
 ## Pipeline
 
@@ -108,7 +108,7 @@ or personal voice shown in the catalogue and colophon. The colophon adds
 
 ## Sources
 
-GeS is served as **ISO-8859-1** (EN) and **latin-1** (LA), not UTF-8. LS and the Curia Word-export pages are UTF-8. Sniff before assuming on any new document.
+GeS is served as **ISO-8859-1** (EN) and **latin-1** (LA), not UTF-8. LS, the modern encyclicals/exhortations (*Fides et Ratio*, *Lumen Fidei*, *Verbum Domini*), and the Curia Word-export pages are UTF-8. Sniff before assuming on any new document.
 
 The ITC export has its first footnote anchor outside the paragraph wrapper
 used by the remaining notes. `extract/_curia.py`'s `anchored_footnotes()`
@@ -125,7 +125,45 @@ source manifest and local status; omit `--list` to fetch missing sources.
 Three templates encountered so far:
 
 - **Old flat** (GeS) — 24 `<p>` tags total, structure carried by `<b>` headings inside `<center>` blocks. Latin source provides a per-paragraph micro-summary keyed by §N. Footnotes in a separate `NOTES`-marked block.
-- **Modern Bootstrap** (LS) — 788 `<p>` tags wrapped in `<main>`. Chapter delimiter is a centred `CHAPTER ONE` followed by a centred `<b>` title. Section is a `<p>` whose only child is a `<b>` matching `^[IVX]+\.`. Sub-heading is a `<p>` whose only child is an `<i>`. The `align` attribute is unreliable (set on the first heading of chapter 1, blank thereafter); use child-shape tests.
+- **Modern Bootstrap** (LS, MH, *Fides et Ratio*, *Lumen Fidei*, *Verbum
+  Domini*) — `<p>` tags wrapped in `<main>`. The base case (LS): chapter
+  delimiter is a centred `CHAPTER ONE` followed by a centred `<b>` title;
+  section is a `<p>` whose only child is a `<b>` matching `^[IVX]+\.`;
+  sub-heading is a `<p>` whose only child is an `<i>`. The `align` attribute
+  is unreliable (set on the first heading of chapter 1, blank thereafter);
+  use child-shape tests. The modern dialect has drifted a lot across years,
+  so expect per-document variation within it:
+  - *Footnote refs.* Three spellings seen. LS uses bare `[N]`. LF gives every
+    footnote anchor an **absolute** cross-document href, so
+    `_modern.strip_footnote_anchors` unwraps the `<a name="_ftn…">` to its
+    `[N]` text before the canonical `[N]` → `(N)` pass. VD uses the
+    fragment `#_ftn` form `clean_text` already short-circuits, but is
+    unwrapped too for uniformity. *Fides et Ratio* (a 1998 export) uses
+    neither: body cites are `<sup><a name="-X">N</a></sup>` (the name suffix
+    is a base-36-ish label, **not** the number — the number is the anchor
+    text), and definitions are loose inline blocks after an `<hr>`, each
+    `<font><b><a name="$N">N</a></b></font> text` split on the definition
+    anchors (the `$` arrives percent-encoded as `%24`).
+  - *Unnumbered headings.* LF/VD/FeR have no Roman section tier; their bold
+    topical headers become auto-numbered sections (à la MH) and the slug
+    joins `make_html.BARE_SECTION_DOCS` so the section renders as its bare
+    title. Opening headings vary: FeR keeps its source "Blessing" and
+    "Introduction" headings, and VD its "Introduction", as authored part-0
+    titles; LF has no opening heading and so picks up the generated
+    **Preamble** (see Renderer conventions). `CONCLUSION`
+    is a trailing chapter titled `Conclusion`, which the non-roman
+    `is_unnumbered` path renders without a `Chapter N` prefix — so **don't** set
+    `chapter_style = "roman"` just because the source numbers chapters with
+    Roman numerals (FeR parses `CHAPTER IV - TITLE` to an arabic number to
+    keep that path; roman style would force a numeral onto the conclusion and
+    would also relabel AeN's `I. Introduction`).
+  - *Parts.* VD nests part (centred `PART ONE` + all-caps title + a dropped
+    scriptural epigraph) › chapter (centred mixed-case) › section (bold).
+  - *Loose body text.* VD's §1 is inline content trailing the `INTRODUCTION`
+    heading outside any `<p>`, so `find_all('p')` misses it; it is recovered
+    from the heading's inline next-siblings. A bracketing table of contents
+    (titled `INDEX` at each end) is skipped by walking from the centred
+    `INTRODUCTION` to the first footnote definition.
 - **Curia Word export** (*Antiqua et nova*, *Quo vadis, humanitas?*) —
   content is a stream of styled `<p>` tags with named anchors for footnotes.
   Major divisions and subsection titles are recovered from
@@ -146,7 +184,9 @@ HTML output is a single self-contained file (CSS + JS inlined, no external asset
 - sub-heading: generated `sub-{n}`
 - appendix: `appendix-{n}`
 
-Doc-scoped CSS lives under `.doc-<slug>` selectors. Long structured documents share gutter-style paragraph numbers, soft-anchor positioning, and a height-capped scroll indicator under their document selectors. GeS keeps the original inline `5. *Latin heading* body` layout via the default rules + `.para-num::after { content: '.' }`.
+Doc-scoped CSS lives under `.doc-<slug>` selectors. Long structured documents share gutter-style paragraph numbers, soft-anchor positioning, and a height-capped scroll indicator under their document selectors. GeS keeps the original inline `5. *Latin heading* body` layout via the default rules + `.para-num::after { content: '.' }`. The long-document slugs are tracked in three places: `make_html.LONG_DOCS` (gutter layout + section-level sticky bar), `make_html.BARE_SECTION_DOCS` (named sections, no `Section N:` prefix), and the `.doc-<slug>` selector groups in `assets/styles.css`.
+
+**Generated "Preamble" heading.** Opening prose at `part = 0`, `chapter = 0` with no authored `part_title` is unlabelled in the TOML; the renderer supplies a "Preamble" heading rather than leaving the region anchorless. It is a *generated display label*, not stored data, so it differs by surface: the **web body suppresses it** (anchor-only — the modern encyclicals don't want a redundant on-page heading) but keeps it in the contents drawer, scroll indicator, and no-JS TOC; the **PDF/EPUB render it visibly** (`make_book.py`), because those have no live navigation to fall back on. An authored `part_title` (GeS "Preface", SC "Introduction", QVH "Preliminary Note") always wins and shows on every surface; a part-0 group that opens straight into a chapter (AeN's roman `I. Introduction`) stays anchor-only under "Introduction".
 
 JS publishes the sticky-bar's measured height to `--bar-h` so other layout (indicator centring, soft-anchor maths) can read it from CSS or JS.
 

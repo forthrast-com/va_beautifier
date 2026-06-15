@@ -504,6 +504,7 @@ def assign_footnote_context(footnotes, paragraphs, *, preserve_scope=False):
 # re-rolled their own copies and quietly diverged on whether emphasis could
 # span a poetic line break.
 
+INLINE_STRONG_EM_RE = re.compile(r'\*\*\*(.+?)\*\*\*', re.DOTALL)
 INLINE_STRONG_RE = re.compile(r'\*\*(.+?)\*\*', re.DOTALL)
 INLINE_EM_RE = re.compile(r'(?<!\*)\*(.+?)\*(?!\*)', re.DOTALL)
 # Single-pass alternation for converters that walk match-by-match (Typst):
@@ -520,13 +521,14 @@ def inline_markup_to_html(text, *, escaped=False, break_tag=''):
     `escaped=True` means the caller already HTML-escaped the text (the web
     renderer escapes line-by-line before linkifying footnote refs, so real
     tags are present by the time markup converts). Escaped `<sup>`/`<sub>`
-    wrappers are restored, then `**strong**` and `*em*` convert. A non-empty
-    `break_tag` (`'<br>'` for the web, `'<br />'` for EPUB XHTML) replaces
-    surviving newlines.
+    wrappers are restored, then `***strong-em***`, `**strong**`, and `*em*`
+    convert. A non-empty `break_tag` (`'<br>'` for the web, `'<br />'` for
+    EPUB XHTML) replaces surviving newlines.
     """
     if not escaped:
         text = html.escape(text)
     text = _ESCAPED_SCRIPT_RE.sub(r'<\1>\2</\1>', text)
+    text = INLINE_STRONG_EM_RE.sub(r'<strong><em>\1</em></strong>', text)
     text = INLINE_STRONG_RE.sub(r'<strong>\1</strong>', text)
     text = INLINE_EM_RE.sub(r'<em>\1</em>', text)
     return text.replace('\n', break_tag) if break_tag else text

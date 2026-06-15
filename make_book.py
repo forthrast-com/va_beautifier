@@ -23,6 +23,7 @@ import sys
 from core import (
     CANONICAL_FOOTNOTE_REF,
     INLINE_MARK_RE,
+    INLINE_STRONG_EM_RE,
     inline_markup_to_html,
     int_to_roman,
     read_toml,
@@ -115,7 +116,8 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
     lines += ['```{=typst}', '#pagebreak(weak: true)', '```', '']
 
     # ── Body walk ──────────────────────────────────────────────────────
-    prev = {'part': None, 'chapter': None, 'section': None, 'sub': None}
+    prev = {'part': None, 'part_title': None,
+            'chapter': None, 'section': None, 'sub': None}
 
     # Heading levels are uniform: chapters at H2 (so --epub-chapter-level=2
     # splits one spine file per chapter), sections at H3, sub-headings at
@@ -138,18 +140,36 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
         text          = p.get('text', '')
         number        = p.get('number', 0)
 
-        if part_title and part != prev['part']:
+        # A part-0 opening with no authored title still needs a navigable
+        # heading in the book — the PDF/EPUB have no JS table of contents to
+        # fall back on, so unlabelled opening prose would otherwise be
+        # orphaned. Generate "Preamble" (mirroring the web reader); authored
+        # titles (Preface, Introduction, Preliminary Note) win.
+        generated_preamble = (
+            part == 0 and chapter == 0 and not part_title
+            and prev['part'] is None
+        )
+        effective_part_title = part_title or (
+            'Preamble' if generated_preamble else ''
+        )
+        # Fire on a part_title change too, not just a part-number change, so
+        # successive part-0 prefaces both get headings (GeS "Preface" then
+        # "Introductory Statement"; FeR "Blessing" then "Introduction").
+        if effective_part_title and (part, effective_part_title) != (
+            prev['part'], prev['part_title']
+        ):
             if part > 0:
-                level, label = '#', f'Part {int_to_roman(part)}: {part_title}'
+                level, label = '#', f'Part {int_to_roman(part)}: {effective_part_title}'
                 lines += ['', '```{=typst}', '#pagebreak(weak: true)', '```', '']
             elif has_numbered_parts:
-                level, label = '#', part_title
+                level, label = '#', effective_part_title
             else:
-                level, label = '##', part_title
+                level, label = '##', effective_part_title
             lines.append('')
             lines.append(f'{level} {label}')
             lines.append('')
-            prev.update(part=part, chapter=None, section=None, sub=None)
+            prev.update(part=part, part_title=effective_part_title,
+                        chapter=None, section=None, sub=None)
 
         # Chapter heading. Force a fresh page on the PDF side so chapters
         # land at the top of a recto — the EPUB writer ignores raw typst.
@@ -196,7 +216,7 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
             # the artefact reads as the Vatican source does.
             return m.group(0)
 
-        body = CANONICAL_FOOTNOTE_REF.sub(replace_ref, text)
+        body = _normalise_vatican_links(CANONICAL_FOOTNOTE_REF.sub(replace_ref, text))
         # Sub-paragraphs are separated by `\n\n` in the TOML; pandoc honours
         # blank-line separators. First sub-paragraph gets the bold number.
         chunks = [c.strip() for c in body.split('\n\n') if c.strip()]
@@ -220,7 +240,7 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
             '',
             f'## {appendix["title"]}',
             '',
-            _markdown_preserve_breaks(appendix['text']),
+            _markdown_preserve_breaks(_normalise_vatican_links(appendix['text'])),
             '',
         ]
 
@@ -251,7 +271,7 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
         # Split on \n\n so each sub-paragraph becomes a real pandoc footnote
         # paragraph. Single \n inside a sub-paragraph is treated as a soft
         # break (typst handles this naturally; pandoc wraps it).
-        text = fn['text'].rstrip()
+        text = _normalise_vatican_links(fn['text'].rstrip())
         paragraphs_fn = [p.strip() for p in text.split('\n\n') if p.strip()]
         first, *rest = paragraphs_fn or ['']
         lines.append(f'[^{part}-{chapter}-{n}]: {first}')
@@ -293,6 +313,11 @@ def _markdown_preserve_breaks(text):
     )
 
 
+def _normalise_vatican_links(text):
+    """Make root-relative Vatican markdown links portable in EPUB/PDF."""
+    return text.replace('](/content/', '](https://www.vatican.va/content/')
+
+
 def _typ_str(s):
     r"""Quote a Python string for embedding in typst source. Typst strings
     are double-quoted with `\\` and `\"` escapes; everything else rides
@@ -315,11 +340,18 @@ def _typ_inline(s, *, preserve_breaks=False):
 
     rendered = []
     pos = 0
-    for match in INLINE_MARK_RE.finditer(s):
+    inline_re = re.compile(
+        rf'{INLINE_STRONG_EM_RE.pattern}|{INLINE_MARK_RE.pattern}', re.DOTALL
+    )
+    for match in inline_re.finditer(s):
         rendered.append(literal(s[pos:match.start()]))
-        content = literal(match.group(1) or match.group(2))
-        command = 'strong' if match.group(1) is not None else 'emph'
-        rendered.append(f'#{command}[{content}]')
+        if match.group(1) is not None:
+            content = literal(match.group(1))
+            rendered.append(f'#strong[#emph[{content}]]')
+        else:
+            content = literal(match.group(2) or match.group(3))
+            command = 'strong' if match.group(2) is not None else 'emph'
+            rendered.append(f'#{command}[{content}]')
         pos = match.end()
     rendered.append(literal(s[pos:]))
     return ''.join(rendered)

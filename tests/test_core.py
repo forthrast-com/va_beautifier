@@ -370,6 +370,12 @@ class InlineMarkupTests(unittest.TestCase):
             '<strong>bold</strong> and <em>ital</em>',
         )
 
+    def test_strong_emphasis_nests_cleanly(self):
+        self.assertEqual(
+            inline_markup_to_html('***both***'),
+            '<strong><em>both</em></strong>',
+        )
+
 
 class HeadingStateTests(unittest.TestCase):
     def test_chapter_clears_section_and_sub_heading(self):

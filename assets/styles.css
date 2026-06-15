@@ -694,11 +694,17 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .doc-magnifica_humanitas .paragraph,
 .doc-antiqua_et_nova .paragraph,
 .doc-quo_vadis_humanitas .paragraph,
+.doc-fides_et_ratio .paragraph,
+.doc-lumen_fidei .paragraph,
+.doc-verbum_domini .paragraph,
 .doc-sacrosanctum_concilium .paragraph      { position: relative; margin: 1.75rem 0; }
 .doc-laudato_si .paragraph::before,
 .doc-magnifica_humanitas .paragraph::before,
 .doc-antiqua_et_nova .paragraph::before,
 .doc-quo_vadis_humanitas .paragraph::before,
+.doc-fides_et_ratio .paragraph::before,
+.doc-lumen_fidei .paragraph::before,
+.doc-verbum_domini .paragraph::before,
 .doc-sacrosanctum_concilium .paragraph::before {
     content: '';
     position: absolute;
@@ -711,6 +717,9 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .doc-magnifica_humanitas .para-num,
 .doc-antiqua_et_nova .para-num,
 .doc-quo_vadis_humanitas .para-num,
+.doc-fides_et_ratio .para-num,
+.doc-lumen_fidei .para-num,
+.doc-verbum_domini .para-num,
 .doc-sacrosanctum_concilium .para-num {
     position: absolute;
     right: calc(100% + 2rem);   /* in the gutter, breathing room from the rule */
@@ -726,11 +735,17 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .doc-magnifica_humanitas .para-num::after,
 .doc-antiqua_et_nova .para-num::after,
 .doc-quo_vadis_humanitas .para-num::after,
+.doc-fides_et_ratio .para-num::after,
+.doc-lumen_fidei .para-num::after,
+.doc-verbum_domini .para-num::after,
 .doc-sacrosanctum_concilium .para-num::after { content: none; }
 .doc-laudato_si #sticky-num,
 .doc-magnifica_humanitas #sticky-num,
 .doc-antiqua_et_nova #sticky-num,
 .doc-quo_vadis_humanitas #sticky-num,
+.doc-fides_et_ratio #sticky-num,
+.doc-lumen_fidei #sticky-num,
+.doc-verbum_domini #sticky-num,
 .doc-sacrosanctum_concilium #sticky-num {
     transform: translateX(-.6rem);  /* centre chapter number above gutter rule */
 }

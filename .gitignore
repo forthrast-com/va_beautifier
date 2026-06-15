@@ -6,6 +6,7 @@ result-*
 _site/
 
 scratch/
+tmp/
 *_demo.html
 sources/*
 

@@ -21,7 +21,9 @@ PARAGRAPHS = [{
     'text': (
         'A paragraph with *emphasis*, **bold**, the 19<sup>th</sup> '
         'century, an A & B ampersand, a footnote ref (1), '
+        '*cross\nline*, '
         '[a good link](https://example.test/x) and '
+        '[a Vatican-relative link](/content/example.html) and '
         '[a bad link](javascript:alert1).'
     ),
 }]
@@ -54,6 +56,7 @@ class MakeHtmlGoldenTests(unittest.TestCase):
 
     def test_inline_markup_renders_as_html(self):
         self.assertIn('<em>emphasis</em>', self.html)
+        self.assertIn('<em>cross<br>line</em>', self.html)
         self.assertIn('<strong>bold</strong>', self.html)
         self.assertIn('19<sup>th</sup>', self.html)
 
@@ -69,6 +72,7 @@ class MakeHtmlGoldenTests(unittest.TestCase):
     def test_http_links_are_linkified_and_other_schemes_are_not(self):
         self.assertIn('href="https://example.test/x"', self.html)
         self.assertIn('a good link</a>', self.html)
+        self.assertIn('href="https://www.vatican.va/content/example.html"', self.html)
         self.assertNotIn('javascript:', self.html)
         self.assertIn('a bad link', self.html)
 
@@ -79,6 +83,14 @@ class MakeHtmlGoldenTests(unittest.TestCase):
         self.assertNotIn('__INDICATOR_JSON__', self.html)
         self.assertNotIn('__DOC_NAME__', self.html)
         self.assertIn('"Fixture & Co"', self.html)
+
+    def test_generated_preamble_labels_nav_but_not_the_body(self):
+        # The fixture opens with unnumbered part-0/chapter-0 prose and no
+        # authored part_title, so the renderer generates a "Preamble" label
+        # for navigation while suppressing it as an on-page heading.
+        self.assertNotIn('class="part-title">Preamble', self.html)
+        self.assertIn('<a id="ch-0"></a>', self.html)
+        self.assertIn('Preamble', self.html)
 
 
 if __name__ == '__main__':

@@ -16,6 +16,26 @@ class CardMetaTests(unittest.TestCase):
             self.assertIn(meta['type'], make_index.TILE_KIND_LABEL, slug)
             self.assertIn(meta['type'], make_index.AUTHORITY_RANK, slug)
 
+    def test_sort_fields_use_requested_order(self):
+        self.assertEqual(
+            [(key, label) for key, label, _default, _reversed in make_index.SORT_FIELDS],
+            [
+                ('date', 'Date'),
+                ('name', 'Name'),
+                ('pope', 'Pope'),
+                ('class', 'Class'),
+                ('size', 'Size'),
+            ],
+        )
+
+    def test_default_direction_labels_for_date_and_size(self):
+        labels = {
+            key: (default, reversed_)
+            for key, _label, default, reversed_ in make_index.SORT_FIELDS
+        }
+        self.assertEqual(labels['date'], ('most recent', 'oldest first'))
+        self.assertEqual(labels['size'], ('longest first', 'shortest first'))
+
 
 class CardFieldsTests(unittest.TestCase):
     def test_encyclical_byline_bolds_the_pope(self):
@@ -40,6 +60,25 @@ class CardFieldsTests(unittest.TestCase):
 
         self.assertEqual(fields['kind_label'], '')
         self.assertEqual(fields['byline'], 'Some Issuing Body')
+
+    def test_body_word_count_uses_paragraph_text_only(self):
+        fields = make_index._card_fields('not_a_document', {
+            'name': 'Mystery Doc',
+            'desc': 'SOME ISSUING BODY',
+            'date': '',
+            'paragraphs': [
+                {
+                    'text': (
+                        "Alpha beta(1) [linked words](https://example.com) "
+                        "*don't* re-roll"
+                    ),
+                },
+            ],
+            'footnotes': [{'text': 'Ignored footnote text'}],
+            'appendices': [{'text': 'Ignored appendix text'}],
+        })
+
+        self.assertEqual(fields['word_count'], 6)
 
 
 if __name__ == '__main__':

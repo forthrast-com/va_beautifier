@@ -87,6 +87,8 @@ def linkify_anchors(text):
         scheme = HREF_SCHEME_RE.match(href)
         if scheme and scheme.group(1).lower() not in ('http', 'https'):
             return body
+        if href.startswith('/content/'):
+            href = 'https://www.vatican.va' + href
         return f'<a href="{href}" class="ext-link" target="_blank" rel="noopener">{body}</a>'
     return INLINE_LINK_RE.sub(replace, text)
 
@@ -107,16 +109,14 @@ def para_html(text, part=None, chapter=None):
     text = tighten(text)
     out = []
     for sub in [p.strip() for p in text.split('\n\n') if p.strip()]:
-        lines = sub.split('\n')
-        rendered = []
-        for ln in lines:
-            ln = e(ln)
-            ln = linkify_anchors(ln)
-            if part is not None:
-                ln = linkify_footnotes(ln, part, chapter)
-            ln = format_inline(ln)
-            rendered.append(ln)
-        out.append('<p>' + '<br>'.join(rendered) + '</p>')
+        rendered = e(sub)
+        rendered = linkify_anchors(rendered)
+        if part is not None:
+            rendered = linkify_footnotes(rendered, part, chapter)
+        rendered = inline_markup_to_html(
+            rendered, escaped=True, break_tag='<br>',
+        )
+        out.append('<p>' + rendered + '</p>')
     return '\n'.join(out)
 
 def end_matter_inline_html(text):
@@ -172,6 +172,9 @@ LONG_DOCS = {
     'antiqua_et_nova',
     'quo_vadis_humanitas',
     'sacrosanctum_concilium',
+    'fides_et_ratio',
+    'lumen_fidei',
+    'verbum_domini',
 }
 
 # The Vatican sources place the document title *between* lines of the
@@ -257,7 +260,10 @@ def next_cid():
 
 # para → indicator chapter id (for ch_paras)
 para_ch_id: dict[int, str] = {}
-SYNTHETIC_INTRO_DOCS = {'magnifica_humanitas'}
+# Documents whose sections are named topical headers, not numbered tiers —
+# the drawer/heading shows the bare title without a "Section N:" prefix.
+BARE_SECTION_DOCS = {'magnifica_humanitas', 'quo_vadis_humanitas',
+                     'fides_et_ratio', 'lumen_fidei', 'verbum_domini'}
 
 for p in paragraphs:
     part    = (p['part'], p['part_title'])
@@ -278,18 +284,24 @@ for p in paragraphs:
     if not same_part:
         cid = next_cid()
         if p['part'] == 0:
-            # Preface/introduction group. Documents that name it (GeS) get
-            # the heading; MH's source omits the otherwise necessary
-            # top-level introduction label, so supply it in the edition.
-            label = p['part_title'] or 'Introduction'
+            # Preface/introduction group. An authored part_title (GeS
+            # "Preface", SC "Introduction", QVH "Preliminary Note") renders as
+            # a visible body heading. Opening prose at chapter 0 with no
+            # authored title gets a *generated* "Preamble" label that is
+            # suppressed in the body but kept for navigation: it labels the
+            # contents drawer, the scroll indicator, and the no-JS TOC, and
+            # shows visibly in the PDF/EPUB (which have no live TOC to lean
+            # on). A part-0 group that runs straight into a chapter — AeN's
+            # roman "I. Introduction" — stays anchor-only under "Introduction".
+            authored_title = p['part_title']
+            is_preamble = not authored_title and p['chapter'] == 0
+            label = authored_title or ('Preamble' if is_preamble else 'Introduction')
             indicator_chapters.append({'id': cid, 'label': label, 'spacer': False, 'part': 0})
-            intro_heading = p['part_title']
-            if not intro_heading and args.doc in SYNTHETIC_INTRO_DOCS:
-                intro_heading = 'Introduction'
-            if intro_heading:
-                html_parts.append(h('h1', 'part-title', intro_heading).replace('<h1 ', f'<h1 id="{cid}" data-sticky '))
+            if authored_title:
+                html_parts.append(h('h1', 'part-title', authored_title).replace('<h1 ', f'<h1 id="{cid}" data-sticky '))
             else:
-                # anchor-only — give the next element the id instead of leaving an empty <h1>
+                # generated preamble or chapter-led part 0: anchor-only in the
+                # body — the label lives in the nav/TOC, not an on-page heading
                 html_parts.append(f'<a id="{cid}"></a>')
         else:
             indicator_chapters.append({'id': cid, 'label': f'Part {int_to_roman(p["part"])}', 'spacer': True, 'part': p['part']})
@@ -349,7 +361,7 @@ for p in paragraphs:
 
     if section != seen_section and p['section'] != 0:
         sec_id = f'sec-{p["part"]}-{p["chapter"]}-{p["section"]}'
-        if args.doc in {'magnifica_humanitas', 'quo_vadis_humanitas'}:
+        if args.doc in BARE_SECTION_DOCS:
             label = p['section_title']
         else:
             label = f'Section {p["section"]}'
@@ -508,24 +520,15 @@ for (part, chapter), ch_label in ch_order:
                if sb['part'] == part and sb['chapter'] == chapter]
     cid = part_chapter_to_cid.get((part, chapter), '')
     if part == 0 and chapter == 0:
-        group_label = ch_label or 'Introduction'
+        group_label = ch_label or 'Preamble'
     elif part == 0:
         group_label = chapter_full_label(chapter, ch_label)
     else:
         group_label = ch_label or f'Part {int_to_roman(part)}, Chapter {chapter}'
 
-    synthetic_intro = (
-        args.doc in SYNTHETIC_INTRO_DOCS and part == 0 and chapter == 0
-    )
-    if synthetic_intro:
-        group_label = 'Introduction'
-
-    # An unrooted preface with sections has no heading to nest under unless
-    # this edition deliberately supplies one (MH).
-    unrooted = (
-        part == 0 and chapter == 0 and not ch_label and secs
-        and not synthetic_intro
-    )
+    # Part-0/chapter-0 regions without an authored title now get a generated
+    # Preamble heading, so their sections can stay nested under that root.
+    unrooted = False
     item_cls = 'sec-nav-item unrooted' if unrooted else 'sec-nav-item'
 
     if not unrooted:
@@ -638,7 +641,7 @@ noscript_toc_parts = ['<ul class="noscript-toc-list">']
 for (part, chapter), ch_label in ch_order:
     cid = part_chapter_to_cid.get((part, chapter), '')
     if part == 0 and chapter == 0:
-        gl = ch_label or 'Preface / Introduction'
+        gl = ch_label or 'Preamble'
     elif part == 0:
         gl = chapter_full_label(chapter, ch_label)
     else:
@@ -823,7 +826,7 @@ page = f"""<!DOCTYPE html>
   {f'<p><a href="{e(doc_source)}" target="_blank" rel="noopener">Original Vatican document</a></p>' if doc_source else ''}
   <p>Email: <a href="mailto:me@forthrast.com">me@forthrast.com</a><br>
   Bluesky: <a href="https://bsky.app/profile/forthrast.com" target="_blank" rel="noopener">@forthrast.com</a><br>
-  GitHub: <a href="https://github.com/forthrast-com" target="_blank" rel="noopener">@forthrast-com</a></p>
+  GitHub: <a href="https://github.com/forthrast-com/va_beautifier" target="_blank" rel="noopener">@forthrast-com</a></p>
 </div>
 
 <div id="prefs-panel" hidden>

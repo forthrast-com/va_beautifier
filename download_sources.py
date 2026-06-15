@@ -65,6 +65,30 @@ SOURCES_MANIFEST = (
         'Magnifica Humanitas (English)',
     ),
     Source(
+        'fides_et_ratio_en',
+        'fides_et_ratio_en.html',
+        'https://www.vatican.va/content/john-paul-ii/en/encyclicals/documents/'
+        'hf_jp-ii_enc_14091998_fides-et-ratio.html',
+        'implemented',
+        'Fides et Ratio (English)',
+    ),
+    Source(
+        'lumen_fidei_en',
+        'lumen_fidei_en.html',
+        'https://www.vatican.va/content/francesco/en/encyclicals/documents/'
+        'papa-francesco_20130629_enciclica-lumen-fidei.html',
+        'implemented',
+        'Lumen Fidei (English)',
+    ),
+    Source(
+        'verbum_domini_en',
+        'verbum_domini_en.html',
+        'https://www.vatican.va/content/benedict-xvi/en/apost_exhortations/'
+        'documents/hf_ben-xvi_exh_20100930_verbum-domini.html',
+        'implemented',
+        'Verbum Domini (English)',
+    ),
+    Source(
         'fratelli_tutti_en',
         'Fratelli tutti_en.html',
         'https://www.vatican.va/content/francesco/en/encyclicals/documents/'

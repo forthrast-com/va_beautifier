@@ -20,6 +20,16 @@ PONTIFICATES = {
         'honorific': 'of His Holiness',
         'display':   'Pope Paul VI',
     },
+    'John Paul II': {
+        'start':     '1978-10-16',
+        'honorific': 'of His Holiness',
+        'display':   'Pope John Paul II',
+    },
+    'Benedict XVI': {
+        'start':     '2005-04-19',
+        'honorific': 'of His Holiness',
+        'display':   'Pope Benedict XVI',
+    },
     'Francis': {
         'start':     '2013-03-13',
         'honorific': 'of the Holy Father',
@@ -71,11 +81,26 @@ CARD_META = {
             'Certain Scenarios for the Future of Humanity'
         ),
     },
+    'fides_et_ratio': {
+        'type': 'encyclical',
+        'subtitle': 'on the Relationship Between Faith and Reason',
+    },
+    'lumen_fidei': {
+        'type': 'encyclical',
+        'subtitle': 'on Faith',
+    },
+    'verbum_domini': {
+        'type': 'apostolic_exhortation',
+        'subtitle': (
+            'on the Word of God in the Life and Mission of the Church'
+        ),
+    },
 }
 
 # Short label that appears tracked at the head of each tile.
 TILE_KIND_LABEL = {
     'encyclical':           'Encyclical Letter',
+    'apostolic_exhortation': 'Apostolic Exhortation',
     'council_constitution': 'Conciliar Constitution',
     'curia_note':           'Doctrinal Note',
     'commission_paper':     'Commission Paper',
@@ -83,19 +108,24 @@ TILE_KIND_LABEL = {
 
 # Canonical authority ranking, low = highest authority. Conciliar
 # constitutions (ecumenical council, promulgated by the Pope) outrank a
-# papal encyclical; a dicasterial doctrinal note exercises the Pope's
-# authority without speaking in his voice; an ITC commission paper is
-# explicitly advisory, not magisterial.
+# papal encyclical; a papal apostolic exhortation ranks just below an
+# encyclical; a dicasterial doctrinal note exercises the Pope's authority
+# without speaking in his voice; an ITC commission paper is explicitly
+# advisory, not magisterial.
 AUTHORITY_RANK = {
-    'council_constitution': 1,
-    'encyclical':           2,
-    'curia_note':           3,
-    'commission_paper':     4,
+    'council_constitution':  1,
+    'encyclical':            2,
+    'apostolic_exhortation': 3,
+    'curia_note':            4,
+    'commission_paper':      5,
 }
 
 
 _TAG_RE = re.compile(r'<[^>]+>')
+_MARKDOWN_LINK_RE = re.compile(r'\[([^\]]+)\]\([^)]+\)')
+_FOOTNOTE_REF_RE = re.compile(r'\(\d{1,3}\)')
 _TITLE_PREFIX_RE = re.compile(r'^(the |a |an )', re.IGNORECASE)
+_WORD_RE = re.compile(r"[^\W_]+(?:[’'-][^\W_]+)*")
 
 # Search aliases. If the blob (post-tag-strip, post-entity-decode,
 # lowercased) contains the trigger substring, the alias terms get
@@ -128,6 +158,23 @@ def _title_sort_key(name):
     return stripped.lower()
 
 
+def _body_word_count(data):
+    """Count body words from paragraph text only.
+
+    This deliberately excludes footnotes, front matter, signatures, and
+    appendices: catalogue size is a rough reading-body measure, not a
+    complete edition byte count.
+    """
+    text = '\n'.join(
+        para.get('text', '')
+        for para in data.get('paragraphs', ())
+    )
+    text = _MARKDOWN_LINK_RE.sub(r'\1', text)
+    text = _FOOTNOTE_REF_RE.sub(' ', text)
+    text = _TAG_RE.sub('', text)
+    return len(_WORD_RE.findall(text))
+
+
 def _card_fields(slug, data):
     """Collect all the tile-level fields for one document into one dict.
 
@@ -148,14 +195,15 @@ def _card_fields(slug, data):
     pont = PONTIFICATES.get(pont_name, {})
 
     # Byline shape is purely a function of `kind_type` + `PONTIFICATES`:
-    #   encyclical           → '{honorific} <strong>{pope}</strong>'
-    #   council_constitution → 'of the <strong>{body}</strong>,
-    #                           promulgated by {pope.display}'
+    #   encyclical,
+    #   apostolic_exhortation → '{honorific} <strong>{pope}</strong>'
+    #   council_constitution  → 'of the <strong>{body}</strong>,
+    #                            promulgated by {pope.display}'
     #   curia_note,
-    #   commission_paper     → '<strong>{body}</strong>'
+    #   commission_paper      → '<strong>{body}</strong>'
     # No per-doc editorial overrides — pope styling lives in PONTIFICATES,
     # body name comes from the TOML's `issued_by` field.
-    if kind_type == 'encyclical' and pont:
+    if kind_type in ('encyclical', 'apostolic_exhortation') and pont:
         byline = f'{pont["honorific"]} <strong>{escape(pont["display"])}</strong>'
     elif kind_type == 'council_constitution' and issued_by:
         byline = f'of the <strong>{escape(issued_by)}</strong>'
@@ -187,20 +235,22 @@ def _card_fields(slug, data):
         'pontif_name':     pont_name,
         'pontif_start':    pont.get('start', ''),
         'title_key':       _title_sort_key(data['name']),
+        'word_count':      _body_word_count(data),
     }
 
 
 # Ordered: which sort field is active controls which label appears
 # next to "Sorting by". The two direction labels read 'default' first
 # (what you get when reverse is off) then 'reversed'. Only date
-# defaults to descending; the rest default ascending (so pontificate
-# starts at Paul VI, authority starts at the conciliar constitutions,
-# alphabetical at A).
+# and size default to descending; the rest default ascending (so name starts
+# at A, pope starts at Paul VI, and class starts at the conciliar
+# constitutions).
 SORT_FIELDS = (
-    ('date',        'Promulgation', 'newest first',       'oldest first'),
-    ('pontificate', 'Pontificate',  'earliest',           'most recent'),
-    ('authority',   'Authority',    'most authoritative', 'least authoritative'),
-    ('title',       'Alphabetical', 'A–Z',                'Z–A'),
+    ('date',  'Date',  'most recent',        'oldest first'),
+    ('name',  'Name',  'A-Z',                'Z-A'),
+    ('pope',  'Pope',  'earliest',           'most recent'),
+    ('class', 'Class', 'highest authority',  'lowest authority'),
+    ('size',  'Size',  'longest first',      'shortest first'),
 )
 
 REVERSE_ICON_SVG = (
@@ -322,6 +372,7 @@ def render_card(slug, f):
         f'data-type-label="{escape(f["kind_label"], quote=True)}" '
         f'data-authority-rank="{AUTHORITY_RANK.get(f["kind_type"], 99)}" '
         f'data-title-key="{escape(f["title_key"], quote=True)}" '
+        f'data-word-count="{f["word_count"]}" '
         f'data-search="{escape(_search_blob(f), quote=True)}"'
     )
 
@@ -1026,8 +1077,8 @@ footer a:hover {{ color: var(--accent); text-decoration-color: var(--accent); }}
     <div class="sort-bar" aria-label="Sort controls">
       <span class="sort-label">
         <small>Sorting by</small>
-        <span class="sort-current">Promulgation</span>
-        <span class="sort-direction">— newest first</span>
+        <span class="sort-current">Date</span>
+        <span class="sort-direction">— most recent</span>
       </span>
       <div class="sort-options" role="group" aria-label="Sort field">
         {_sort_options_html()}
@@ -1048,7 +1099,7 @@ footer a:hover {{ color: var(--accent); text-decoration-color: var(--accent); }}
     <div class="contacts">
       <div><span>email</span><a href="mailto:me@forthrast.com">me@forthrast.com</a></div>
       <div><span>bsky</span><a href="https://bsky.app/profile/forthrast.com" target="_blank" rel="noopener">@forthrast.com</a></div>
-      <div><span>code</span><a href="https://github.com/forthrast-com" target="_blank" rel="noopener">@forthrast-com</a></div>
+      <div><span>code</span><a href="https://github.com/forthrast-com/va_beautifier" target="_blank" rel="noopener">@forthrast-com</a></div>
     </div>
     <div class="attribution">made with claude and codex ^•^</div>
   </footer>
@@ -1058,7 +1109,8 @@ footer a:hover {{ color: var(--accent); text-decoration-color: var(--accent); }}
   document.body.classList.remove('no-js');
 
   var SORT_META = {_sort_field_meta_json()};
-  var STORE_KEY = 'circulars:sort';
+  var LEGACY_SORTS = {{ title: 'name', pontificate: 'pope', authority: 'class' }};
+  var STORE_KEY = 'circulars:sort:v2';
 
   var grid     = document.querySelector('.editions');
   var input    = document.getElementById('filter-input');
@@ -1078,18 +1130,19 @@ footer a:hover {{ color: var(--accent); text-decoration-color: var(--accent); }}
       pontifName: el.dataset.pontifName || '',
       type:       el.dataset.typeLabel || '',
       authority:  parseInt(el.dataset.authorityRank, 10) || 99,
-      title:      el.dataset.titleKey || '',
+      name:       el.dataset.titleKey || '',
+      wordCount:  parseInt(el.dataset.wordCount, 10) || 0,
       search:     el.dataset.search || '',
     }};
   }});
 
-  // Which sorts get group headings. Date/alphabetical are continuous
-  // orderings where headings would be noise; pontificate and authority
+  // Which sorts get group headings. Date/name/size are continuous
+  // orderings where headings would be noise; pope and class
   // are the buckets the user scans by, so they get a tracked-caps
   // label (pope name, kind label).
   var GROUPING_KEY = {{
-    pontificate: function(r) {{ return r.pontifName; }},
-    authority:   function(r) {{ return r.type; }},
+    pope:  function(r) {{ return r.pontifName; }},
+    class: function(r) {{ return r.type; }},
   }};
 
   var state = {{ sort: 'date', reversed: false }};
@@ -1099,8 +1152,9 @@ footer a:hover {{ color: var(--accent); text-decoration-color: var(--accent); }}
 
   try {{
     var stored = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
-    if (stored && SORT_META[stored.sort]) {{
-      state.sort = stored.sort;
+    var storedSort = stored && (LEGACY_SORTS[stored.sort] || stored.sort);
+    if (stored && SORT_META[storedSort]) {{
+      state.sort = storedSort;
       state.reversed = !!stored.reversed;
     }}
   }} catch (e) {{ /* ignore corrupt prefs */ }}
@@ -1163,10 +1217,11 @@ footer a:hover {{ color: var(--accent); text-decoration-color: var(--accent); }}
 
   function compare(a, b) {{
     var sort = state.sort;
-    if (sort === 'date')        return cmp(a.date, b.date);
-    if (sort === 'pontificate') return cmp(a.pontif, b.pontif) || cmp(a.date, b.date);
-    if (sort === 'authority')   return cmp(a.authority, b.authority) || cmp(b.date, a.date);
-    if (sort === 'title')       return cmp(a.title, b.title);
+    if (sort === 'date')  return cmp(a.date, b.date);
+    if (sort === 'name')  return cmp(a.name, b.name);
+    if (sort === 'pope')  return cmp(a.pontif, b.pontif) || cmp(a.name, b.name);
+    if (sort === 'class') return cmp(a.authority, b.authority) || cmp(a.name, b.name);
+    if (sort === 'size')  return cmp(a.wordCount, b.wordCount) || cmp(a.name, b.name);
     return 0;
   }}
   function cmp(x, y) {{ return x < y ? -1 : x > y ? 1 : 0; }}
@@ -1178,11 +1233,11 @@ footer a:hover {{ color: var(--accent); text-decoration-color: var(--accent); }}
     Array.prototype.slice.call(grid.querySelectorAll('details.pdf-menu[open]'))
       .forEach(function(d) {{ d.removeAttribute('open'); }});
 
-    // Only date defaults to descending (newest first). Pontificate,
-    // authority, and alphabetical all default ascending — pope from
-    // Paul VI forward, authority from conciliar constitution down,
-    // letters from A. Reverse flips whichever default applies.
-    var descByDefault = (state.sort === 'date');
+    // Date and size default to descending (most recent, longest body).
+    // Name, pope, and class default ascending: letters from A, pope from
+    // Paul VI forward, and class from conciliar constitution down. Grouped
+    // sorts use name as their in-category tie-breaker.
+    var descByDefault = (state.sort === 'date' || state.sort === 'size');
     var descending = descByDefault !== state.reversed;
     rows.sort(function(a, b) {{
       var c = compare(a, b);

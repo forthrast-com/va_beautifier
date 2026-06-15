@@ -1,11 +1,15 @@
 DOCS  := gaudium_et_spes laudato_si magnifica_humanitas antiqua_et_nova \
-         quo_vadis_humanitas sacrosanctum_concilium
+         quo_vadis_humanitas sacrosanctum_concilium fides_et_ratio \
+         lumen_fidei verbum_domini
 HTMLS := $(DOCS:%=site/%.html)
 TOMLS := $(DOCS:%=build/%.toml)
 EPUBS := $(DOCS:%=site/downloads/%.epub)
-PDFS  := $(DOCS:%=site/downloads/%.pdf)
+PDFS  := $(DOCS:%=site/downloads/%-a4.pdf) \
+         $(DOCS:%=site/downloads/%-a5.pdf) \
+         $(DOCS:%=site/downloads/%-a6.pdf)
+BOOKS := $(EPUBS) $(PDFS)
 
-.PHONY: all fetch books site clean
+.PHONY: all fetch books site qa clean
 
 # `all` builds the books first so the landing page can report current
 # PDF/EPUB sizes; the index target depends on every HTML rendered too.
@@ -13,6 +17,9 @@ all: books site/index.html
 
 fetch:
 	python3 download_sources.py --category implemented
+
+qa: all
+	VA_REQUIRE_SITE_ARTIFACTS=1 python3 -m unittest tests.test_site_artifacts -v
 
 # --- TOML targets (explicit: each doc has distinct source deps) ---
 
@@ -40,36 +47,36 @@ build/sacrosanctum_concilium.toml: sources/Sacrosanctum\ Concilium_en.html \
                                     extract/sacrosanctum_concilium.py extract/_oldflat.py core.py
 	python3 parse.py sacrosanctum_concilium
 
+build/fides_et_ratio.toml: sources/fides_et_ratio_en.html \
+                           extract/fides_et_ratio.py extract/_modern.py core.py
+	python3 parse.py fides_et_ratio
+
+build/lumen_fidei.toml: sources/lumen_fidei_en.html \
+                        extract/lumen_fidei.py extract/_modern.py core.py
+	python3 parse.py lumen_fidei
+
+build/verbum_domini.toml: sources/verbum_domini_en.html \
+                          extract/verbum_domini.py extract/_modern.py core.py
+	python3 parse.py verbum_domini
+
 # --- HTML targets ---
 
 site/%.html: build/%.toml make_html.py assets/styles.css assets/scripts.js
 	python3 make_html.py $*
 
-site/index.html: $(HTMLS) $(EPUBS) make_index.py
+site/index.html: $(HTMLS) $(BOOKS) make_index.py
 	python3 make_index.py $(DOCS)
 
 # --- Books (requires pandoc + typst) ---
 
-# All four artefacts (EPUB plus A4, A5, and A6 PDFs) come from one make_book.py
-# invocation, so the epub rule below is the authoritative trigger and the
-# PDF rules at the bottom of this file are no-ops that just declare the
-# dependency for explicit `make site/downloads/foo-a5.pdf` calls.
-books: $(EPUBS)
+# All four artefacts (EPUB plus A4, A5, and A6 PDFs) come from one grouped
+# make_book.py invocation. If any sibling artefact is missing or stale, GNU
+# make rebuilds the whole group once.
+books: $(BOOKS)
 
-site/downloads/%.epub: build/%.toml make_book.py templates/book.typ templates/epub.css templates/strip_fn_backlink.lua
+site/downloads/%.epub site/downloads/%-a4.pdf \
+site/downloads/%-a5.pdf site/downloads/%-a6.pdf &: build/%.toml make_book.py templates/book.typ templates/epub.css templates/strip_fn_backlink.lua
 	python3 make_book.py $*
-
-# `make books` emits an .epub and three .pdfs in one shot; declare the PDFs
-# as side-effects of the
-# epub sibling so explicit `make site/downloads/foo-a5.pdf` works.
-site/downloads/%-a5.pdf: site/downloads/%.epub
-	@:
-
-site/downloads/%-a6.pdf: site/downloads/%.epub
-	@:
-
-site/downloads/%-a4.pdf: site/downloads/%.epub
-	@:
 
 # --- Housekeeping ---
 

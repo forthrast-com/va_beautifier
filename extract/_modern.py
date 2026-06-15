@@ -17,6 +17,11 @@ CHROME = ['script', 'style', 'meta', 'link', 'img', 'header',
 
 RE_CHAPTER_WORD = re.compile(r'^CHAPTER\s+([A-Z]+)$')
 
+# Footnote reference and definition anchors. The body cite carries
+# `name="_ftnref{N}"`; the tail definition carries `name="_ftn{N}"`; both
+# wrap the visible `[N]` marker.
+RE_FOOTNOTE_ANCHOR = re.compile(r'^_ftn(ref)?\d+$')
+
 
 def load_main(path, *, drop_chrome=False):
     """Parse a UTF-8 modern page; return `(soup, main-or-body)`."""
@@ -32,6 +37,22 @@ def chapter_word_marker(text):
     """The chapter number for a `CHAPTER ONE` delimiter line, else None."""
     match = RE_CHAPTER_WORD.match(text)
     return chapter_word_to_int(match.group(1)) if match else None
+
+
+def strip_footnote_anchors(soup):
+    """Unwrap footnote ref/def anchors to the bare `[N]` text they contain.
+
+    `clean_text` only short-circuits footnote anchors whose `href` is a
+    relative `#_ftn…` (the fragment-only form Verbum Domini uses). Lumen
+    Fidei instead gives every footnote anchor an *absolute* cross-document
+    href, so the generic `[text](href)` linkifier would wrap the `[N]`
+    marker in a Markdown link. Replacing these anchors with their text up
+    front lets the canonical `[N]` → `(N)` normalisation run on every modern
+    page regardless of how the source spelt the href. Cross-references to
+    *other* documents (no `_ftn` name) keep their anchors and stay linkable.
+    """
+    for anchor in soup.find_all('a', attrs={'name': RE_FOOTNOTE_ANCHOR}):
+        anchor.replace_with(anchor.get_text())
 
 
 def encyclical_front_matter(fm, title_upper):
