@@ -8,7 +8,13 @@ import re
 
 from bs4 import BeautifulSoup
 
-from core import br_lines, chapter_word_to_int, encyclical_split, split_around_title
+from core import (
+    br_lines,
+    chapter_word_to_int,
+    encyclical_split,
+    is_centred,
+    split_around_title,
+)
 
 
 # Non-content chrome that confuses tag walks when left in the tree.
@@ -37,6 +43,16 @@ def chapter_word_marker(text):
     """The chapter number for a `CHAPTER ONE` delimiter line, else None."""
     match = RE_CHAPTER_WORD.match(text)
     return chapter_word_to_int(match.group(1)) if match else None
+
+
+def is_signature_trailer(tag, promulgation, signature):
+    """True for the centred papal signature that trails the promulgation.
+
+    The modern encyclicals close with `Given in …` (the promulgation) then a
+    centred name line (`FRANCISCUS`, `JOHN PAUL II`). Capture the first such
+    centred line once the promulgation has been seen and none taken yet.
+    """
+    return bool(promulgation) and not signature and is_centred(tag)
 
 
 def strip_footnote_anchors(soup):

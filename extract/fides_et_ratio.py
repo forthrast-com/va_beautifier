@@ -38,7 +38,11 @@ from core import (
 )
 from project import SOURCES
 
-from ._modern import encyclical_front_matter, load_main
+from ._modern import (
+    encyclical_front_matter,
+    is_signature_trailer,
+    load_main,
+)
 
 
 EN_SRC = SOURCES / 'fides_et_ratio_en.html'
@@ -164,14 +168,14 @@ def extract():
                 state.part_title = 'Blessing'
                 continue
             # The papal signature is the centred trailer after the promulgation.
-            if promulgation and not signature:
+            if is_signature_trailer(p, promulgation, signature):
                 signature = clean_text(p, preserve_formatting=True)
             continue
 
         # unnumbered bold topical header → auto-numbered section
         # (`<b>…</b>` or `<b><i>…</i></b>`; the sole child is the <b> either way)
         if only_child_is(p, 'b'):
-            state.set_section(state.section + 1, heading_title(text))
+            state.add_section(heading_title(text))
             continue
 
         numbered = numbered_paragraph(p, RE_PARA)

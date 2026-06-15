@@ -164,7 +164,7 @@ def extract():
 
         # unnumbered bold topical header → auto-numbered section
         if only_child_is(p, 'b'):
-            state.set_section(state.section + 1, heading_title(text))
+            state.add_section(heading_title(text))
             continue
 
         numbered = numbered_paragraph(p, RE_PARA)

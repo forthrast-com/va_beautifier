@@ -201,6 +201,13 @@ class ExtractorRegressionTests(unittest.TestCase):
         # Absolute-href footnote anchors must not survive as markdown links.
         for p in data['paragraphs']:
             self.assertNotIn('](#_ftn', p['text'])
+        # The closing Marian prayer trails §60 unnumbered; the single-pass walk
+        # folds it onto §60 in verse form (the earlier two-phase walk dropped
+        # it). Pin it so the tail is never silently truncated again.
+        para_60 = next(p for p in data['paragraphs'] if p['number'] == 60)
+        self.assertIn('Mother, help our faith!', para_60['text'])
+        self.assertTrue(para_60['text'].rstrip().endswith(
+            'your Son, our Lord!'))
 
     @needs_sources(verbum_domini.EN_SRC)
     def test_verbum_domini_recovers_parts_and_loose_first_paragraph(self):

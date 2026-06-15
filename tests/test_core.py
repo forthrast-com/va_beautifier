@@ -412,6 +412,20 @@ class HeadingStateTests(unittest.TestCase):
         self.assertEqual(record['chapter_subtitle'], 'Subtitle')
         self.assertEqual(record['section'], 0)
 
+    def test_add_section_auto_numbers_within_chapter(self):
+        state = HeadingState()
+        state.set_chapter(2, 'Ch')
+        state.add_section('First topic')
+        state.add_section('Second topic')
+
+        self.assertEqual(state.section, 2)
+        self.assertEqual(state.section_title, 'Second topic')
+
+        # A new chapter resets the running section count.
+        state.set_chapter(3, 'Next')
+        state.add_section('Fresh topic')
+        self.assertEqual(state.section, 1)
+
 
 class NumberedParagraphTests(unittest.TestCase):
     PATTERN = re.compile(r'^(\d+)\.\s+(.+)$', re.DOTALL)

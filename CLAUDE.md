@@ -261,6 +261,26 @@ config-driven generic walker: the dialects diverge exactly where a
 framework would need escape hatches, and the drop-a-file extractor
 contract is the part of the design that works.
 
+Shared mechanics keep growing as patterns prove out: `HeadingState.add_section`
+(the auto-numbered bold-section idiom in LF/MH/FeR/VD) and
+`_modern.is_signature_trailer` (the centred name line after the
+promulgation). The modern dialect also converges on a single end-matter
+shape — walk the body span up to `first_note_idx` (the first
+`name="_ftnN"` definition anchor), then `extract_footnotes` the tail —
+used by MH, VD, and now LF. **LS keeps the two-phase split** because its
+tail interleaves *titled* prayer appendices with the footnotes, which the
+single slice can't separate.
+
+The single-pass shape is preferred for a reason beyond brevity: it captures
+the whole body span and routes every paragraph, so nothing in the tail can
+be *silently dropped*. LF's old walk was a half-copy of LS's two-phase that
+forgot the closing Marian prayer (untitled, trailing §60) — the prayer fell
+through the phase-2 loop and vanished. The lesson is **route, don't drop**:
+an ad-hoc tail loop that only recognises footnote/promulgation/signature
+discards anything else without a peep. Treat an unclassified non-empty `<p>`
+in the body span as a bug, not a no-op; a regression test pins the recovered
+prayer (`tests/test_extractors.py`).
+
 Two cautions from the refactor:
 
 - `is_centred` accepts either `align="center"` or a `text-align:center`

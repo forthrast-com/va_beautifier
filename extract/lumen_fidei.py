@@ -25,6 +25,7 @@ from core import (
     HeadingState,
     assign_footnote_context,
     clean_text,
+    extract_footnotes,
     heading_title,
     is_centred,
     is_promulgation,
@@ -32,7 +33,6 @@ from core import (
     numbered_paragraph,
     only_child_is,
     paragraph_record,
-    parse_footnote,
     title_case,
 )
 from project import SOURCES
@@ -40,6 +40,7 @@ from project import SOURCES
 from ._modern import (
     chapter_word_marker,
     encyclical_front_matter,
+    is_signature_trailer,
     load_main,
     strip_footnote_anchors,
 )
@@ -71,45 +72,55 @@ def _chapter_title(text):
 
 def extract():
     soup, main = load_main(EN_SRC, drop_chrome=True)
-    strip_footnote_anchors(soup)
     ps = main.find_all('p')
 
     fm_p = next((p for p in ps if 'ENCYCLICAL LETTER' in p.get_text()), None)
     desc_pre, desc_post = encyclical_front_matter(fm_p, TITLE_UPPER)
 
-    # The body ends at the last numbered paragraph; the promulgation,
-    # signature, and footnote definitions all trail it unnumbered.
-    last_body_idx = max(
-        (i for i, p in enumerate(ps) if RE_PARA.match(clean_text(p))),
-        default=-1,
+    # The footnote definitions are a contiguous tail block, each opening with
+    # an `<a name="_ftnN">` anchor (the body cites carry `_ftnrefN`). Single
+    # pass over the body up to that boundary, then slice the notes off the
+    # tail — the same shape MH and VD use. Locate the boundary *before*
+    # unwrapping the anchors, which would erase the marker.
+    first_note_idx = next(
+        (i for i, p in enumerate(ps)
+         if p.find('a', attrs={'name': re.compile(r'^_ftn\d+$')})), None
     )
+    if first_note_idx is None:
+        raise ValueError(
+            f'{EN_SRC.name}: no footnote definition (name="_ftnN") found — '
+            'cannot locate the end of the body text'
+        )
+    strip_footnote_anchors(soup)
 
     paragraphs = []
-    footnotes = []
     promulgation = ''
     signature = ''
 
-    # ─── Phase 1: body walk ──────────────────────────────────────────────
     state = HeadingState()
     pending_chapter_num = None
 
-    for i in range(last_body_idx + 1):
-        p = ps[i]
+    for p in ps[:first_note_idx]:
         text = clean_text(p)
         if not text or p is fm_p:
             continue
 
         has_b = bool(p.find('b'))
 
-        # chapter marker: <p align="center">CHAPTER ONE</p> (no <b>)
-        if is_centred(p) and not has_b:
-            chapter_num = chapter_word_marker(text)
-            if chapter_num is not None:
-                pending_chapter_num = chapter_num
-            continue
-
-        # centred bold following a CHAPTER N marker: the chapter title
-        if is_centred(p) and has_b:
+        if is_centred(p):
+            # Once the promulgation is seen, the only centred line left is the
+            # papal signature ("FRANCISCUS"); take it before the chapter
+            # branches below would treat it as a (title-less) chapter line.
+            if is_signature_trailer(p, promulgation, signature):
+                signature = clean_text(p, preserve_formatting=True)
+                continue
+            # chapter marker: <p align="center">CHAPTER ONE</p> (no <b>),
+            # then its centred-bold scriptural title
+            if not has_b:
+                chapter_num = chapter_word_marker(text)
+                if chapter_num is not None:
+                    pending_chapter_num = chapter_num
+                continue
             if pending_chapter_num is not None:
                 state.set_chapter(pending_chapter_num, _chapter_title(text))
                 pending_chapter_num = None
@@ -117,7 +128,7 @@ def extract():
 
         # unnumbered bold topical header → auto-numbered section
         if only_child_is(p, 'b'):
-            state.set_section(state.section + 1, heading_title(text))
+            state.add_section(heading_title(text))
             continue
 
         numbered = numbered_paragraph(p, RE_PARA)
@@ -127,36 +138,21 @@ def extract():
             ))
             continue
 
+        # The promulgation dateline trails the last numbered paragraph; catch
+        # it before the continuation fallback would fold it into §60.
+        if is_promulgation(text):
+            promulgation = clean_text(p, preserve_formatting=True)
+            continue
+
         # unnumbered continuation prose following a numbered paragraph
         if paragraphs and not has_b:
             paragraphs[-1]['text'] += '\n\n' + normalise_footnote_refs(
                 clean_text(p, preserve_formatting=True), bracketed=True
             )
 
-    # ─── Phase 2: end matter (promulgation, signature, footnotes) ─────────
-    for i in range(last_body_idx + 1, len(ps)):
-        p = ps[i]
-        text = clean_text(p)
-        if not text:
-            continue
-
-        footnote = parse_footnote(
-            clean_text(p, preserve_formatting=True),
-            RE_FOOTNOTE, bracketed_refs=True,
-        )
-        if footnote:
-            footnotes.append(footnote)
-            continue
-
-        if is_promulgation(text):
-            promulgation = clean_text(p, preserve_formatting=True)
-            continue
-
-        # The papal signature ("FRANCISCUS") is the centred trailer after
-        # the promulgation; capture the first one and ignore later ones.
-        if is_centred(p) and promulgation and not signature:
-            signature = clean_text(p, preserve_formatting=True)
-
+    footnotes = extract_footnotes(
+        ps[first_note_idx:], RE_FOOTNOTE, bracketed_refs=True
+    )
     footnotes = assign_footnote_context(footnotes, paragraphs)
 
     return {

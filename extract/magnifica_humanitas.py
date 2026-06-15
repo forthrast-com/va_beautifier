@@ -130,7 +130,7 @@ def extract():
                 # Primary headings are mixed case except the closing
                 # CONCLUSION; heading_title normalises all-caps ones the
                 # way chapter titles are and passes the rest through.
-                state.set_section(state.section + 1, heading_title(heading))
+                state.add_section(heading_title(heading))
             continue
 
         if is_promulgation(text):

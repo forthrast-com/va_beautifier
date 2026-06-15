@@ -363,6 +363,15 @@ class HeadingState:
         self.section_title = title
         self.sub_heading = ''
 
+    def add_section(self, title=''):
+        """Open the next auto-numbered section under the current chapter.
+
+        The modern encyclicals (LF, MH, FeR, VD) divide a chapter with
+        unnumbered bold topical headers; each becomes the next section in
+        sequence. Sugar over `set_section(self.section + 1, …)`.
+        """
+        self.set_section(self.section + 1, title)
+
     def kwargs(self):
         """The context keywords accepted by `paragraph_record`."""
         return {
