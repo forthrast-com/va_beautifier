@@ -18,6 +18,28 @@ all: books site/index.html
 fetch:
 	python3 download_sources.py --category implemented
 
+# Source snapshots are fetched on demand too, so a build target can pull the
+# missing Vatican HTML rather than failing at the first absent prerequisite.
+define FETCH_SOURCE
+$1: download_sources.py
+	python3 download_sources.py $2
+endef
+
+$(eval $(call FETCH_SOURCE,sources/gaudium_et_spes_en.html,gaudium_et_spes_en))
+$(eval $(call FETCH_SOURCE,sources/gaudium_et_spes_lt.html,gaudium_et_spes_lt))
+$(eval $(call FETCH_SOURCE,sources/laudato_si_en.html,laudato_si_en))
+$(eval $(call FETCH_SOURCE,sources/laudato_si_lt.html,laudato_si_lt))
+$(eval $(call FETCH_SOURCE,sources/magnifica_humanitas_en.html,magnifica_humanitas_en))
+$(eval $(call FETCH_SOURCE,sources/fides_et_ratio_en.html,fides_et_ratio_en))
+$(eval $(call FETCH_SOURCE,sources/lumen_fidei_en.html,lumen_fidei_en))
+$(eval $(call FETCH_SOURCE,sources/verbum_domini_en.html,verbum_domini_en))
+$(eval $(call FETCH_SOURCE,sources/Fratelli\ tutti_en.html,fratelli_tutti_en))
+$(eval $(call FETCH_SOURCE,sources/Sacrosanctum\ Concilium_en.html,sacrosanctum_concilium_en))
+$(eval $(call FETCH_SOURCE,sources/Sacrosanctum\ Concilium_la.html,sacrosanctum_concilium_lt))
+$(eval $(call FETCH_SOURCE,sources/antiqua_et_nova_en.html,antiqua_et_nova_en))
+$(eval $(call FETCH_SOURCE,sources/quo_vadis_humanitas_en.html,quo_vadis_humanitas_en))
+$(eval $(call FETCH_SOURCE,sources/Participation\ of\ the\ Holy\ Father\ Francis\ at\ the\ G7\ in\ Borgo\ Egnazia\ \(Puglia\)\ \(14\ June\ 2024\).html,francis_g7_ai_en))
+
 qa: all
 	VA_REQUIRE_SITE_ARTIFACTS=1 python3 -m unittest tests.test_site_artifacts -v
 
