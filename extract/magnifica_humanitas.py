@@ -9,10 +9,12 @@ Bold-italic headings nested below primary headings become `sub_heading`.
 import re
 
 from core import (
+    RE_FOOTNOTE,
     HeadingState,
     assign_footnote_context,
     clean_text,
     extract_footnotes,
+    flatten_ws,
     heading_title,
     is_centred,
     is_promulgation,
@@ -40,10 +42,9 @@ IDENTIFIER = 'papal:magnifica-humanitas:2026-05-15'
 TITLE_UPPER = 'MAGNIFICA HUMANITAS'
 
 RE_PARA = re.compile(r'^(\d+)\.\s+(.+)$', re.DOTALL)
-RE_FOOTNOTE = re.compile(r'^\[\s*(\d+)\s*\]\s*(.+)$', re.DOTALL)
 
 def _heading_text(p):
-    text = re.sub(r'\s+', ' ', p.get_text(separator=' ', strip=True)).strip()
+    text = flatten_ws(p.get_text(separator=' ', strip=True))
     return text.replace('R esponsibility', 'Responsibility')
 
 
@@ -157,6 +158,11 @@ def extract():
         'pontificate': 'Leo XIV',
         'date': DATE,
         'identifier': IDENTIFIER,
+        'type': 'encyclical',
+        'subtitle': (
+            'on Safeguarding the Human Person '
+            'in the Time of Artificial Intelligence'
+        ),
         # The pope is already named in `desc` ("ENCYCLICAL LETTER OF
         # HIS HOLINESS POPE LEO XIV"), so the title-page foot stays bare.
         'show_title_author': False,

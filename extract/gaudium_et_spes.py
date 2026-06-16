@@ -9,12 +9,14 @@ Quirks:
 """
 
 import re
-from bs4 import BeautifulSoup, NavigableString, Tag
+from bs4 import NavigableString, Tag
 
 from core import (
     HeadingState,
     assign_footnote_context,
     clean_text,
+    flatten_ws,
+    make_soup,
     normalise_footnote_refs,
     numbered_paragraph,
     paragraph_record,
@@ -83,7 +85,7 @@ def _walk_body(body_soup):
     current = None
 
     def process_bold_heading(text):
-        text = re.sub(r'\s+', ' ', text).strip()
+        text = flatten_ws(text)
 
         if text == 'PREFACE':
             state.set_part(0, 'Preface')
@@ -112,7 +114,7 @@ def _walk_body(body_soup):
         if m:
             state.set_section(
                 parse_num(m.group(1)),
-                title_case(re.sub(r'\s+', ' ', m.group(2)).strip()),
+                title_case(flatten_ws(m.group(2))),
             )
             return True
         return False
@@ -131,13 +133,13 @@ def _walk_body(body_soup):
         bolds = tag.find_all('b')
         if bolds:
             for b in bolds:
-                bt = re.sub(r'\s+', ' ', b.get_text(separator=' ')).strip()
+                bt = flatten_ws(b.get_text(separator=' '))
                 if bt:
                     process_bold_heading(bt)
             if tag.name == 'center':
                 continue
             if tag.find('b') and RE_SECTION.match(
-                re.sub(r'\s+', ' ', tag.find('b').get_text()).strip()
+                flatten_ws(tag.find('b').get_text())
             ):
                 continue
 
@@ -168,7 +170,7 @@ RE_NOTE_CHAPTER = re.compile(r'^Chapter\s+(\d+|[IVX]+)$', re.IGNORECASE)
 
 
 def _extract_footnotes(notes_html):
-    notes_soup = BeautifulSoup(notes_html, 'html.parser')
+    notes_soup = make_soup(notes_html)
     footnotes = []
     part, chapter = 0, 0
     for tag in notes_soup.find_all('p'):
@@ -196,10 +198,10 @@ def _extract_footnotes(notes_html):
 def _extract_latin_headings():
     """Latin source: bold tags carry a per-paragraph micro-summary keyed by §N."""
     with open(LT_SRC, encoding='latin-1') as f:
-        soup = BeautifulSoup(f.read(), 'html.parser')
-    bolds = [re.sub(r'\s+', ' ', b.get_text(' ', strip=True))
+        soup = make_soup(f.read())
+    bolds = [flatten_ws(b.get_text(' ', strip=True))
              for b in soup.find_all('b')
-             if re.sub(r'\s+', ' ', b.get_text(' ', strip=True))]
+             if flatten_ws(b.get_text(' ', strip=True))]
     out = {}
     i = 0
     while i < len(bolds):
@@ -222,7 +224,7 @@ def extract():
     body_html = body_html[body_html.find('<hr />'):]
 
     desc, promulgation = _extract_frontmatter(body_html)
-    paragraphs = _walk_body(BeautifulSoup(body_html, 'html.parser'))
+    paragraphs = _walk_body(make_soup(body_html))
     footnotes = assign_footnote_context(
         _extract_footnotes(notes_html), paragraphs, preserve_scope=True
     )
@@ -240,6 +242,8 @@ def extract():
         'pontificate': 'Paul VI',
         'date': DATE,
         'identifier': IDENTIFIER,
+        'type': 'council_constitution',
+        'kind_long': 'Pastoral Constitution on the Church in the Modern World',
         'desc': desc,
         'desc_post': '',
         'promulgation': title_case(promulgation),

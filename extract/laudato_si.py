@@ -214,6 +214,8 @@ def extract():
         'pontificate': 'Francis',
         'date': DATE,
         'identifier': IDENTIFIER,
+        'type': 'encyclical',
+        'subtitle': 'on Care for Our Common Home',
         # The pope is already named in `desc` ("ENCYCLICAL LETTER OF
         # THE HOLY FATHER FRANCIS"), so the title-page foot stays bare.
         'show_title_author': False,

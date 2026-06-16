@@ -147,6 +147,11 @@ def extract():
         'pontificate': 'Leo XIV',
         'date': DATE,
         'identifier': IDENTIFIER,
+        'type': 'commission_paper',
+        'subtitle': (
+            'Thinking through Christian Anthropology in the Face of '
+            'Certain Scenarios for the Future of Humanity'
+        ),
         'desc': 'International Theological Commission',
         'desc_post': 'Thinking through Christian Anthropology in the Face of '
                      'Certain Scenarios for the Future of Humanity',

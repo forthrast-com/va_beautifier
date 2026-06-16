@@ -20,18 +20,19 @@ its own:
 
 import re
 
-from bs4 import BeautifulSoup
-
 from core import (
     HeadingState,
     assign_footnote_context,
     clean_text,
+    flatten_ws,
     heading_title,
     is_centred,
     is_promulgation,
+    make_soup,
     normalise_footnote_refs,
     normalise_footnote_text,
     numbered_paragraph,
+    notes_between_anchors,
     only_child_is,
     paragraph_record,
     roman_to_int,
@@ -98,25 +99,20 @@ def _footnotes(soup):
             'source structure has changed or the snapshot is not this dialect'
         )
     markup = str(first.find_parent('div'))
-    defs = list(RE_DEF.finditer(markup))
-    notes = []
-    for index, match in enumerate(defs):
-        end = defs[index + 1].start() if index + 1 < len(defs) else len(markup)
-        body = BeautifulSoup(
-            '<p>' + markup[match.end():end] + '</p>', 'html.parser'
-        ).p
+
+    def text_of(slice_markup):
+        body = make_soup('<p>' + slice_markup + '</p>').p
         text = normalise_footnote_text(
             normalise_footnote_refs(clean_text(body, preserve_formatting=True))
         )
         # The source footnote blocks use line wrapping as layout noise. Flatten
         # that noise so the extracted note reads as a single prose paragraph.
-        text = re.sub(r'\s+', ' ', text).strip()
+        text = flatten_ws(text)
         text = re.sub(r'([“‘])\s+', r'\1', text)
         text = re.sub(r'\s+([”’])', r'\1', text)
-        notes.append({
-            'part': 0, 'chapter': 0, 'number': int(match.group(1)), 'text': text,
-        })
-    return notes
+        return text
+
+    return notes_between_anchors(markup, RE_DEF, text_of=text_of)
 
 
 def extract():
@@ -221,6 +217,8 @@ def extract():
         'pontificate': 'John Paul II',
         'date': DATE,
         'identifier': IDENTIFIER,
+        'type': 'encyclical',
+        'subtitle': 'on the Relationship Between Faith and Reason',
         # The pope is already named in `desc` ("ENCYCLICAL LETTER … OF THE
         # SUPREME PONTIFF JOHN PAUL II"), so the title-page foot stays bare.
         'show_title_author': False,

@@ -21,9 +21,8 @@ are unwrapped to ``[N]`` for the canonical normalisation regardless.
 
 import re
 
-from bs4 import BeautifulSoup
-
 from core import (
+    RE_FOOTNOTE,
     HeadingState,
     assign_footnote_context,
     chapter_word_to_int,
@@ -32,6 +31,7 @@ from core import (
     heading_title,
     is_centred,
     is_promulgation,
+    make_soup,
     normalise_footnote_refs,
     numbered_paragraph,
     only_child_is,
@@ -56,7 +56,6 @@ IDENTIFIER = 'papal:verbum-domini:2010-09-30'
 TITLE_UPPER = 'VERBUM DOMINI'
 
 RE_PARA = re.compile(r'^(\d+)\s*\.\s+(.+)$', re.DOTALL)
-RE_FOOTNOTE = re.compile(r'^\[\s*(\d+)\s*\]\s*(.+)$', re.DOTALL)
 RE_PART = re.compile(r'^PART\s+([A-Z]+)$')
 
 _QUOTE_CHARS = '“"‘’”\''
@@ -75,7 +74,7 @@ def _trailing_prose(tag):
             break
         parts.append(str(sibling))
     fragment = ''.join(parts).strip()
-    return BeautifulSoup(f'<p>{fragment}</p>', 'html.parser').p if fragment else None
+    return make_soup(f'<p>{fragment}</p>').p if fragment else None
 
 
 def extract():
@@ -198,6 +197,10 @@ def extract():
         'pontificate': 'Benedict XVI',
         'date': DATE,
         'identifier': IDENTIFIER,
+        'type': 'apostolic_exhortation',
+        'subtitle': (
+            'on the Word of God in the Life and Mission of the Church'
+        ),
         # The pope is already named in `desc` ("POST-SYNODAL APOSTOLIC
         # EXHORTATION … OF THE HOLY FATHER BENEDICT XVI"), so the title-page
         # foot stays bare.

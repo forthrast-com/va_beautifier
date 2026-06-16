@@ -13,6 +13,7 @@ from core import (
     ch_order_label,
     clean_text,
     encyclical_split,
+    flatten_ws,
     heading_title,
     inline_markup_to_html,
     int_to_roman,
@@ -42,6 +43,14 @@ class TextHelperTests(unittest.TestCase):
             clean_text(soup.p),
             'First\nSecond [link](https://example.test/x) [1]',
         )
+
+    def test_flatten_ws_collapses_newlines_unlike_clean_text(self):
+        # The distinguishing behaviour: flatten_ws folds line breaks into
+        # spaces (layout noise), where clean_text keeps them (content).
+        self.assertEqual(flatten_ws('  a\n  b \t c\n'), 'a b c')
+        soup = BeautifulSoup('<p>First<br>Second</p>', 'html.parser')
+        self.assertEqual(clean_text(soup.p), 'First\nSecond')
+        self.assertEqual(flatten_ws(clean_text(soup.p)), 'First Second')
 
     def test_clean_text_preserves_authored_inline_formatting_when_requested(self):
         soup = BeautifulSoup(
@@ -227,6 +236,8 @@ class TomlTests(unittest.TestCase):
                 date='2024-01-15',
                 identifier='papal:sample:2024-01-15',
                 rights='© 2024 Holy See',
+                type='encyclical',
+                subtitle='on the Sample Document',
                 chapter_style='roman',
                 book_toc_depth=4,
                 paragraphs=[],
@@ -240,6 +251,8 @@ class TomlTests(unittest.TestCase):
         self.assertEqual(data['date'], '2024-01-15')
         self.assertEqual(data['identifier'], 'papal:sample:2024-01-15')
         self.assertEqual(data['rights'], '© 2024 Holy See')
+        self.assertEqual(data['type'], 'encyclical')
+        self.assertEqual(data['subtitle'], 'on the Sample Document')
         self.assertEqual(data['chapter_style'], 'roman')
         self.assertEqual(data['book_toc_depth'], 4)
         self.assertEqual(data['publisher'], 'circulars.forthrast.com')

@@ -43,59 +43,9 @@ PONTIFICATES = {
 }
 
 
-# Structured card metadata per document. Each entry declares a `type`
-# whose template controls what gets bolded and how the description flows.
-# Adding a doc means adding a row here; adding a doc category means adding
-# a branch in `_card_fields`.
-CARD_META = {
-    'gaudium_et_spes': {
-        'type': 'council_constitution',
-        'kind_long': 'Pastoral Constitution on the Church in the Modern World',
-    },
-    'sacrosanctum_concilium': {
-        'type': 'council_constitution',
-        'kind_long': 'Constitution on the Sacred Liturgy',
-    },
-    'laudato_si': {
-        'type': 'encyclical',
-        'subtitle': 'on Care for Our Common Home',
-    },
-    'magnifica_humanitas': {
-        'type': 'encyclical',
-        'subtitle': (
-            'on Safeguarding the Human Person '
-            'in the Time of Artificial Intelligence'
-        ),
-    },
-    'antiqua_et_nova': {
-        'type': 'curia_note',
-        'subtitle': (
-            'Note on the Relationship Between Artificial Intelligence '
-            'and Human Intelligence'
-        ),
-    },
-    'quo_vadis_humanitas': {
-        'type': 'commission_paper',
-        'subtitle': (
-            'Thinking through Christian Anthropology in the Face of '
-            'Certain Scenarios for the Future of Humanity'
-        ),
-    },
-    'fides_et_ratio': {
-        'type': 'encyclical',
-        'subtitle': 'on the Relationship Between Faith and Reason',
-    },
-    'lumen_fidei': {
-        'type': 'encyclical',
-        'subtitle': 'on Faith',
-    },
-    'verbum_domini': {
-        'type': 'apostolic_exhortation',
-        'subtitle': (
-            'on the Word of God in the Life and Mission of the Church'
-        ),
-    },
-}
+# Structured card metadata lives in each document TOML: `type`, plus either
+# `subtitle` or `kind_long`. Adding a document should not require touching this
+# renderer unless it introduces a new document category.
 
 # Short label that appears tracked at the head of each tile.
 TILE_KIND_LABEL = {
@@ -183,13 +133,12 @@ def _card_fields(slug, data):
     constitutions, dicastery notes, and theological-commission papers.
     The bolded element in each byline is the human-or-body that the
     rendered card most wants the eye to land on."""
-    meta = CARD_META.get(slug, {})
-    kind_type = meta.get('type', '')
-    subtitle = meta.get('subtitle', '')
+    kind_type = data.get('type', '')
+    subtitle = data.get('subtitle', '')
     byline = ''
 
     if kind_type == 'council_constitution':
-        subtitle = meta.get('kind_long', '')
+        subtitle = data.get('kind_long', '')
     issued_by = data.get('issued_by', '')
     pont_name = data.get('pontificate', '')
     pont = PONTIFICATES.get(pont_name, {})
@@ -437,10 +386,23 @@ def _sort_field_meta_json():
     })
 
 
-def missing_card_meta(slugs):
-    """Slugs with no CARD_META entry — their tiles would silently render
-    without a kind label, subtitle, or styled byline."""
-    return [slug for slug in slugs if slug not in CARD_META]
+def missing_tile_meta(docs):
+    """Slugs whose TOML lacks tile metadata.
+
+    Missing metadata is allowed so queued/local experiments can still render,
+    but first-class catalogue documents should carry it beside their document
+    metadata in the extractor.
+    """
+    missing = []
+    for slug, data in docs.items():
+        kind_type = data.get('type', '')
+        if not kind_type:
+            missing.append(slug)
+        elif kind_type == 'council_constitution' and not data.get('kind_long'):
+            missing.append(slug)
+        elif kind_type != 'council_constitution' and not data.get('subtitle'):
+            missing.append(slug)
+    return missing
 
 
 def main():
@@ -448,10 +410,11 @@ def main():
     if not slugs:
         raise SystemExit('usage: python make_index.py DOC [DOC ...]')
 
-    unstyled = missing_card_meta(slugs)
+    docs = {slug: read_toml(BUILD / f'{slug}.toml') for slug in slugs}
+    unstyled = missing_tile_meta(docs)
     if unstyled:
         print(
-            f'make_index.py: warning: no CARD_META entry for '
+            f'make_index.py: warning: no tile metadata in TOML for '
             f'{", ".join(unstyled)} — tile renders without kind/subtitle/'
             f'byline styling',
             file=sys.stderr,
@@ -459,8 +422,7 @@ def main():
 
     # Server-side default: reverse chronological by promulgation date. JS
     # picks up the same default when it boots, so first paint matches.
-    fields_by_slug = {slug: _card_fields(slug, read_toml(BUILD / f'{slug}.toml'))
-                      for slug in slugs}
+    fields_by_slug = {slug: _card_fields(slug, docs[slug]) for slug in slugs}
     slugs = sorted(
         slugs,
         key=lambda s: fields_by_slug[s]['iso_date'],

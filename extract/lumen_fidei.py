@@ -4,7 +4,8 @@ Modern Bootstrap dialect, close kin to *Laudato Si'*: word-based
 `CHAPTER ONE` markers followed by a centred-bold scriptural chapter title,
 and unnumbered bold topical headers within each chapter (mapped to
 auto-numbered sections, like *Magnifica Humanitas*). There is no Roman
-section tier and no appendix.
+section tier; the closing Marian prayer is a source `<blockquote>` trailing
+§60.
 
 The one wrinkle versus LS: every footnote anchor carries an *absolute*
 cross-document href, so the anchors are unwrapped to their `[N]` text
@@ -16,12 +17,14 @@ Structure (per <p> in <main>):
   - <p align="center"><b>TITLE (cf. …)</b></p>  — chapter title
   - <p><b>Topical header</b></p>                — section (auto-numbered)
   - <p>N. Body…</p>                             — numbered paragraph
+  - <blockquote><p>Prayer…</p></blockquote>     — italic verse continuation
   - <p>[N] Footnote…</p>                        — footnote definition (tail)
 """
 
 import re
 
 from core import (
+    RE_FOOTNOTE,
     HeadingState,
     assign_footnote_context,
     clean_text,
@@ -59,7 +62,6 @@ IDENTIFIER = 'papal:lumen-fidei:2013-06-29'
 TITLE_UPPER = 'LUMEN FIDEI'
 
 RE_PARA = re.compile(r'^(\d+)\s*\.\s+(.+)$', re.DOTALL)
-RE_FOOTNOTE = re.compile(r'^\[\s*(\d+)\s*\]\s*(.+)$', re.DOTALL)
 
 # title_case capitalises the `cf` of a parenthetical scripture citation
 # ("(cf. 1 Jn 4:16)"); restore the lower-case scholarly abbreviation.
@@ -68,6 +70,18 @@ _CF_FIX = re.compile(r'\(Cf\.')
 
 def _chapter_title(text):
     return _CF_FIX.sub('(cf.', title_case(text))
+
+
+def _continuation_text(p):
+    text = normalise_footnote_refs(
+        clean_text(p, preserve_formatting=True), bracketed=True
+    )
+    if p.find_parent('blockquote'):
+        # LF's closing prayer is authored as a blockquote. The TOML contract has
+        # no blockquote role for paragraph continuations, so keep the source's
+        # visual signal as canonical emphasis while preserving verse breaks.
+        return f'*{text}*'
+    return text
 
 
 def extract():
@@ -146,9 +160,7 @@ def extract():
 
         # unnumbered continuation prose following a numbered paragraph
         if paragraphs and not has_b:
-            paragraphs[-1]['text'] += '\n\n' + normalise_footnote_refs(
-                clean_text(p, preserve_formatting=True), bracketed=True
-            )
+            paragraphs[-1]['text'] += '\n\n' + _continuation_text(p)
 
     footnotes = extract_footnotes(
         ps[first_note_idx:], RE_FOOTNOTE, bracketed_refs=True
@@ -164,6 +176,8 @@ def extract():
         'pontificate': 'Francis',
         'date': DATE,
         'identifier': IDENTIFIER,
+        'type': 'encyclical',
+        'subtitle': 'on Faith',
         # The pope is already named in `desc` ("ENCYCLICAL LETTER OF THE
         # SUPREME PONTIFF FRANCIS"), so the title-page foot stays bare.
         'show_title_author': False,

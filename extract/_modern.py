@@ -6,13 +6,12 @@ as a document.
 
 import re
 
-from bs4 import BeautifulSoup
-
 from core import (
     br_lines,
     chapter_word_to_int,
     encyclical_split,
     is_centred,
+    make_soup,
     split_around_title,
 )
 
@@ -32,7 +31,7 @@ RE_FOOTNOTE_ANCHOR = re.compile(r'^_ftn(ref)?\d+$')
 def load_main(path, *, drop_chrome=False):
     """Parse a UTF-8 modern page; return `(soup, main-or-body)`."""
     with open(path, encoding='utf-8') as f:
-        soup = BeautifulSoup(f.read(), 'html.parser')
+        soup = make_soup(f.read())
     if drop_chrome:
         for tag in soup(CHROME):
             tag.decompose()

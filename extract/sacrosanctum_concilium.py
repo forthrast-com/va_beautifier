@@ -20,12 +20,14 @@ Shape:
 """
 
 import re
-from bs4 import BeautifulSoup
 
 from core import (
+    RE_FOOTNOTE,
     HeadingState,
     assign_footnote_context,
     clean_text,
+    flatten_ws,
+    make_soup,
     normalise_footnote_refs,
     numbered_paragraph,
     paragraph_record,
@@ -56,7 +58,6 @@ RE_APPENDIX_LINE = re.compile(r'^APPENDIX(?:\s+(.+))?$', re.DOTALL)
 RE_SECTION_BOLD = re.compile(r'^([IVX]+|\d+)\s*\.\s+(.+)$', re.DOTALL)
 RE_SUBHEADING = re.compile(r'^([A-F])\)\s*(.+)$', re.DOTALL)
 RE_PARA_NUM = re.compile(r'^\s*(\d+)\s*\.\s+(.+)$', re.DOTALL)
-RE_FOOTNOTE = re.compile(r'^\[\s*(\d+)\s*\]\s*(.+)$', re.DOTALL)
 
 
 def _extract_frontmatter(body_html):
@@ -67,7 +68,7 @@ def _extract_frontmatter(body_html):
     text = front_matter_text(body_html, 'CONSTITUTION ON THE SACRED LITURGY')
     if not text:
         return '', ''
-    text = re.sub(r'\s+', ' ', text).strip()
+    text = flatten_ws(text)
     text = re.sub(r'^\[.*?\]\s*', '', text)
     m = re.match(
         r'(.+?)\s+SACROSANCTUM CONCILIUM\s+(.+)$', text, re.DOTALL
@@ -78,11 +79,8 @@ def _extract_frontmatter(body_html):
 
 
 def _joined_bolds(tag):
-    parts = [
-        re.sub(r'\s+', ' ', b.get_text(' ', strip=True))
-        for b in tag.find_all('b')
-    ]
-    return re.sub(r'\s+', ' ', ' '.join(p for p in parts if p)).strip()
+    parts = [flatten_ws(b.get_text(' ', strip=True)) for b in tag.find_all('b')]
+    return flatten_ws(' '.join(p for p in parts if p))
 
 
 def _walk_body(corpo):
@@ -231,7 +229,7 @@ def _walk_body(corpo):
 
 
 def _extract_footnotes(notes_html):
-    soup = BeautifulSoup(notes_html, 'html.parser')
+    soup = make_soup(notes_html)
     footnotes = []
     for tag in soup.find_all('p'):
         rich = clean_text(tag, preserve_formatting=True)
@@ -248,7 +246,7 @@ def extract():
     # canonical edition, consistently with the other document dialects.
     desc, promulgation = _extract_frontmatter(body_html)
 
-    soup = BeautifulSoup(body_html, 'html.parser')
+    soup = make_soup(body_html)
     corpo = soup.find(id='corpo') or soup.body or soup
     paragraphs, appendices = _walk_body(corpo)
     footnotes = assign_footnote_context(_extract_footnotes(notes_html), paragraphs)
@@ -262,6 +260,8 @@ def extract():
         'pontificate': 'Paul VI',
         'date': DATE,
         'identifier': IDENTIFIER,
+        'type': 'council_constitution',
+        'kind_long': 'Constitution on the Sacred Liturgy',
         'desc': desc,
         'desc_post': '',
         'promulgation': title_case(promulgation),

@@ -3,18 +3,46 @@ import unittest
 import make_index
 
 
-class CardMetaTests(unittest.TestCase):
-    def test_every_known_slug_validates(self):
-        self.assertEqual(make_index.missing_card_meta(list(make_index.CARD_META)), [])
+class TileMetaTests(unittest.TestCase):
+    def test_docs_with_tile_type_validate(self):
+        docs = {
+            'gaudium_et_spes': {
+                'type': 'council_constitution',
+                'kind_long': 'Pastoral Constitution',
+            },
+            'laudato_si': {
+                'type': 'encyclical',
+                'subtitle': 'on Care for Our Common Home',
+            },
+        }
 
-    def test_unknown_slug_is_reported(self):
-        slugs = ['gaudium_et_spes', 'not_a_document']
-        self.assertEqual(make_index.missing_card_meta(slugs), ['not_a_document'])
+        self.assertEqual(make_index.missing_tile_meta(docs), [])
 
-    def test_card_meta_types_all_have_labels_and_rank(self):
-        for slug, meta in make_index.CARD_META.items():
-            self.assertIn(meta['type'], make_index.TILE_KIND_LABEL, slug)
-            self.assertIn(meta['type'], make_index.AUTHORITY_RANK, slug)
+    def test_missing_tile_type_is_reported(self):
+        docs = {
+            'gaudium_et_spes': {
+                'type': 'council_constitution',
+                'kind_long': 'Pastoral Constitution',
+            },
+            'not_a_document': {},
+        }
+
+        self.assertEqual(make_index.missing_tile_meta(docs), ['not_a_document'])
+
+    def test_missing_tile_subtitle_is_reported(self):
+        docs = {
+            'gaudium_et_spes': {'type': 'council_constitution'},
+            'laudato_si': {'type': 'encyclical'},
+        }
+
+        self.assertEqual(
+            make_index.missing_tile_meta(docs),
+            ['gaudium_et_spes', 'laudato_si'],
+        )
+
+    def test_tile_types_all_have_labels_and_rank(self):
+        for kind_type in make_index.TILE_KIND_LABEL:
+            self.assertIn(kind_type, make_index.AUTHORITY_RANK)
 
     def test_sort_fields_use_requested_order(self):
         self.assertEqual(
@@ -41,6 +69,8 @@ class CardFieldsTests(unittest.TestCase):
     def test_encyclical_byline_bolds_the_pope(self):
         fields = make_index._card_fields('laudato_si', {
             'name': 'Laudato si’',
+            'type': 'encyclical',
+            'subtitle': 'on Care for Our Common Home',
             'issued_by': 'Francis',
             'pontificate': 'Francis',
             'date': '2015-05-24',
@@ -48,6 +78,7 @@ class CardFieldsTests(unittest.TestCase):
         })
 
         self.assertEqual(fields['kind_label'], 'Encyclical Letter')
+        self.assertEqual(fields['subtitle'], 'on Care for Our Common Home')
         self.assertIn('<strong>Francis</strong>', fields['byline'])
         self.assertEqual(fields['date'], '24 May 2015')
 

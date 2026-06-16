@@ -12,6 +12,9 @@ Each `extract/<doc>.py` exposes:
         'date':         str,        # promulgation date ISO 8601 yyyy-mm-dd (may be '')
         'identifier':   str,        # urn suffix, e.g. "papal:laudato-si:2015-05-24" (may be '')
         'rights':       str,        # dc:rights line for EPUB (may be '')
+        'type':         str,        # catalogue tile class, e.g. "encyclical" (may be '')
+        'subtitle':     str,        # catalogue tile subtitle for most docs (may be '')
+        'kind_long':    str,        # catalogue tile subtitle for council docs (may be '')
         'desc':         str,        # multi-line preamble shown ABOVE the title (may be '')
         'desc_post':    str,        # multi-line subtitle shown BELOW the title (may be '')
         'chapter_style': str,        # optional numbering style, currently "roman"
@@ -50,10 +53,23 @@ import re
 import tomllib
 from pathlib import Path
 
-from bs4 import NavigableString
+from bs4 import BeautifulSoup, NavigableString
 
 
 # ── text helpers ─────────────────────────────────────────────────────────────
+
+def make_soup(markup):
+    """Parse a markup string with the project's standard parser.
+
+    Centralises the `html.parser` choice every extractor otherwise spells
+    out — loaders, the front-matter probe, and the footnote-slice reparse
+    spots alike. The file *encoding* stays at the call site: it's a dialect
+    bit (utf-8 for modern and Curia, iso-8859-1 for old-flat), not a parser
+    concern, so a `utf-8` default here would only invite old-flat to forget
+    its override.
+    """
+    return BeautifulSoup(markup, 'html.parser')
+
 
 def _wrap_inline(text, marker):
     """Wrap visible inline content while keeping source spacing outside marks."""
@@ -107,6 +123,17 @@ def clean_text(element, *, preserve_formatting=False):
     text = re.sub(r'[ \t]+', ' ', text)
     text = re.sub(r' *\n *', '\n', text)
     return text.strip()
+
+
+def flatten_ws(text):
+    """Collapse every run of whitespace — *including* newlines — to one space.
+
+    The flatten counterpart to `clean_text`, which preserves line breaks
+    because body prose needs them. Use `flatten_ws` where line breaks are
+    layout noise rather than content: Word-export headings and footnotes
+    that wrap mid-phrase, all-caps source headings, &c.
+    """
+    return re.sub(r'\s+', ' ', text).strip()
 
 
 def only_child_is(tag, name):
@@ -291,6 +318,13 @@ _SUPERSCRIPT_FOOTNOTE_REF = re.compile(
 # parenthesised years or longer prose citations.
 CANONICAL_FOOTNOTE_REF = re.compile(r'\((\d{1,3})\)')
 
+# A footnote *definition* line, `[N] body…`, as the modern Bootstrap pages
+# and the old-flat NOTES block both spell it. Shared by every extractor that
+# reads bracketed notes (LF, MH, VD, SC); pass it to `parse_footnote` /
+# `extract_footnotes`. (`RE_PARA` is deliberately *not* shared — its `\.`
+# vs `\s*\.` spacing varies per source.)
+RE_FOOTNOTE = re.compile(r'^\[\s*(\d+)\s*\]\s*(.+)$', re.DOTALL)
+
 
 def normalise_footnote_refs(text, *, bracketed=False):
     """Return body or note text with canonical compact `(N)` references.
@@ -329,6 +363,31 @@ def normalise_footnote_text(text):
     if any(work in text for work in KNOWN_PARAGRAPH_CITED):
         text = _PARAGRAPH_CITED_RANGE.sub(r', nn. \1, \2.', text)
     return text
+
+
+def notes_between_anchors(markup, anchor_re, *, text_of):
+    """Build footnote dicts from definition anchors embedded in raw `markup`.
+
+    For footnote definitions that aren't wrapped one-per-tag: each `anchor_re`
+    match opens a note whose body runs from the end of that anchor to the
+    start of the next (or end of string). `anchor_re` must capture the note
+    number in group 1; `text_of(slice_markup) -> str` re-parses one body
+    slice into the note text — it owns the wrapper tag and any
+    dialect-specific repair. The boundary arithmetic and the `part`/`chapter`
+    note-dict shape are shared verbatim by the Word-export (`_curia`,
+    `_ftnN`) and Fides et Ratio (`%24N`) definition schemes.
+    """
+    matches = list(anchor_re.finditer(markup))
+    notes = []
+    for index, match in enumerate(matches):
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(markup)
+        notes.append({
+            'part': 0,
+            'chapter': 0,
+            'number': int(match.group(1)),
+            'text': text_of(markup[match.end():end]),
+        })
+    return notes
 
 
 class HeadingState:
@@ -643,6 +702,7 @@ DEFAULT_COLLECTION = 'The Circulars (Vatican documents)'
 def write_toml(path, *, name, hue=None, source_url='',
                author='', issued_by='', pontificate='', date='', identifier='', rights='',
                publisher=DEFAULT_PUBLISHER, collection=DEFAULT_COLLECTION,
+               type='', subtitle='', kind_long='',
                desc='', desc_post='', chapter_style='', book_toc_depth=3,
                promulgation='', signature='', show_title_author=True,
                paragraphs, footnotes, appendices=(), signatories=()):
@@ -665,6 +725,12 @@ def write_toml(path, *, name, hue=None, source_url='',
         out.append(f'publisher = {_toml_str(publisher)}')
     if collection:
         out.append(f'collection = {_toml_str(collection)}')
+    if type:
+        out.append(f'type = {_toml_str(type)}')
+    if subtitle:
+        out.append(f'subtitle = {_toml_str(subtitle)}')
+    if kind_long:
+        out.append(f'kind_long = {_toml_str(kind_long)}')
     if rights:
         out.append(f'rights = {_toml_str(rights)}')
     if desc:

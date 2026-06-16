@@ -102,8 +102,16 @@ class GeneratedSiteArtifactTests(unittest.TestCase):
                 self.assertIn(f'href="downloads/{slug}-a5.pdf"', html)
                 self.assertIn(f'href="downloads/{slug}-a6.pdf"', html)
 
-    def test_makefile_docs_and_card_meta_stay_in_sync(self):
-        self.assertEqual(set(DOCS), set(make_index.CARD_META))
+    def test_makefile_docs_have_catalogue_tile_metadata(self):
+        for slug in DOCS:
+            with self.subTest(slug=slug):
+                data = _load_toml(slug)
+                self.assertIn(data.get('type'), make_index.TILE_KIND_LABEL)
+                self.assertIn(data.get('type'), make_index.AUTHORITY_RANK)
+                if data.get('type') == 'council_constitution':
+                    self.assertTrue(data.get('kind_long'))
+                else:
+                    self.assertTrue(data.get('subtitle'))
 
     def test_reader_html_has_navigation_and_no_known_markup_leaks(self):
         for slug in DOCS:

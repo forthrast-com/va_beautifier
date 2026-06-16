@@ -139,6 +139,11 @@ def extract():
         'pontificate': 'Francis',
         'date': DATE,
         'identifier': IDENTIFIER,
+        'type': 'curia_note',
+        'subtitle': (
+            'Note on the Relationship Between Artificial Intelligence '
+            'and Human Intelligence'
+        ),
         'desc': 'Dicastery for the Doctrine of the Faith\n'
                 'Dicastery for Culture and Education',
         'desc_post': 'Note on the Relationship Between Artificial Intelligence '

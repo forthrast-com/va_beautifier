@@ -58,9 +58,9 @@ The TOML is the canonical intermediate. Downstream renderers consume TOML — ne
   scroll indicator, drawer contents/footnotes/bookmarks, appendices, and end
   matter. Body gets `class="doc-<slug>"` for scoped overrides.
 - `make_index.py` — renders the catalogue cards and download controls from
-  TOML plus `CARD_META`. Client-side filtering, grouping, and sort preference
-  persistence are inlined into `site/index.html`. Adding a document currently
-  requires a `CARD_META` entry for a fully authored tile.
+  TOML. Client-side filtering, grouping, and sort preference persistence are
+  inlined into `site/index.html`. Add tile metadata (`type`, plus `subtitle` or
+  `kind_long`) in the document TOML/extractor for a fully authored card.
 - `make_book.py <slug>` — emits intermediate Markdown and per-paper title-page
   Typst includes, then writes one EPUB plus A4, A5, and A6 PDFs under
   `site/downloads/`. Appendices enter both tables of contents; page breaks and
@@ -215,31 +215,10 @@ published, while intermediate Markdown/TOML stays in `build/` only.
   (promulgation + optional signatories + signature) renders on its own page via a raw-typst
   block at the end of the body, with a parallel raw-HTML colophon
   block so EPUB gets the same content.
-- **Book polish (other)** —
-    - *Multi-paragraph footnotes:* the few notes in LS that span two
-      paragraphs render as one block — pandoc's continuation-indent
-      handling needs a closer look.
-    - *Auto-build hygiene:* the Makefile already keeps things minimal via
-      per-target dependencies, but a few historical TOMLs commit-bounce
-      because their generated formatting drifted; rerun `make clean && make`
-      and recommit any genuine churn.
 - **More documents** — `sources/Fratelli tutti_en.html` is sitting
   un-extracted (likely the modern Bootstrap dialect, LS-shaped). A
   reference capture recorded by `download_sources.py` for a possible
   future edition is `francis_g7_ai_en.html`.
-- **Audit follow-ups (2026-06)** —
-    - *make_book coverage:* only end-matter/accent helpers are tested;
-      no test renders a small TOML through `emit_markdown` the way
-      `tests/test_make_html.py` golden-tests the web renderer.
-    - *CARD_META → TOML:* `make_index.py` now warns on a missing entry,
-      but the better end state is moving tile metadata (`type`,
-      `subtitle`/`kind_long`) into the document TOML so adding a doc
-      touches one place.
-    - *EPUB title strip:* `templates/strip_fn_backlink.lua` removes the
-      synthetic title H1 by text match; safe today because `make_book.py`
-      never emits a doc-name H1 (noted in the filter) — revisit if that
-      changes.
-
 ## Extractor boundaries (implemented 2026-06)
 
 The shared surface has two tiers. Dialect-agnostic walker mechanics live
@@ -281,17 +260,12 @@ discards anything else without a peep. Treat an unclassified non-empty `<p>`
 in the body span as a bug, not a no-op; a regression test pins the recovered
 prayer (`tests/test_extractors.py`).
 
-Two cautions from the refactor:
+One caution from the refactor:
 
 - `is_centred` accepts either `align="center"` or a `text-align:center`
   inline style; before the refactor LS/QVH tested only the attribute and
   MH only the style. This is a deliberate (slight) widening — if a doc
   misclassifies a paragraph, look here first.
-- The refactor was authored without source snapshots available, so the
-  byte-identical `build/*.toml` regeneration check is still **owed**:
-  before merging, fetch sources, run the extractor regression tests
-  (CI's test workflow does this on branch pushes), and ideally diff
-  regenerated TOMLs against the previous build.
 
 ## JS-free drawer (not implemented — approach notes)
 

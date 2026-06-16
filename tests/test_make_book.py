@@ -1,5 +1,12 @@
+import json
+from pathlib import Path
+import shutil
+import subprocess
+import tempfile
+import textwrap
 import unittest
 
+import make_book
 from make_book import (
     _copyright_page_typst,
     _end_matter_html,
@@ -9,6 +16,20 @@ from make_book import (
     _pdf_accent,
     _typ_inline,
 )
+from project import ROOT
+
+
+def _inline_text(inlines):
+    parts = []
+    for inline in inlines:
+        kind = inline.get('t')
+        if kind == 'Str':
+            parts.append(inline.get('c', ''))
+        elif kind == 'Space':
+            parts.append(' ')
+        elif kind in ('Emph', 'Strong'):
+            parts.append(_inline_text(inline.get('c', [])))
+    return ''.join(parts)
 
 
 class EndMatterRenderTests(unittest.TestCase):
@@ -54,6 +75,71 @@ class EndMatterRenderTests(unittest.TestCase):
             _normalise_vatican_links('[Doc](/content/example.html)'),
             '[Doc](https://www.vatican.va/content/example.html)',
         )
+
+    def test_emit_markdown_preserves_multi_paragraph_footnote_continuation(self):
+        data = {
+            'name': 'Sample Document',
+            'paragraphs': [{
+                'number': 1,
+                'part': 0,
+                'chapter': 0,
+                'section': 0,
+                'text': 'Body with a note.(1)',
+            }],
+            'footnotes': [{
+                'part': 0,
+                'chapter': 0,
+                'number': 1,
+                'text': 'First note paragraph.\n\nSecond note paragraph.',
+            }],
+        }
+
+        old_build = make_book.BUILD
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            make_book.BUILD = Path(tmp_dir)
+            try:
+                md_path = make_book.emit_markdown(data, 'sample_doc')
+                rendered = md_path.read_text(encoding='utf-8')
+            finally:
+                make_book.BUILD = old_build
+
+        self.assertIn('[^0-0-1]: First note paragraph.', rendered)
+        self.assertIn('\n    \n    Second note paragraph.\n', rendered)
+
+    @unittest.skipUnless(shutil.which('pandoc'), 'pandoc not found')
+    def test_epub_filter_strips_synthetic_metadata_title_h1(self):
+        source = textwrap.dedent("""\
+            ---
+            title: Sample Document
+            ---
+
+            # Sample Document
+
+            # Part One
+
+            Body text.
+            """)
+        result = subprocess.run(
+            [
+                'pandoc',
+                '-f', 'markdown+smart',
+                '-t', 'json',
+                f'--lua-filter={ROOT / "templates" / "strip_fn_backlink.lua"}',
+            ],
+            input=source,
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        blocks = json.loads(result.stdout)['blocks']
+
+        self.assertEqual(blocks[0]['t'], 'Header')
+        self.assertEqual(_inline_text(blocks[0]['c'][2]), 'Part One')
+        self.assertFalse(any(
+            block['t'] == 'Header'
+            and _inline_text(block['c'][2]) == 'Sample Document'
+            for block in blocks
+        ))
 
     def test_html_preserves_formatting_signature_break_and_signatories(self):
         rendered = _end_matter_html(

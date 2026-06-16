@@ -6,13 +6,14 @@ as a document.
 
 import re
 
-from bs4 import BeautifulSoup
-
 from core import (
     assign_footnote_context,
     clean_text,
+    flatten_ws,
+    make_soup,
     normalise_footnote_refs,
     normalise_footnote_text,
+    notes_between_anchors,
 )
 
 
@@ -24,11 +25,11 @@ NOTE_ANCHOR = re.compile(
 
 def load_source(path):
     with path.open(encoding='utf-8') as source:
-        return BeautifulSoup(source.read(), 'html.parser')
+        return make_soup(source.read())
 
 
 def text(tag):
-    return re.sub(r'\s+', ' ', clean_text(tag)).strip()
+    return flatten_ws(clean_text(tag))
 
 
 def rich_text(tag):
@@ -37,7 +38,7 @@ def rich_text(tag):
 
 def prose_text(tag):
     """Return formatted Curia prose without Word-export line wrapping."""
-    return re.sub(r'\s+', ' ', rich_text(tag)).strip()
+    return flatten_ws(rich_text(tag))
 
 
 def anchored_footnotes(soup, paragraphs):
@@ -46,21 +47,11 @@ def anchored_footnotes(soup, paragraphs):
     Some Curia pages make each note a paragraph; others leave note 1 bare
     inside an enclosing div. Splitting at `_ftnN` anchors handles both forms.
     """
-    markup = soup.decode()
-    anchors = list(NOTE_ANCHOR.finditer(markup))
-    notes = []
-    for index, anchor in enumerate(anchors):
-        end = anchors[index + 1].start() if index + 1 < len(anchors) else len(markup)
-        holder = BeautifulSoup(
-            '<div>' + markup[anchor.end():end] + '</div>', 'html.parser'
-        ).div
-        body = normalise_footnote_text(
+    def text_of(slice_markup):
+        holder = make_soup('<div>' + slice_markup + '</div>').div
+        return normalise_footnote_text(
             normalise_footnote_refs(prose_text(holder), bracketed=True)
         )
-        notes.append({
-            'part': 0,
-            'chapter': 0,
-            'number': int(anchor.group(1)),
-            'text': body,
-        })
+
+    notes = notes_between_anchors(soup.decode(), NOTE_ANCHOR, text_of=text_of)
     return assign_footnote_context(notes, paragraphs)

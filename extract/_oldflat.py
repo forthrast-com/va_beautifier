@@ -4,9 +4,7 @@ Underscore-prefixed so `parse.py`'s module discovery doesn't offer it
 as a document.
 """
 
-from bs4 import BeautifulSoup
-
-from core import br_text
+from core import br_text, make_soup
 
 
 def load_split(path):
@@ -19,7 +17,7 @@ def load_split(path):
 
 def front_matter_text(body_html, marker):
     """`br_text` of the front-matter `<p>` containing `marker`, or ''."""
-    soup = BeautifulSoup(body_html, 'html.parser')
+    soup = make_soup(body_html)
     fm = next((p for p in soup.find_all('p')
                if marker in p.get_text()), None)
     return br_text(fm) if fm else ''
