@@ -697,6 +697,10 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .doc-fides_et_ratio .paragraph,
 .doc-lumen_fidei .paragraph,
 .doc-verbum_domini .paragraph,
+.doc-deus_caritas_est .paragraph,
+.doc-spe_salvi .paragraph,
+.doc-caritas_in_veritate .paragraph,
+.doc-ecclesia_in_oceania .paragraph,
 .doc-sacrosanctum_concilium .paragraph      { position: relative; margin: 1.75rem 0; }
 .doc-laudato_si .paragraph::before,
 .doc-magnifica_humanitas .paragraph::before,
@@ -705,6 +709,10 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .doc-fides_et_ratio .paragraph::before,
 .doc-lumen_fidei .paragraph::before,
 .doc-verbum_domini .paragraph::before,
+.doc-deus_caritas_est .paragraph::before,
+.doc-spe_salvi .paragraph::before,
+.doc-caritas_in_veritate .paragraph::before,
+.doc-ecclesia_in_oceania .paragraph::before,
 .doc-sacrosanctum_concilium .paragraph::before {
     content: '';
     position: absolute;
@@ -720,6 +728,10 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .doc-fides_et_ratio .para-num,
 .doc-lumen_fidei .para-num,
 .doc-verbum_domini .para-num,
+.doc-deus_caritas_est .para-num,
+.doc-spe_salvi .para-num,
+.doc-caritas_in_veritate .para-num,
+.doc-ecclesia_in_oceania .para-num,
 .doc-sacrosanctum_concilium .para-num {
     position: absolute;
     right: calc(100% + 2rem);   /* in the gutter, breathing room from the rule */
@@ -738,6 +750,10 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .doc-fides_et_ratio .para-num::after,
 .doc-lumen_fidei .para-num::after,
 .doc-verbum_domini .para-num::after,
+.doc-deus_caritas_est .para-num::after,
+.doc-spe_salvi .para-num::after,
+.doc-caritas_in_veritate .para-num::after,
+.doc-ecclesia_in_oceania .para-num::after,
 .doc-sacrosanctum_concilium .para-num::after { content: none; }
 .doc-laudato_si #sticky-num,
 .doc-magnifica_humanitas #sticky-num,
@@ -746,6 +762,10 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .doc-fides_et_ratio #sticky-num,
 .doc-lumen_fidei #sticky-num,
 .doc-verbum_domini #sticky-num,
+.doc-deus_caritas_est #sticky-num,
+.doc-spe_salvi #sticky-num,
+.doc-caritas_in_veritate #sticky-num,
+.doc-ecclesia_in_oceania #sticky-num,
 .doc-sacrosanctum_concilium #sticky-num {
     transform: translateX(-.6rem);  /* centre chapter number above gutter rule */
 }

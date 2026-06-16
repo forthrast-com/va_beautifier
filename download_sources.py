@@ -89,6 +89,38 @@ SOURCES_MANIFEST = (
         'Verbum Domini (English)',
     ),
     Source(
+        'deus_caritas_est_en',
+        'deus_caritas_est_en.html',
+        'https://www.vatican.va/content/benedict-xvi/en/encyclicals/documents/'
+        'hf_ben-xvi_enc_20051225_deus-caritas-est.html',
+        'implemented',
+        'Deus Caritas Est (English)',
+    ),
+    Source(
+        'spe_salvi_en',
+        'spe_salvi_en.html',
+        'https://www.vatican.va/content/benedict-xvi/en/encyclicals/documents/'
+        'hf_ben-xvi_enc_20071130_spe-salvi.html',
+        'implemented',
+        'Spe Salvi (English)',
+    ),
+    Source(
+        'caritas_in_veritate_en',
+        'caritas_in_veritate_en.html',
+        'https://www.vatican.va/content/benedict-xvi/en/encyclicals/documents/'
+        'hf_ben-xvi_enc_20090629_caritas-in-veritate.html',
+        'implemented',
+        'Caritas in Veritate (English)',
+    ),
+    Source(
+        'ecclesia_in_oceania_en',
+        'ecclesia_in_oceania_en.html',
+        'https://www.vatican.va/content/john-paul-ii/en/apost_exhortations/'
+        'documents/hf_jp-ii_exh_20011122_ecclesia-in-oceania.html',
+        'implemented',
+        'Ecclesia in Oceania (English)',
+    ),
+    Source(
         'fratelli_tutti_en',
         'Fratelli tutti_en.html',
         'https://www.vatican.va/content/francesco/en/encyclicals/documents/'

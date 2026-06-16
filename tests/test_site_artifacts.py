@@ -10,7 +10,9 @@ from project import BUILD, DOWNLOADS, ROOT, SITE
 
 
 STRICT = os.environ.get('VA_REQUIRE_SITE_ARTIFACTS') == '1'
-FOOTNOTE_REF_RE = re.compile(r'\((\d{1,3})\)')
+# Mirror core.CANONICAL_FOOTNOTE_REF: a `(N)` glued to a preceding digit is
+# Psalm dual-numbering (`Ps 73(72)`), not a footnote cite.
+FOOTNOTE_REF_RE = re.compile(r'(?<!\d)\((\d{1,3})\)')
 
 
 def _makefile_docs():

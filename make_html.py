@@ -175,6 +175,10 @@ LONG_DOCS = {
     'fides_et_ratio',
     'lumen_fidei',
     'verbum_domini',
+    'deus_caritas_est',
+    'spe_salvi',
+    'caritas_in_veritate',
+    'ecclesia_in_oceania',
 }
 
 # The Vatican sources place the document title *between* lines of the
@@ -263,7 +267,12 @@ para_ch_id: dict[int, str] = {}
 # Documents whose sections are named topical headers, not numbered tiers —
 # the drawer/heading shows the bare title without a "Section N:" prefix.
 BARE_SECTION_DOCS = {'magnifica_humanitas', 'quo_vadis_humanitas',
-                     'fides_et_ratio', 'lumen_fidei', 'verbum_domini'}
+                     'fides_et_ratio', 'lumen_fidei', 'verbum_domini',
+                     'spe_salvi', 'ecclesia_in_oceania'}
+# Documents whose chapters are bare topical titles (no "CHAPTER N" marker in
+# the source) — the chapter renders as its title alone, like the trailing
+# Conclusion, but for every chapter.
+BARE_CHAPTER_DOCS = {'spe_salvi', 'deus_caritas_est'}
 
 for p in paragraphs:
     part    = (p['part'], p['part_title'])
@@ -324,9 +333,9 @@ for p in paragraphs:
         # only 'CONCLUSION', not 'CHAPTER SIX' — suppress the "Chapter N"
         # prefix so the rendered heading matches the source. The id then
         # rides on the title <h3> instead of the (omitted) chapter-num <h2>.
-        is_unnumbered = (
-            chapter_style != 'roman'
-            and p['chapter_title'].strip().lower() == 'conclusion'
+        is_unnumbered = chapter_style != 'roman' and (
+            p['chapter_title'].strip().lower() == 'conclusion'
+            or args.doc in BARE_CHAPTER_DOCS
         )
         if chapter_style == 'roman':
             # Roman-numeral docs (AeN): chapter number lives in the

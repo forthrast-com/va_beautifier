@@ -24,8 +24,9 @@ RE_CHAPTER_WORD = re.compile(r'^CHAPTER\s+([A-Z]+)$')
 
 # Footnote reference and definition anchors. The body cite carries
 # `name="_ftnref{N}"`; the tail definition carries `name="_ftn{N}"`; both
-# wrap the visible `[N]` marker.
-RE_FOOTNOTE_ANCHOR = re.compile(r'^_ftn(ref)?\d+$')
+# wrap the visible `[N]` marker. Word's *endnote* export (Caritas in
+# Veritate) spells the same scheme `_edn{N}` / `_ednref{N}`.
+RE_FOOTNOTE_ANCHOR = re.compile(r'^_(ftn|edn)(ref)?\d+$')
 
 
 def load_main(path, *, drop_chrome=False):

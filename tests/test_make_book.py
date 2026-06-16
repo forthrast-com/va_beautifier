@@ -156,6 +156,51 @@ class EndMatterRenderTests(unittest.TestCase):
         )
         self.assertNotIn('A footnote line  \nwrapped as source text.', rendered)
 
+    def test_emit_markdown_gates_dce_prayer_line_breaks_for_typst(self):
+        data = {
+            'name': 'Deus Caritas Est',
+            'paragraphs': [{
+                'number': 42,
+                'part': 2,
+                'chapter': 1,
+                'chapter_title': 'Conclusion',
+                'section': 0,
+                'text': (
+                    'To her we entrust the Church and her mission in the '
+                    'service of love:\n\n'
+                    '*Holy Mary, Mother of God,\n'
+                    'you have given the world its true light,\n'
+                    'Jesus, your Son – the Son of God.\n'
+                    'in the midst of a thirsting world.*'
+                ),
+            }],
+            'footnotes': [],
+        }
+
+        old_build = make_book.BUILD
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            make_book.BUILD = Path(tmp_dir)
+            try:
+                md_path = make_book.emit_markdown(data, 'deus_caritas_est')
+                rendered = md_path.read_text(encoding='utf-8')
+            finally:
+                make_book.BUILD = old_build
+
+        self.assertIn(
+            '**42.** To her we entrust the Church and her mission in the '
+            'service of love:\n\n',
+            rendered,
+        )
+        self.assertIn(
+            '`#block[#set par(first-line-indent: 0em); `{=typst}'
+            '*Holy Mary, Mother of God,  \n'
+            'you have given the world its true light,  \n'
+            'Jesus, your Son – the Son of God.  \n'
+            'in the midst of a thirsting world.*'
+            '`]`{=typst}\n',
+            rendered,
+        )
+
     @unittest.skipUnless(shutil.which('pandoc'), 'pandoc not found')
     def test_epub_filter_strips_synthetic_metadata_title_h1(self):
         source = textwrap.dedent("""\

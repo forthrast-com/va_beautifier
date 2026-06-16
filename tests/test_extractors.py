@@ -2,6 +2,9 @@ import unittest
 
 from extract import (
     antiqua_et_nova,
+    caritas_in_veritate,
+    deus_caritas_est,
+    ecclesia_in_oceania,
     fides_et_ratio,
     gaudium_et_spes,
     laudato_si,
@@ -9,6 +12,7 @@ from extract import (
     magnifica_humanitas,
     quo_vadis_humanitas,
     sacrosanctum_concilium,
+    spe_salvi,
     verbum_domini,
 )
 
@@ -234,6 +238,152 @@ class ExtractorRegressionTests(unittest.TestCase):
         # Trailing unnumbered Conclusion chapter under the last part.
         self.assertEqual(data['paragraphs'][-1]['chapter_title'], 'Conclusion')
         self.assertEqual(data['paragraphs'][-1]['part'], 3)
+
+    @needs_sources(deus_caritas_est.EN_SRC)
+    def test_deus_caritas_est_joins_split_part_title(self):
+        data = deus_caritas_est.extract()
+
+        self.assertEqual(len(data['paragraphs']), 42)
+        self.assertEqual(len(data['footnotes']), 36)
+        self.assertEqual(data['hue'], 354)
+        self.assertEqual(data['pontificate'], 'Benedict XVI')
+        self.assertEqual(data['signature'], '**BENEDICTUS PP. XVI**')
+        # INTRODUCTION opens an authored part-0 group.
+        self.assertEqual(data['paragraphs'][0]['part'], 0)
+        self.assertEqual(data['paragraphs'][0]['part_title'], 'Introduction')
+        # Part II spreads "CARITAS" onto its own centred line ahead of the
+        # descriptive title; the fragments join with a colon, and the quoted
+        # title noun keeps its capital despite title_case's quote handling.
+        part_titles = dict(
+            (p['part'], p['part_title']) for p in data['paragraphs'] if p['part']
+        )
+        self.assertEqual(
+            part_titles[1],
+            'The Unity of Love in Creation and in Salvation History',
+        )
+        self.assertEqual(
+            part_titles[2],
+            'Caritas: The Practice of Love by the Church as a '
+            '“Community of Love”',
+        )
+        # Within each part the italic topical headers are bare chapters (the
+        # document's H2-level divisions), opening Part II's run and resetting
+        # per part. Conclusion is the trailing bare chapter.
+        chapters = [(p['part'], p['chapter'], p['chapter_title'])
+                    for p in data['paragraphs'] if p['chapter']]
+        self.assertIn((1, 1, 'A problem of language'), chapters)
+        self.assertIn((2, 2, 'Charity as a responsibility of the Church'),
+                      chapters)
+        self.assertEqual(data['paragraphs'][-1]['chapter_title'], 'Conclusion')
+        for p in data['paragraphs']:
+            self.assertNotIn('](#', p['text'])
+        # The closing Marian prayer trails §42 as a source <blockquote>; like
+        # Lumen Fidei it folds onto the paragraph as canonical italic verse.
+        para_42 = next(p for p in data['paragraphs'] if p['number'] == 42)
+        self.assertIn('*Holy Mary, Mother of God,', para_42['text'])
+        self.assertTrue(para_42['text'].rstrip().endswith('thirsting world.*'))
+
+    @needs_sources(spe_salvi.EN_SRC)
+    def test_spe_salvi_maps_bold_headers_and_roman_subsections(self):
+        data = spe_salvi.extract()
+
+        self.assertEqual(len(data['paragraphs']), 50)
+        self.assertEqual(len(data['footnotes']), 40)
+        self.assertEqual(data['hue'], 150)
+        self.assertEqual(data['pontificate'], 'Benedict XVI')
+        self.assertEqual(data['signature'], '**BENEDICTUS PP. XVI**')
+        # Introduction opens the part-0 group.
+        self.assertEqual(data['paragraphs'][0]['part'], 0)
+        self.assertEqual(data['paragraphs'][0]['part_title'], 'Introduction')
+        # The bold topical headers are the document's primary divisions, so
+        # they drive the (bare) chapter tier — eight of them, opening with
+        # "Faith is Hope".
+        chapters = sorted({(p['chapter'], p['chapter_title'])
+                           for p in data['paragraphs'] if p['chapter']})
+        self.assertEqual(len(chapters), 8)
+        self.assertEqual(chapters[0], (1, 'Faith is Hope'))
+        self.assertEqual(chapters[-1], (8, 'Mary, Star of Hope'))
+        # The "Settings" chapter's centred-bold Roman subsections become its
+        # sections, kept verbatim (numeral and all). No deeper sub-heading
+        # tier is used.
+        sections = [p['section_title'] for p in data['paragraphs']
+                    if p['section']]
+        self.assertIn('I. Prayer as a school of hope', sections)
+        self.assertIn('III. Judgement as a setting for learning and '
+                      'practising hope', sections)
+        self.assertFalse(any(p['sub_heading'] for p in data['paragraphs']))
+        for p in data['paragraphs']:
+            self.assertNotIn('](#', p['text'])
+
+    @needs_sources(caritas_in_veritate.EN_SRC)
+    def test_caritas_in_veritate_canonicalises_endnote_scheme(self):
+        data = caritas_in_veritate.extract()
+
+        self.assertEqual(len(data['paragraphs']), 79)
+        self.assertEqual(len(data['footnotes']), 159)
+        self.assertEqual(data['hue'], 28)
+        self.assertEqual(data['pontificate'], 'Benedict XVI')
+        self.assertEqual(data['signature'], '**BENEDICTUS PP. XVI**')
+        # Six word-marked chapters plus a trailing unnumbered Conclusion; the
+        # part-0 "Introduction" label must not bleed onto the chapters.
+        self.assertEqual(
+            next(p['chapter_title'] for p in data['paragraphs']
+                 if p['chapter'] == 1),
+            'The Message of Populorum Progressio',
+        )
+        self.assertEqual(data['paragraphs'][-1]['chapter_title'], 'Conclusion')
+        self.assertTrue(all(
+            p['part_title'] == '' for p in data['paragraphs'] if p['chapter']
+        ))
+        # The Word *endnote* export (`_edn` anchors) must fully canonicalise:
+        # no markdown-link tails or anchor names leak into body or notes.
+        for note in (1, 17, 159):
+            self.assertTrue(any(f['number'] == note for f in data['footnotes']))
+        for p in data['paragraphs']:
+            self.assertNotIn('](#', p['text'])
+            self.assertNotIn('_edn', p['text'])
+
+    @needs_sources(ecclesia_in_oceania.EN_SRC)
+    def test_ecclesia_in_oceania_recovers_italic_wrapped_note(self):
+        data = ecclesia_in_oceania.extract()
+
+        self.assertEqual(len(data['paragraphs']), 53)
+        self.assertEqual(len(data['footnotes']), 178)
+        self.assertEqual(data['hue'], 212)
+        self.assertEqual(data['pontificate'], 'John Paul II')
+        self.assertEqual(data['signature'], '**JOANNES PAULUS PP. II**')
+        # Four Roman chapters parsed to arabic + trailing Conclusion.
+        self.assertEqual(
+            next(p['chapter_title'] for p in data['paragraphs']
+                 if p['chapter'] == 1),
+            'Jesus Christ and the Peoples of Oceania',
+        )
+        self.assertEqual(data['paragraphs'][-1]['chapter_title'], 'Conclusion')
+        # Note 21's leading `(21)` is wrapped in the same <i> the source opens
+        # for "Propositio"; keying off the marker recovers it rather than
+        # dropping it (177 of 178 before the fix).
+        self.assertEqual(len({f['number'] for f in data['footnotes']}), 178)
+        note_21 = next(f for f in data['footnotes'] if f['number'] == 21)
+        self.assertEqual(note_21['text'], 'Cf. Propositio 44.')
+        # Italic-only headers are a sub-heading tier (previously folded into
+        # prose and lost).
+        subs = {p['sub_heading'] for p in data['paragraphs'] if p['sub_heading']}
+        self.assertIn('The Permanent Diaconate', subs)
+        self.assertIn('Mary our Mother', subs)
+        # The titled closing prayer is lifted into its own prayer appendix,
+        # not mashed into the conclusion's last paragraph.
+        prayers = [a for a in data['appendices'] if a.get('kind') == 'prayer']
+        self.assertEqual(len(prayers), 1)
+        self.assertEqual(prayers[0]['title'], 'Prayer')
+        self.assertTrue(prayers[0]['text'].startswith('O Mary, Help of Christians,'))
+        self.assertIn('Bright Star of the Sea', prayers[0]['text'])
+        # The prayer verse lives only in the appendix, not folded into prose.
+        self.assertFalse(any('Bright Star of the Sea' in p['text']
+                             for p in data['paragraphs']))
+        # Split `fn`/`fnref` cite anchors must collapse to canonical `(N)`,
+        # leaving no markdown-link tails in the body.
+        for p in data['paragraphs']:
+            self.assertNotIn('](#', p['text'])
 
 
 if __name__ == '__main__':

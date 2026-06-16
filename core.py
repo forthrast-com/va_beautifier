@@ -315,8 +315,10 @@ _SUPERSCRIPT_FOOTNOTE_REF = re.compile(
     r'(?:<sup>\s*)+(\(\d{1,3}\))(?:\s*</sup>)+'
 )
 # Public contract consumed by renderers: match note markers, not four-digit
-# parenthesised years or longer prose citations.
-CANONICAL_FOOTNOTE_REF = re.compile(r'\((\d{1,3})\)')
+# parenthesised years or longer prose citations. The negative lookbehind
+# skips a `(N)` glued to a preceding digit — Psalm dual-numbering such as
+# `Ps 73(72):25` (Hebrew vs Septuagint), not a footnote cite.
+CANONICAL_FOOTNOTE_REF = re.compile(r'(?<!\d)\((\d{1,3})\)')
 
 # A footnote *definition* line, `[N] body…`, as the modern Bootstrap pages
 # and the old-flat NOTES block both spell it. Shared by every extractor that

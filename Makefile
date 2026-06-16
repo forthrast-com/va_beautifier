@@ -1,6 +1,7 @@
 DOCS  := gaudium_et_spes laudato_si magnifica_humanitas antiqua_et_nova \
          quo_vadis_humanitas sacrosanctum_concilium fides_et_ratio \
-         lumen_fidei verbum_domini
+         lumen_fidei verbum_domini deus_caritas_est spe_salvi \
+         caritas_in_veritate ecclesia_in_oceania
 HTMLS := $(DOCS:%=site/%.html)
 TOMLS := $(DOCS:%=build/%.toml)
 EPUBS := $(DOCS:%=site/downloads/%.epub)
@@ -33,6 +34,10 @@ $(eval $(call FETCH_SOURCE,sources/magnifica_humanitas_en.html,magnifica_humanit
 $(eval $(call FETCH_SOURCE,sources/fides_et_ratio_en.html,fides_et_ratio_en))
 $(eval $(call FETCH_SOURCE,sources/lumen_fidei_en.html,lumen_fidei_en))
 $(eval $(call FETCH_SOURCE,sources/verbum_domini_en.html,verbum_domini_en))
+$(eval $(call FETCH_SOURCE,sources/deus_caritas_est_en.html,deus_caritas_est_en))
+$(eval $(call FETCH_SOURCE,sources/spe_salvi_en.html,spe_salvi_en))
+$(eval $(call FETCH_SOURCE,sources/caritas_in_veritate_en.html,caritas_in_veritate_en))
+$(eval $(call FETCH_SOURCE,sources/ecclesia_in_oceania_en.html,ecclesia_in_oceania_en))
 $(eval $(call FETCH_SOURCE,sources/Fratelli\ tutti_en.html,fratelli_tutti_en))
 $(eval $(call FETCH_SOURCE,sources/Sacrosanctum\ Concilium_en.html,sacrosanctum_concilium_en))
 $(eval $(call FETCH_SOURCE,sources/Sacrosanctum\ Concilium_la.html,sacrosanctum_concilium_lt))
@@ -80,6 +85,22 @@ build/lumen_fidei.toml: sources/lumen_fidei_en.html \
 build/verbum_domini.toml: sources/verbum_domini_en.html \
                           extract/verbum_domini.py extract/_modern.py core.py
 	python3 parse.py verbum_domini
+
+build/deus_caritas_est.toml: sources/deus_caritas_est_en.html \
+                             extract/deus_caritas_est.py extract/_modern.py core.py
+	python3 parse.py deus_caritas_est
+
+build/spe_salvi.toml: sources/spe_salvi_en.html \
+                      extract/spe_salvi.py extract/_modern.py core.py
+	python3 parse.py spe_salvi
+
+build/caritas_in_veritate.toml: sources/caritas_in_veritate_en.html \
+                                extract/caritas_in_veritate.py extract/_modern.py core.py
+	python3 parse.py caritas_in_veritate
+
+build/ecclesia_in_oceania.toml: sources/ecclesia_in_oceania_en.html \
+                                extract/ecclesia_in_oceania.py extract/_modern.py core.py
+	python3 parse.py ecclesia_in_oceania
 
 # --- HTML targets ---
 

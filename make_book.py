@@ -33,6 +33,11 @@ from project import BUILD, DOWNLOADS, ROOT
 BUILD.mkdir(exist_ok=True)
 DOWNLOADS.mkdir(parents=True, exist_ok=True)
 
+# Documents whose chapters are bare topical titles (no "CHAPTER N" marker in
+# the source); the book heading shows the title alone, mirroring
+# make_html.BARE_CHAPTER_DOCS.
+BARE_CHAPTER_DOCS = {'spe_salvi', 'deus_caritas_est'}
+
 
 def emit_markdown(data, slug, *, paper='a5', template_slug=None):
     # Output slug controls the .md filename; the template slug points at
@@ -174,7 +179,10 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
         # Chapter heading. Force a fresh page on the PDF side so chapters
         # land at the top of a recto — the EPUB writer ignores raw typst.
         if ch_title and chapter != prev['chapter']:
-            unnumbered = ch_title.strip().lower() in ('conclusion', 'preface', 'introduction')
+            unnumbered = (
+                ch_title.strip().lower() in ('conclusion', 'preface', 'introduction')
+                or template_slug in BARE_CHAPTER_DOCS
+            )
             if chapter_style == 'roman':
                 label = f'{int_to_roman(chapter)}. {ch_title}'
             else:

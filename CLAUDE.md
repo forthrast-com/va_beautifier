@@ -126,7 +126,9 @@ Three templates encountered so far:
 
 - **Old flat** (GeS) — 24 `<p>` tags total, structure carried by `<b>` headings inside `<center>` blocks. Latin source provides a per-paragraph micro-summary keyed by §N. Footnotes in a separate `NOTES`-marked block.
 - **Modern Bootstrap** (LS, MH, *Fides et Ratio*, *Lumen Fidei*, *Verbum
-  Domini*) — `<p>` tags wrapped in `<main>`. The base case (LS): chapter
+  Domini*, plus the Benedict XVI / JP II encyclicals *Deus Caritas Est*,
+  *Spe Salvi*, *Caritas in Veritate*, and the exhortation *Ecclesia in
+  Oceania*) — `<p>` tags wrapped in `<main>`. The base case (LS): chapter
   delimiter is a centred `CHAPTER ONE` followed by a centred `<b>` title;
   section is a `<p>` whose only child is a `<b>` matching `^[IVX]+\.`;
   sub-heading is a `<p>` whose only child is an `<i>`. The `align` attribute
@@ -143,7 +145,39 @@ Three templates encountered so far:
     is a base-36-ish label, **not** the number — the number is the anchor
     text), and definitions are loose inline blocks after an `<hr>`, each
     `<font><b><a name="$N">N</a></b></font> text` split on the definition
-    anchors (the `$` arrives percent-encoded as `%24`).
+    anchors (the `$` arrives percent-encoded as `%24`). *Caritas in Veritate*
+    is a Word **endnote** export: same `[N]`-marker scheme but spelt
+    `_edn{N}` / `_ednref{N}`, so `_modern.RE_FOOTNOTE_ANCHOR` matches both
+    `ftn` and `edn` and `strip_footnote_anchors` handles it unchanged.
+    *Ecclesia in Oceania* (2001) is different again: body cites are
+    `<sup><a name="fnref{N}">(</a><a href="#fn{N}">N</a>)</sup>` — the
+    parentheses are literal and the marker is split across two anchors (one
+    `name`, one `href`); both halves are unwrapped so the cite collapses to a
+    canonical `(N)`. Its definitions sit in a trailing `NOTES` block, each a
+    `<p>` opening `(N) …`; note 21 wraps its leading `(21)` in the same `<i>`
+    it opens for the next word, so the extractor lifts emphasis off the
+    marker before parsing.
+  - *Parts without chapters / bare chapters.* *Deus Caritas Est* has only
+    `PART I` / `PART II` (Part II's title spreads `CARITAS` onto its own
+    centred line, joined with a colon) and, within each part, italic-only
+    topical headers that map to **bare chapters** (auto-numbered, no
+    `Chapter N` prefix) so they read as H2 entries in the book TOCs. *Spe
+    Salvi* has no `CHAPTER` markers at all — its all-bold topical headers are
+    the primary divisions and likewise become bare chapters, with the
+    centred-bold Roman `I./II./III.` subsections becoming its sections. Bare
+    chapters render title-only via `make_html`/`make_book.BARE_CHAPTER_DOCS`
+    (the same path as the trailing `Conclusion`). DCE's and *Ecclesia in
+    Oceania*'s closing prayers: DCE's is an untitled `<blockquote>` folded
+    onto the last paragraph as italic verse (LF-style); EiO's carries an
+    explicit italic `Prayer` heading and is lifted into a `kind="prayer"`
+    appendix. EiO also exposes a finer italic-only sub-heading tier
+    (`only_child_is(p, 'i')`, e.g. "The Permanent Diaconate"); guard that
+    branch with `not is_promulgation` since the dateline is also a lone
+    italic `<p>`.
+  - *Psalm dual-numbering.* DCE/SS body text cites psalms as `Ps 73(72):25`
+    (Hebrew vs Septuagint). `core.CANONICAL_FOOTNOTE_REF` carries a
+    `(?<!\d)` lookbehind so a `(N)` glued to a preceding digit is not
+    linkified as a footnote; the `test_site_artifacts` ref-check mirrors it.
   - *Unnumbered headings.* LF/VD/FeR have no Roman section tier; their bold
     topical headers become auto-numbered sections (à la MH) and the slug
     joins `make_html.BARE_SECTION_DOCS` so the section renders as its bare
@@ -184,7 +218,7 @@ HTML output is a single self-contained file (CSS + JS inlined, no external asset
 - sub-heading: generated `sub-{n}`
 - appendix: `appendix-{n}`
 
-Doc-scoped CSS lives under `.doc-<slug>` selectors. Long structured documents share gutter-style paragraph numbers, soft-anchor positioning, and a height-capped scroll indicator under their document selectors. GeS keeps the original inline `5. *Latin heading* body` layout via the default rules + `.para-num::after { content: '.' }`. The long-document slugs are tracked in three places: `make_html.LONG_DOCS` (gutter layout + section-level sticky bar), `make_html.BARE_SECTION_DOCS` (named sections, no `Section N:` prefix), and the `.doc-<slug>` selector groups in `assets/styles.css`.
+Doc-scoped CSS lives under `.doc-<slug>` selectors. Long structured documents share gutter-style paragraph numbers, soft-anchor positioning, and a height-capped scroll indicator under their document selectors. GeS keeps the original inline `5. *Latin heading* body` layout via the default rules + `.para-num::after { content: '.' }`. The long-document slugs are tracked in several places: `make_html.LONG_DOCS` (gutter layout + section-level sticky bar), `make_html.BARE_SECTION_DOCS` (named sections, no `Section N:` prefix), `make_html.BARE_CHAPTER_DOCS` + the parallel `make_book.BARE_CHAPTER_DOCS` (chapters render title-only, no `Chapter N:` prefix — for docs whose source has no chapter numbering, e.g. SS, DCE), and the `.doc-<slug>` selector groups in `assets/styles.css`.
 
 **Generated "Preamble" heading.** Opening prose at `part = 0`, `chapter = 0` with no authored `part_title` is unlabelled in the TOML; the renderer supplies a "Preamble" heading rather than leaving the region anchorless. It is a *generated display label*, not stored data, so it differs by surface: the **web body suppresses it** (anchor-only — the modern encyclicals don't want a redundant on-page heading) but keeps it in the contents drawer, scroll indicator, and no-JS TOC; the **PDF/EPUB render it visibly** (`make_book.py`), because those have no live navigation to fall back on. An authored `part_title` (GeS "Preface", SC "Introduction", QVH "Preliminary Note") always wins and shows on every surface; a part-0 group that opens straight into a chapter (AeN's roman `I. Introduction`) stays anchor-only under "Introduction".
 
@@ -219,6 +253,16 @@ published, while intermediate Markdown/TOML stays in `build/` only.
   un-extracted (likely the modern Bootstrap dialect, LS-shaped). A
   reference capture recorded by `download_sources.py` for a possible
   future edition is `francis_g7_ai_en.html`.
+- **Parallelise the full build.** A 13-doc `make` is serial and the
+  bottleneck is `make_book.py` shelling out to pandoc + typst (~4 compiles
+  per doc). The per-doc book rule is already a self-contained grouped target
+  (`%.epub %-a4.pdf … &:`) and the doc targets are independent, so
+  `make -j8` (or `-j$(sysctl -n hw.ncpu)`) should parallelise the book build
+  with no Makefile change; `site/index.html` already depends on `$(BOOKS)`
+  so it still lands last. Keep `-j` an explicit invocation flag rather than
+  baking `MAKEFLAGS += -j` in, so single-doc incremental builds stay
+  legible and stderr isn't interleaved. Verify a cold `make -jN` matches a
+  serial build before relying on it.
 ## Extractor boundaries (implemented 2026-06)
 
 The shared surface has two tiers. Dialect-agnostic walker mechanics live
