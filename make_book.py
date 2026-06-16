@@ -121,7 +121,7 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
     lines += ['```{=typst}', '#pagebreak(weak: true)', '```', '']
 
     # ── Body walk ──────────────────────────────────────────────────────
-    prev = {'part': None, 'part_title': None,
+    prev = {'part': None, 'part_title': None, 'part_subtitle': None,
             'chapter': None, 'section': None, 'sub': None}
 
     # Heading levels are uniform: chapters at H2 (so --epub-chapter-level=2
@@ -135,6 +135,7 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
     for p in paragraphs:
         part          = p.get('part', 0)
         part_title    = p.get('part_title', '')
+        part_subtitle = p.get('part_subtitle', '')
         chapter       = p.get('chapter', 0)
         ch_title      = p.get('chapter_title', '')
         ch_subtitle   = p.get('chapter_subtitle', '')
@@ -160,9 +161,12 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
         # Fire on a part_title change too, not just a part-number change, so
         # successive part-0 prefaces both get headings (GeS "Preface" then
         # "Introductory Statement"; FeR "Blessing" then "Introduction").
-        if effective_part_title and (part, effective_part_title) != (
-            prev['part'], prev['part_title']
-        ):
+        opened_part = effective_part_title and (
+            part, effective_part_title, part_subtitle
+        ) != (
+            prev['part'], prev['part_title'], prev['part_subtitle']
+        )
+        if opened_part:
             if part > 0:
                 level, label = '#', f'Part {int_to_roman(part)}: {effective_part_title}'
                 lines += ['', '```{=typst}', '#pagebreak(weak: true)', '```', '']
@@ -173,7 +177,13 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
             lines.append('')
             lines.append(f'{level} {label}')
             lines.append('')
+            if part_subtitle:
+                lines.append(_markdown_body_chunk(
+                    _normalise_vatican_links(part_subtitle)
+                ))
+                lines.append('')
             prev.update(part=part, part_title=effective_part_title,
+                        part_subtitle=part_subtitle,
                         chapter=None, section=None, sub=None)
 
         # Chapter heading. Force a fresh page on the PDF side so chapters
@@ -187,7 +197,11 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
                 label = f'{int_to_roman(chapter)}. {ch_title}'
             else:
                 label = ch_title if unnumbered or chapter == 0 else f'Chapter {chapter}: {ch_title}'
-            lines += ['', '```{=typst}', '#pagebreak(weak: true)', '```', '']
+            # VD's part openers carry a part epigraph plus the first section
+            # heading on the same authored opener page; suppress the chapter
+            # pagebreak there so the stack stays together.
+            if not (template_slug == 'verbum_domini' and opened_part):
+                lines += ['', '```{=typst}', '#pagebreak(weak: true)', '```', '']
             lines.append(f'## {label}')
             lines.append('')
             if ch_subtitle:

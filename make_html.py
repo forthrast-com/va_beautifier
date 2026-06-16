@@ -99,6 +99,10 @@ def format_inline(text):
     linkifying), hence `escaped=True`."""
     return inline_markup_to_html(text, escaped=True)
 
+def structure_inline_html(text):
+    """Render canonical inline markup for headings with authored line breaks."""
+    return inline_markup_to_html(e(text), escaped=True, break_tag='<br>')
+
 def para_html(text, part=None, chapter=None):
     """Convert paragraph text to <p> tags.
 
@@ -241,6 +245,9 @@ html_parts = []
 def h(tag, cls, text):
     return f'<{tag} class="{cls}">{e(text)}</{tag}>'
 
+def rich_h(tag, cls, text):
+    return f'<{tag} class="{cls}">{structure_inline_html(text)}</{tag}>'
+
 seen_part        = object()
 seen_chapter     = object()
 seen_section     = object()
@@ -275,7 +282,7 @@ BARE_SECTION_DOCS = {'magnifica_humanitas', 'quo_vadis_humanitas',
 BARE_CHAPTER_DOCS = {'spe_salvi', 'deus_caritas_est'}
 
 for p in paragraphs:
-    part    = (p['part'], p['part_title'])
+    part    = (p['part'], p['part_title'], p.get('part_subtitle', ''))
     chapter = (p['chapter'], p['chapter_title'], p.get('chapter_subtitle', ''))
     section = (p['section'], p['section_title'])
 
@@ -308,6 +315,8 @@ for p in paragraphs:
             indicator_chapters.append({'id': cid, 'label': label, 'spacer': False, 'part': 0})
             if authored_title:
                 html_parts.append(h('h1', 'part-title', authored_title).replace('<h1 ', f'<h1 id="{cid}" data-sticky '))
+                if p.get('part_subtitle', ''):
+                    html_parts.append(rich_h('p', 'part-subtitle', p['part_subtitle']))
             else:
                 # generated preamble or chapter-led part 0: anchor-only in the
                 # body — the label lives in the nav/TOC, not an on-page heading
@@ -317,6 +326,8 @@ for p in paragraphs:
             html_parts.append(h('h1', 'part-num', f'Part {int_to_roman(p["part"])}').replace('<h1 ', f'<h1 id="{cid}" '))
             if p['part_title']:
                 html_parts.append(h('h2', 'part-title', p['part_title']).replace('<h2 ', '<h2 data-sticky '))
+            if p.get('part_subtitle', ''):
+                html_parts.append(rich_h('p', 'part-subtitle', p['part_subtitle']))
         seen_part        = part
         seen_chapter     = object()
         seen_section     = object()
@@ -349,7 +360,8 @@ for p in paragraphs:
                 .replace('<h3 ', f'<h3 id="{cid}" data-sticky data-ch-num="{ch_num}" ')
             )
             if p.get('chapter_subtitle', ''):
-                html_parts.append(h('p', 'chapter-subtitle', p['chapter_subtitle']))
+                html_parts.append(rich_h('p', 'chapter-subtitle',
+                                         p['chapter_subtitle']))
         else:
             if not is_unnumbered:
                 html_parts.append(h('h2', 'chapter-num', chapter_num_label(p['chapter'])).replace('<h2 ', f'<h2 id="{cid}" '))
@@ -361,7 +373,8 @@ for p in paragraphs:
                     .replace('<h3 ', f'<h3 {id_attr}data-sticky data-ch-num="{ch_num}" ')
                 )
                 if p.get('chapter_subtitle', ''):
-                    html_parts.append(h('p', 'chapter-subtitle', p['chapter_subtitle']))
+                    html_parts.append(rich_h('p', 'chapter-subtitle',
+                                             p['chapter_subtitle']))
         seen_chapter     = chapter
         seen_section     = object()
         seen_sub_heading = object()
@@ -674,6 +687,7 @@ noscript_toc_html = '\n'.join(noscript_toc_parts)
 DOC_INDICATOR_LEVEL = {
     'laudato_si': 'sections',   # 246 paras across 36 sections — much cleaner
     'magnifica_humanitas': 'sections',
+    'verbum_domini': 'sections',
 }
 indicator_level = DOC_INDICATOR_LEVEL.get(args.doc, 'paragraphs')
 

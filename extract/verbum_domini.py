@@ -5,10 +5,11 @@ Modern Bootstrap page with the deepest hierarchy met so far — three tiers
 below the document:
 
   - **Part** — a centred ``PART ONE`` marker, then a centred all-caps part
-    title (``VERBUM DEI``) and a centred scriptural epigraph (dropped).
+    title (``VERBUM DEI``) and a centred scriptural epigraph.
   - **Chapter** — a centred mixed-case heading within a part
     (``The God Who Speaks``).
-  - **Section** — an unnumbered bold topical header (``God in dialogue``),
+  - **Section** — an unnumbered bold topical header
+    (``God in dialogue`` / ``The Church receives the word``),
     auto-numbered within its chapter.
 
 ``INTRODUCTION`` opens the part-0 group; ``CONCLUSION`` is an unnumbered
@@ -34,7 +35,6 @@ from core import (
     make_soup,
     normalise_footnote_refs,
     numbered_paragraph,
-    only_child_is,
     paragraph_record,
     title_case,
 )
@@ -59,6 +59,19 @@ RE_PARA = re.compile(r'^(\d+)\s*\.\s+(.+)$', re.DOTALL)
 RE_PART = re.compile(r'^PART\s+([A-Z]+)$')
 
 _QUOTE_CHARS = '“"‘’”\''
+
+
+def _is_all_bold(p):
+    """True when every visible character of `p` sits inside a `<b>`.
+
+    VD's topical headers are wrapped inconsistently (plain ``<b>`` in Part I,
+    ``<i><b>…</b></i>`` in Part II), so a single-child shape test misses the
+    latter and folds it into the previous paragraph as continuation prose.
+    """
+    bolds = p.find_all('b')
+    return bool(bolds) and p.get_text(strip=True) == ''.join(
+        b.get_text(strip=True) for b in bolds
+    )
 
 
 def _trailing_prose(tag):
@@ -112,7 +125,7 @@ def extract():
     signature = ''
 
     state = HeadingState()
-    expect = None  # 'part_title' or 'epigraph' after a PART marker
+    expect = None  # 'part_title' or 'part_subtitle' after a PART marker
 
     for p in ps[body_start:first_note_idx]:
         text = clean_text(p)
@@ -134,12 +147,15 @@ def extract():
                 continue
             if expect == 'part_title' and text == text.upper():
                 state.part_title = title_case(text)
-                expect = 'epigraph'
+                expect = 'part_subtitle'
                 continue
-            drop_epigraph = expect == 'epigraph' and text[:1] in _QUOTE_CHARS
+            if expect == 'part_subtitle' and text[:1] in _QUOTE_CHARS:
+                state.part_subtitle = clean_text(
+                    p, preserve_formatting=True
+                )
+                expect = None
+                continue
             expect = None
-            if drop_epigraph:
-                continue
             if text == 'INTRODUCTION':
                 # Keep the source's "Introduction" heading as an authored
                 # part-0 title (a real heading on every surface), not the
@@ -162,7 +178,7 @@ def extract():
             continue
 
         # unnumbered bold topical header → auto-numbered section
-        if only_child_is(p, 'b'):
+        if _is_all_bold(p):
             state.add_section(heading_title(text))
             continue
 

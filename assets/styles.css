@@ -247,6 +247,7 @@ h1, h2, h3, h4 { font-family: var(--font-display); }
 /* ── document structure ─────────────────────────────────────────────────── */
 h1.part-num      { font-size: 1rem; text-transform: uppercase; letter-spacing: .15em; color: var(--fg-dimmer); margin: 3rem 0 .25rem; }
 h1.part-title    { font-size: 1.6rem; margin: 1.5rem 0 1rem; }
+.part-subtitle   { font-family: var(--font-display); font-size: 1.05rem; color: var(--fg-dim); margin: -.25rem 0 1.5rem; }
 h2.chapter-num   { font-size: .9rem; text-transform: uppercase; letter-spacing: .15em; color: var(--fg-dimmer); margin: 2.5rem 0 .2rem; }
 h3.chapter-title { font-size: 1.3rem; margin: 0 0 1rem; }
 .chapter-subtitle { font-family: var(--font-display); font-size: 1.05rem; color: var(--fg-dim); margin: -.65rem 0 1rem; }
@@ -874,6 +875,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .doc-magnifica_humanitas #ch-indicator,
 .doc-antiqua_et_nova #ch-indicator,
 .doc-quo_vadis_humanitas #ch-indicator,
+.doc-verbum_domini #ch-indicator,
 .doc-sacrosanctum_concilium #ch-indicator {
     height: calc(95vh - var(--bar-h, 4rem));
     top:    calc(50% + var(--bar-h, 4rem) / 2);
@@ -882,11 +884,13 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .doc-magnifica_humanitas .ch-bar,
 .doc-antiqua_et_nova .ch-bar,
 .doc-quo_vadis_humanitas .ch-bar,
+.doc-verbum_domini .ch-bar,
 .doc-sacrosanctum_concilium .ch-bar { flex: 1 1 0; min-height: 8px; height: auto; }
 .doc-laudato_si .ch-seg,
 .doc-magnifica_humanitas .ch-seg,
 .doc-antiqua_et_nova .ch-seg,
 .doc-quo_vadis_humanitas .ch-seg,
+.doc-verbum_domini .ch-seg,
 .doc-sacrosanctum_concilium .ch-seg { flex: 1; height: auto; min-height: 1px; }
 
 /* ── no-JS: hide non-functional fixed chrome ────────────────────────────── */

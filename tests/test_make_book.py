@@ -201,6 +201,57 @@ class EndMatterRenderTests(unittest.TestCase):
             rendered,
         )
 
+    def test_emit_markdown_keeps_vd_part_opener_on_one_pdf_page(self):
+        data = {
+            'name': 'Verbum Domini',
+            'paragraphs': [{
+                'number': 50,
+                'part': 2,
+                'part_title': 'Verbum in Ecclesia',
+                'part_subtitle': (
+                    '“But to all who received him he gave power\n'
+                    'to become children of God”\n'
+                    '(Jn 1:12)'
+                ),
+                'chapter': 1,
+                'chapter_title': 'The Word of God and the Church',
+                'section': 1,
+                'section_title': 'The Church receives the word',
+                'text': 'The Lord speaks his word so that it may be received.',
+            }],
+            'footnotes': [],
+        }
+
+        old_build = make_book.BUILD
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            make_book.BUILD = Path(tmp_dir)
+            try:
+                md_path = make_book.emit_markdown(data, 'verbum_domini')
+                rendered = md_path.read_text(encoding='utf-8')
+            finally:
+                make_book.BUILD = old_build
+
+        self.assertIn('# Part II: Verbum in Ecclesia', rendered)
+        self.assertIn('## Chapter 1: The Word of God and the Church', rendered)
+        self.assertIn('### The Church receives the word', rendered)
+        self.assertLess(
+            rendered.index('# Part II: Verbum in Ecclesia'),
+            rendered.index('“But to all who received him he gave power'),
+        )
+        self.assertLess(
+            rendered.index('“But to all who received him he gave power'),
+            rendered.index('## Chapter 1: The Word of God and the Church'),
+        )
+        self.assertLess(
+            rendered.index('## Chapter 1: The Word of God and the Church'),
+            rendered.index('### The Church receives the word'),
+        )
+        opener = rendered[
+            rendered.index('# Part II: Verbum in Ecclesia'):
+            rendered.index('### The Church receives the word')
+        ]
+        self.assertNotIn('#pagebreak(weak: true)', opener)
+
     @unittest.skipUnless(shutil.which('pandoc'), 'pandoc not found')
     def test_epub_filter_strips_synthetic_metadata_title_h1(self):
         source = textwrap.dedent("""\

@@ -31,7 +31,7 @@ DEFAULT_COLLECTION when the extractor doesn't override.
 
 Paragraph schema (all keys optional except number, text — defaults to 0 / ''):
 
-    number, part, part_title, chapter, chapter_title, chapter_subtitle,
+    number, part, part_title, part_subtitle, chapter, chapter_title, chapter_subtitle,
     section, section_title, sub_heading, heading_la, break_after,
     hide_number, text
 
@@ -406,11 +406,13 @@ class HeadingState:
     def __init__(self):
         self.part = 0
         self.part_title = ''
+        self.part_subtitle = ''
         self.set_chapter(0)
 
-    def set_part(self, number, title=''):
+    def set_part(self, number, title='', subtitle=''):
         self.part = number
         self.part_title = title
+        self.part_subtitle = subtitle
         self.set_chapter(0)
 
     def set_chapter(self, number, title='', subtitle=''):
@@ -438,6 +440,7 @@ class HeadingState:
         return {
             'part': self.part,
             'part_title': self.part_title,
+            'part_subtitle': self.part_subtitle,
             'chapter': self.chapter,
             'chapter_title': self.chapter_title,
             'chapter_subtitle': self.chapter_subtitle,
@@ -467,8 +470,9 @@ def numbered_paragraph(tag, pattern, *, plain_text=None, rich_text=None):
     return int(match.group(1)), (rich_match or match).group(2)
 
 
-def paragraph_record(number, text, *, part=0, part_title='', chapter=0,
-                     chapter_title='', chapter_subtitle='', section=0,
+def paragraph_record(number, text, *, part=0, part_title='',
+                     part_subtitle='', chapter=0, chapter_title='',
+                     chapter_subtitle='', section=0,
                      section_title='', sub_heading='', heading_la='',
                      bracketed_refs=False):
     """Construct a canonical paragraph record from source text and context."""
@@ -479,6 +483,7 @@ def paragraph_record(number, text, *, part=0, part_title='', chapter=0,
         'number': number,
         'part': part,
         'part_title': part_title,
+        'part_subtitle': part_subtitle,
         'chapter': chapter,
         'chapter_title': chapter_title,
         'chapter_subtitle': chapter_subtitle,
@@ -685,6 +690,7 @@ _PARA_FIELDS = [
     ('number',        'int'),
     ('part',          'int'),
     ('part_title',    'str'),
+    ('part_subtitle', 'str'),
     ('chapter',       'int'),
     ('chapter_title', 'str'),
     ('chapter_subtitle', 'str'),
@@ -762,7 +768,11 @@ def write_toml(path, *, name, hue=None, source_url='',
             if kind == 'int':
                 out.append(f'{key} = {p.get(key, 0)}')
             elif kind == 'str':
-                out.append(f'{key} = {_toml_str(p.get(key, ""))}')
+                value = p.get(key, "")
+                if '\n' in value:
+                    out.append(f'{key} = {_toml_multiline(value)}')
+                else:
+                    out.append(f'{key} = {_toml_str(value)}')
             elif kind == 'bool':
                 out.append(f'{key} = {str(p.get(key, False)).lower()}')
             else:  # mlstr

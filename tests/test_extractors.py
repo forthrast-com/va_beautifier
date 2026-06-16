@@ -235,6 +235,16 @@ class ExtractorRegressionTests(unittest.TestCase):
             ).items() if p],
             [(1, 'Verbum Dei'), (2, 'Verbum in Ecclesia'), (3, 'Verbum Mundo')],
         )
+        part_two = next(p for p in data['paragraphs'] if p['number'] == 50)
+        self.assertIn(
+            'But to all who received him he gave power',
+            part_two['part_subtitle'],
+        )
+        self.assertTrue(part_two['part_subtitle'].rstrip().endswith('(Jn 1:12)'))
+        self.assertEqual(part_two['section'], 1)
+        self.assertEqual(part_two['section_title'], 'The Church receives the word')
+        para_49 = next(p for p in data['paragraphs'] if p['number'] == 49)
+        self.assertNotIn('The Church receives the word', para_49['text'])
         # Trailing unnumbered Conclusion chapter under the last part.
         self.assertEqual(data['paragraphs'][-1]['chapter_title'], 'Conclusion')
         self.assertEqual(data['paragraphs'][-1]['part'], 3)
