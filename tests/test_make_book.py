@@ -106,6 +106,56 @@ class EndMatterRenderTests(unittest.TestCase):
         self.assertIn('[^0-0-1]: First note paragraph.', rendered)
         self.assertIn('\n    \n    Second note paragraph.\n', rendered)
 
+    def test_emit_markdown_preserves_body_verse_line_breaks(self):
+        data = {
+            'name': 'Sample Document',
+            'paragraphs': [{
+                'number': 1,
+                'part': 0,
+                'chapter': 0,
+                'section': 0,
+                'text': (
+                    'A normal prose subparagraph with a note.(1)\n\n'
+                    '*Mother, help our faith!\n'
+                    'Open our ears to hear God’s word.\n'
+                    'Teach us to follow.*'
+                ),
+            }],
+            'footnotes': [{
+                'part': 0,
+                'chapter': 0,
+                'number': 1,
+                'text': 'A footnote line\nwrapped as source text.',
+            }],
+        }
+
+        old_build = make_book.BUILD
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            make_book.BUILD = Path(tmp_dir)
+            try:
+                md_path = make_book.emit_markdown(data, 'sample_doc')
+                rendered = md_path.read_text(encoding='utf-8')
+            finally:
+                make_book.BUILD = old_build
+
+        self.assertIn(
+            '**1.** A normal prose subparagraph with a note.[^0-0-1]\n\n',
+            rendered,
+        )
+        self.assertIn(
+            '`#block[#set par(first-line-indent: 0em); `{=typst}'
+            '*Mother, help our faith!  \n'
+            'Open our ears to hear God’s word.  \n'
+            'Teach us to follow.*'
+            '`]`{=typst}\n',
+            rendered,
+        )
+        self.assertIn(
+            '[^0-0-1]: A footnote line\nwrapped as source text.\n',
+            rendered,
+        )
+        self.assertNotIn('A footnote line  \nwrapped as source text.', rendered)
+
     @unittest.skipUnless(shutil.which('pandoc'), 'pandoc not found')
     def test_epub_filter_strips_synthetic_metadata_title_h1(self):
         source = textwrap.dedent("""\

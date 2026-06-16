@@ -223,7 +223,7 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
         if chunks and not p.get('hide_number', False):
             chunks[0] = f'**{number}.** {chunks[0]}'
         for chunk in chunks:
-            lines.append(chunk)
+            lines.append(_markdown_body_chunk(chunk))
             lines.append('')
 
         if p.get('break_after'):
@@ -310,6 +310,18 @@ def _markdown_preserve_breaks(text):
         '  \n'.join(line.rstrip() for line in stanza.splitlines())
         for stanza in text.split('\n\n')
         if stanza.strip()
+    )
+
+
+def _markdown_body_chunk(text):
+    """Emit one body chunk, suppressing PDF prose indents for hard-break text."""
+    rendered = _markdown_preserve_breaks(text)
+    if '\n' not in rendered:
+        return rendered
+    return (
+        '`#block[#set par(first-line-indent: 0em); `{=typst}'
+        f'{rendered}'
+        '`]`{=typst}'
     )
 
 
