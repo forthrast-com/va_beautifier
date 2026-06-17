@@ -20,9 +20,19 @@ chased across `make_html`, `make_book`, *and* the CSS.
 Everything below the line is hand-maintained membership lists that should
 *derive from one source of truth*.
 
+## Status
+
+**#1 and #2 are done** (the `[layout]` TOML table + `layout-*` body classes).
+While doing #2 the CSS turned out to hold *three* distinct slug groupings, not
+one: the gutter layout (all 12 long docs), a narrow-viewport inline-numbering
+fallback (5 docs), and the height-capped scroll indicator (6 docs). Each got
+its own flag — `long`, `mobile_inline`, `capped_indicator` — so all three
+collapsed to classes rather than leaving B/C enumerated. Canonical flag list is
+`core.LAYOUT_FLAGS`. **#3 (Makefile) is still pending.**
+
 ## What to change (biggest win first)
 
-### 1. Move layout flags onto the doc, like catalogue metadata already is
+### 1. Move layout flags onto the doc, like catalogue metadata already is — ✅ done
 
 Catalogue metadata (`type` / `subtitle`) was already migrated out of a central
 `make_index.CARD_META` dict and into the document TOML (commit `9a409c0`). Do
@@ -38,7 +48,7 @@ the same for the rendering flags `LONG_DOCS` / `BARE_SECTION_DOCS` /
 → **0 edits to `make_html` / `make_book`** when adding a doc. Cleanest,
 lowest-risk, and mirrors a migration the codebase has already blessed.
 
-### 2. Replace the per-slug CSS with shared layout classes
+### 2. Replace the per-slug CSS with shared layout classes — ✅ done
 
 `make_html` already stamps `class="doc-<slug>"` on the body and knows the
 flags. Have it also emit `layout-long` / `layout-bare-sections`. Then

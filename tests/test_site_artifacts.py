@@ -121,7 +121,10 @@ class GeneratedSiteArtifactTests(unittest.TestCase):
                 data = _load_toml(slug)
                 html = (SITE / f'{slug}.html').read_text(encoding='utf-8')
 
-                self.assertIn(f'<body class="doc-{slug}"', html)
+                # doc-<slug> always leads the class list; layout-* flag classes
+                # (from the [layout] TOML table) may follow, so don't anchor on
+                # the closing quote.
+                self.assertIn(f'<body class="doc-{slug}', html)
                 self.assertIn(
                     f'<p class="doc-name">{escape(data["name"])}</p>',
                     html,

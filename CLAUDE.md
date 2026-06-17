@@ -91,6 +91,12 @@ canonical inline formatting; line breaks in `signature` are significant.
 or personal voice shown in the catalogue and colophon. The colophon adds
 `pontificate` only when it differs from `issued_by`.
 
+An optional `[layout]` table carries per-document rendering flags
+(`long`, `bare_sections`, `bare_chapters`, `mobile_inline`,
+`capped_indicator`; canonical order in `core.LAYOUT_FLAGS`). Only truthy
+flags are serialised; a doc with none (GeS) omits the table. See Renderer
+conventions for what each flag drives.
+
 `[[paragraphs]]` — `number`, `part`, `part_title`, `chapter`, `chapter_title`, `chapter_subtitle`, `section`, `section_title`, `sub_heading`, `heading_la`, `break_after`, `text` (multiline, `\n\n`-separated sub-paragraphs). Authored inline formatting in `text` and footnote `text` is canonical Markdown-compatible content: `*italics*`, `**bold**`, `<sup>…</sup>`, and `<sub>…</sub>`.
 
 - `sub_heading` is per-paragraph and optional (defaults to ''); LS uses it for topical headers within sections, GeS doesn't have any.
@@ -165,8 +171,8 @@ Three templates encountered so far:
     Salvi* has no `CHAPTER` markers at all — its all-bold topical headers are
     the primary divisions and likewise become bare chapters, with the
     centred-bold Roman `I./II./III.` subsections becoming its sections. Bare
-    chapters render title-only via `make_html`/`make_book.BARE_CHAPTER_DOCS`
-    (the same path as the trailing `Conclusion`). DCE's and *Ecclesia in
+    chapters render title-only via the `bare_chapters` layout flag (see
+    Renderer conventions), the same path as the trailing `Conclusion`. DCE's and *Ecclesia in
     Oceania*'s closing prayers: DCE's is an untitled `<blockquote>` folded
     onto the last paragraph as italic verse (LF-style); EiO's carries an
     explicit italic `Prayer` heading and is lifted into a `kind="prayer"`
@@ -179,9 +185,8 @@ Three templates encountered so far:
     `(?<!\d)` lookbehind so a `(N)` glued to a preceding digit is not
     linkified as a footnote; the `test_site_artifacts` ref-check mirrors it.
   - *Unnumbered headings.* LF/VD/FeR have no Roman section tier; their bold
-    topical headers become auto-numbered sections (à la MH) and the slug
-    joins `make_html.BARE_SECTION_DOCS` so the section renders as its bare
-    title. Opening headings vary: FeR keeps its source "Blessing" and
+    topical headers become auto-numbered sections (à la MH) and the doc sets
+    the `bare_sections` layout flag so the section renders as its bare title. Opening headings vary: FeR keeps its source "Blessing" and
     "Introduction" headings, and VD its "Introduction", as authored part-0
     titles; LF has no opening heading and so picks up the generated
     **Preamble** (see Renderer conventions). `CONCLUSION`
@@ -218,7 +223,16 @@ HTML output is a single self-contained file (CSS + JS inlined, no external asset
 - sub-heading: generated `sub-{n}`
 - appendix: `appendix-{n}`
 
-Doc-scoped CSS lives under `.doc-<slug>` selectors. Long structured documents share gutter-style paragraph numbers, soft-anchor positioning, and a height-capped scroll indicator under their document selectors. GeS keeps the original inline `5. *Latin heading* body` layout via the default rules + `.para-num::after { content: '.' }`. The long-document slugs are tracked in several places: `make_html.LONG_DOCS` (gutter layout + section-level sticky bar), `make_html.BARE_SECTION_DOCS` (named sections, no `Section N:` prefix), `make_html.BARE_CHAPTER_DOCS` + the parallel `make_book.BARE_CHAPTER_DOCS` (chapters render title-only, no `Chapter N:` prefix — for docs whose source has no chapter numbering, e.g. SS, DCE), and the `.doc-<slug>` selector groups in `assets/styles.css`.
+Doc-scoped CSS lives under `.doc-<slug>` selectors. Long structured documents share gutter-style paragraph numbers, soft-anchor positioning, and a height-capped scroll indicator. GeS keeps the original inline `5. *Latin heading* body` layout via the default rules + `.para-num::after { content: '.' }`.
+
+**Layout flags (the `[layout]` TOML table).** Per-document rendering choices that used to live as hand-maintained slug sets scattered across `make_html`, `make_book`, and `styles.css` are now declared once per document. The extractor returns a `layout` dict; `core.write_toml` serialises it to a `[layout]` table (canonical flag order in `core.LAYOUT_FLAGS`); the renderers read `data['layout']` and `make_html` also stamps each truthy flag as a `layout-<flag>` body class (underscores → hyphens). `styles.css` targets those classes once instead of enumerating slugs. The flags:
+  - `long` — gutter paragraph numbers + section-level sticky bar (`.layout-long`); replaced `make_html.LONG_DOCS`.
+  - `bare_sections` — named topical sections, no `Section N:` prefix; replaced `make_html.BARE_SECTION_DOCS`.
+  - `bare_chapters` — title-only chapters, no `Chapter N:` prefix, for sources with no chapter numbering (SS, DCE); replaced `make_html`/`make_book.BARE_CHAPTER_DOCS`.
+  - `mobile_inline` — narrow-viewport fallback to inline `5.` numbering (`.layout-mobile-inline`; LS/MH/AeN/QVH/SC).
+  - `capped_indicator` — height-capped, chapter-segmented scroll indicator (`.layout-capped-indicator`; the above plus VD).
+
+Genuinely bespoke per-doc CSS still uses `.doc-<slug>` (AeN's gutter chapter numeral, MH/QVH's third heading tier). Adding a standard long doc now needs **no** edit to `make_html`, `make_book`, or `styles.css` — only the `layout` dict in its extractor.
 
 **Generated "Preamble" heading.** Opening prose at `part = 0`, `chapter = 0` with no authored `part_title` is unlabelled in the TOML; the renderer supplies a "Preamble" heading rather than leaving the region anchorless. It is a *generated display label*, not stored data, so it differs by surface: the **web body suppresses it** (anchor-only — the modern encyclicals don't want a redundant on-page heading) but keeps it in the contents drawer, scroll indicator, and no-JS TOC; the **PDF/EPUB render it visibly** (`make_book.py`), because those have no live navigation to fall back on. An authored `part_title` (GeS "Preface", SC "Introduction", QVH "Preliminary Note") always wins and shows on every surface; a part-0 group that opens straight into a chapter (AeN's roman `I. Introduction`) stays anchor-only under "Introduction".
 
