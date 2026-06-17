@@ -74,9 +74,16 @@ The TOML is the canonical intermediate. Downstream renderers consume TOML — ne
 - `assets/styles.css`, `assets/scripts.js` — read by `make_html.py` and inlined into the output. The JS has two placeholders, `__INDICATOR_JSON__` and `__DOC_NAME__`, substituted at render time. Edit these files directly; the output is still self-contained.
 - `Makefile` — the build entrypoint. `make` builds books, every reader, and the
   catalogue; `make books` stops after EPUB/PDF; `make site/<slug>.html` builds
-  one reader. Each new document gets an explicit TOML rule so source
-  dependencies stay precise. Add a doc → drop extractor → add slug to `DOCS`,
-  add its TOML rule, and add catalogue metadata.
+  one reader. `DOCS`, the per-source fetch rules, and the per-document TOML
+  rules (with precise source + dialect-helper deps) are **generated** into
+  `build/docs.mk` by `gen_doc_rules.py` from the `download_sources.py` manifest
+  and each extractor's dialect import; the Makefile `include`s it and `make`
+  re-execs after regenerating when the manifest or any extractor changes. So
+  adding a doc needs no Makefile edit — drop the extractor (with `layout` +
+  catalogue metadata in its return dict), add its `Source(...)` manifest
+  entries, and write a regression test.
+- `gen_doc_rules.py` — emits `build/docs.mk` (see above). Run by the Makefile;
+  `python3 gen_doc_rules.py` alone prints the fragment to stdout.
 
 ## TOML schema
 

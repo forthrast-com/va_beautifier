@@ -28,7 +28,16 @@ one: the gutter layout (all 12 long docs), a narrow-viewport inline-numbering
 fallback (5 docs), and the height-capped scroll indicator (6 docs). Each got
 its own flag — `long`, `mobile_inline`, `capped_indicator` — so all three
 collapsed to classes rather than leaving B/C enumerated. Canonical flag list is
-`core.LAYOUT_FLAGS`. **#3 (Makefile) is still pending.**
+`core.LAYOUT_FLAGS`.
+
+**#3 is also done.** `gen_doc_rules.py` emits `build/docs.mk` (DOCS + fetch
+rules + per-doc TOML rules) from the manifest + each extractor's dialect
+import; the Makefile `include`s it and re-execs on change. Source-file deps
+stay precise and fetch-on-demand survives. It uses GNU make's
+remaking-makefiles idiom (make builds the include, then re-execs) — moderately
+esoteric, but the only way to derive precise per-doc source deps in make.
+Fixed a latent bug in passing: the old hand-written G7 fetch rule targeted a
+filename the manifest no longer used.
 
 ## What to change (biggest win first)
 
@@ -56,7 +65,7 @@ flags. Have it also emit `layout-long` / `layout-bare-sections`. Then
 `.doc-<slug>` selector lists collapse. Bespoke per-doc CSS still uses
 `.doc-<slug>`; a standard long doc needs **0 CSS edits**.
 
-### 3. Derive the Makefile from the manifest
+### 3. Derive the Makefile from the manifest — ✅ done (`gen_doc_rules.py` → `build/docs.mk`)
 
 The three Makefile edits are all derivable. `parse.py` already discovers
 extractors via `pkgutil.iter_modules(extract.__path__)`, and
