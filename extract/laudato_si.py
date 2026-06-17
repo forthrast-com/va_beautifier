@@ -223,6 +223,7 @@ def extract():
         'desc_post': desc_post,
         'promulgation': promulgation,
         'signature': signature,
+        'layout': {'long': True, 'mobile_inline': True, 'capped_indicator': True},
         'paragraphs': paragraphs,
         'footnotes': footnotes,
         'appendices': appendices,

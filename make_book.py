@@ -19,6 +19,7 @@ import re
 import shutil
 import subprocess
 import sys
+from collections import Counter, defaultdict
 
 from core import (
     CANONICAL_FOOTNOTE_REF,
@@ -33,17 +34,14 @@ from project import BUILD, DOWNLOADS, ROOT
 BUILD.mkdir(exist_ok=True)
 DOWNLOADS.mkdir(parents=True, exist_ok=True)
 
-# Documents whose chapters are bare topical titles (no "CHAPTER N" marker in
-# the source); the book heading shows the title alone, mirroring
-# make_html.BARE_CHAPTER_DOCS.
-BARE_CHAPTER_DOCS = {'spe_salvi', 'deus_caritas_est'}
-
-
 def emit_markdown(data, slug, *, paper='a5', template_slug=None):
     # Output slug controls the .md filename; the template slug points at
     # the per-doc typst module on disk. Both default to the same value
     # unless an A4 variant is being emitted from the canonical doc.
     template_slug = template_slug or slug
+    # Chapters render title-only (no "Chapter N") when the source has no chapter
+    # numbering — declared per-doc in the [layout] table (see core.LAYOUT_FLAGS).
+    bare_chapters = bool(data.get('layout', {}).get('bare_chapters'))
     name        = data['name']
     desc        = data.get('desc', '')
     desc_post   = data.get('desc_post', '')
@@ -57,8 +55,21 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
     appendices  = data.get('appendices', [])
     chapter_style = data.get('chapter_style', '')
 
-    fn_index = {(f['part'], f['chapter'], f['number']): f for f in footnotes}
-    used = {}  # ordered: (part, chapter, n) → footnote dict
+    fn_occurrences = Counter((f['part'], f['chapter'], f['number']) for f in footnotes)
+    fn_seen = Counter()
+    fn_buckets = defaultdict(list)
+    for f in footnotes:
+        base_key = (f['part'], f['chapter'], f['number'])
+        fn_seen[base_key] += 1
+        suffix = f'-{fn_seen[base_key]}' if fn_occurrences[base_key] > 1 else ''
+        label = f'{f["part"]}-{f["chapter"]}-{f["number"]}{suffix}'
+        fn_buckets[base_key].append((label, f))
+    fn_ref_counts = Counter()
+    for p in paragraphs:
+        for r in CANONICAL_FOOTNOTE_REF.findall(p.get('text', '')):
+            fn_ref_counts[(p.get('part', 0), p.get('chapter', 0), int(r))] += 1
+    fn_ref_seen = Counter()
+    used = {}  # ordered: footnote label → footnote dict
 
     lines = []
 
@@ -191,7 +202,7 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
         if ch_title and chapter != prev['chapter']:
             unnumbered = (
                 ch_title.strip().lower() in ('conclusion', 'preface', 'introduction')
-                or template_slug in BARE_CHAPTER_DOCS
+                or bare_chapters
             )
             if chapter_style == 'roman':
                 label = f'{int_to_roman(chapter)}. {ch_title}'
@@ -231,9 +242,17 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
         def replace_ref(m, _part=part, _chapter=chapter):
             n = int(m.group(1))
             key = (_part, _chapter, n)
-            if key in fn_index:
-                used[key] = fn_index[key]
-                return f'[^{_part}-{_chapter}-{n}]'
+            candidates = fn_buckets.get(key, [])
+            if candidates:
+                if len(candidates) == 1:
+                    label, fn = candidates[0]
+                else:
+                    fn_ref_seen[key] += 1
+                    skipped_uncited = max(0, len(candidates) - fn_ref_counts[key])
+                    position = min(skipped_uncited + fn_ref_seen[key], len(candidates))
+                    label, fn = candidates[position - 1]
+                used[label] = fn
+                return f'[^{label}]'
             # No matching definition — leave the literal `(N)` alone so
             # the artefact reads as the Vatican source does.
             return m.group(0)
@@ -289,14 +308,14 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
     # Emit at the bottom of the markdown. Pandoc's EPUB writer places
     # them at end-of-section; the typst writer floats them to page bottom.
     lines.append('')
-    for (part, chapter, n), fn in used.items():
+    for label, fn in used.items():
         # Split on \n\n so each sub-paragraph becomes a real pandoc footnote
         # paragraph. Single \n inside a sub-paragraph is treated as a soft
         # break (typst handles this naturally; pandoc wraps it).
         text = _normalise_vatican_links(fn['text'].rstrip())
         paragraphs_fn = [p.strip() for p in text.split('\n\n') if p.strip()]
         first, *rest = paragraphs_fn or ['']
-        lines.append(f'[^{part}-{chapter}-{n}]: {first}')
+        lines.append(f'[^{label}]: {first}')
         for paragraph in rest:
             # Pandoc keeps a footnote alive across blank lines only when the
             # blank itself is indented; the body of the continuation needs

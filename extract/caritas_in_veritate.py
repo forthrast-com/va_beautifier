@@ -156,6 +156,7 @@ def extract():
         'desc_post': desc_post,
         'promulgation': promulgation,
         'signature': signature,
+        'layout': {'long': True},
         'paragraphs': paragraphs,
         'footnotes': footnotes,
     }

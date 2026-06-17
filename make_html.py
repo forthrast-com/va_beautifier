@@ -1,11 +1,12 @@
 import argparse
 import json
 import re
-from collections import defaultdict
+from collections import Counter, defaultdict
 from html import escape
 
 from core import (
     CANONICAL_FOOTNOTE_REF,
+    LAYOUT_FLAGS,
     ch_order_label,
     inline_markup_to_html,
     int_to_roman,
@@ -44,7 +45,7 @@ args = ap.parse_args()
 data = read_toml(BUILD / f'{args.doc}.toml')
 
 paragraphs   = data['paragraphs']
-footnotes    = data['footnotes']
+footnotes    = data.get('footnotes', [])
 appendices   = data.get('appendices', [])
 doc_name     = data.get('name', args.doc)
 doc_source   = data.get('source_url', '')
@@ -54,6 +55,21 @@ doc_promulg   = data.get('promulgation', '')
 doc_signature = data.get('signature', '')
 doc_signatories = data.get('signatories', [])
 chapter_style = data.get('chapter_style', '')
+
+# Per-document rendering flags, declared in the extractor and serialised to the
+# [layout] TOML table (see core.LAYOUT_FLAGS). These replace the slug
+# membership sets (LONG_DOCS / BARE_SECTION_DOCS / BARE_CHAPTER_DOCS) that used
+# to live here — adding a doc no longer means editing this file.
+layout        = data.get('layout', {})
+IS_LONG       = bool(layout.get('long'))         # gutter layout + section-level sticky bar
+BARE_SECTIONS = bool(layout.get('bare_sections'))  # named sections, no "Section N:" prefix
+BARE_CHAPTERS = bool(layout.get('bare_chapters'))  # title-only chapters, no "Chapter N:" prefix
+# Every truthy flag also becomes a `layout-<flag>` body class (underscores →
+# hyphens) so styles.css targets the class once instead of enumerating slugs.
+layout_classes = ''.join(
+    f' layout-{flag.replace("_", "-")}'
+    for flag in LAYOUT_FLAGS if layout.get(flag)
+)
 
 # Default = warm gold for legacy TOML files without explicit document colour.
 doc_hue = data.get('hue', 42)
@@ -70,11 +86,18 @@ def chapter_full_label(chapter, title):
     separator = ' ' if chapter_style == 'roman' else ': '
     return f'{number}{separator}{title}' if title else number
 
-def linkify_footnotes(text, part, chapter):
+def footnote_key(part, chapter, number, occurrence=0):
+    base = f'{part}-{chapter}-{number}'
+    return base if not occurrence else f'{base}-{occurrence}'
+
+def linkify_footnotes(text, part, chapter, footnote_ref_ids=None):
     """Replace (N) inline refs with linked superscripts."""
+    ref_ids = iter(footnote_ref_ids or [])
+
     def replace(m):
         n = m.group(1)
-        return f'<sup><a href="#fn-{part}-{chapter}-{n}">{n}</a></sup>'
+        target = next(ref_ids, f'fn-{part}-{chapter}-{n}')
+        return f'<sup><a href="#{target}">{n}</a></sup>'
     return CANONICAL_FOOTNOTE_REF.sub(replace, text)
 
 def linkify_anchors(text):
@@ -103,7 +126,7 @@ def structure_inline_html(text):
     """Render canonical inline markup for headings with authored line breaks."""
     return inline_markup_to_html(e(text), escaped=True, break_tag='<br>')
 
-def para_html(text, part=None, chapter=None):
+def para_html(text, part=None, chapter=None, footnote_ref_ids=None):
     """Convert paragraph text to <p> tags.
 
     `\\n\\n` separates sub-paragraphs (each becomes its own <p>).
@@ -112,11 +135,14 @@ def para_html(text, part=None, chapter=None):
     """
     text = tighten(text)
     out = []
+    footnote_ref_ids = iter(footnote_ref_ids or [])
     for sub in [p.strip() for p in text.split('\n\n') if p.strip()]:
         rendered = e(sub)
         rendered = linkify_anchors(rendered)
         if part is not None:
-            rendered = linkify_footnotes(rendered, part, chapter)
+            rendered = linkify_footnotes(
+                rendered, part, chapter, footnote_ref_ids,
+            )
         rendered = inline_markup_to_html(
             rendered, escaped=True, break_tag='<br>',
         )
@@ -170,21 +196,6 @@ def _desc_block(text, cls, *, break_before_on=False, stacked=False):
             out += piece
     return f'<p class="{cls}">{out}</p>'
 
-LONG_DOCS = {
-    'laudato_si',
-    'magnifica_humanitas',
-    'antiqua_et_nova',
-    'quo_vadis_humanitas',
-    'sacrosanctum_concilium',
-    'fides_et_ratio',
-    'lumen_fidei',
-    'verbum_domini',
-    'deus_caritas_est',
-    'spe_salvi',
-    'caritas_in_veritate',
-    'ecclesia_in_oceania',
-}
-
 # The Vatican sources place the document title *between* lines of the
 # front-matter block: e.g. MH has "ENCYCLICAL LETTER" above the title and
 # "OF HIS HOLINESS … IN THE TIME OF AI" below; GeS has "PASTORAL
@@ -193,7 +204,7 @@ LONG_DOCS = {
 # (below); the renderer just stacks them around the name.
 title_block = ''
 if doc_desc or doc_name or doc_desc_post:
-    is_modern = args.doc in LONG_DOCS
+    is_modern = IS_LONG
     # Documents whose pre-title `desc` lists distinct issuing bodies
     # (Antiqua et nova — two co-signing dicasteries) want each line on
     # its own row instead of flowed as a single title phrase.
@@ -255,7 +266,7 @@ seen_sub_heading = object()
 
 sections_for_drawer = []  # list of {id, label, chapter_label}
 subs_for_drawer    = []   # list of {id, label, part, chapter, section, first_para}
-para_to_sub_id     = {}   # para_num → sub id ('' if no sub-heading)
+para_to_sub_id     = {}   # para id → sub id ('' if no sub-heading)
 _cur_sub_id        = ''   # tracks the currently active sub-heading as we walk
 _cur_sub_text      = ''   # the running sub-heading text (LS); GeS computes per-para
 
@@ -269,19 +280,63 @@ def next_cid():
     _ch_counter += 1
     return cid
 
-# para → indicator chapter id (for ch_paras)
-para_ch_id: dict[int, str] = {}
-# Documents whose sections are named topical headers, not numbered tiers —
-# the drawer/heading shows the bare title without a "Section N:" prefix.
-BARE_SECTION_DOCS = {'magnifica_humanitas', 'quo_vadis_humanitas',
-                     'fides_et_ratio', 'lumen_fidei', 'verbum_domini',
-                     'spe_salvi', 'ecclesia_in_oceania'}
-# Documents whose chapters are bare topical titles (no "CHAPTER N" marker in
-# the source) — the chapter renders as its title alone, like the trailing
-# Conclusion, but for every chapter.
-BARE_CHAPTER_DOCS = {'spe_salvi', 'deus_caritas_est'}
+# para id → indicator chapter id (for ch_paras)
+para_ch_id: dict[str, str] = {}
 
+para_id_by_index: dict[int, str] = {}
+para_number_counts = Counter(p['number'] for p in paragraphs)
+para_number_seen = Counter()
+visible_para_seen = Counter()
+for idx, p in enumerate(paragraphs):
+    number = p['number']
+    para_number_seen[number] += 1
+    if para_number_counts[number] == 1:
+        para_id = f'para-{number}'
+    elif not p.get('hide_number', False) and visible_para_seen[number] == 0:
+        para_id = f'para-{number}'
+        visible_para_seen[number] += 1
+    else:
+        para_id = f'para-{number}-{para_number_seen[number]}'
+    para_id_by_index[idx] = para_id
+
+fn_occurrences = Counter((fn['part'], fn['chapter'], fn['number']) for fn in footnotes)
+fn_seen = Counter()
+fn_render_key_by_object: dict[int, tuple[int, int, int, int]] = {}
+fn_keys_by_context_number: dict[tuple[int, int, int], list[tuple[int, int, int, int]]] = defaultdict(list)
+for fn in footnotes:
+    context_key = (fn['part'], fn['chapter'], fn['number'])
+    fn_seen[context_key] += 1
+    occurrence = fn_seen[context_key] if fn_occurrences[context_key] > 1 else 0
+    key = (fn['part'], fn['chapter'], fn['number'], occurrence)
+    fn_render_key_by_object[id(fn)] = key
+    fn_keys_by_context_number[context_key].append(key)
+
+footnote_ref_ids_by_index: dict[int, list[str]] = defaultdict(list)
+fn_para: dict[tuple[int, int, int, int], str] = {}
+fn_ref_counts = Counter()
 for p in paragraphs:
+    for r in CANONICAL_FOOTNOTE_REF.findall(p['text']):
+        fn_ref_counts[(p['part'], p['chapter'], int(r))] += 1
+fn_ref_seen = Counter()
+for idx, p in enumerate(paragraphs):
+    refs = CANONICAL_FOOTNOTE_REF.findall(p['text'])
+    for r in refs:
+        context_key = (p['part'], p['chapter'], int(r))
+        candidates = fn_keys_by_context_number.get(context_key, [])
+        if candidates:
+            if len(candidates) == 1:
+                key = candidates[0]
+            else:
+                fn_ref_seen[context_key] += 1
+                skipped_uncited = max(0, len(candidates) - fn_ref_counts[context_key])
+                position = min(skipped_uncited + fn_ref_seen[context_key], len(candidates))
+                key = candidates[position - 1]
+        else:
+            key = (p['part'], p['chapter'], int(r), 0)
+        footnote_ref_ids_by_index[idx].append('fn-' + footnote_key(*key))
+        fn_para.setdefault(key, para_id_by_index[idx])
+
+for idx, p in enumerate(paragraphs):
     part    = (p['part'], p['part_title'], p.get('part_subtitle', ''))
     chapter = (p['chapter'], p['chapter_title'], p.get('chapter_subtitle', ''))
     section = (p['section'], p['section_title'])
@@ -346,7 +401,7 @@ for p in paragraphs:
         # rides on the title <h3> instead of the (omitted) chapter-num <h2>.
         is_unnumbered = chapter_style != 'roman' and (
             p['chapter_title'].strip().lower() == 'conclusion'
-            or args.doc in BARE_CHAPTER_DOCS
+            or BARE_CHAPTERS
         )
         if chapter_style == 'roman':
             # Roman-numeral docs (AeN): chapter number lives in the
@@ -379,11 +434,12 @@ for p in paragraphs:
         seen_section     = object()
         seen_sub_heading = object()
 
-    para_ch_id[p['number']] = indicator_chapters[-1]['id']
+    para_id = para_id_by_index[idx]
+    para_ch_id[para_id] = indicator_chapters[-1]['id']
 
     if section != seen_section and p['section'] != 0:
         sec_id = f'sec-{p["part"]}-{p["chapter"]}-{p["section"]}'
-        if args.doc in BARE_SECTION_DOCS:
+        if BARE_SECTIONS:
             label = p['section_title']
         else:
             label = f'Section {p["section"]}'
@@ -400,7 +456,7 @@ for p in paragraphs:
     sub = p.get('sub_heading', '')
     if sub != seen_sub_heading:
         if sub:
-            _cur_sub_id = f'sub-{p["number"]}'
+            _cur_sub_id = f'sub-{para_id.removeprefix("para-")}'
             _cur_sub_text = sub
             subs_for_drawer.append({
                 'id': _cur_sub_id, 'label': sub,
@@ -414,12 +470,15 @@ for p in paragraphs:
             _cur_sub_id = ''
             _cur_sub_text = ''
         seen_sub_heading = sub
-    para_to_sub_id[p['number']] = _cur_sub_id
+    para_to_sub_id[para_id] = _cur_sub_id
 
     # paragraph block
     num  = p['number']
     head = p.get('heading_la', '')
-    body = para_html(p['text'], p['part'], p['chapter'])
+    body = para_html(
+        p['text'], p['part'], p['chapter'],
+        footnote_ref_ids_by_index.get(idx, []),
+    )
 
     # Per-doc sticky-bar sub-line. GeS prefers the larger structural unit
     # (section title) and falls back to the paragraph's Latin micro-summary
@@ -431,14 +490,14 @@ for p in paragraphs:
     # disentangle a shared one.
     if args.doc == 'gaudium_et_spes':
         sub_text = (p['section_title'] if p['section'] else '') or head
-    elif args.doc in LONG_DOCS:
+    elif IS_LONG:
         sub_text = p['section_title'] if p['section'] else ''
     else:
         sub_text = _cur_sub_text
 
     visible_num = '' if p.get('hide_number', False) else f'<span class="para-num">{num}</span>'
     html_parts.append(
-        f'<div class="paragraph" id="para-{num}" data-sub-text="{e(sub_text)}">'
+        f'<div class="paragraph" id="{para_id}" data-para-num="{num}" data-sub-text="{e(sub_text)}">'
         f'{visible_num}'
         + (f' <em class="heading-la">{e(head)}</em>' if head else '')
         + f'\n{body}'
@@ -449,10 +508,10 @@ for p in paragraphs:
 
 # (part, chapter) → first cid containing those paragraphs (for footnote links)
 part_chapter_to_cid: dict[tuple, str] = {}
-for p in paragraphs:
+for idx, p in enumerate(paragraphs):
     key = (p['part'], p['chapter'])
     if key not in part_chapter_to_cid:
-        part_chapter_to_cid[key] = para_ch_id[p['number']]
+        part_chapter_to_cid[key] = para_ch_id[para_id_by_index[idx]]
 
 # ── drawer: sections + sub-headings + footnotes interleaved by chapter ──────
 
@@ -471,15 +530,14 @@ for fn in footnotes:
 # Footnote heading placement is canonical TOML data. Only the link back to
 # the first citing paragraph is renderer-owned, because paragraph anchors are
 # an HTML navigation detail rather than source structure.
-fn_section: dict[tuple, int] = {}
-fn_sub:     dict[tuple, str] = {}
-fn_para:    dict[tuple, int] = {}
+fn_section: dict[tuple[int, int, int, int], int] = {}
+fn_sub:     dict[tuple[int, int, int, int], str] = {}
 sub_id_by_context: dict[tuple, str] = {}
 for sb in subs_for_drawer:
     key = (sb['part'], sb['chapter'], sb['section'], sb['label'])
     sub_id_by_context.setdefault(key, sb['id'])
 for fn in footnotes:
-    key = (fn['part'], fn['chapter'], fn['number'])
+    key = fn_render_key_by_object[id(fn)]
     section = fn.get('section', 0)
     fn_section[key] = section
     sub_heading = fn.get('sub_heading', '')
@@ -487,15 +545,17 @@ for fn in footnotes:
         fn_sub[key] = sub_id_by_context.get(
             (fn['part'], fn['chapter'], section, sub_heading), ''
         )
-for p in paragraphs:
+for idx, p in enumerate(paragraphs):
     refs = CANONICAL_FOOTNOTE_REF.findall(p['text'])
     for r in refs:
-        key = (p['part'], p['chapter'], int(r))
-        if key not in fn_para:
-            fn_para[key] = p['number']
+        context_key = (p['part'], p['chapter'], int(r))
+        candidates = fn_keys_by_context_number.get(context_key, [])
+        key = candidates[0] if len(candidates) == 1 else None
+        if key is None:
+            continue
         # Keep older TOML intermediates renderable until they are rebuilt.
         fn_section.setdefault(key, p['section'])
-        fn_sub.setdefault(key, para_to_sub_id.get(p['number'], ''))
+        fn_sub.setdefault(key, para_to_sub_id.get(para_id_by_index[idx], ''))
 
 # chapter order from document
 ch_order = []
@@ -507,15 +567,16 @@ for p in paragraphs:
         seen_ch_order.add(key)
 
 def fn_item_html(part, chapter, fn):
-    key  = (part, chapter, fn['number'])
-    pnum = fn_para.get(key)
-    href = f'#para-{pnum}' if pnum else ''
+    key  = fn_render_key_by_object[id(fn)]
+    para_id = fn_para.get(key)
+    href = f'#{para_id}' if para_id else ''
     if href:
         num = f'<a href="{href}" class="fn-num-link">{fn["number"]}</a>'
     else:
         num = f'<span class="fn-num-link">{fn["number"]}</span>'
     body = para_html(fn['text'])
-    return f'<li id="fn-{part}-{chapter}-{fn["number"]}" class="fn-item">{num}{body}</li>'
+    fn_id = 'fn-' + footnote_key(*key)
+    return f'<li id="{fn_id}" class="fn-item">{num}{body}</li>'
 
 # Per-doc drawer style. 'chapter' = chapter group headings + flat footnote
 # list (no section/sub nav lines). 'full' = chapter + section + sub-heading
@@ -581,7 +642,7 @@ for (part, chapter), ch_label in ch_order:
     # first numbered section (or all of a chapter that has no sections).
     fns_by_sec: dict[int, list] = defaultdict(list)
     for fn in fns:
-        sec = fn_section.get((part, chapter, fn['number']), 0)
+        sec = fn_section.get(fn_render_key_by_object[id(fn)], 0)
         fns_by_sec[sec].append(fn)
 
     sec_nums = [0] + [s['section'] for s in sorted(secs, key=lambda s: s['section'])]
@@ -604,7 +665,7 @@ for (part, chapter), ch_label in ch_order:
         # the citing paragraph fell under.
         fns_by_sub: dict[str, list] = defaultdict(list)
         for fn in sec_fns:
-            sid = fn_sub.get((part, chapter, fn['number']), '')
+            sid = fn_sub.get(fn_render_key_by_object[id(fn)], '')
             fns_by_sub[sid].append(fn)
 
         # Footnotes not under any sub-heading come first (preserves
@@ -692,12 +753,9 @@ DOC_INDICATOR_LEVEL = {
 indicator_level = DOC_INDICATOR_LEVEL.get(args.doc, 'paragraphs')
 
 ch_paras: dict[str, list[int]] = {}
-visible_para_numbers = {
-    p['number'] for p in paragraphs if not p.get('hide_number', False)
-}
-for pnum, cid in para_ch_id.items():
-    if pnum in visible_para_numbers:
-        ch_paras.setdefault(cid, []).append(pnum)
+for idx, p in enumerate(paragraphs):
+    if not p.get('hide_number', False):
+        ch_paras.setdefault(para_ch_id[para_id_by_index[idx]], []).append(p['number'])
 
 # Map each section id → its (first, last) paragraph range so we can
 # build section-mode segs without re-walking paragraphs.
@@ -708,8 +766,8 @@ for p in paragraphs:
         sec_paras[sid].append(p['number'])
 
 sub_paras: dict[str, list[int]] = defaultdict(list)
-for p in paragraphs:
-    sid = para_to_sub_id.get(p['number'], '')
+for idx, p in enumerate(paragraphs):
+    sid = para_to_sub_id.get(para_id_by_index[idx], '')
     if sid:
         sub_paras[sid].append(p['number'])
 
@@ -820,7 +878,7 @@ page = f"""<!DOCTYPE html>
   }} catch (e) {{}}
 </script>
 </head>
-<body class="doc-{args.doc}">
+<body class="doc-{args.doc}{layout_classes}">
 <noscript>
 <p class="noscript-banner noscript-screen">Non-interactive render, you might want to enable JavaScript.<a href="https://circulars.forthrast.com">circulars.forthrast.com</a></p>
 <p class="noscript-banner noscript-print">Printed from circulars.forthrast.com</p>

@@ -106,6 +106,73 @@ class EndMatterRenderTests(unittest.TestCase):
         self.assertIn('[^0-0-1]: First note paragraph.', rendered)
         self.assertIn('\n    \n    Second note paragraph.\n', rendered)
 
+    def test_emit_markdown_disambiguates_duplicate_footnote_numbers(self):
+        data = {
+            'name': 'Sample Document',
+            'paragraphs': [
+                {
+                    'number': 1,
+                    'part': 0,
+                    'chapter': 0,
+                    'section': 0,
+                    'text': (
+                        'First paragraph with an uncited leading note.(1)\n\n'
+                        'Then a repeated note number.(2)'
+                    ),
+                },
+                {
+                    'number': 2,
+                    'part': 0,
+                    'chapter': 0,
+                    'section': 0,
+                    'text': 'Second paragraph with the same note number.(2)',
+                },
+            ],
+            'footnotes': [
+                {
+                    'part': 0,
+                    'chapter': 0,
+                    'number': 1,
+                    'text': 'Uncited leading note.',
+                },
+                {
+                    'part': 0,
+                    'chapter': 0,
+                    'number': 1,
+                    'text': 'Cited body note.',
+                },
+                {
+                    'part': 0,
+                    'chapter': 0,
+                    'number': 2,
+                    'text': 'First duplicate note.',
+                },
+                {
+                    'part': 0,
+                    'chapter': 0,
+                    'number': 2,
+                    'text': 'Second duplicate note.',
+                },
+            ],
+        }
+
+        old_build = make_book.BUILD
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            make_book.BUILD = Path(tmp_dir)
+            try:
+                md_path = make_book.emit_markdown(data, 'sample_doc')
+                rendered = md_path.read_text(encoding='utf-8')
+            finally:
+                make_book.BUILD = old_build
+
+        self.assertIn('uncited leading note.[^0-0-1-2]', rendered)
+        self.assertIn('repeated note number.[^0-0-2-1]', rendered)
+        self.assertIn('same note number.[^0-0-2-2]', rendered)
+        self.assertNotIn('[^0-0-1-1]', rendered)
+        self.assertIn('[^0-0-1-2]: Cited body note.', rendered)
+        self.assertIn('[^0-0-2-1]: First duplicate note.', rendered)
+        self.assertIn('[^0-0-2-2]: Second duplicate note.', rendered)
+
     def test_emit_markdown_preserves_body_verse_line_breaks(self):
         data = {
             'name': 'Sample Document',

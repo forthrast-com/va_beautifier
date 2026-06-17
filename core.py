@@ -19,6 +19,7 @@ Each `extract/<doc>.py` exposes:
         'desc_post':    str,        # multi-line subtitle shown BELOW the title (may be '')
         'chapter_style': str,        # optional numbering style, currently "roman"
         'book_toc_depth': int,       # optional PDF contents depth (default 3)
+        'layout':       dict,        # optional [layout] table of rendering flags (see LAYOUT_FLAGS)
         'promulgation': str,        # canonical inline markup; blank lines split stanzas
         'signature':    str,        # canonical inline markup; line breaks are significant
         'signatories':  list[dict], # optional end-matter name/role pairs
@@ -706,6 +707,26 @@ _PARA_FIELDS = [
 DEFAULT_PUBLISHER = 'circulars.forthrast.com'
 DEFAULT_COLLECTION = 'The Circulars (Vatican documents)'
 
+# Per-document rendering flags. These used to be hand-maintained slug
+# membership sets scattered across make_html, make_book, and styles.css; now
+# each extractor declares its own layout and the renderers read it back from
+# the [layout] TOML table (see write_toml). The canonical order here fixes the
+# serialised order. Each truthy flag also becomes a `layout-<flag>` body class
+# (underscores → hyphens) so styles.css can target it once instead of
+# enumerating slugs.
+#   long             — gutter-style paragraph numbers + soft-anchor layout
+#   bare_sections    — named topical sections render without a "Section N:" prefix
+#   bare_chapters    — chapters render title-only (source has no "CHAPTER N")
+#   mobile_inline    — gutter numbers fall back to inline "5." on narrow screens
+#   capped_indicator — scroll indicator divides into height-capped chapter segments
+LAYOUT_FLAGS = (
+    'long',
+    'bare_sections',
+    'bare_chapters',
+    'mobile_inline',
+    'capped_indicator',
+)
+
 
 def write_toml(path, *, name, hue=None, source_url='',
                author='', issued_by='', pontificate='', date='', identifier='', rights='',
@@ -713,6 +734,7 @@ def write_toml(path, *, name, hue=None, source_url='',
                type='', subtitle='', kind_long='',
                desc='', desc_post='', chapter_style='', book_toc_depth=3,
                promulgation='', signature='', show_title_author=True,
+               layout=None,
                paragraphs, footnotes, appendices=(), signatories=()):
     out = [f'name = {_toml_str(name)}']
     if hue is not None:
@@ -760,6 +782,18 @@ def write_toml(path, *, name, hue=None, source_url='',
             out.append(f'signature = {_toml_str(signature)}')
     if not show_title_author:
         out.append('show_title_author = false')
+    # Per-document rendering flags, serialised as a [layout] table before the
+    # [[paragraphs]] arrays. Only truthy flags are written; a doc with no
+    # layout (e.g. GeS) emits nothing and reads back as {}. Renderers consume
+    # data['layout'] instead of hardcoded slug membership sets. Order is fixed
+    # for deterministic output.
+    if layout:
+        flags = [k for k in LAYOUT_FLAGS if layout.get(k)]
+        if flags:
+            out.append('')
+            out.append('[layout]')
+            for k in flags:
+                out.append(f'{k} = true')
     out.append('')
 
     for p in paragraphs:

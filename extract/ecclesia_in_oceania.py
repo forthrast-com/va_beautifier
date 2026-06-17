@@ -243,6 +243,7 @@ def extract():
         'desc_post': desc_post,
         'promulgation': promulgation,
         'signature': signature,
+        'layout': {'long': True, 'bare_sections': True},
         'paragraphs': paragraphs,
         'footnotes': footnotes,
         'appendices': appendices,

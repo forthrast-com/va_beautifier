@@ -265,6 +265,7 @@ def extract():
         'desc': desc,
         'desc_post': '',
         'promulgation': title_case(promulgation),
+        'layout': {'long': True, 'mobile_inline': True, 'capped_indicator': True},
         'paragraphs': paragraphs,
         'footnotes': footnotes,
         'appendices': appendices,
