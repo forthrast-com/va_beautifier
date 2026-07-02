@@ -5,42 +5,39 @@ with contents navigation, footnotes, bookmarks and reader preferences.
 
 ## Site
 
-Published for `https://circulars.forthrast.com/` using GitHub Pages:
+Published to `https://circulars.forthrast.com/` using GitHub Pages. The
+catalogue at `/` links one reader page per document (`/<slug>.html`, e.g.
+`/laudato_si.html`) plus EPUB and A4/A5/A6 PDF downloads.
 
-- `/gaudium_et_spes.html`
-- `/laudato_si.html`
-- `/magnifica_humanitas.html`
-- `/antiqua_et_nova.html`
-- `/quo_vadis_humanitas.html`
-- `/sacrosanctum_concilium.html`
+## Dev shell
+
+Everything runs inside the Nix flake's dev shell. With direnv installed,
+`direnv allow` once and the shell loads on `cd`; otherwise prefix commands
+with `nix develop --command`.
 
 ## Build
 
 ```sh
-nix develop --command make
+make               # everything: books, readers, catalogue
+make books         # EPUB + PDFs for every document
+make <slug>        # one reader page (site/<slug>.html)
+make <slug>-books  # one document's EPUB + PDFs
+make list          # the document slugs <slug> accepts
+make test          # unit + extractor regression tests
+make qa            # full build, then the site-artifact smoke check
+make help          # this list
 ```
 
-The build uses the Nix flake and renders the TOML intermediate files, flat
-HTML pages, and downloadable PDF/EPUB editions. GitHub Actions rebuilds the
-site and publishes the finished reading and download files.
+GitHub Actions rebuilds the site and publishes the finished reading and
+download files.
 
-Run the unit and extractor regression tests with:
+## Sources
 
-```sh
-nix develop --command python -m unittest discover -s tests
-```
-
-Build and run the full generated-site smoke check with:
+For a fresh checkout, fetch the Vatican HTML snapshots first:
 
 ```sh
-nix develop --command make qa
-```
-
-For a fresh source collection, fetch the Vatican HTML snapshots first:
-
-```sh
-nix develop --command python download_sources.py --list
-nix develop --command python download_sources.py
+python download_sources.py --list   # manifest + local status
+python download_sources.py         # fetch what's missing
 ```
 
 The downloader records both implemented and queued documents, plus reference
@@ -48,5 +45,7 @@ pages collected for later work. Existing source files are retained unless
 `--force` is given; `--category queued` or `--category reference` selects a
 smaller set.
 
-The custom domain requires a DNS `CNAME` record from `circulars.forthrast.com` to
-`forthrast-com.github.io`.
+## DNS
+
+The custom domain requires a DNS `CNAME` record from `circulars.forthrast.com`
+to `forthrast-com.github.io`.

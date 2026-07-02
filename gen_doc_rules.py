@@ -102,6 +102,17 @@ def render() -> str:
         out.append(f'build/{slug}.toml: ' + ' '.join(prereqs))
         out.append(f'\tpython3 parse.py {slug}')
         out.append('')
+    out.append('# Convenience aliases: `make <slug>` renders the reader page,')
+    out.append('# `make <slug>-books` its EPUB + PDFs.')
+    for slug, _ in docs:
+        books = ' '.join(
+            f'site/downloads/{slug}{ext}'
+            for ext in ('.epub', '-a4.pdf', '-a5.pdf', '-a6.pdf')
+        )
+        out.append(f'.PHONY: {slug} {slug}-books')
+        out.append(f'{slug}: site/{slug}.html')
+        out.append(f'{slug}-books: {books}')
+        out.append('')
     return '\n'.join(out) + '\n'
 
 

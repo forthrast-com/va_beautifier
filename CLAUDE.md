@@ -73,8 +73,10 @@ The TOML is the canonical intermediate. Downstream renderers consume TOML — ne
   heading. Title pages and colophons come from the include-before-body files.
 - `assets/styles.css`, `assets/scripts.js` — read by `make_html.py` and inlined into the output. The JS has two placeholders, `__INDICATOR_JSON__` and `__DOC_NAME__`, substituted at render time. Edit these files directly; the output is still self-contained.
 - `Makefile` — the build entrypoint. `make` builds books, every reader, and the
-  catalogue; `make books` stops after EPUB/PDF; `make site/<slug>.html` builds
-  one reader. `DOCS`, the per-source fetch rules, and the per-document TOML
+  catalogue; `make books` stops after EPUB/PDF; `make <slug>` builds one reader
+  and `make <slug>-books` one document's EPUB/PDFs (generated aliases; `make
+  list` prints the slugs, `make help` the target summary, `make test` runs the
+  suite). `DOCS`, the per-source fetch rules, and the per-document TOML
   rules (with precise source + dialect-helper deps) are **generated** into
   `build/docs.mk` by `gen_doc_rules.py` from the `download_sources.py` manifest
   and each extractor's dialect import; the Makefile `include`s it and `make`
@@ -368,7 +370,9 @@ If revisiting:
 
 `flake.nix` provides Python 3.12 + beautifulsoup4, GNU make, pandoc, and
 typst. Use the Nix shell for project commands; do not rely on tools
-installed in the ambient shell. Build everything:
+installed in the ambient shell. A tracked `.envrc` (`use flake`) loads the
+shell via direnv/nix-direnv; without direnv, prefix commands with
+`nix develop --command`. Build everything:
 `nix develop --command make`. Build one book:
 `nix develop --command python make_book.py laudato_si`.
 

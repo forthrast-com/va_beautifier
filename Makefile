@@ -4,7 +4,7 @@
 # goal keeps the generated include's own build/docs.mk rule from hijacking it.
 .DEFAULT_GOAL := all
 
-.PHONY: all fetch books site qa clean
+.PHONY: all fetch books site qa clean help list test
 
 # Fetch template used by the generated include: one target per source snapshot,
 # so a build can pull missing Vatican HTML on demand rather than failing at the
@@ -61,6 +61,24 @@ site/downloads/%-a5.pdf site/downloads/%-a6.pdf &: build/%.toml make_book.py tem
 	python3 make_book.py $*
 
 # --- Housekeeping ---
+
+help:
+	@echo "Targets (run inside the dev shell: direnv, or nix develop --command make ...):"
+	@echo "  make               build everything: books, readers, catalogue"
+	@echo "  make books         EPUB + A4/A5/A6 PDFs for every document"
+	@echo "  make <slug>        one reader page (site/<slug>.html)"
+	@echo "  make <slug>-books  one document's EPUB + PDFs"
+	@echo "  make list          the document slugs <slug> accepts"
+	@echo "  make fetch         download missing Vatican HTML snapshots"
+	@echo "  make test          unit + extractor regression tests"
+	@echo "  make qa            full build, then the site-artifact smoke check"
+	@echo "  make clean         drop generated TOML, HTML, and books"
+
+list:
+	@printf '%s\n' $(DOCS)
+
+test:
+	python3 -m unittest discover -s tests
 
 clean:
 	rm -f $(TOMLS) $(HTMLS) site/index.html
