@@ -54,6 +54,13 @@ class ExtractorRegressionTests(unittest.TestCase):
                       data['promulgation'])
         self.assertEqual(data['paragraphs'][-1]['number'], 130)
         self.assertTrue(data['paragraphs'][-1]['break_after'])
+        # The snapshot mislabels ¶87 as "81."; the load-time repair keeps it
+        # a paragraph of its own instead of folding into ¶86.
+        p86, p87 = (next(p for p in data['paragraphs'] if p['number'] == n)
+                    for n in (86, 87))
+        self.assertTrue(p87['text'].startswith(
+            'In order that the divine office may be better'))
+        self.assertNotIn('divine office may be better', p86['text'])
         self.assertEqual(len(data['appendices']), 1)
         self.assertEqual(data['appendices'][0]['kind'], 'declaration')
         self.assertIn('1. The Sacred Council would not object',
@@ -143,6 +150,14 @@ class ExtractorRegressionTests(unittest.TestCase):
             'Gaudium et spes',
         )
         self.assertEqual(data['paragraphs'][-1]['chapter_title'], 'Conclusion')
+        # Continuation blocks get the same [N] → (N) pass as first blocks;
+        # notes 12/27/28/41/192–194 previously stayed bracketed (uncited).
+        for p in data['paragraphs']:
+            self.assertNotRegex(p['text'], r'\[\d{1,3}\]')
+        self.assertIn('(192)', next(
+            p['text'] for p in data['paragraphs']
+            if 'born of the Holy Spirit' in p['text']
+        ))
 
     @needs_sources(fides_et_ratio.EN_SRC)
     def test_fides_et_ratio_canonicalises_legacy_footnote_scheme(self):
@@ -340,6 +355,12 @@ class ExtractorRegressionTests(unittest.TestCase):
             next(p['chapter_title'] for p in data['paragraphs']
                  if p['chapter'] == 1),
             'The Message of Populorum Progressio',
+        )
+        # Chapter 4's <br/>-stacked list heading gets its commas repaired.
+        self.assertEqual(
+            next(p['chapter_title'] for p in data['paragraphs']
+                 if p['chapter'] == 4),
+            'The Development of People, Rights and Duties, the Environment',
         )
         self.assertEqual(data['paragraphs'][-1]['chapter_title'], 'Conclusion')
         self.assertTrue(all(

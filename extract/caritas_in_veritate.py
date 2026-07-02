@@ -59,6 +59,17 @@ TITLE_UPPER = 'CARITAS IN VERITATE'
 
 RE_PARA = re.compile(r'^(\d+)\s*\.\s+(.+)$', re.DOTALL)
 
+# Chapter 4's centred heading stacks a three-item list on <br/> lines with no
+# punctuation ("THE DEVELOPMENT OF PEOPLE / RIGHTS AND DUTIES / THE
+# ENVIRONMENT"); the space-join loses the list commas the encyclical's own
+# index carries. A generic comma-join would wreck ordinary wrapped titles
+# (chapter 6 breaks mid-phrase), so repair the one known title, keyed on the
+# joined form so a source change surfaces as a miss.
+CHAPTER_TITLE_REPAIRS = {
+    'The Development of People Rights and Duties the Environment':
+        'The Development of People, Rights and Duties, the Environment',
+}
+
 
 def extract():
     soup, main = load_main(EN_SRC, drop_chrome=True)
@@ -112,7 +123,11 @@ def extract():
                 # Leave the part-0 "Introduction" label behind once chapters
                 # begin, so it doesn't bleed onto every chapter paragraph.
                 state.part_title = ''
-                state.set_chapter(pending_chapter_num, title_case(text))
+                title = title_case(text)
+                state.set_chapter(
+                    pending_chapter_num,
+                    CHAPTER_TITLE_REPAIRS.get(title, title),
+                )
                 pending_chapter_num = None
             continue
 

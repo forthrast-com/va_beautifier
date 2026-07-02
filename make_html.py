@@ -86,6 +86,22 @@ def chapter_full_label(chapter, title):
     separator = ' ' if chapter_style == 'roman' else ': '
     return f'{number}{separator}{title}' if title else number
 
+def chapter_group_label(part, chapter, title):
+    """Drawer/TOC label for a chapter group, matching the body rendering:
+    bare-chapter docs and trailing conclusions show the bare title
+    (the body's is_unnumbered suppression), everything else keeps the
+    "Chapter N: " prefix."""
+    if part == 0 and chapter == 0:
+        return title or 'Preamble'
+    is_unnumbered = title and chapter_style != 'roman' and (
+        BARE_CHAPTERS or title.strip().lower() == 'conclusion'
+    )
+    if is_unnumbered:
+        return title
+    if part == 0:
+        return chapter_full_label(chapter, title)
+    return title or f'Part {int_to_roman(part)}, Chapter {chapter}'
+
 def footnote_key(part, chapter, number, occurrence=0):
     base = f'{part}-{chapter}-{number}'
     return base if not occurrence else f'{base}-{occurrence}'
@@ -602,12 +618,7 @@ for (part, chapter), ch_label in ch_order:
     ch_subs = [sb for sb in subs_for_drawer
                if sb['part'] == part and sb['chapter'] == chapter]
     cid = part_chapter_to_cid.get((part, chapter), '')
-    if part == 0 and chapter == 0:
-        group_label = ch_label or 'Preamble'
-    elif part == 0:
-        group_label = chapter_full_label(chapter, ch_label)
-    else:
-        group_label = ch_label or f'Part {int_to_roman(part)}, Chapter {chapter}'
+    group_label = chapter_group_label(part, chapter, ch_label)
 
     # Part-0/chapter-0 regions without an authored title now get a generated
     # Preamble heading, so their sections can stay nested under that root.
@@ -723,12 +734,7 @@ toc_drawer_html = '\n'.join(toc_items)
 noscript_toc_parts = ['<ul class="noscript-toc-list">']
 for (part, chapter), ch_label in ch_order:
     cid = part_chapter_to_cid.get((part, chapter), '')
-    if part == 0 and chapter == 0:
-        gl = ch_label or 'Preamble'
-    elif part == 0:
-        gl = chapter_full_label(chapter, ch_label)
-    else:
-        gl = ch_label or f'Part {int_to_roman(part)}, Chapter {chapter}'
+    gl = chapter_group_label(part, chapter, ch_label)
     noscript_toc_parts.append(f'<li class="ntoc-ch"><a href="#{cid}">{e(gl)}</a>')
     secs = sorted(secs_by_ch.get((part, chapter), []), key=lambda x: x['section'])
     if secs:

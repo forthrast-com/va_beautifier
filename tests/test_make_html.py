@@ -31,13 +31,13 @@ PARAGRAPHS = [{
 FOOTNOTES = [{'number': 1, 'text': 'A note citing *Gaudium et spes*.'}]
 
 
-def render_html_fixture(slug, paragraphs, footnotes):
+def render_html_fixture(slug, paragraphs, footnotes, **doc_fields):
     BUILD.mkdir(exist_ok=True)
     toml_path = BUILD / f'{slug}.toml'
     html_path = SITE / f'{slug}.html'
     write_toml(
         toml_path, name='Fixture & Co', hue=42,
-        paragraphs=paragraphs, footnotes=footnotes,
+        paragraphs=paragraphs, footnotes=footnotes, **doc_fields,
     )
     try:
         result = subprocess.run(
@@ -111,6 +111,43 @@ class MakeHtmlGoldenTests(unittest.TestCase):
         self.assertNotIn('class="part-title">Preamble', self.html)
         self.assertIn('<a id="ch-0"></a>', self.html)
         self.assertIn('Preamble', self.html)
+
+
+class MakeHtmlChapterLabelTests(unittest.TestCase):
+    def test_bare_chapter_drawer_labels_drop_the_prefix(self):
+        # bare_chapters docs (SS, DCE) render body headings title-only; the
+        # drawer contents and no-JS TOC labels must match, not re-add
+        # "Chapter N: ".
+        html = render_html_fixture(
+            'audit_bare_chapter_fixture',
+            [
+                {'number': 1, 'text': 'Opening prose.'},
+                {'number': 2, 'chapter': 1, 'chapter_title': 'Faith is Hope',
+                 'text': 'Hopeful prose.'},
+            ],
+            [],
+            layout={'bare_chapters': True},
+        )
+        self.assertNotIn('Chapter 1', html)
+        self.assertIn('Faith is Hope', html)
+
+    def test_trailing_conclusion_drawer_label_drops_the_prefix(self):
+        # The conclusion suppression is independent of bare_chapters: a
+        # numbered-chapter doc still shows its trailing Conclusion bare,
+        # matching the body's is_unnumbered rendering.
+        html = render_html_fixture(
+            'audit_conclusion_fixture',
+            [
+                {'number': 1, 'text': 'Opening prose.'},
+                {'number': 2, 'chapter': 1, 'chapter_title': 'Ideas',
+                 'text': 'Numbered chapter prose.'},
+                {'number': 3, 'chapter': 2, 'chapter_title': 'Conclusion',
+                 'text': 'Closing prose.'},
+            ],
+            [],
+        )
+        self.assertIn('Chapter 1: Ideas', html)
+        self.assertNotIn('Chapter 2: Conclusion', html)
 
 
 class MakeHtmlCollisionTests(unittest.TestCase):

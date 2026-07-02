@@ -163,7 +163,11 @@ Three templates encountered so far:
     anchors (the `$` arrives percent-encoded as `%24`). *Caritas in Veritate*
     is a Word **endnote** export: same `[N]`-marker scheme but spelt
     `_edn{N}` / `_ednref{N}`, so `_modern.RE_FOOTNOTE_ANCHOR` matches both
-    `ftn` and `edn` and `strip_footnote_anchors` handles it unchanged.
+    `ftn` and `edn` and `strip_footnote_anchors` handles it unchanged. Its
+    chapter 4 heading stacks a three-item list on `<br/>` lines with no
+    punctuation; the extractor repairs the joined title's commas via a
+    keyed `CHAPTER_TITLE_REPAIRS` map (a generic comma-join would wreck
+    ordinary wrapped titles like chapter 6's).
     *Ecclesia in Oceania* (2001) is different again: body cites are
     `<sup><a name="fnref{N}">(</a><a href="#fn{N}">N</a>)</sup>` — the
     parentheses are literal and the marker is split across two anchors (one
@@ -237,7 +241,7 @@ Doc-scoped CSS lives under `.doc-<slug>` selectors. Long structured documents sh
 **Layout flags (the `[layout]` TOML table).** Per-document rendering choices that used to live as hand-maintained slug sets scattered across `make_html`, `make_book`, and `styles.css` are now declared once per document. The extractor returns a `layout` dict; `core.write_toml` serialises it to a `[layout]` table (canonical flag order in `core.LAYOUT_FLAGS`); the renderers read `data['layout']` and `make_html` also stamps each truthy flag as a `layout-<flag>` body class (underscores → hyphens). `styles.css` targets those classes once instead of enumerating slugs. The flags:
   - `long` — gutter paragraph numbers + section-level sticky bar (`.layout-long`); replaced `make_html.LONG_DOCS`.
   - `bare_sections` — named topical sections, no `Section N:` prefix; replaced `make_html.BARE_SECTION_DOCS`.
-  - `bare_chapters` — title-only chapters, no `Chapter N:` prefix, for sources with no chapter numbering (SS, DCE); replaced `make_html`/`make_book.BARE_CHAPTER_DOCS`.
+  - `bare_chapters` — title-only chapters, no `Chapter N:` prefix, for sources with no chapter numbering (SS, DCE); replaced `make_html`/`make_book.BARE_CHAPTER_DOCS`. Drawer contents and no-JS TOC labels follow the same bare rendering via `make_html.chapter_group_label`, which also strips the prefix from a trailing `Conclusion` chapter to match the body's `is_unnumbered` path.
   - `mobile_inline` — narrow-viewport fallback to inline `5.` numbering (`.layout-mobile-inline`; LS/MH/AeN/QVH/SC).
   - `capped_indicator` — height-capped, chapter-segmented scroll indicator (`.layout-capped-indicator`; the above plus VD).
 
@@ -301,7 +305,8 @@ front-matter location). `parse.py` discovery filters underscore names so
 they are never offered as documents.
 
 Extractors keep facts (metadata, title lines) and quirks (SC's appendix
-mode and split `CHAPTER VI`, LS's two-phase body/tail split, QVH's
+mode, split `CHAPTER VI`, and load-time repair of the snapshot's "81."
+mis-numbering of ¶87; LS's two-phase body/tail split; QVH's
 hidden-numbered preliminary note). There is deliberately still no
 config-driven generic walker: the dialects diverge exactly where a
 framework would need escape hatches, and the drop-a-file extractor

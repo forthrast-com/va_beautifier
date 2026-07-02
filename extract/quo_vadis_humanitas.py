@@ -6,6 +6,7 @@ from core import (
     HeadingState,
     heading_title,
     is_centred,
+    normalise_footnote_refs,
     numbered_paragraph,
     paragraph_record,
     roman_to_int,
@@ -127,15 +128,20 @@ def extract():
 
         if state.part_title == 'Preliminary Note':
             paragraph = paragraph_record(
-                hidden_number, prose_text(p), part_title=state.part_title
+                hidden_number, prose_text(p), part_title=state.part_title,
+                bracketed_refs=True,
             )
             paragraph['hide_number'] = True
             paragraphs.append(paragraph)
             hidden_number -= 1
             continue
 
+        # Continuation blocks need the same [N] → (N) pass the numbered
+        # record gets, or their cites stay bracketed and never linkify.
         if paragraphs:
-            paragraphs[-1]['text'] += '\n\n' + prose_text(p)
+            paragraphs[-1]['text'] += '\n\n' + normalise_footnote_refs(
+                prose_text(p), bracketed=True
+            )
 
     footnotes = anchored_footnotes(soup, paragraphs)
     return {

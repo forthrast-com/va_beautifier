@@ -17,6 +17,8 @@ Shape:
     from the first citing paragraph.
   - A ruled-off calendar declaration follows chapter VII; emitted through
     `appendices[]`, not invented as an eighth chapter.
+  - The snapshot mislabels ¶87 as "81."; repaired at load in `extract()` so
+    the walker's strictly-increasing number guard accepts it.
 """
 
 import re
@@ -199,9 +201,9 @@ def _walk_body(corpo):
 
         # Body paragraph. Only accept the next strictly-greater number so
         # `<p>1.` / `<p>2.` list items embedded inside a paragraph (¶22's
-        # numbered norms etc.) don't fork off as new records; source typos
-        # that skip an index (¶87 is mislabelled "81." in the snapshot
-        # then resumes at 88) survive as a gap rather than a stuck parser.
+        # numbered norms etc.) don't fork off as new records. Known source
+        # mis-numberings are repaired at load in extract(); anything new
+        # survives as a gap rather than a stuck parser.
         numbered = numbered_paragraph(tag, RE_PARA_NUM)
         if numbered and not appendix_active and numbered[0] > last_num:
             flush()
@@ -241,6 +243,15 @@ def _extract_footnotes(notes_html):
 
 def extract():
     body_html, notes_html = load_split(EN_SRC)
+
+    # The snapshot mislabels ¶87 as "81." (the office-reform decree between
+    # ¶86 and ¶88). Without the repair the walker's strictly-increasing
+    # guard folds it into ¶86 as continuation prose, stray marker and all.
+    body_html = body_html.replace(
+        '<p>81. In order that the divine office may be better',
+        '<p>87. In order that the divine office may be better',
+        1,
+    )
 
     # Source placement is decorative; promulgation is end matter in the
     # canonical edition, consistently with the other document dialects.
