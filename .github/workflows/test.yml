@@ -2,8 +2,11 @@ name: Tests
 
 # Branch pushes get the full suite — sources are fetched first, so the
 # extractor regression tests run too (they skip without snapshots).
+# Main is excluded: the pages workflow runs the same suite as a deploy
+# gate, so a main push isn't tested twice.
 on:
   push:
+    branches-ignore: [main]
   workflow_dispatch:
 
 jobs:

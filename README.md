@@ -19,6 +19,7 @@ with `nix develop --command`.
 
 ```sh
 make               # everything: books, readers, catalogue
+make -j8           # same, parallel (verified equivalent; ~4x faster)
 make books         # EPUB + PDFs for every document
 make <slug>        # one reader page (site/<slug>.html)
 make <slug>-books  # one document's EPUB + PDFs
