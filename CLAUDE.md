@@ -381,6 +381,14 @@ shell via direnv/nix-direnv; without direnv, prefix commands with
 `nix develop --command make`. Build one book:
 `nix develop --command python make_book.py laudato_si`.
 
-Run tests: `nix develop --command python -m unittest discover -s tests`.
+Run tests: `nix develop --command python -m unittest discover -s tests`
+(or `make test`). `tests/test_pipeline_invariants.py` is the generic tier:
+bug-class invariants (unconverted `[N]` markers, source junk in text,
+numbering continuity, folded-paragraph markers, scope-aware footnote
+resolution, source-vs-TOML note parity, emphasis balance, catalogue
+metadata) swept over every implemented document discovered from the
+manifest — a new extractor inherits every lesson with no registration.
+Pin document-specific facts in `test_extractors.py`; encode a new *class*
+of defect as another invariant there instead.
 
 `shell.nix` is kept only as a legacy fallback.
