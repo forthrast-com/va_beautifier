@@ -352,6 +352,7 @@ for idx, p in enumerate(paragraphs):
         footnote_ref_ids_by_index[idx].append('fn-' + footnote_key(*key))
         fn_para.setdefault(key, para_id_by_index[idx])
 
+part_nav: dict[int, tuple[str, str]] = {}  # part → (cid, title) for drawer/no-JS TOC rows
 for idx, p in enumerate(paragraphs):
     part    = (p['part'], p['part_title'], p.get('part_subtitle', ''))
     chapter = (p['chapter'], p['chapter_title'], p.get('chapter_subtitle', ''))
@@ -394,6 +395,7 @@ for idx, p in enumerate(paragraphs):
                 html_parts.append(f'<a id="{cid}"></a>')
         else:
             indicator_chapters.append({'id': cid, 'label': f'Part {int_to_roman(p["part"])}', 'spacer': True, 'part': p['part']})
+            part_nav[p['part']] = (cid, p['part_title'])
             html_parts.append(h('h1', 'part-num', f'Part {int_to_roman(p["part"])}').replace('<h1 ', f'<h1 id="{cid}" '))
             if p['part_title']:
                 html_parts.append(h('h2', 'part-title', p['part_title']).replace('<h2 ', '<h2 data-sticky '))
@@ -610,9 +612,21 @@ def toc_item(tag, cls, link_cls, target, label):
         f'</{tag}>'
     )
 
+def part_nav_label(part):
+    cid, title = part_nav[part]
+    label = f'Part {int_to_roman(part)}'
+    return cid, (f'{label}: {title}' if title else label)
+
 drawer_items = []
 toc_items = []
+toc_part_seen = 0
 for (part, chapter), ch_label in ch_order:
+    # Parted documents (VD, DCE, GeS) get a part row in the contents tree,
+    # mirroring the body's Part I/II headings; chapters group beneath it.
+    if part and part != toc_part_seen and part in part_nav:
+        p_cid, p_label = part_nav_label(part)
+        toc_items.append(toc_item('h3', 'fn-group part-group', 'fn-ch-link', p_cid, p_label))
+    toc_part_seen = part
     secs    = secs_by_ch.get((part, chapter), [])
     fns     = fns_by_ch.get((part, chapter), [])
     ch_subs = [sb for sb in subs_for_drawer
@@ -732,7 +746,13 @@ toc_drawer_html = '\n'.join(toc_items)
 
 # ── no-JS fallback TOC (simple link list, no bookmark widgets) ───────────────
 noscript_toc_parts = ['<ul class="noscript-toc-list">']
+ntoc_part_seen = 0
 for (part, chapter), ch_label in ch_order:
+    if part and part != ntoc_part_seen and part in part_nav:
+        p_cid, p_label = part_nav_label(part)
+        noscript_toc_parts.append(
+            f'<li class="ntoc-ch ntoc-part"><a href="#{p_cid}">{e(p_label)}</a></li>')
+    ntoc_part_seen = part
     cid = part_chapter_to_cid.get((part, chapter), '')
     gl = chapter_group_label(part, chapter, ch_label)
     noscript_toc_parts.append(f'<li class="ntoc-ch"><a href="#{cid}">{e(gl)}</a>')

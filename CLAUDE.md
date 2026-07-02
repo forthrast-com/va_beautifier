@@ -251,6 +251,11 @@ Genuinely bespoke per-doc CSS still uses `.doc-<slug>` (AeN's gutter chapter num
 
 JS publishes the sticky-bar's measured height to `--bar-h` so other layout (indicator centring, soft-anchor maths) can read it from CSS or JS.
 
+Parted documents (VD, DCE, GeS) get part rows in the drawer contents tree
+and no-JS TOC (`part_nav` → `.part-group` / `.ntoc-part`), mirroring the
+body's Part I/II headings; the tracked-caps treatment is one CSS rule
+shared with the in-text `h1.part-num` eyebrow.
+
 The drawer opens from the top-right control or an inline footnote reference.
 Opening from a reference synchronises the control state and selects the note.
 On touch only, tapping document text closes the drawer; mouse clicks do not.

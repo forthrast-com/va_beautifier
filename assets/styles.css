@@ -245,7 +245,7 @@ h1, h2, h3, h4 { font-family: var(--font-display); }
 }
 
 /* ── document structure ─────────────────────────────────────────────────── */
-h1.part-num      { font-size: 1rem; text-transform: uppercase; letter-spacing: .15em; color: var(--fg-dimmer); margin: 3rem 0 .25rem; }
+h1.part-num      { font-size: 1rem; margin: 3rem 0 .25rem; } /* caps/tracking shared with drawer part rows — see .part-group */
 h1.part-title    { font-size: 1.6rem; margin: 1.5rem 0 1rem; }
 .part-subtitle   { font-family: var(--font-display); font-size: 1.05rem; color: var(--fg-dim); margin: -.25rem 0 1.5rem; }
 h2.chapter-num   { font-size: .9rem; text-transform: uppercase; letter-spacing: .15em; color: var(--fg-dimmer); margin: 2.5rem 0 .2rem; }
@@ -407,6 +407,12 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .bookmarks-empty p              { margin: 0 0 .65rem; }
 #bookmark-list .toc-item .bookmark-toggle { opacity: 1; }
 .fn-group                       { font-size: .75rem; text-transform: uppercase; letter-spacing: .1em; color: var(--fg-dimmer); margin: 1.5rem 0 .4rem; }
+/* Tracked-caps part label, shared by the in-text Part eyebrow (h1.part-num)
+   and the drawer/no-JS part rows (VD, DCE, GeS). Each context keeps its own
+   size and spacing — the body heading rides the text column's gutter split,
+   the drawer row is ruled off from the group above. */
+h1.part-num, .part-group, .ntoc-part > a { text-transform: uppercase; letter-spacing: .15em; color: var(--fg-dimmer); font-weight: 600; }
+.part-group                     { margin-top: 2rem; padding-top: .9rem; border-top: 1px solid var(--rule-tint); }
 .fn-list                        { list-style: none; margin-left: 0; padding-left: 0; font-size: 1rem; line-height: 1.55; }
 .fn-item {
     display: grid;

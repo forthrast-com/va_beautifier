@@ -150,6 +150,34 @@ class MakeHtmlChapterLabelTests(unittest.TestCase):
         self.assertNotIn('Chapter 2: Conclusion', html)
 
 
+class MakeHtmlPartNavTests(unittest.TestCase):
+    def test_parted_documents_get_part_rows_in_contents_and_noscript_toc(self):
+        # VD/DCE/GeS render Part I/II headings in the body and indicator;
+        # the drawer contents tree and no-JS TOC must show the same
+        # grouping, not a flat chapter list.
+        html = render_html_fixture(
+            'audit_parts_fixture',
+            [
+                {'number': 1, 'text': 'Opening prose.'},
+                {'number': 2, 'part': 1, 'part_title': 'The Word of God',
+                 'chapter': 1, 'chapter_title': 'The God Who Speaks',
+                 'text': 'First part prose.'},
+                {'number': 3, 'part': 2, 'part_title': 'The Word in the Church',
+                 'chapter': 1, 'chapter_title': 'Receiving the Word',
+                 'text': 'Second part prose.'},
+            ],
+            [],
+        )
+        self.assertIn('Part I: The Word of God', html)
+        self.assertIn('Part II: The Word in the Church', html)
+        self.assertIn('ntoc-part', html)
+        # the part row precedes its first chapter row in the contents tree
+        self.assertLess(
+            html.index('Part I: The Word of God'),
+            html.index('The God Who Speaks'),
+        )
+
+
 class MakeHtmlCollisionTests(unittest.TestCase):
     def test_hidden_duplicate_paragraph_number_does_not_steal_visible_anchor(self):
         html = render_html_fixture(
