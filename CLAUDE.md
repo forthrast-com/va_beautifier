@@ -285,16 +285,12 @@ published, while intermediate Markdown/TOML stays in `build/` only.
   un-extracted (likely the modern Bootstrap dialect, LS-shaped). A
   reference capture recorded by `download_sources.py` for a possible
   future edition is `francis_g7_ai_en.html`.
-- **Parallelise the full build.** A 13-doc `make` is serial and the
-  bottleneck is `make_book.py` shelling out to pandoc + typst (~4 compiles
-  per doc). The per-doc book rule is already a self-contained grouped target
-  (`%.epub %-a4.pdf … &:`) and the doc targets are independent, so
-  `make -j8` (or `-j$(sysctl -n hw.ncpu)`) should parallelise the book build
-  with no Makefile change; `site/index.html` already depends on `$(BOOKS)`
-  so it still lands last. Keep `-j` an explicit invocation flag rather than
-  baking `MAKEFLAGS += -j` in, so single-doc incremental builds stay
-  legible and stderr isn't interleaved. Verify a cold `make -jN` matches a
-  serial build before relying on it.
+- **Parallel build — verified.** A cold `make -j8` matches a cold serial
+  build (byte-identical md/typ/toml intermediates, identical artefact
+  inventory, site-artifact QA green in both modes; 42s → 12s locally,
+  2026-07). CI uses `make -j8`; locally keep `-j` an explicit invocation
+  flag rather than baking `MAKEFLAGS += -j` in, so single-doc incremental
+  builds stay legible and stderr isn't interleaved.
 ## Extractor boundaries (implemented 2026-06)
 
 The shared surface has two tiers. Dialect-agnostic walker mechanics live
@@ -395,5 +391,9 @@ metadata) swept over every implemented document discovered from the
 manifest — a new extractor inherits every lesson with no registration.
 Pin document-specific facts in `test_extractors.py`; encode a new *class*
 of defect as another invariant there instead.
+
+`tools/audit_structure.py [slug …]` prints the human-side complement: each
+built TOML as a part › chapter › section tree with paragraph ranges — the
+view to eyeball when writing a new extractor.
 
 `shell.nix` is kept only as a legacy fallback.
