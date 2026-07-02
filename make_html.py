@@ -613,9 +613,11 @@ def toc_item(tag, cls, link_cls, target, label):
     )
 
 def part_nav_label(part):
+    # Em dash, not a colon: part titles routinely carry their own colon
+    # (DCE's "Caritas: The Practice of Love…"), which would stack.
     cid, title = part_nav[part]
     label = f'Part {int_to_roman(part)}'
-    return cid, (f'{label}: {title}' if title else label)
+    return cid, (f'{label} — {title}' if title else label)
 
 drawer_items = []
 toc_items = []

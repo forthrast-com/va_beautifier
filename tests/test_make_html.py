@@ -168,12 +168,13 @@ class MakeHtmlPartNavTests(unittest.TestCase):
             ],
             [],
         )
-        self.assertIn('Part I: The Word of God', html)
-        self.assertIn('Part II: The Word in the Church', html)
+        # Em-dash separator: part titles routinely carry their own colon.
+        self.assertIn('Part I — The Word of God', html)
+        self.assertIn('Part II — The Word in the Church', html)
         self.assertIn('ntoc-part', html)
         # the part row precedes its first chapter row in the contents tree
         self.assertLess(
-            html.index('Part I: The Word of God'),
+            html.index('Part I — The Word of God'),
             html.index('The God Who Speaks'),
         )
 
