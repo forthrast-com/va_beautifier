@@ -121,7 +121,10 @@ def clean_text(element, *, preserve_formatting=False):
         return content
 
     text = ''.join(render(child) for child in element.children)
-    text = re.sub(r'[ \t]+', ' ', text)
+    # \xa0 joins the collapse class: Word exports scatter non-breaking
+    # spaces (often glued to real spaces, which would render as visible
+    # double spacing); canonical text carries plain spaces only.
+    text = re.sub(r'[ \t\xa0]+', ' ', text)
     text = re.sub(r' *\n *', '\n', text)
     return text.strip()
 

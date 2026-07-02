@@ -44,6 +44,19 @@ class TextHelperTests(unittest.TestCase):
             'First\nSecond [link](https://example.test/x) [1]',
         )
 
+    def test_clean_text_collapses_non_breaking_spaces(self):
+        # Word exports scatter \xa0, often glued to a real space — which
+        # would render as visible double spacing in justified text.
+        soup = BeautifulSoup(
+            '<p>a force of\xa0 good, examined\xa0in\xa0silence</p>',
+            'html.parser',
+        )
+
+        self.assertEqual(
+            clean_text(soup.p),
+            'a force of good, examined in silence',
+        )
+
     def test_flatten_ws_collapses_newlines_unlike_clean_text(self):
         # The distinguishing behaviour: flatten_ws folds line breaks into
         # spaces (layout noise), where clean_text keeps them (content).
