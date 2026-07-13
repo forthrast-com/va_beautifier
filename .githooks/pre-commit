@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+
+if [[ -n "${IN_NIX_SHELL:-}" ]]; then
+    exec make check
+fi
+
+exec nix develop --command make check

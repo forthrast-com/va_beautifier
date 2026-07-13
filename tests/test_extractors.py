@@ -400,6 +400,21 @@ class ExtractorRegressionTests(unittest.TestCase):
         self.assertEqual(paragraphs[15]['section_title'],
                          'Lacking a Plan for Everyone')
         self.assertNotIn('SHATTERED DREAMS', paragraphs[9]['text'])
+        # Long source quotations become semantic blockquotes. Scripture cites
+        # stay attached as citation lines; redundant outer quote marks go.
+        self.assertIn('\n\n> Just then a lawyer stood up',
+                      paragraphs[56]['text'])
+        self.assertIn('\n>\n> — *Lk* 10:25–37', paragraphs[56]['text'])
+        self.assertNotIn('> “Just then', paragraphs[56]['text'])
+        self.assertIn('\n\n> You shall not wrong or oppress a stranger',
+                      paragraphs[61]['text'])
+        self.assertIn('\n>\n> — *Ex* 22:21', paragraphs[61]['text'])
+        self.assertIn('\n>\n> — Lev 19:33–34', paragraphs[61]['text'])
+        self.assertIn('\n\n> In the name of God,', paragraphs[285]['text'])
+        self.assertIn('\n>\n> In the name of innocent human life',
+                      paragraphs[285]['text'])
+        self.assertNotIn('> “In the name', paragraphs[285]['text'])
+        self.assertIn('method and standard.(285)', paragraphs[285]['text'])
         # Two titled prayers arrive as appendices (the LS-shaped tail).
         self.assertEqual(
             [a['title'] for a in data['appendices']],

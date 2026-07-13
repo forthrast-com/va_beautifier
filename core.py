@@ -126,6 +126,11 @@ def clean_text(element, *, preserve_formatting=False):
     # double spacing); canonical text carries plain spaces only.
     text = re.sub(r'[ \t\xa0]+', ' ', text)
     text = re.sub(r' *\n *', '\n', text)
+    # Vatican exports often leave wrapper whitespace around italic citation
+    # fragments: `( <i>Gal</i> 5:22)` / `(ed. cit. IV, 371 b )`. It has no
+    # semantic value and becomes conspicuous once the inline tag is rendered.
+    text = re.sub(r'\(\s+', '(', text)
+    text = re.sub(r'\s+\)', ')', text)
     return text.strip()
 
 

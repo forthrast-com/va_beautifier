@@ -18,6 +18,9 @@ const stickyNum   = document.getElementById('sticky-num');
 const stickyLabel = document.getElementById('sticky-label');
 const stickySub   = document.getElementById('sticky-sub');
 const stickyEls   = Array.from(document.querySelectorAll('[data-sticky]'));
+const stickyContextEls = Array.from(
+  document.querySelectorAll('[data-sticky], h4.section-title')
+);
 let currentParaNum = '';
 function updateSticky() {
   let current = null;
@@ -28,8 +31,24 @@ function updateSticky() {
   if (current) {
     stickyLabel.textContent = current.textContent;
     stickyNum.textContent   = current.dataset.chNum || '';
-    const para = currentParaNum ? document.getElementById('para-' + currentParaNum) : null;
-    stickySub.textContent = para?.dataset?.subText || '';
+    if (document.body.classList.contains('layout-long')) {
+      // The indicator anticipates the next paragraph at 35% of the viewport,
+      // but the bar should not: change its context only when the authored
+      // section heading reaches the top of the readable area. A new chapter,
+      // part, or appendix clears the previous section context.
+      const barEdge = document.getElementById('sticky-bar').offsetHeight + 8;
+      let currentSub = '';
+      for (const el of stickyContextEls) {
+        if (el.getBoundingClientRect().top > barEdge) break;
+        currentSub = el.matches('h4.section-title') ? el.textContent : '';
+      }
+      stickySub.textContent = currentSub;
+    } else {
+      const para = currentParaNum
+        ? document.getElementById('para-' + currentParaNum)
+        : null;
+      stickySub.textContent = para?.dataset?.subText || '';
+    }
   } else {
     // Top of doc / no chapter context — leave the bar blank.
     // The permanent doc-title-corner element handles "where am I".
@@ -152,87 +171,79 @@ window.addEventListener('resize', () => {
   publishTitleClearance();
 });
 
-// ── Long modern documents: soft-anchor paragraph numbers ──
-// Three-phase trajectory as paragraph scrolls up through viewport:
-//   A. paragraph below viewport centre -> number sits at top of paragraph
-//   B. paragraph approaching top -> anchor lerps from viewport centre
-//                                   down to (bar bottom + small offset)
-//   C. paragraph past top -> number sticks just under the bar, clamped
-//                            to paragraph bottom so it exits with the para
-// Number is `position: absolute` within `.paragraph`; we set its top in
-// px relative to the paragraph. CSS default (top:50%) is the JS-off
-// fallback — the first frame of scroll handler replaces it.
-if (document.body.classList.contains('doc-laudato_si') ||
-    document.body.classList.contains('doc-magnifica_humanitas') ||
-    document.body.classList.contains('doc-antiqua_et_nova') ||
-    document.body.classList.contains('doc-quo_vadis_humanitas') ||
-    document.body.classList.contains('doc-sacrosanctum_concilium')) {
+// ── Long documents: pin only the current paragraph number ──
+// Every number normally sits beside its paragraph's first line. Once that
+// paragraph scrolls under the sticky bar, its number alone stays pinned until
+// the paragraph bottom carries it away. Following numbers remain in ordinary
+// document flow — no pre-emptive sliding or multi-number choreography.
+if (document.body.classList.contains('layout-long')) {
   const paragraphs = Array.from(document.querySelectorAll('.paragraph'));
+  let activeNum = null;
   let raf = 0;
-  let cachedNumH = 0;   // every digit renders the same height for a given font/size
 
-  function placeNums() {
+  function clearNumState(num) {
+    if (!num) return;
+    num.classList.remove('para-num-pinned', 'para-num-at-bottom');
+    num.style.left = '';
+    num.style.width = '';
+  }
+
+  function pinNum(num) {
+    if (num.classList.contains('para-num-pinned')) return;
+    const rect = num.getBoundingClientRect();
+    num.classList.remove('para-num-at-bottom');
+    num.style.left = rect.left + 'px';
+    num.style.width = rect.width + 'px';
+    num.classList.add('para-num-pinned');
+  }
+
+  function updateActiveNum() {
     raf = 0;
-    // Narrow layout: CSS reverts to inline bold prefix; clear any inline
-    // styles we may have set from a previous (wider) layout and bail.
     if (window.innerWidth <= 900) {
-      for (const para of paragraphs) {
-        const num = para.querySelector('.para-num');
-        if (num && num.style.top) { num.style.top = ''; num.style.transform = ''; }
-      }
+      clearNumState(activeNum);
+      activeNum = null;
       return;
     }
-    const barH = stickyBar.offsetHeight;
-    const vh   = window.innerHeight;
-    const topAnchor = barH + 6;
-    const centerY   = barH + (vh - barH) / 2;
 
-    // Two-pass: read all rects, then write all styles — interleaving forces
-    // a layout flush per paragraph (~246 of them in LS).
-    const updates = [];
+    const anchorY = stickyBar.offsetHeight + 6;
+    let activePara = null;
+    let activeRect = null;
+
     for (const para of paragraphs) {
       const rect = para.getBoundingClientRect();
-      updates.push((rect.bottom < -50 || rect.top > vh + 50) ? null : rect);
+      if (rect.top > anchorY) break;
+      if (rect.bottom > anchorY) {
+        activePara = para;
+        activeRect = rect;
+      }
     }
-    if (!cachedNumH) {
-      const visiblePara = paragraphs.find((para, i) =>
-        updates[i] && para.querySelector('.para-num')
-      );
-      cachedNumH = visiblePara ? visiblePara.querySelector('.para-num').offsetHeight : 16;
-    }
-    const halfNum = cachedNumH / 2;
 
-    for (let i = 0; i < paragraphs.length; i++) {
-      const num = paragraphs[i].querySelector('.para-num');
-      if (!num) continue;
-      const rect = updates[i];
-      if (!rect) {
-        if (num.style.top) { num.style.top = ''; num.style.transform = ''; }
-        continue;
-      }
-      const paraTop = rect.top, paraBottom = rect.bottom;
-      let anchor;
-      if (paraTop >= centerY) {
-        anchor = paraTop + halfNum;                          // phase A
-      } else if (paraTop >= topAnchor) {
-        const t = (centerY - paraTop) / (centerY - topAnchor);
-        anchor = centerY * (1 - t) + (topAnchor + halfNum) * t;  // phase B
-      } else {
-        anchor = topAnchor + halfNum;                        // phase C
-      }
-      anchor = Math.max(paraTop + halfNum, Math.min(anchor, paraBottom - halfNum));
-      num.style.top = (anchor - paraTop) + 'px';
-      num.style.transform = 'translateY(-50%)';
+    const nextNum = activePara && activePara.querySelector('.para-num');
+    if (activeNum !== nextNum) clearNumState(activeNum);
+    activeNum = nextNum;
+    if (!activeNum) return;
+
+    if (activeRect.bottom <= anchorY + activeNum.offsetHeight) {
+      activeNum.classList.remove('para-num-pinned');
+      activeNum.classList.add('para-num-at-bottom');
+      activeNum.style.left = '';
+      activeNum.style.width = '';
+    } else {
+      pinNum(activeNum);
     }
   }
 
-  function schedule() { if (!raf) raf = requestAnimationFrame(placeNums); }
-  // Listeners live for the page's lifetime by design — each reader is a
-  // standalone document, never re-initialised in place. Add teardown here
-  // if this script is ever re-run without a full page load.
-  window.addEventListener('scroll', schedule, {passive: true});
-  window.addEventListener('resize', schedule);
-  placeNums();
+  function scheduleActiveNum() {
+    if (!raf) raf = requestAnimationFrame(updateActiveNum);
+  }
+  function resetActiveNum() {
+    clearNumState(activeNum);
+    activeNum = null;
+    scheduleActiveNum();
+  }
+  window.addEventListener('scroll', scheduleActiveNum, {passive: true});
+  window.addEventListener('resize', resetActiveNum);
+  updateActiveNum();
 }
 
 // ── footnote drawer ──

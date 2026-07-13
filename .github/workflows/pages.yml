@@ -60,12 +60,8 @@ jobs:
           find build -type f -exec touch {} +
           find site -maxdepth 1 -name '*.html' -exec touch {} +
           find site/downloads -type f -exec touch {} +
-      - name: Run tests
-        run: nix develop --command python -m unittest discover -s tests
       - name: Build
         run: nix develop --command make -j8
-      - name: Site artifact QA
-        run: VA_REQUIRE_SITE_ARTIFACTS=1 nix develop --command python -m unittest tests.test_site_artifacts
       - name: Prepare flat site
         run: |
           mkdir -p _site/downloads

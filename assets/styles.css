@@ -527,11 +527,25 @@ h1.part-num, .part-group, .ntoc-part > a { text-transform: uppercase; letter-spa
     text-align: center;
     margin-bottom: 1.25rem;
 }
-.appendix-prayer p {
+.appendix-prayer p,
+blockquote.document-quote p {
     font-style: italic;
     color: var(--fg);
     margin-top: 1rem;
 }
+blockquote.document-quote {
+    margin: 2.5rem 0;
+    padding: 0 clamp(1rem, 5vw, 3rem);
+}
+blockquote.document-quote p:first-child { margin-top: 0; }
+blockquote.document-quote footer {
+    margin-top: 1.25rem;
+    color: var(--display);
+    font-size: .95rem;
+    font-style: italic;
+    text-align: center;
+}
+blockquote.document-quote cite { font-style: normal; }
 
 /* ── corner action buttons (home / info / aA) ───────────────────────────── */
 /* Pulled out of the sticky bar so they sit stably at the far-right of the
@@ -717,13 +731,21 @@ h1.part-num, .part-group, .ntoc-part > a { text-transform: uppercase; letter-spa
 .layout-long .para-num {
     position: absolute;
     right: calc(100% + 2rem);   /* in the gutter, breathing room from the rule */
-    top: 50%;
-    transform: translateY(-50%);
+    top: 0;
     color: var(--fg-faint);
     font-weight: normal;
     font-size: .95rem;
     text-align: right;
-    will-change: top;
+}
+.layout-long .para-num.para-num-pinned {
+    position: fixed;
+    top: calc(var(--bar-h) + 6px);
+    right: auto;
+    z-index: 2;
+}
+.layout-long .para-num.para-num-at-bottom {
+    top: auto;
+    bottom: 0;
 }
 .layout-long .para-num::after { content: none; }
 .layout-long #sticky-num {

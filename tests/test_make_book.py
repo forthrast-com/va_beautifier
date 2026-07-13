@@ -70,6 +70,21 @@ class EndMatterRenderTests(unittest.TestCase):
 
         self.assertEqual(rendered, 'First line  \nSecond line\n\nNext stanza')
 
+    def test_body_blockquote_reaches_pandoc_as_markdown(self):
+        quote = '> Quoted text.\n>\n> — *Lk* 10:25–37'
+
+        self.assertEqual(make_book._markdown_body_chunk(quote), quote)
+
+    def test_appendix_stanzas_suppress_pdf_first_line_indents(self):
+        rendered = make_book._markdown_appendix_body(
+            'First stanza line\nSecond line\n\n'
+            'Second stanza line\nAnother line'
+        )
+
+        self.assertEqual(rendered.count('first-line-indent: 0em'), 2)
+        self.assertIn('First stanza line  \nSecond line', rendered)
+        self.assertIn('Second stanza line  \nAnother line', rendered)
+
     def test_book_markdown_expands_vatican_relative_links(self):
         self.assertEqual(
             _normalise_vatican_links('[Doc](/content/example.html)'),

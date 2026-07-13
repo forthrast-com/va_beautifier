@@ -26,11 +26,13 @@ make <slug>-books  # one document's EPUB + PDFs
 make list          # the document slugs <slug> accepts
 make test          # unit + extractor regression tests
 make qa            # full build, then the site-artifact smoke check
+make check         # complete local gate: test + build + artefact QA
 make help          # this list
 ```
 
-GitHub Actions rebuilds the site and publishes the finished reading and
-download files.
+The Nix dev shell configures the tracked pre-commit hook in `.githooks/`; it
+runs `make check` before each commit. GitHub Actions only rebuilds the site and
+publishes the finished reading and download files.
 
 ## Sources
 

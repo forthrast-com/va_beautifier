@@ -84,6 +84,9 @@
     leading: 0.72em,
     first-line-indent: 1.1em,
   )
+  // Block quotations already carry an inset. A prose first-line indent inside
+  // them is redundant, and makes multi-paragraph declarations visibly drift.
+  show quote.where(block: true): set par(first-line-indent: 0em)
 
   // ── Headings ─────────────────────────────────────────────────────────
   // Heading hierarchy after the EPUB structural fix:

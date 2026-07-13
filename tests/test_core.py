@@ -57,6 +57,17 @@ class TextHelperTests(unittest.TestCase):
             'a force of good, examined in silence',
         )
 
+    def test_clean_text_tightens_parenthetical_citation_edges(self):
+        soup = BeautifulSoup(
+            '<p>See ( <i>Gal</i> 5:22) and (ed. cit. IV, 371 b ).</p>',
+            'html.parser',
+        )
+
+        self.assertEqual(
+            clean_text(soup.p, preserve_formatting=True),
+            'See (*Gal* 5:22) and (ed. cit. IV, 371 b).',
+        )
+
     def test_flatten_ws_collapses_newlines_unlike_clean_text(self):
         # The distinguishing behaviour: flatten_ws folds line breaks into
         # spaces (layout noise), where clean_text keeps them (content).

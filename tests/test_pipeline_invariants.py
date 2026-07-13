@@ -14,6 +14,8 @@ Each invariant is a lesson from a real defect:
   `clean_text` (280 in MH, rendering as double spacing); F&R once leaked a
   copyright footer. Canonical text carries Markdown-compatible inline
   markup and `<sup>`/`<sub>` only.
+- *Parenthetical edge spaces* — modern exports put tag-boundary whitespace
+  inside citations (`( Gal 5:22)`); canonical text tightens both edges.
 - *Paragraph continuity / folded markers* — the SC snapshot mislabels ¶87
   as "81."; the walker's out-of-sequence guard folded it into ¶86, stray
   marker and all. A gap in visible numbering or a continuation block
@@ -45,6 +47,8 @@ SOURCE_JUNK = re.compile(
     r'_ftn|_edn|\]\(#|<a\s|</a>|<i>|</i>|<b>|</b>|<br|<p>|<p\s'
     r'|&#\d+;|&nbsp;|\xa0'
 )
+
+PAREN_EDGE_SPACE = re.compile(r'\(\s|\s\)')
 
 # A continuation block opening `N. ` where N is a plausible neighbour of the
 # host paragraph's own number. Small N (≤9) are usually authored norm lists
@@ -118,6 +122,15 @@ class PipelineInvariantTests(unittest.TestCase):
                 self.assertIsNone(
                     m, f'{where}: source junk {m and m.group(0)!r} in '
                     f'{m and text[max(0, m.start() - 40):m.end() + 30]!r}')
+        self.for_each_doc(check)
+
+    def test_no_parenthetical_edge_spaces(self):
+        def check(slug, data):
+            for where, text in text_fields(data):
+                m = PAREN_EDGE_SPACE.search(text)
+                self.assertIsNone(
+                    m, f'{where}: whitespace inside parenthesis near '
+                    f'{m and text[max(0, m.start() - 30):m.end() + 30]!r}')
         self.for_each_doc(check)
 
     def test_visible_paragraph_numbering_is_continuous(self):

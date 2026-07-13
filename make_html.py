@@ -148,21 +148,51 @@ def para_html(text, part=None, chapter=None, footnote_ref_ids=None):
     `\\n\\n` separates sub-paragraphs (each becomes its own <p>).
     `\\n` within a sub-paragraph is a poetic line break and becomes <br>
     (the LS canticle + closing prayers use this).
+    Canonical Markdown blockquotes become semantic `<blockquote>` elements;
+    a final em-dash paragraph becomes their citation footer.
     """
     text = tighten(text)
     out = []
     footnote_ref_ids = iter(footnote_ref_ids or [])
-    for sub in [p.strip() for p in text.split('\n\n') if p.strip()]:
-        rendered = e(sub)
+
+    def render_fragment(fragment):
+        rendered = e(fragment)
         rendered = linkify_anchors(rendered)
         if part is not None:
             rendered = linkify_footnotes(
                 rendered, part, chapter, footnote_ref_ids,
             )
-        rendered = inline_markup_to_html(
+        return inline_markup_to_html(
             rendered, escaped=True, break_tag='<br>',
         )
-        out.append('<p>' + rendered + '</p>')
+
+    for sub in [p.strip() for p in text.split('\n\n') if p.strip()]:
+        quote_lines = sub.splitlines()
+        if quote_lines and all(
+            line == '>' or line.startswith('> ') for line in quote_lines
+        ):
+            canonical = '\n'.join(
+                '' if line == '>' else line[2:] for line in quote_lines
+            )
+            blocks = [b.strip() for b in canonical.split('\n\n') if b.strip()]
+            rendered_blocks = []
+            for i, block in enumerate(blocks):
+                if i == len(blocks) - 1 and block.startswith('— '):
+                    citation = render_fragment(block[2:].lstrip())
+                    rendered_blocks.append(
+                        f'<footer>— <cite>{citation}</cite></footer>'
+                    )
+                else:
+                    rendered_blocks.append(
+                        '<p>' + render_fragment(block) + '</p>'
+                    )
+            out.append(
+                '<blockquote class="document-quote">'
+                + ''.join(rendered_blocks)
+                + '</blockquote>'
+            )
+            continue
+        out.append('<p>' + render_fragment(sub) + '</p>')
     return '\n'.join(out)
 
 def end_matter_inline_html(text):

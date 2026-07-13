@@ -67,6 +67,14 @@ RE_FOOTNOTE = re.compile(r'^\[\s*(\d+)\s*\]\s*(.+)$', re.DOTALL)
 # sees a canonical marker.
 RE_BROKEN_MARKER = re.compile(r'^(\d{1,3})\]')
 
+# The Good Samaritan pericope (§56) and the eight scripture excerpts under
+# §61 are fully italic source paragraphs with parenthesised citations.
+# Canonicalise each as a semantic Markdown blockquote, with a citation footer.
+RE_SCRIPTURE_BLOCK = re.compile(
+    r'^\*“(.+)”\*\s*\((.+)\)\.$', re.DOTALL
+)
+RE_APPEAL_CLOSE = re.compile(r'”(?=\.\(285\)$)')
+
 
 def split_glued_definitions(rich):
     """Yield each definition when a source <p> glues two together.
@@ -156,9 +164,25 @@ def extract():
 
         # Unnumbered continuation prose under the open paragraph.
         if paragraphs and not p.find('b'):
-            paragraphs[-1]['text'] += '\n\n' + normalise_footnote_refs(
+            continuation = normalise_footnote_refs(
                 clean_text(p, preserve_formatting=True), bracketed=True
             )
+            scripture = RE_SCRIPTURE_BLOCK.match(continuation)
+            if scripture:
+                citation = re.sub(r'(?<=\d)-(?=\d)', '–', scripture.group(2))
+                continuation = (
+                    f'> {scripture.group(1)}\n>\n> — {citation}'
+                )
+            elif (paragraphs[-1]['number'] == 285
+                  and continuation.startswith('“In the name')):
+                appeal_line = RE_APPEAL_CLOSE.sub('', continuation[1:])
+                separator = (
+                    '\n>\n> ' if '\n\n> ' in paragraphs[-1]['text']
+                    else '\n\n> '
+                )
+                paragraphs[-1]['text'] += separator + appeal_line
+                continue
+            paragraphs[-1]['text'] += '\n\n' + continuation
 
     # ─── Phase 2: tail walk (prayers → promulgation → signature → notes) ─
     current = None

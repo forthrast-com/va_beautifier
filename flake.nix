@@ -31,6 +31,14 @@
               pkgs.google-fonts
               pkgs.libertinus
             ];
+            shellHook = ''
+              if [[ -z "''${CI:-}" ]] && git rev-parse --git-dir >/dev/null 2>&1; then
+                hooks_path="$(git config --local --get core.hooksPath || true)"
+                if [[ "$hooks_path" != ".githooks" ]]; then
+                  git config --local core.hooksPath .githooks
+                fi
+              fi
+            '';
           };
         });
     };

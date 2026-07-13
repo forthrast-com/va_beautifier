@@ -106,7 +106,7 @@ An optional `[layout]` table carries per-document rendering flags
 flags are serialised; a doc with none (GeS) omits the table. See Renderer
 conventions for what each flag drives.
 
-`[[paragraphs]]` — `number`, `part`, `part_title`, `chapter`, `chapter_title`, `chapter_subtitle`, `section`, `section_title`, `sub_heading`, `heading_la`, `break_after`, `text` (multiline, `\n\n`-separated sub-paragraphs). Authored inline formatting in `text` and footnote `text` is canonical Markdown-compatible content: `*italics*`, `**bold**`, `<sup>…</sup>`, and `<sub>…</sub>`.
+`[[paragraphs]]` — `number`, `part`, `part_title`, `chapter`, `chapter_title`, `chapter_subtitle`, `section`, `section_title`, `sub_heading`, `heading_la`, `break_after`, `text` (multiline, `\n\n`-separated sub-paragraphs). Authored inline formatting in `text` and footnote `text` is canonical Markdown-compatible content: `*italics*`, `**bold**`, `<sup>…</sup>`, and `<sub>…</sub>`. Markdown `> …` lines form semantic blockquotes; use a bare `>` line between quote paragraphs. A final `> — Citation` becomes the web citation footer and remains ordinary blockquote content for Pandoc's EPUB/PDF writers.
 
 - `sub_heading` is per-paragraph and optional (defaults to ''); LS uses it for topical headers within sections, GeS doesn't have any.
 - `heading_la` is a Latin micro-summary; GeS has one per paragraph, LS has none.
@@ -236,7 +236,7 @@ HTML output is a single self-contained file (CSS + JS inlined, no external asset
 - sub-heading: generated `sub-{n}`
 - appendix: `appendix-{n}`
 
-Doc-scoped CSS lives under `.doc-<slug>` selectors. Long structured documents share gutter-style paragraph numbers, soft-anchor positioning, and a height-capped scroll indicator. GeS keeps the original inline `5. *Latin heading* body` layout via the default rules + `.para-num::after { content: '.' }`.
+Doc-scoped CSS lives under `.doc-<slug>` selectors. Long structured documents share gutter-style paragraph numbers and a height-capped scroll indicator. Only the current paragraph's number pins below the sticky bar; following numbers remain static beside their first lines. GeS keeps the original inline `5. *Latin heading* body` layout via the default rules + `.para-num::after { content: '.' }`.
 
 **Layout flags (the `[layout]` TOML table).** Per-document rendering choices that used to live as hand-maintained slug sets scattered across `make_html`, `make_book`, and `styles.css` are now declared once per document. The extractor returns a `layout` dict; `core.write_toml` serialises it to a `[layout]` table (canonical flag order in `core.LAYOUT_FLAGS`); the renderers read `data['layout']` and `make_html` also stamps each truthy flag as a `layout-<flag>` body class (underscores → hyphens). `styles.css` targets those classes once instead of enumerating slugs. The flags:
   - `long` — gutter paragraph numbers + section-level sticky bar (`.layout-long`); replaced `make_html.LONG_DOCS`.
@@ -249,7 +249,8 @@ Genuinely bespoke per-doc CSS still uses `.doc-<slug>` (AeN's gutter chapter num
 
 **Generated "Preamble" heading.** Opening prose at `part = 0`, `chapter = 0` with no authored `part_title` is unlabelled in the TOML; the renderer supplies a "Preamble" heading rather than leaving the region anchorless. It is a *generated display label*, not stored data, so it differs by surface: the **web body suppresses it** (anchor-only — the modern encyclicals don't want a redundant on-page heading) but keeps it in the contents drawer, scroll indicator, and no-JS TOC; the **PDF/EPUB render it visibly** (`make_book.py`), because those have no live navigation to fall back on. An authored `part_title` (GeS "Preface", SC "Introduction", QVH "Preliminary Note") always wins and shows on every surface; a part-0 group that opens straight into a chapter (AeN's roman `I. Introduction`) stays anchor-only under "Introduction".
 
-JS publishes the sticky-bar's measured height to `--bar-h` so other layout (indicator centring, soft-anchor maths) can read it from CSS or JS.
+JS publishes the sticky-bar's measured height to `--bar-h` so other layout,
+notably indicator centring and the current paragraph-number pin, can read it.
 
 Parted documents (VD, DCE, GeS) get part rows in the drawer contents tree
 and no-JS TOC (`part_nav` → `.part-group` / `.ntoc-part`), mirroring the
@@ -297,9 +298,10 @@ published, while intermediate Markdown/TOML stays in `build/` only.
 - **Parallel build — verified.** A cold `make -j8` matches a cold serial
   build (byte-identical md/typ/toml intermediates, identical artefact
   inventory, site-artifact QA green in both modes; 42s → 12s locally,
-  2026-07). CI uses `make -j8`; locally keep `-j` an explicit invocation
-  flag rather than baking `MAKEFLAGS += -j` in, so single-doc incremental
-  builds stay legible and stderr isn't interleaved.
+  2026-07). The deploy workflow uses `make -j8`; locally keep `-j` an explicit
+  invocation flag rather than baking `MAKEFLAGS += -j` in, so single-doc
+  incremental builds stay legible and stderr isn't interleaved.
+
 ## Extractor boundaries (implemented 2026-06)
 
 The shared surface has two tiers. Dialect-agnostic walker mechanics live
@@ -400,6 +402,11 @@ metadata) swept over every implemented document discovered from the
 manifest — a new extractor inherits every lesson with no registration.
 Pin document-specific facts in `test_extractors.py`; encode a new *class*
 of defect as another invariant there instead.
+
+The Nix dev shell installs the tracked `.githooks/pre-commit` hook for the
+clone. It runs `make check`: fetch implemented snapshots, run the full suite,
+build incrementally with `-j8`, then require the site-artifact QA. GitHub
+Actions only rebuilds and deploys; it does not repeat the local test gate.
 
 `tools/audit_structure.py [slug …]` prints the human-side complement: each
 built TOML as a part › chapter › section tree with paragraph ranges — the

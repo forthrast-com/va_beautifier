@@ -17,6 +17,22 @@ p {
   text-indent: 0;
 }
 
+/* Scripture/declaration blocks echo the web reader's closing-prayer style:
+   inset, italic text, no ornamental box around the words. */
+blockquote {
+  margin: 1.8em 1.2em;
+}
+
+blockquote p {
+  font-style: italic;
+}
+
+blockquote p:last-child {
+  color: #665b4a;
+  font-size: 0.9em;
+  text-align: center;
+}
+
 /* Pandoc's default makes links invisible (`a{color:#1a1a1a}`); restore the
    affordance with a subtle underline that doesn't shout. */
 a, a:visited {

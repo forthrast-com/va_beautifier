@@ -281,7 +281,9 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
             '',
             f'## {appendix["title"]}',
             '',
-            _markdown_preserve_breaks(_normalise_vatican_links(appendix['text'])),
+            _markdown_appendix_body(
+                _normalise_vatican_links(appendix['text'])
+            ),
             '',
         ]
 
@@ -356,6 +358,11 @@ def _markdown_preserve_breaks(text):
 
 def _markdown_body_chunk(text):
     """Emit one body chunk, suppressing PDF prose indents for hard-break text."""
+    lines = text.splitlines()
+    if lines and all(line == '>' or line.startswith('> ') for line in lines):
+        # Already canonical Markdown blockquote syntax. Passing it through the
+        # poetic-line wrapper would hide the structure from Pandoc.
+        return text
     rendered = _markdown_preserve_breaks(text)
     if '\n' not in rendered:
         return rendered
@@ -363,6 +370,15 @@ def _markdown_body_chunk(text):
         '`#block[#set par(first-line-indent: 0em); `{=typst}'
         f'{rendered}'
         '`]`{=typst}'
+    )
+
+
+def _markdown_appendix_body(text):
+    """Render appendix stanzas without inheriting prose first-line indents."""
+    return '\n\n'.join(
+        _markdown_body_chunk(stanza.strip())
+        for stanza in text.split('\n\n')
+        if stanza.strip()
     )
 
 

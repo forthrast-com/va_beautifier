@@ -4,7 +4,7 @@
 # goal keeps the generated include's own build/docs.mk rule from hijacking it.
 .DEFAULT_GOAL := all
 
-.PHONY: all fetch books site qa clean help list test
+.PHONY: all fetch books site qa check clean help list test
 
 # Fetch template used by the generated include: one target per source snapshot,
 # so a build can pull missing Vatican HTML on demand rather than failing at the
@@ -41,6 +41,12 @@ fetch:
 qa: all
 	VA_REQUIRE_SITE_ARTIFACTS=1 python3 -m unittest tests.test_site_artifacts -v
 
+# The local commit gate: populate source snapshots, run the generic suite,
+# then rebuild incrementally and inspect the finished site artefacts.
+check: fetch
+	$(MAKE) test
+	$(MAKE) -j8 qa
+
 # --- HTML targets ---
 
 site/%.html: build/%.toml make_html.py assets/styles.css assets/scripts.js
@@ -72,6 +78,7 @@ help:
 	@echo "  make fetch         download missing Vatican HTML snapshots"
 	@echo "  make test          unit + extractor regression tests"
 	@echo "  make qa            full build, then the site-artifact smoke check"
+	@echo "  make check         complete pre-commit gate: test + build + artefact QA"
 	@echo "  make clean         drop generated TOML, HTML, and books"
 
 list:

@@ -112,8 +112,51 @@ class MakeHtmlGoldenTests(unittest.TestCase):
         self.assertIn('<a id="ch-0"></a>', self.html)
         self.assertIn('Preamble', self.html)
 
+    def test_canonical_blockquote_renders_quote_and_citation(self):
+        html = render_html_fixture(
+            'audit_blockquote_fixture',
+            [{
+                'number': 1,
+                'text': (
+                    'Introductory prose.\n\n'
+                    '> Quoted text.\n>\n> — *Lk* 10:25–37'
+                ),
+            }],
+            [],
+        )
+        self.assertIn('<blockquote class="document-quote">', html)
+        self.assertIn('<p>Quoted text.</p>', html)
+        self.assertIn(
+            '<footer>— <cite><em>Lk</em> 10:25–37</cite></footer>',
+            html,
+        )
+        self.assertNotIn('&gt; Quoted text', html)
+
 
 class MakeHtmlChapterLabelTests(unittest.TestCase):
+    def test_long_layout_pins_only_the_current_paragraph_number(self):
+        html = render_html_fixture(
+            'audit_long_layout_fixture',
+            [{'number': 1, 'text': 'Long document prose.'}],
+            [],
+            layout={'long': True},
+        )
+        self.assertIn('class="doc-audit_long_layout_fixture layout-long"', html)
+        self.assertIn('.layout-long .para-num {', html)
+        self.assertIn('function updateActiveNum()', html)
+        self.assertIn('activePara.querySelector(\'.para-num\')', html)
+        self.assertIn('top: calc(var(--bar-h) + 6px);', html)
+        self.assertIn(
+            "document.querySelectorAll('[data-sticky], h4.section-title')",
+            html,
+        )
+        self.assertIn(
+            "el.matches('h4.section-title') ? el.textContent : ''",
+            html,
+        )
+        self.assertNotIn('activeNum.style.top =', html)
+        self.assertNotIn('function placeNums()', html)
+
     def test_bare_chapter_drawer_labels_drop_the_prefix(self):
         # bare_chapters docs (SS, DCE) render body headings title-only; the
         # drawer contents and no-JS TOC labels must match, not re-add
