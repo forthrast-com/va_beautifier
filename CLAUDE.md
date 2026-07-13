@@ -141,9 +141,9 @@ Three templates encountered so far:
 
 - **Old flat** (GeS) — 24 `<p>` tags total, structure carried by `<b>` headings inside `<center>` blocks. Latin source provides a per-paragraph micro-summary keyed by §N. Footnotes in a separate `NOTES`-marked block.
 - **Modern Bootstrap** (LS, MH, *Fides et Ratio*, *Lumen Fidei*, *Verbum
-  Domini*, plus the Benedict XVI / JP II encyclicals *Deus Caritas Est*,
-  *Spe Salvi*, *Caritas in Veritate*, and the exhortation *Ecclesia in
-  Oceania*) — `<p>` tags wrapped in `<main>`. The base case (LS): chapter
+  Domini*, *Fratelli Tutti*, plus the Benedict XVI / JP II encyclicals
+  *Deus Caritas Est*, *Spe Salvi*, *Caritas in Veritate*, and the
+  exhortation *Ecclesia in Oceania*) — `<p>` tags wrapped in `<main>`. The base case (LS): chapter
   delimiter is a centred `CHAPTER ONE` followed by a centred `<b>` title;
   section is a `<p>` whose only child is a `<b>` matching `^[IVX]+\.`;
   sub-heading is a `<p>` whose only child is an `<i>`. The `align` attribute
@@ -281,10 +281,18 @@ published, while intermediate Markdown/TOML stays in `build/` only.
   (promulgation + optional signatories + signature) renders on its own page via a raw-typst
   block at the end of the body, with a parallel raw-HTML colophon
   block so EPUB gets the same content.
-- **More documents** — `sources/Fratelli tutti_en.html` is sitting
-  un-extracted (likely the modern Bootstrap dialect, LS-shaped). A
-  reference capture recorded by `download_sources.py` for a possible
-  future edition is `francis_g7_ai_en.html`.
+- **More documents** — a reference capture recorded by
+  `download_sources.py` for a possible future edition is
+  `francis_g7_ai_en.html`. *Fratelli Tutti* is implemented: LS-shaped
+  two-phase walk (same titled-prayer tail), but chapter titles are centred
+  *non-bold* and the italic-only topical headers are its sole intra-chapter
+  tier, promoted to auto-numbered bare sections. Its note stream carries
+  three source defects — notes 86/112/185 lose their opening bracket to an
+  empty anchor, note 98's marker is glued to its text, and note 119's
+  definition shares note 118's `<p>` (split on the exact-successor
+  `[N+1]` marker) — all repaired in the extractor and pinned by a
+  regression test. The pipeline-invariant parity check is what caught all
+  five.
 - **Parallel build — verified.** A cold `make -j8` matches a cold serial
   build (byte-identical md/typ/toml intermediates, identical artefact
   inventory, site-artifact QA green in both modes; 42s → 12s locally,

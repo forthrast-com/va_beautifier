@@ -125,7 +125,7 @@ SOURCES_MANIFEST = (
         'Fratelli tutti_en.html',
         'https://www.vatican.va/content/francesco/en/encyclicals/documents/'
         'papa-francesco_20201003_enciclica-fratelli-tutti.html',
-        'queued',
+        'implemented',
         'Fratelli tutti (English)',
     ),
     Source(

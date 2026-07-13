@@ -6,6 +6,7 @@ from extract import (
     deus_caritas_est,
     ecclesia_in_oceania,
     fides_et_ratio,
+    fratelli_tutti,
     gaudium_et_spes,
     laudato_si,
     lumen_fidei,
@@ -373,6 +374,41 @@ class ExtractorRegressionTests(unittest.TestCase):
         for p in data['paragraphs']:
             self.assertNotIn('](#', p['text'])
             self.assertNotIn('_edn', p['text'])
+
+    @needs_sources(fratelli_tutti.EN_SRC)
+    def test_fratelli_tutti_repairs_broken_note_markers(self):
+        data = fratelli_tutti.extract()
+
+        self.assertEqual(len(data['paragraphs']), 287)
+        self.assertEqual(len(data['footnotes']), 288)
+        self.assertEqual(data['pontificate'], 'Francis')
+        self.assertEqual(data['signature'], 'Franciscus')
+        self.assertIn('Given in Assisi', data['promulgation'])
+        # Non-bold centred chapter titles; italic headers → bare sections.
+        self.assertEqual(
+            next(p['chapter_title'] for p in data['paragraphs']
+                 if p['chapter'] == 1),
+            'Dark Clouds Over a Closed World',
+        )
+        self.assertEqual(
+            next(p['section_title'] for p in data['paragraphs']
+                 if p['chapter'] == 1 and p['section'] == 1),
+            'The end of historical consciousness',
+        )
+        # Two titled prayers arrive as appendices (the LS-shaped tail).
+        self.assertEqual(
+            [a['title'] for a in data['appendices']],
+            ['A Prayer to the Creator', 'An Ecumenical Christian Prayer'],
+        )
+        # Source note defects: 86/112/185 lose their opening bracket,
+        # 98's marker is glued to its text, and 119's definition shares
+        # note 118's <p>. All five must arrive, unglued.
+        notes = {n['number']: n['text'] for n in data['footnotes']}
+        for n in (86, 98, 112, 185):
+            self.assertIn(n, notes)
+        self.assertTrue(
+            notes[119].startswith('*[Document on Human Fraternity'))
+        self.assertNotIn('Document on Human Fraternity', notes[118])
 
     @needs_sources(ecclesia_in_oceania.EN_SRC)
     def test_ecclesia_in_oceania_recovers_italic_wrapped_note(self):

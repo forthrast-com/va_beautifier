@@ -27,7 +27,7 @@ class ManifestTests(unittest.TestCase):
 
         self.assertEqual(
             {source.key for source in queued},
-            {'fratelli_tutti_en'},
+            set(),
         )
         self.assertEqual(
             {source.key for source in reference},
@@ -35,6 +35,7 @@ class ManifestTests(unittest.TestCase):
         )
         self.assertTrue({
             'antiqua_et_nova_en',
+            'fratelli_tutti_en',
             'quo_vadis_humanitas_en',
             'sacrosanctum_concilium_en',
             'sacrosanctum_concilium_lt',
