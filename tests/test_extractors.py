@@ -384,17 +384,22 @@ class ExtractorRegressionTests(unittest.TestCase):
         self.assertEqual(data['pontificate'], 'Francis')
         self.assertEqual(data['signature'], 'Franciscus')
         self.assertIn('Given in Assisi', data['promulgation'])
-        # Non-bold centred chapter titles; italic headers → bare sections.
+        # Non-bold centred chapter titles; all-caps anchor headings become
+        # bare sections, with italic headings as their finer sub-heading tier.
         self.assertEqual(
             next(p['chapter_title'] for p in data['paragraphs']
                  if p['chapter'] == 1),
             'Dark Clouds Over a Closed World',
         )
-        self.assertEqual(
-            next(p['section_title'] for p in data['paragraphs']
-                 if p['chapter'] == 1 and p['section'] == 1),
-            'The end of historical consciousness',
-        )
+        paragraphs = {p['number']: p for p in data['paragraphs']}
+        self.assertEqual(paragraphs[3]['section_title'], 'Without Borders')
+        self.assertEqual(paragraphs[10]['section_title'], 'Shattered Dreams')
+        self.assertEqual(paragraphs[13]['section_title'], 'Shattered Dreams')
+        self.assertEqual(paragraphs[13]['sub_heading'],
+                         'The end of historical consciousness')
+        self.assertEqual(paragraphs[15]['section_title'],
+                         'Lacking a Plan for Everyone')
+        self.assertNotIn('SHATTERED DREAMS', paragraphs[9]['text'])
         # Two titled prayers arrive as appendices (the LS-shaped tail).
         self.assertEqual(
             [a['title'] for a in data['appendices']],

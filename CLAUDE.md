@@ -285,8 +285,9 @@ published, while intermediate Markdown/TOML stays in `build/` only.
   `download_sources.py` for a possible future edition is
   `francis_g7_ai_en.html`. *Fratelli Tutti* is implemented: LS-shaped
   two-phase walk (same titled-prayer tail), but chapter titles are centred
-  *non-bold* and the italic-only topical headers are its sole intra-chapter
-  tier, promoted to auto-numbered bare sections. Its note stream carries
+  *non-bold*. Empty-anchor + all-caps headings become auto-numbered bare
+  sections; italic-only topical headers form the finer sub-heading tier. Its
+  note stream carries
   three source defects — notes 86/112/185 lose their opening bracket to an
   empty anchor, note 98's marker is glued to its text, and note 119's
   definition shares note 118's `<p>` (split on the exact-successor

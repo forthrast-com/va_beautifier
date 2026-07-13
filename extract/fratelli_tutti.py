@@ -6,9 +6,9 @@ appendices interleave before the footnote definitions), with two drifts:
   - **Chapter titles are centred but not bold.** LS's `has_b` discriminator
     doesn't apply; a centred line while a `CHAPTER N` marker is pending is
     the title (`DARK CLOUDS OVER A CLOSED WORLD`), all-caps plain text.
-  - **No Roman section tier.** The 45 italic-only topical headers are the
-    only intra-chapter division, so they become auto-numbered bare sections
-    (the LF/MH idiom) rather than LS-style sub-headings.
+  - **No Roman section tier.** Empty named anchors followed by all-caps text
+    (`SHATTERED DREAMS`) become auto-numbered bare sections (the LF/MH idiom).
+    The 45 italic-only topical headers form the finer sub-heading tier.
 
 Body cites are `<a name="_ftnrefN" href="#_ftnN">[N]</a>`; definitions carry
 both `name="_ftnN"` and a backref href. `clean_text` unwraps the `#_ftn`
@@ -131,9 +131,20 @@ def extract():
                 pending_chapter_num = None
             continue
 
-        # Italic-only topical header → next auto-numbered bare section.
+        # Primary division: an empty named anchor followed by all-caps text
+        # in an otherwise plain paragraph. Without this branch the
+        # continuation fallback glues headings such as `SHATTERED DREAMS`
+        # onto the preceding numbered paragraph.
+        named_anchor = p.find('a', attrs={'name': True}, recursive=False)
+        if named_anchor and not named_anchor.get_text(strip=True) \
+                and text.isupper():
+            state.add_section(title_case(text))
+            continue
+
+        # Italic-only topical header → finer sub-heading within the open
+        # all-caps division.
         if only_child_is(p, 'i'):
-            state.add_section(text)
+            state.sub_heading = text
             continue
 
         numbered = numbered_paragraph(p, RE_PARA)
