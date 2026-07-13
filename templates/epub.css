@@ -17,8 +17,7 @@ p {
   text-indent: 0;
 }
 
-/* Scripture/declaration blocks echo the web reader's closing-prayer style:
-   inset, italic text, no ornamental box around the words. */
+/* Uncited declarations echo the closing-prayer style. */
 blockquote {
   margin: 1.8em 1.2em;
 }
@@ -30,6 +29,23 @@ blockquote p {
 blockquote p:last-child {
   color: #665b4a;
   font-size: 0.9em;
+  text-align: center;
+}
+
+/* Cited scripture keeps the web reader's stronger card geometry, but EPUB
+   readers own paper, ink, and theme colours. Inherit everything from the
+   reading system rather than smuggling a white rectangle into night mode. */
+.scripture-quote {
+  margin: 1em 0;
+  padding: 1.1em 1.25em;
+  border: 1px solid currentColor;
+}
+
+.scripture-quote blockquote { margin: 0; }
+.scripture-quote blockquote p { line-height: 1.6; }
+.scripture-quote blockquote p:last-child {
+  color: inherit;
+  margin-top: 1.4em;
   text-align: center;
 }
 

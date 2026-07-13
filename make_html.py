@@ -176,6 +176,7 @@ def para_html(text, part=None, chapter=None, footnote_ref_ids=None):
             )
             blocks = [b.strip() for b in canonical.split('\n\n') if b.strip()]
             rendered_blocks = []
+            has_citation = bool(blocks and blocks[-1].startswith('— '))
             for i, block in enumerate(blocks):
                 if i == len(blocks) - 1 and block.startswith('— '):
                     citation = render_fragment(block[2:].lstrip())
@@ -187,7 +188,9 @@ def para_html(text, part=None, chapter=None, footnote_ref_ids=None):
                         '<p>' + render_fragment(block) + '</p>'
                     )
             out.append(
-                '<blockquote class="document-quote">'
+                '<blockquote class="document-quote'
+                + (' scripture-quote' if has_citation else '')
+                + '">'
                 + ''.join(rendered_blocks)
                 + '</blockquote>'
             )
@@ -305,6 +308,17 @@ def h(tag, cls, text):
 def rich_h(tag, cls, text):
     return f'<{tag} class="{cls}">{structure_inline_html(text)}</{tag}>'
 
+def subtitle_html(cls, text):
+    """Render ordinary inline subtitles or canonical quoted epigraphs."""
+    lines = text.splitlines()
+    if lines and all(line == '>' or line.startswith('> ') for line in lines):
+        return para_html(text).replace(
+            'class="document-quote',
+            f'class="{cls} document-quote',
+            1,
+        )
+    return rich_h('p', cls, text)
+
 seen_part        = object()
 seen_chapter     = object()
 seen_section     = object()
@@ -418,7 +432,9 @@ for idx, p in enumerate(paragraphs):
             if authored_title:
                 html_parts.append(h('h1', 'part-title', authored_title).replace('<h1 ', f'<h1 id="{cid}" data-sticky '))
                 if p.get('part_subtitle', ''):
-                    html_parts.append(rich_h('p', 'part-subtitle', p['part_subtitle']))
+                    html_parts.append(subtitle_html(
+                        'part-subtitle', p['part_subtitle']
+                    ))
             else:
                 # generated preamble or chapter-led part 0: anchor-only in the
                 # body — the label lives in the nav/TOC, not an on-page heading
@@ -430,7 +446,9 @@ for idx, p in enumerate(paragraphs):
             if p['part_title']:
                 html_parts.append(h('h2', 'part-title', p['part_title']).replace('<h2 ', '<h2 data-sticky '))
             if p.get('part_subtitle', ''):
-                html_parts.append(rich_h('p', 'part-subtitle', p['part_subtitle']))
+                html_parts.append(subtitle_html(
+                    'part-subtitle', p['part_subtitle']
+                ))
         seen_part        = part
         seen_chapter     = object()
         seen_section     = object()
@@ -463,8 +481,9 @@ for idx, p in enumerate(paragraphs):
                 .replace('<h3 ', f'<h3 id="{cid}" data-sticky data-ch-num="{ch_num}" ')
             )
             if p.get('chapter_subtitle', ''):
-                html_parts.append(rich_h('p', 'chapter-subtitle',
-                                         p['chapter_subtitle']))
+                html_parts.append(subtitle_html(
+                    'chapter-subtitle', p['chapter_subtitle']
+                ))
         else:
             if not is_unnumbered:
                 html_parts.append(h('h2', 'chapter-num', chapter_num_label(p['chapter'])).replace('<h2 ', f'<h2 id="{cid}" '))
@@ -476,8 +495,9 @@ for idx, p in enumerate(paragraphs):
                     .replace('<h3 ', f'<h3 {id_attr}data-sticky data-ch-num="{ch_num}" ')
                 )
                 if p.get('chapter_subtitle', ''):
-                    html_parts.append(rich_h('p', 'chapter-subtitle',
-                                             p['chapter_subtitle']))
+                    html_parts.append(subtitle_html(
+                        'chapter-subtitle', p['chapter_subtitle']
+                    ))
         seen_chapter     = chapter
         seen_section     = object()
         seen_sub_heading = object()

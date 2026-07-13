@@ -26,6 +26,7 @@ from core import (
     RE_FOOTNOTE,
     HeadingState,
     assign_footnote_context,
+    canonical_blockquote,
     chapter_word_to_int,
     clean_text,
     extract_footnotes,
@@ -59,6 +60,57 @@ RE_PARA = re.compile(r'^(\d+)\s*\.\s+(.+)$', re.DOTALL)
 RE_PART = re.compile(r'^PART\s+([A-Z]+)$')
 
 _QUOTE_CHARS = '“"‘’”\''
+RE_PART_EPIGRAPH = re.compile(
+    r'^[“"](?P<body>.+)[”"]\n\((?P<citation>[^)]+)\)$',
+    re.DOTALL,
+)
+RE_COUPLET_CLOSE = re.compile(
+    r'^(?P<body>.+)”(?P<punct>[.!?])(?P<ref>\(\d+\))$',
+    re.DOTALL,
+)
+
+
+def _canonicalise_part_epigraph(text):
+    text = text.strip()
+    if text.startswith('*') and text.endswith('*'):
+        text = text[1:-1]
+    match = RE_PART_EPIGRAPH.fullmatch(text)
+    if not match:
+        return text
+    citation = re.sub(
+        r'^((?:[1-3]\s+)?[A-Za-z]+)(\s+)', r'*\1*\2',
+        match.group('citation'),
+    )
+    citation = re.sub(r'(?<=\d)-(?=\d)', '–', citation)
+    return canonical_blockquote(match.group('body'), citation)
+
+
+def _canonicalise_hermeneutic_couplet(paragraphs):
+    """Lift §37's Latin couplet + translation into one quiet quotation."""
+    paragraph = next((p for p in paragraphs if p['number'] == 37), None)
+    if paragraph is None:
+        return
+    chunks = paragraph['text'].split('\n\n')
+    quote_index = next(
+        (i for i, chunk in enumerate(chunks[:-1])
+         if chunk.startswith('“*Littera gesta docet')),
+        None,
+    )
+    if quote_index is None:
+        return
+    opening = chunks[quote_index]
+    closing = RE_COUPLET_CLOSE.fullmatch(chunks[quote_index + 1])
+    if not closing:
+        return
+    quote = (
+        opening.removeprefix('“') + '\n\n'
+        + closing.group('body') + closing.group('punct') + closing.group('ref')
+    )
+    paragraph['text'] = '\n\n'.join(
+        chunks[:quote_index]
+        + [canonical_blockquote(quote)]
+        + chunks[quote_index + 2:]
+    )
 
 
 def _is_all_bold(p):
@@ -150,8 +202,8 @@ def extract():
                 expect = 'part_subtitle'
                 continue
             if expect == 'part_subtitle' and text[:1] in _QUOTE_CHARS:
-                state.part_subtitle = clean_text(
-                    p, preserve_formatting=True
+                state.part_subtitle = _canonicalise_part_epigraph(
+                    clean_text(p, preserve_formatting=True)
                 )
                 expect = None
                 continue
@@ -198,6 +250,8 @@ def extract():
             paragraphs[-1]['text'] += '\n\n' + normalise_footnote_refs(
                 clean_text(p, preserve_formatting=True), bracketed=True
             )
+
+    _canonicalise_hermeneutic_couplet(paragraphs)
 
     footnotes = extract_footnotes(
         ps[first_note_idx:], RE_FOOTNOTE, bracketed_refs=True

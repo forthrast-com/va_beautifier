@@ -362,6 +362,11 @@ def _markdown_body_chunk(text):
     if lines and all(line == '>' or line.startswith('> ') for line in lines):
         # Already canonical Markdown blockquote syntax. Passing it through the
         # poetic-line wrapper would hide the structure from Pandoc.
+        if lines[-1].startswith('> — '):
+            # Preserve the semantic distinction for EPUB styling. Pandoc's
+            # Typst writer treats the surrounding div as an ordinary block,
+            # so print output retains its native quotation treatment.
+            return f'::: {{.scripture-quote}}\n{text}\n:::'
         return text
     rendered = _markdown_preserve_breaks(text)
     if '\n' not in rendered:

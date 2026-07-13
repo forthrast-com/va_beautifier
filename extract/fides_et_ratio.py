@@ -23,6 +23,7 @@ import re
 from core import (
     HeadingState,
     assign_footnote_context,
+    canonical_blockquote,
     clean_text,
     flatten_ws,
     heading_title,
@@ -61,6 +62,10 @@ TITLE_UPPER = 'FIDES ET RATIO'
 RE_PARA = re.compile(r'^(\d+)\s*\.\s+(.+)$', re.DOTALL)
 RE_CHAPTER = re.compile(r'^CHAPTER\s+([IVXLC]+)\b\s*[-–—]\s*(.+)$', re.DOTALL)
 RE_COPYRIGHT_NOTICE = re.compile(r'^Copyright © Dicastery for Communication$')
+RE_SCRIPTURE = re.compile(
+    r'^\*+“(?P<body>.+)”\*+\s+\((?P<citation>[^)]+)\)$',
+    re.DOTALL,
+)
 
 # Body footnote cites: <a name="-X">N</a> inside a <sup>, where the visible
 # number N is the anchor text and the name suffix X is the source's own
@@ -72,6 +77,14 @@ RE_DEF = re.compile(
     r'\s*</b>\s*</font>',
     re.IGNORECASE | re.DOTALL,
 )
+
+
+def _canonicalise_scripture(text):
+    match = RE_SCRIPTURE.fullmatch(text.strip())
+    if not match:
+        return text
+    citation = re.sub(r'(?<=\d)-(?=\d)', '–', match.group('citation'))
+    return canonical_blockquote(match.group('body'), citation)
 
 
 def _canonicalise_body_refs(soup):
@@ -202,9 +215,10 @@ def extract():
         if paragraphs:
             if RE_COPYRIGHT_NOTICE.fullmatch(text.strip()):
                 continue
-            paragraphs[-1]['text'] += '\n\n' + normalise_footnote_refs(
+            rich = normalise_footnote_refs(
                 clean_text(p, preserve_formatting=True)
             )
+            paragraphs[-1]['text'] += '\n\n' + _canonicalise_scripture(rich)
 
     footnotes = assign_footnote_context(_footnotes(soup), paragraphs)
 

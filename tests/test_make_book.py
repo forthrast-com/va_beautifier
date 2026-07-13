@@ -73,6 +73,14 @@ class EndMatterRenderTests(unittest.TestCase):
     def test_body_blockquote_reaches_pandoc_as_markdown(self):
         quote = '> Quoted text.\n>\n> — *Lk* 10:25–37'
 
+        self.assertEqual(
+            make_book._markdown_body_chunk(quote),
+            f'::: {{.scripture-quote}}\n{quote}\n:::',
+        )
+
+    def test_uncited_body_blockquote_stays_plain(self):
+        quote = '> A solemn declaration.'
+
         self.assertEqual(make_book._markdown_body_chunk(quote), quote)
 
     def test_appendix_stanzas_suppress_pdf_first_line_indents(self):

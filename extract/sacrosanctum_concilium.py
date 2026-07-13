@@ -27,6 +27,7 @@ from core import (
     RE_FOOTNOTE,
     HeadingState,
     assign_footnote_context,
+    canonical_blockquote,
     clean_text,
     flatten_ws,
     make_soup,
@@ -60,6 +61,18 @@ RE_APPENDIX_LINE = re.compile(r'^APPENDIX(?:\s+(.+))?$', re.DOTALL)
 RE_SECTION_BOLD = re.compile(r'^([IVX]+|\d+)\s*\.\s+(.+)$', re.DOTALL)
 RE_SUBHEADING = re.compile(r'^([A-F])\)\s*(.+)$', re.DOTALL)
 RE_PARA_NUM = re.compile(r'^\s*(\d+)\s*\.\s+(.+)$', re.DOTALL)
+RE_WHOLE_QUOTED_CONTINUATION = re.compile(
+    r'^[“"](?P<body>.+)[”"](?P<ref>\(\d+\))(?P<punct>[.!?])$',
+    re.DOTALL,
+)
+
+
+def _canonicalise_whole_quote(text):
+    match = RE_WHOLE_QUOTED_CONTINUATION.fullmatch(text.strip())
+    if not match:
+        return text
+    body = match.group('body') + match.group('ref') + match.group('punct')
+    return canonical_blockquote(body)
 
 
 def _extract_frontmatter(body_html):
@@ -215,10 +228,11 @@ def _walk_body(corpo):
 
         # Continuation line under the currently open paragraph
         if current is not None and seen_frontmatter:
-            current['text'] += '\n\n' + normalise_footnote_refs(
+            rich = normalise_footnote_refs(
                 clean_text(tag, preserve_formatting=True),
                 bracketed=True,
             )
+            current['text'] += '\n\n' + _canonicalise_whole_quote(rich)
 
     flush()
     if appendix_blocks:

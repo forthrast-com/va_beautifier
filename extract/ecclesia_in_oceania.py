@@ -28,6 +28,7 @@ import re
 from core import (
     HeadingState,
     assign_footnote_context,
+    canonical_blockquote,
     clean_text,
     heading_title,
     is_centred,
@@ -69,6 +70,18 @@ RE_FN_NAME = re.compile(r'^fn(ref)?\d+$')
 RE_FN_HREF = re.compile(r'^#fn(ref)?\d+$')
 # Definition lines after the `NOTES` heading open with a parenthesised number.
 RE_NOTE = re.compile(r'^\((\d+)\)\s*(.+)$', re.DOTALL)
+RE_SCRIPTURE = re.compile(
+    r'^\*"(?P<body>.+)"\*\s+\((?P<citation>[^)]+)\)\.?$',
+    re.DOTALL,
+)
+
+
+def _canonicalise_scripture(text):
+    match = RE_SCRIPTURE.fullmatch(text.strip())
+    if not match:
+        return text
+    citation = re.sub(r'(?<=\d)-(?=\d)', '–', match.group('citation'))
+    return canonical_blockquote(match.group('body'), citation)
 
 
 def _is_fn_anchor(anchor):
@@ -211,6 +224,7 @@ def extract():
         rich = normalise_footnote_refs(
             clean_text(p, preserve_formatting=True), bracketed=True
         )
+        rich = _canonicalise_scripture(rich)
         # Once the "Prayer" heading is open, its verse forms the appendix body
         # rather than folding back into the conclusion's last paragraph.
         if prayer is not None:

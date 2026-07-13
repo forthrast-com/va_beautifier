@@ -145,6 +145,29 @@ def flatten_ws(text):
     return re.sub(r'\s+', ' ', text).strip()
 
 
+def canonical_blockquote(text, citation=''):
+    """Render extracted quote text as canonical Markdown blockquote syntax.
+
+    Extractors decide *whether* a source block is a quotation and strip its
+    source-specific wrapper marks. This helper owns only the stable output
+    shape shared by HTML, EPUB, and PDF renderers.
+    """
+    blocks = [block.strip() for block in text.split('\n\n') if block.strip()]
+    lines = []
+    for block_index, block in enumerate(blocks):
+        if block_index:
+            lines.append('>')
+        lines.extend(
+            '>' if not line else f'> {line}'
+            for line in block.splitlines()
+        )
+    if citation:
+        if lines:
+            lines.append('>')
+        lines.append(f'> — {citation.strip()}')
+    return '\n'.join(lines)
+
+
 def only_child_is(tag, name):
     """True if `tag`'s only non-whitespace direct child is a <name>.
 

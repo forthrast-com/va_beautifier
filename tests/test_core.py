@@ -10,6 +10,7 @@ from core import (
     HeadingState,
     assign_footnote_context,
     br_text,
+    canonical_blockquote,
     ch_order_label,
     clean_text,
     encyclical_split,
@@ -32,6 +33,16 @@ from core import (
 
 
 class TextHelperTests(unittest.TestCase):
+    def test_canonical_blockquote_preserves_blocks_and_citation(self):
+        self.assertEqual(
+            canonical_blockquote(
+                'First line\nSecond line\n\nNext stanza',
+                '*Lk* 10:25–37',
+            ),
+            '> First line\n> Second line\n>\n> Next stanza\n>\n'
+            '> — *Lk* 10:25–37',
+        )
+
     def test_clean_text_preserves_lines_and_external_links(self):
         soup = BeautifulSoup(
             '<p>First<br>Second <a href="https://example.test/x">link</a> '

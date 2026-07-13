@@ -106,7 +106,7 @@ An optional `[layout]` table carries per-document rendering flags
 flags are serialised; a doc with none (GeS) omits the table. See Renderer
 conventions for what each flag drives.
 
-`[[paragraphs]]` — `number`, `part`, `part_title`, `chapter`, `chapter_title`, `chapter_subtitle`, `section`, `section_title`, `sub_heading`, `heading_la`, `break_after`, `text` (multiline, `\n\n`-separated sub-paragraphs). Authored inline formatting in `text` and footnote `text` is canonical Markdown-compatible content: `*italics*`, `**bold**`, `<sup>…</sup>`, and `<sub>…</sub>`. Markdown `> …` lines form semantic blockquotes; use a bare `>` line between quote paragraphs. A final `> — Citation` becomes the web citation footer and remains ordinary blockquote content for Pandoc's EPUB/PDF writers.
+`[[paragraphs]]` — `number`, `part`, `part_title`, `chapter`, `chapter_title`, `chapter_subtitle`, `section`, `section_title`, `sub_heading`, `heading_la`, `break_after`, `text` (multiline, `\n\n`-separated sub-paragraphs). Authored inline formatting in `text` and footnote `text` is canonical Markdown-compatible content: `*italics*`, `**bold**`, `<sup>…</sup>`, and `<sub>…</sub>`. Markdown `> …` lines form semantic blockquotes; use a bare `>` line between quote paragraphs. A final `> — Citation` marks a cited scripture block: web/EPUB give it the stronger scripture-card treatment, while Pandoc preserves ordinary blockquote semantics for print. Structural subtitles may use the same canonical form for scriptural epigraphs.
 
 - `sub_heading` is per-paragraph and optional (defaults to ''); LS uses it for topical headers within sections, GeS doesn't have any.
 - `heading_la` is a Latin micro-summary; GeS has one per paragraph, LS has none.

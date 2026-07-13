@@ -124,13 +124,45 @@ class MakeHtmlGoldenTests(unittest.TestCase):
             }],
             [],
         )
-        self.assertIn('<blockquote class="document-quote">', html)
+        self.assertIn(
+            '<blockquote class="document-quote scripture-quote">',
+            html,
+        )
         self.assertIn('<p>Quoted text.</p>', html)
         self.assertIn(
             '<footer>— <cite><em>Lk</em> 10:25–37</cite></footer>',
             html,
         )
         self.assertNotIn('&gt; Quoted text', html)
+
+    def test_uncited_blockquote_stays_quiet(self):
+        html = render_html_fixture(
+            'audit_declaration_fixture',
+            [{'number': 1, 'text': '> A solemn declaration.'}],
+            [],
+        )
+        self.assertIn('<blockquote class="document-quote">', html)
+        self.assertNotIn('scripture-quote', html.split('</style>', 1)[-1])
+
+    def test_structural_scripture_epigraph_uses_the_same_card(self):
+        html = render_html_fixture(
+            'audit_scripture_epigraph_fixture',
+            [{
+                'number': 1,
+                'part': 1,
+                'part_title': 'Verbum Dei',
+                'part_subtitle': (
+                    '> In the beginning was the Word\n>\n> — *Jn* 1:1'
+                ),
+                'text': 'Opening prose.',
+            }],
+            [],
+        )
+        self.assertIn(
+            '<blockquote class="part-subtitle document-quote '
+            'scripture-quote">',
+            html,
+        )
 
 
 class MakeHtmlChapterLabelTests(unittest.TestCase):

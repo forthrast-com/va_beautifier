@@ -66,6 +66,13 @@ class ExtractorRegressionTests(unittest.TestCase):
         self.assertEqual(data['appendices'][0]['kind'], 'declaration')
         self.assertIn('1. The Sacred Council would not object',
                       data['appendices'][0]['text'])
+        para_77 = next(p for p in data['paragraphs'] if p['number'] == 77)
+        self.assertIn(
+            '\n\n> If any regions are wont to use other praiseworthy customs',
+            para_77['text'],
+        )
+        self.assertIn('retained(41).', para_77['text'])
+        self.assertNotIn('> "If any regions', para_77['text'])
 
     @needs_sources(laudato_si.EN_SRC)
     def test_laudato_si_retains_appendices_and_note_context(self):
@@ -196,6 +203,17 @@ class ExtractorRegressionTests(unittest.TestCase):
             'Copyright © Dicastery for Communication',
             data['paragraphs'][-1]['text'],
         )
+        paragraphs = {p['number']: p for p in data['paragraphs']}
+        self.assertIn(
+            '\n\n> Wisdom knows all and understands all\n>\n'
+            '> — *Wis* 9:11',
+            paragraphs[15]['text'],
+        )
+        self.assertIn(
+            '\n\n> Acquire wisdom, acquire understanding\n>\n'
+            '> — *Prov* 4:5',
+            paragraphs[20]['text'],
+        )
 
     @needs_sources(lumen_fidei.EN_SRC)
     def test_lumen_fidei_unwraps_absolute_footnote_anchors(self):
@@ -256,11 +274,17 @@ class ExtractorRegressionTests(unittest.TestCase):
             'But to all who received him he gave power',
             part_two['part_subtitle'],
         )
-        self.assertTrue(part_two['part_subtitle'].rstrip().endswith('(Jn 1:12)'))
+        self.assertTrue(part_two['part_subtitle'].rstrip().endswith(
+            '> — *Jn* 1:12'
+        ))
         self.assertEqual(part_two['section'], 1)
         self.assertEqual(part_two['section_title'], 'The Church receives the word')
         para_49 = next(p for p in data['paragraphs'] if p['number'] == 49)
         self.assertNotIn('The Church receives the word', para_49['text'])
+        para_37 = next(p for p in data['paragraphs'] if p['number'] == 37)
+        self.assertIn('\n\n> *Littera gesta docet', para_37['text'])
+        self.assertIn('anagogy about our destiny.(122)', para_37['text'])
+        self.assertNotIn('> “*Littera', para_37['text'])
         # Trailing unnumbered Conclusion chapter under the last part.
         self.assertEqual(data['paragraphs'][-1]['chapter_title'], 'Conclusion')
         self.assertEqual(data['paragraphs'][-1]['part'], 3)
@@ -415,6 +439,10 @@ class ExtractorRegressionTests(unittest.TestCase):
                       paragraphs[285]['text'])
         self.assertNotIn('> “In the name', paragraphs[285]['text'])
         self.assertIn('method and standard.(285)', paragraphs[285]['text'])
+        # Francis's long self-citations remain authored prose, not detached
+        # source blocks masquerading as scripture or external testimony.
+        self.assertFalse(paragraphs[227]['text'].startswith('> '))
+        self.assertFalse(paragraphs[268]['text'].startswith('> '))
         # Two titled prayers arrive as appendices (the LS-shaped tail).
         self.assertEqual(
             [a['title'] for a in data['appendices']],
@@ -471,6 +499,16 @@ class ExtractorRegressionTests(unittest.TestCase):
         # leaving no markdown-link tails in the body.
         for p in data['paragraphs']:
             self.assertNotIn('](#', p['text'])
+        paragraphs = {p['number']: p for p in data['paragraphs']}
+        expected_scripture = {
+            2: '*Mt* 4:18–20',
+            9: '*Mt* 4:21–22',
+            17: '*Lk* 5:1–3',
+            35: '*Lk* 5:4–7',
+        }
+        for number, citation in expected_scripture.items():
+            self.assertIn(f'> — {citation}', paragraphs[number]['text'])
+            self.assertNotRegex(paragraphs[number]['text'], r'> [“"]')
 
 
 if __name__ == '__main__':

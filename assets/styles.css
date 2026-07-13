@@ -47,6 +47,11 @@
     --accent-darker: hsl(calc(var(--hue) -  5),  80%, 20%);    /* cur-para indicator */
     --display:       hsl(calc(var(--hue) - 12), 100%, 20%);    /* title block, prayer headers */
 
+    --scripture-bg:   #fff;
+    --scripture-fg:   #191817;
+    --scripture-cite: #665b4a;
+    --scripture-rule: rgb(0 0 0 / 8%);
+
     /* sizing */
     --para-size:    1.2rem;
 }
@@ -78,6 +83,11 @@
     --accent-strong: hsl(calc(var(--hue) -  8), 55%, 70%);
     --accent-darker: hsl(calc(var(--hue) -  6), 90%, 88%);
     --display:       hsl(calc(var(--hue) - 10), 55%, 61%);
+
+    --scripture-bg:   hsl(var(--hue), 12%, 18%);
+    --scripture-fg:   #eee7d8;
+    --scripture-cite: var(--accent);
+    --scripture-rule: hsl(var(--hue), 14%, 30%);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -102,6 +112,11 @@
         --accent-strong: hsl(calc(var(--hue) -  8), 55%, 70%);
         --accent-darker: hsl(calc(var(--hue) -  6), 90%, 88%);
         --display:       hsl(calc(var(--hue) - 10), 55%, 61%);
+
+        --scripture-bg:   hsl(var(--hue), 12%, 18%);
+        --scripture-fg:   #eee7d8;
+        --scripture-cite: var(--accent);
+        --scripture-rule: hsl(var(--hue), 14%, 30%);
     }
 }
 
@@ -546,6 +561,29 @@ blockquote.document-quote footer {
     text-align: center;
 }
 blockquote.document-quote cite { font-style: normal; }
+
+/* A cited scripture block should interrupt the page, not dissolve into it.
+   Light mode uses crisp paper; dark mode lifts a warmer surface just far
+   enough from the page to read as a distinct leaf without fridge-light glare. */
+blockquote.document-quote.scripture-quote {
+    margin: 1rem 0;
+    padding: clamp(1.1rem, 3vw, 1.6rem) clamp(1.2rem, 4vw, 2rem);
+    background: var(--scripture-bg);
+    color: var(--scripture-fg);
+    border: 1px solid var(--scripture-rule);
+    border-radius: .18rem;
+    box-shadow: none;
+}
+blockquote.document-quote.scripture-quote p {
+    color: var(--scripture-fg);
+    font-size: 1.06em;
+    line-height: 1.65;
+}
+blockquote.document-quote.scripture-quote footer {
+    color: var(--scripture-cite);
+    margin-top: 1.5rem;
+    text-align: center;
+}
 
 /* ── corner action buttons (home / info / aA) ───────────────────────────── */
 /* Pulled out of the sticky bar so they sit stably at the far-right of the
