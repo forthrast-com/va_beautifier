@@ -61,7 +61,7 @@ jobs:
           find site -maxdepth 1 -name '*.html' -exec touch {} +
           find site/downloads -type f -exec touch {} +
       - name: Build
-        run: nix develop --command make -j8
+        run: nix develop --profile "$RUNNER_TEMP/nix-dev-shell" --command make -j8
       - name: Prepare flat site
         run: |
           mkdir -p _site/downloads

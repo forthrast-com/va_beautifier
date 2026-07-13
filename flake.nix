@@ -22,13 +22,12 @@
             ps.beautifulsoup4
           ]);
         in {
-          default = pkgs.mkShell {
+          default = pkgs.mkShellNoCC {
             packages = [
               python
               pkgs.gnumake
               pkgs.pandoc
               pkgs.typst
-              pkgs.google-fonts
               pkgs.libertinus
             ];
             shellHook = ''
