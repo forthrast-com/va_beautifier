@@ -237,6 +237,28 @@ HTML output is a single self-contained file (CSS + JS inlined, no external asset
 - sub-heading: generated `sub-{n}`
 - appendix: `appendix-{n}`
 
+**Heading outline (a11y, 2026-07).** The doc title is the page's single
+`h1`; each structural heading nests one level below the nearest *rendered*
+ancestor heading, so tags are context-dependent (LS's preamble sub-headings
+are `h2`, the same class inside a chapter section is `h4`). The
+"Part I"/"Chapter N" eyebrows demote to `<p>` whenever a real title follows —
+one heading per structural node. Consequently CSS heading selectors are
+class-based (`.chapter-title`, not `h3.chapter-title`), and each class pins
+its own font-family/weight rather than leaning on tag defaults.
+`assets/scripts.js` matches `.section-title` likewise. Landmarks: body column
+in `<main>`, corner controls a labelled `<nav>`, panels labelled non-modal
+dialogs, sticky bar/corner title/indicator `aria-hidden`. Contrast tokens
+floor 4.5:1 on the worst tinted surface across the whole hue wheel — boundary
+maths in `scratch/contrast_solve.py`; re-run it before dimming any muted
+text token. Audit + remediation record: `docs/a11y-audit-2026-07.md`.
+
+**Reading regions are keyed by cid, not (part, chapter).** Drawer/TOC groups,
+section/sub attribution, footnote grouping, and indicator bars all key on the
+generated region id captured during the walk. Two same-numbered regions split
+only by `part_title` (QVH's Preliminary Note and Introduction are both
+`(0, 0)`) would otherwise pool their structure under the first region's
+group — regression-tested in `test_make_html`.
+
 Doc-scoped CSS lives under `.doc-<slug>` selectors. Long structured documents share gutter-style paragraph numbers. Only the current paragraph's number pins below the sticky bar; following numbers remain static beside their first lines. GeS keeps the original inline `5. *Latin heading* body` layout via the default rules + `.para-num::after { content: '.' }`.
 
 **Scroll indicator (universal).** The rail is full-height for every document — it fills the area below the sticky bar, bars flex-grow by paragraph count, segs share their bar equally (the old `capped_indicator` flag is retired; the cap-vs-natural distinction no longer exists). In `section_indicator` mode each seg is a section range; sub-headings inside a section are emitted as `notches` (fractions) on its seg, drawn as hairline ticks across the seg's right third and **visible only on the active bar** (at 5px idle they'd be grit — the bar discloses texture as it widens). The current-position marker splits lanes in a notched seg: an unbroken stripe down the left two-thirds marks the current section, and a band slides notch-to-notch in the right third marking the current sub-heading; unnotched segs keep the plain whole-seg `cur-para` fill. A chapter with *no* numbered sections but authored sub-headings promotes each sub to its own seg (the `ch_subs` branch — LS's introduction, FT ch 2).
@@ -246,7 +268,7 @@ Doc-scoped CSS lives under `.doc-<slug>` selectors. Long structured documents sh
   - `bare_sections` — named topical sections, no `Section N:` prefix; replaced `make_html.BARE_SECTION_DOCS`.
   - `bare_chapters` — title-only chapters, no `Chapter N:` prefix, for sources with no chapter numbering (SS, DCE); replaced `make_html`/`make_book.BARE_CHAPTER_DOCS`. Drawer contents and no-JS TOC labels follow the same bare rendering via `make_html.chapter_group_label`, which also strips the prefix from a trailing `Conclusion` chapter to match the body's `is_unnumbered` path.
   - `mobile_inline` — narrow-viewport fallback to inline `5.` numbering (`.layout-mobile-inline`; LS/MH/AeN/QVH/SC).
-  - `section_indicator` — indicator segments cover section ranges instead of one per paragraph, with sub-heading notches (LS/MH/VD/FT); replaced `make_html.DOC_INDICATOR_LEVEL`.
+  - `section_indicator` — indicator segments cover section ranges instead of one per paragraph, with sub-heading notches (LS/MH/VD/FT/QVH); replaced `make_html.DOC_INDICATOR_LEVEL`. A region whose paragraphs are *all* hidden-numbered (QVH's Preliminary Note) falls back to one whole-region seg ranged over the hidden numbers, so its bar stays visible and live.
   - `stacked_desc` — each pre-title `desc` line renders on its own row, for fronts that list distinct issuing bodies (AeN's two dicasteries); replaced a slug test in `make_html`.
 
 The web/book agreement on which chapters render title-only (trailing `Conclusion`, bare-chapter docs, never roman-style) lives in `core.is_unnumbered_chapter`, shared by both renderers.

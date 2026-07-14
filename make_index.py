@@ -450,7 +450,7 @@ def main():
   /* Ink */
   --ink:          #1f1b13;
   --ink-dim:      #6a6253;
-  --ink-fainter:  #948a76;
+  --ink-fainter:  #71685a;   /* 4.5:1 on both bg and paper (WCAG 1.4.3) */
   /* Display fallback hue when the per-tile --hue isn't set */
   --hue: 42;
   --accent:       hsl(calc(var(--hue) -  6),  44%, 30%);
@@ -465,7 +465,7 @@ def main():
     --rule-soft:    #2b2620;
     --ink:          #ece5d3;
     --ink-dim:      #b6ad95;
-    --ink-fainter:  #807761;
+    --ink-fainter:  #9c937e;   /* 4.5:1 on both bg and paper (WCAG 1.4.3) */
     --accent:       hsl(calc(var(--hue) -  4), 42%, 70%);
     --accent-soft:  hsl(calc(var(--hue) +  2), 30%, 50%);
   }}

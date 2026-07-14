@@ -5,11 +5,13 @@
       `scratch/axe_scan.sh` (agent-browser + axe-core, replaces the mortolista
       playwright script). Remediation is the open follow-up:
 
-- [ ] **A11y remediation.** From the audit, roughly in severity order:
-      contrast lifts (`.para-num` 2.2:1, `.chapter-num` light 3.36:1, dark
-      drawer 3.99:1, index sort controls); `<main>` landmark; coherent heading
-      outline (title is a `div`, body opens at `h5`, only `h1`s are the
-      appendices); drawer keyboard flow (Escape close, focus into panel — its
-      first focusable is tab stop 188/299); footnote refs should move focus;
-      settings buttons need names ("A"×3) and `aria-pressed`; scroll indicator
-      is mouse-only (`aria-hidden` it or make it operable).
+- [x] **A11y remediation.** Done 2026-07-14; every audit finding cleared
+      (axe re-scan zero violations across index/LS/GeS/QVH, light + dark,
+      drawer/settings open — see the remediation appendix in
+      `docs/a11y-audit-2026-07.md`). Contrast boundary maths live in
+      `scratch/contrast_solve.py`. Residual (from the audit's "not covered"):
+
+- [ ] **A11y follow-ups.** Real VoiceOver smoke test; touch-target sizing;
+      EPUB/PDF accessibility; drawer tablist arrow-key navigation (tabs are
+      `role="tab"` but only Tab-reachable). (`axe.min.js` is now vendored
+      at `scratch/axe.min.js`; the `../mortolista` borrow is gone.)

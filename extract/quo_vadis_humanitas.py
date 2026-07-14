@@ -161,7 +161,8 @@ def extract():
         'desc': 'International Theological Commission',
         'desc_post': 'Thinking through Christian Anthropology in the Face of '
                      'Certain Scenarios for the Future of Humanity',
-        'layout': {'long': True, 'bare_sections': True, 'mobile_inline': True},
+        'layout': {'long': True, 'bare_sections': True, 'mobile_inline': True,
+                   'section_indicator': True},
         'paragraphs': paragraphs,
         'footnotes': footnotes,
     }

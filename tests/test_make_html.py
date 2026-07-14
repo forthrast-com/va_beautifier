@@ -85,7 +85,7 @@ class MakeHtmlGoldenTests(unittest.TestCase):
         self.assertIn('Fixture &amp; Co', self.html)
 
     def test_footnote_ref_links_to_drawer_note(self):
-        self.assertIn('<sup><a href="#fn-0-0-1">1</a></sup>', self.html)
+        self.assertIn('<sup><a href="#fn-0-0-1" aria-label="Footnote 1">1</a></sup>', self.html)
         self.assertIn('id="fn-0-0-1"', self.html)
         self.assertIn('<em>Gaudium et spes</em>', self.html)
 
@@ -179,11 +179,11 @@ class MakeHtmlChapterLabelTests(unittest.TestCase):
         self.assertIn('activePara.querySelector(\'.para-num\')', html)
         self.assertIn('top: calc(var(--bar-h) + 6px);', html)
         self.assertIn(
-            "document.querySelectorAll('[data-sticky], h4.section-title')",
+            "document.querySelectorAll('[data-sticky], .section-title')",
             html,
         )
         self.assertIn(
-            "el.matches('h4.section-title') ? el.textContent : ''",
+            "el.matches('.section-title') ? el.textContent : ''",
             html,
         )
         self.assertNotIn('activeNum.style.top =', html)
@@ -287,6 +287,73 @@ class MakeHtmlCollisionTests(unittest.TestCase):
             html.index('id="para-1" data-para-num="1"'),
         )
 
+    def test_title_split_regions_keep_their_own_sections(self):
+        # QVH regression: Preliminary Note and Introduction are both
+        # (part 0, chapter 0), split only by part_title. Keying drawer/
+        # indicator structure on (part, chapter) filed the Introduction's
+        # sections (and footnotes) under the Preliminary Note's group; the
+        # region cid must disambiguate.
+        html = render_html_fixture(
+            'audit_region_split_fixture',
+            [
+                {
+                    'number': -1, 'part': 0, 'part_title': 'Preliminary Note',
+                    'chapter': 0, 'section': 0, 'hide_number': True,
+                    'text': 'Prefatory prose.(1)',
+                },
+                {
+                    'number': 1, 'part': 0, 'part_title': 'Introduction',
+                    'chapter': 0, 'section': 0,
+                    'text': 'Opening paragraph.',
+                },
+                {
+                    'number': 2, 'part': 0, 'part_title': 'Introduction',
+                    'chapter': 0, 'section': 1,
+                    'section_title': 'The method',
+                    'text': 'Sectioned paragraph.(2)',
+                },
+            ],
+            [
+                {'part': 0, 'chapter': 0, 'section': 0, 'number': 1,
+                 'text': 'Prelim note.'},
+                {'part': 0, 'chapter': 0, 'section': 1, 'number': 2,
+                 'text': 'Intro note.'},
+            ],
+            layout={'long': True, 'bare_sections': True,
+                    'section_indicator': True},
+        )
+
+        toc = html.split('id="drawer-toc"')[1].split('id="drawer-footnotes"')[0]
+        self.assertIn('data-label="Preliminary Note"', toc)
+        self.assertIn('data-label="Introduction"', toc)
+        # The section row belongs to the Introduction group, after its header.
+        self.assertLess(
+            toc.index('data-label="Introduction"'),
+            toc.index('data-label="The method"'),
+        )
+        # Indicator: the Introduction's bar carries the section seg; the
+        # Preliminary Note's bar must not claim it.
+        import json as _json
+        indicator = _json.loads(
+            html.split('const chapters = ')[1].split(';\n')[0]
+        )
+        by_label = {ch['label']: ch for ch in indicator}
+        intro_targets = [s['target'] for s in by_label['Introduction']['segs']]
+        prelim_targets = [s['target'] for s in by_label['Preliminary Note']['segs']]
+        self.assertIn('sec-0-0-1', intro_targets)
+        self.assertNotIn('sec-0-0-1', prelim_targets)
+        # Footnote grouping: the intro's note follows the Introduction header
+        # in the footnotes view, not the Preliminary Note's.
+        fn_view = html.split('id="drawer-footnotes"')[1].split('id="drawer-bookmarks"')[0]
+        self.assertLess(
+            fn_view.index('data-label="Introduction"'),
+            fn_view.index('id="fn-0-0-2"'),
+        )
+        self.assertLess(
+            fn_view.index('id="fn-0-0-1"'),
+            fn_view.index('data-label="Introduction"'),
+        )
+
     def test_duplicate_footnote_numbers_get_distinct_targets(self):
         html = render_html_fixture(
             'audit_duplicate_fn_fixture',
@@ -338,9 +405,9 @@ class MakeHtmlCollisionTests(unittest.TestCase):
             ],
         )
 
-        self.assertIn('<sup><a href="#fn-0-0-1-2">1</a></sup>', html)
-        self.assertIn('<sup><a href="#fn-0-0-2-1">2</a></sup>', html)
-        self.assertIn('<sup><a href="#fn-0-0-2-2">2</a></sup>', html)
+        self.assertIn('<sup><a href="#fn-0-0-1-2" aria-label="Footnote 1">1</a></sup>', html)
+        self.assertIn('<sup><a href="#fn-0-0-2-1" aria-label="Footnote 2">2</a></sup>', html)
+        self.assertIn('<sup><a href="#fn-0-0-2-2" aria-label="Footnote 2">2</a></sup>', html)
         self.assertIn('id="fn-0-0-1-1"', html)
         self.assertIn('id="fn-0-0-1-2"', html)
         self.assertIn('id="fn-0-0-2-1"', html)

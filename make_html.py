@@ -114,7 +114,7 @@ def linkify_footnotes(text, part, chapter, footnote_ref_ids=None):
     def replace(m):
         n = m.group(1)
         target = next(ref_ids, f'fn-{part}-{chapter}-{n}')
-        return f'<sup><a href="#{target}">{n}</a></sup>'
+        return f'<sup><a href="#{target}" aria-label="Footnote {n}">{n}</a></sup>'
     return CANONICAL_FOOTNOTE_REF.sub(replace, text)
 
 def linkify_anchors(text):
@@ -264,7 +264,7 @@ if doc_desc or doc_name or doc_desc_post:
         '<div class="doc-title">'
         + _desc_block(doc_desc, 'doc-desc doc-desc-pre',
                       stacked=stack_desc_pre)
-        + f'<p class="doc-name">{e(doc_name)}</p>'
+        + f'<h1 class="doc-name">{e(doc_name)}</h1>'
         + _desc_block(doc_desc_post, 'doc-desc doc-desc-post',
                       break_before_on=is_modern)
         + '</div>'
@@ -325,6 +325,17 @@ seen_part        = object()
 seen_chapter     = object()
 seen_section     = object()
 seen_sub_heading = object()
+
+# Heading-outline tracking: the document title is the page's only <h1>, and
+# each structural heading nests one level below the nearest rendered ancestor
+# heading (doc title = level 1). Levels are context-dependent, not fixed tags:
+# LS's preamble sub-headings sit directly under the title (h2), while the same
+# sub-headings inside a chapter's section land at h4. Number eyebrows
+# ("Part I", "Chapter 2") demote to <p> whenever a real title follows — one
+# heading per structural node keeps SR heading-nav coherent.
+part_heading_level    = 0   # level of the rendered part-region heading (0 = none)
+chapter_heading_level = 0
+section_heading_level = 0
 
 sections_for_drawer = []  # list of {id, label, chapter_label}
 subs_for_drawer    = []   # list of {id, label, part, chapter, section, first_para}
@@ -432,7 +443,8 @@ for idx, p in enumerate(paragraphs):
             label = authored_title or ('Preamble' if is_preamble else 'Introduction')
             indicator_chapters.append({'id': cid, 'label': label, 'spacer': False, 'part': 0})
             if authored_title:
-                html_parts.append(h('h1', 'part-title', authored_title).replace('<h1 ', f'<h1 id="{cid}" data-sticky '))
+                html_parts.append(h('h2', 'part-title', authored_title).replace('<h2 ', f'<h2 id="{cid}" data-sticky '))
+                part_heading_level = 2
                 if p.get('part_subtitle', ''):
                     html_parts.append(subtitle_html(
                         'part-subtitle', p['part_subtitle']
@@ -441,12 +453,17 @@ for idx, p in enumerate(paragraphs):
                 # generated preamble or chapter-led part 0: anchor-only in the
                 # body — the label lives in the nav/TOC, not an on-page heading
                 html_parts.append(f'<a id="{cid}"></a>')
+                part_heading_level = 0
         else:
             indicator_chapters.append({'id': cid, 'label': f'Part {int_to_roman(p["part"])}', 'spacer': True, 'part': p['part']})
             part_nav[p['part']] = (cid, p['part_title'])
-            html_parts.append(h('h1', 'part-num', f'Part {int_to_roman(p["part"])}').replace('<h1 ', f'<h1 id="{cid}" '))
             if p['part_title']:
+                # eyebrow, not a heading — the part title below is the heading
+                html_parts.append(f'<p class="part-num" id="{cid}">Part {int_to_roman(p["part"])}</p>')
                 html_parts.append(h('h2', 'part-title', p['part_title']).replace('<h2 ', '<h2 data-sticky '))
+            else:
+                html_parts.append(h('h2', 'part-num', f'Part {int_to_roman(p["part"])}').replace('<h2 ', f'<h2 id="{cid}" '))
+            part_heading_level = 2
             if p.get('part_subtitle', ''):
                 html_parts.append(subtitle_html(
                     'part-subtitle', p['part_subtitle']
@@ -455,6 +472,8 @@ for idx, p in enumerate(paragraphs):
         seen_chapter     = object()
         seen_section     = object()
         seen_sub_heading = object()
+        chapter_heading_level = 0
+        section_heading_level = 0
 
     if chapter != seen_chapter and p['chapter'] != 0:
         cid = next_cid()
@@ -471,6 +490,7 @@ for idx, p in enumerate(paragraphs):
             p['chapter_title'], chapter_style=chapter_style,
             bare_chapters=BARE_CHAPTERS,
         )
+        ch_tag = f'h{(part_heading_level or 1) + 1}'
         if chapter_style == 'roman':
             # Roman-numeral docs (AeN): chapter number lives in the
             # left gutter as a Roman numeral (data-ch-num + CSS
@@ -479,8 +499,8 @@ for idx, p in enumerate(paragraphs):
             # without the inline prefix doubling the numeral up.
             ch_num = int_to_roman(p['chapter'])
             html_parts.append(
-                h('h3', 'chapter-title', p['chapter_title'])
-                .replace('<h3 ', f'<h3 id="{cid}" data-sticky data-ch-num="{ch_num}" ')
+                h(ch_tag, 'chapter-title', p['chapter_title'])
+                .replace(f'<{ch_tag} ', f'<{ch_tag} id="{cid}" data-sticky data-ch-num="{ch_num}" ')
             )
             if p.get('chapter_subtitle', ''):
                 html_parts.append(subtitle_html(
@@ -488,13 +508,17 @@ for idx, p in enumerate(paragraphs):
                 ))
         else:
             if not is_unnumbered:
-                html_parts.append(h('h2', 'chapter-num', chapter_num_label(p['chapter'])).replace('<h2 ', f'<h2 id="{cid}" '))
+                if p['chapter_title']:
+                    # eyebrow, not a heading — the chapter title is the heading
+                    html_parts.append(f'<p class="chapter-num" id="{cid}">{e(chapter_num_label(p["chapter"]))}</p>')
+                else:
+                    html_parts.append(h(ch_tag, 'chapter-num', chapter_num_label(p['chapter'])).replace(f'<{ch_tag} ', f'<{ch_tag} id="{cid}" '))
             if p['chapter_title']:
                 ch_num = f'{int_to_roman(p["part"])}.{p["chapter"]}' if p['part'] else f'{p["chapter"]}'
                 id_attr = f'id="{cid}" ' if is_unnumbered else ''
                 html_parts.append(
-                    h('h3', 'chapter-title', p['chapter_title'])
-                    .replace('<h3 ', f'<h3 {id_attr}data-sticky data-ch-num="{ch_num}" ')
+                    h(ch_tag, 'chapter-title', p['chapter_title'])
+                    .replace(f'<{ch_tag} ', f'<{ch_tag} {id_attr}data-sticky data-ch-num="{ch_num}" ')
                 )
                 if p.get('chapter_subtitle', ''):
                     html_parts.append(subtitle_html(
@@ -503,6 +527,8 @@ for idx, p in enumerate(paragraphs):
         seen_chapter     = chapter
         seen_section     = object()
         seen_sub_heading = object()
+        chapter_heading_level = (part_heading_level or 1) + 1
+        section_heading_level = 0
 
     para_id = para_id_by_index[idx]
     para_ch_id[para_id] = indicator_chapters[-1]['id']
@@ -516,12 +542,19 @@ for idx, p in enumerate(paragraphs):
             if p['section_title']:
                 label += f': {p["section_title"]}'
         ch_label = p['chapter_title'] or f'Part {int_to_roman(p["part"])}, Ch. {p["chapter"]}'
+        # `cid` ties the section to its reading region. (part, chapter) alone
+        # is ambiguous: QVH's Preliminary Note and Introduction are both
+        # (0, 0), split only by part_title, and keying on the pair filed the
+        # Introduction's sections under the Preliminary Note's bar/TOC group.
         sections_for_drawer.append({'id': sec_id, 'label': label, 'ch_label': ch_label,
                                      'part': p['part'], 'chapter': p['chapter'],
-                                     'section': p['section']})
-        html_parts.append(h('h4', 'section-title', label).replace('<h4 ', f'<h4 id="{sec_id}" '))
+                                     'section': p['section'],
+                                     'cid': indicator_chapters[-1]['id']})
+        sec_tag = f'h{(chapter_heading_level or part_heading_level or 1) + 1}'
+        html_parts.append(h(sec_tag, 'section-title', label).replace(f'<{sec_tag} ', f'<{sec_tag} id="{sec_id}" '))
         seen_section     = section
         seen_sub_heading = object()
+        section_heading_level = (chapter_heading_level or part_heading_level or 1) + 1
 
     sub = p.get('sub_heading', '')
     if sub != seen_sub_heading:
@@ -532,9 +565,14 @@ for idx, p in enumerate(paragraphs):
                 'id': _cur_sub_id, 'label': sub,
                 'part': p['part'], 'chapter': p['chapter'], 'section': p['section'],
                 'first_para': p['number'],
+                'cid': indicator_chapters[-1]['id'],
             })
+            sub_tag = 'h{}'.format(
+                (section_heading_level or chapter_heading_level
+                 or part_heading_level or 1) + 1
+            )
             html_parts.append(
-                h('h5', 'sub-heading', sub).replace('<h5 ', f'<h5 id="{_cur_sub_id}" ')
+                h(sub_tag, 'sub-heading', sub).replace(f'<{sub_tag} ', f'<{sub_tag} id="{_cur_sub_id}" ')
             )
         else:
             _cur_sub_id = ''
@@ -583,19 +621,30 @@ for idx, p in enumerate(paragraphs):
     if key not in part_chapter_to_cid:
         part_chapter_to_cid[key] = para_ch_id[para_id_by_index[idx]]
 
-# ── drawer: sections + sub-headings + footnotes interleaved by chapter ──────
+# ── drawer: sections + sub-headings + footnotes interleaved by region ───────
+# Reading regions are keyed by their indicator chapter id (cid), not by
+# (part, chapter): two same-numbered regions split only by part_title (QVH's
+# Preliminary Note vs Introduction, both (0, 0)) must not pool their
+# sections, sub-headings, or footnotes.
 
-secs_by_ch = defaultdict(list)
+secs_by_region = defaultdict(list)
 for s in sections_for_drawer:
-    secs_by_ch[(s['part'], s['chapter'])].append(s)
+    secs_by_region[s['cid']].append(s)
 
-subs_by_chsec: dict[tuple, list] = defaultdict(list)
+subs_by_region_sec: dict[tuple, list] = defaultdict(list)
 for sb in subs_for_drawer:
-    subs_by_chsec[(sb['part'], sb['chapter'], sb['section'])].append(sb)
+    subs_by_region_sec[(sb['cid'], sb['section'])].append(sb)
 
-fns_by_ch = defaultdict(list)
+# A footnote belongs to the region of its first citing paragraph; notes never
+# cited in the body fall back to the first region of their TOML (part,
+# chapter) scope, which is where they landed before regions existed.
+fns_by_region = defaultdict(list)
 for fn in footnotes:
-    fns_by_ch[(fn['part'], fn['chapter'])].append(fn)
+    key = fn_render_key_by_object[id(fn)]
+    citing_para = fn_para.get(key)
+    cid = (para_ch_id.get(citing_para) if citing_para else None) \
+        or part_chapter_to_cid.get((fn['part'], fn['chapter']), '')
+    fns_by_region[cid].append(fn)
 
 # Footnote heading placement is canonical TOML data. Only the link back to
 # the first citing paragraph is renderer-owned, because paragraph anchors are
@@ -627,14 +676,14 @@ for idx, p in enumerate(paragraphs):
         fn_section.setdefault(key, p['section'])
         fn_sub.setdefault(key, para_to_sub_id.get(para_id_by_index[idx], ''))
 
-# chapter order from document
-ch_order = []
-seen_ch_order = set()
-for p in paragraphs:
-    key = (p['part'], p['chapter'])
-    if key not in seen_ch_order:
-        ch_order.append((key, ch_order_label(p)))
-        seen_ch_order.add(key)
+# reading-region order from the document: (cid, part, chapter, label)
+region_order = []
+seen_region_order = set()
+for idx, p in enumerate(paragraphs):
+    cid = para_ch_id[para_id_by_index[idx]]
+    if cid not in seen_region_order:
+        region_order.append((cid, p['part'], p['chapter'], ch_order_label(p)))
+        seen_region_order.add(cid)
 
 def fn_item_html(part, chapter, fn):
     key  = fn_render_key_by_object[id(fn)]
@@ -667,27 +716,25 @@ def part_nav_label(part):
 drawer_items = []
 toc_items = []
 toc_part_seen = 0
-for (part, chapter), ch_label in ch_order:
+for cid, part, chapter, ch_label in region_order:
     # Parted documents (VD, DCE, GeS) get a part row in the contents tree,
     # mirroring the body's Part I/II headings; chapters group beneath it.
     if part and part != toc_part_seen and part in part_nav:
         p_cid, p_label = part_nav_label(part)
         toc_items.append(toc_item('h3', 'fn-group part-group', 'fn-ch-link', p_cid, p_label))
     toc_part_seen = part
-    secs    = secs_by_ch.get((part, chapter), [])
-    fns     = fns_by_ch.get((part, chapter), [])
-    ch_subs = [sb for sb in subs_for_drawer
-               if sb['part'] == part and sb['chapter'] == chapter]
-    cid = part_chapter_to_cid.get((part, chapter), '')
+    secs    = secs_by_region.get(cid, [])
+    fns     = fns_by_region.get(cid, [])
+    ch_subs = [sb for sb in subs_for_drawer if sb['cid'] == cid]
     group_label = chapter_group_label(part, chapter, ch_label)
 
     toc_items.append(toc_item('h3', 'fn-group', 'fn-ch-link', cid, group_label))
 
-    for sb in subs_by_chsec.get((part, chapter, 0), []):
+    for sb in subs_by_region_sec.get((cid, 0), []):
         toc_items.append(toc_item('p', 'sub-nav-item', 'sub-nav-link', sb['id'], sb['label']))
     for s in sorted(secs, key=lambda x: x['section']):
         toc_items.append(toc_item('p', 'sec-nav-item', 'sec-nav-link', s['id'], s['label']))
-        for sb in subs_by_chsec.get((part, chapter, s['section']), []):
+        for sb in subs_by_region_sec.get((cid, s['section']), []):
             toc_items.append(toc_item('p', 'sub-nav-item', 'sub-nav-link', sb['id'], sb['label']))
 
     if not secs and not fns and not ch_subs:
@@ -711,7 +758,7 @@ for (part, chapter), ch_label in ch_order:
 
     for sec_num in sec_nums:
         s        = sec_meta.get(sec_num)
-        sec_subs = subs_by_chsec.get((part, chapter, sec_num), [])
+        sec_subs = subs_by_region_sec.get((cid, sec_num), [])
         sec_fns  = fns_by_sec.get(sec_num, [])
         if not s and not sec_subs and not sec_fns:
             continue
@@ -764,7 +811,7 @@ if appendices:
         stanzas = para_html(app['text'])    # honours \n\n and \n the same way as body paragraphs
         parts.append(
             f'<div class="appendix{kind_cls}" id="{aid}">'
-            f'<h1 class="appendix-title" data-sticky>{e(app["title"])}</h1>'
+            f'<h2 class="appendix-title" data-sticky>{e(app["title"])}</h2>'
             f'{stanzas}'
             f'</div>'
         )
@@ -780,16 +827,15 @@ toc_drawer_html = '\n'.join(toc_items)
 # ── no-JS fallback TOC (simple link list, no bookmark widgets) ───────────────
 noscript_toc_parts = ['<ul class="noscript-toc-list">']
 ntoc_part_seen = 0
-for (part, chapter), ch_label in ch_order:
+for cid, part, chapter, ch_label in region_order:
     if part and part != ntoc_part_seen and part in part_nav:
         p_cid, p_label = part_nav_label(part)
         noscript_toc_parts.append(
             f'<li class="ntoc-ch ntoc-part"><a href="#{p_cid}">{e(p_label)}</a></li>')
     ntoc_part_seen = part
-    cid = part_chapter_to_cid.get((part, chapter), '')
     gl = chapter_group_label(part, chapter, ch_label)
     noscript_toc_parts.append(f'<li class="ntoc-ch"><a href="#{cid}">{e(gl)}</a>')
-    secs = sorted(secs_by_ch.get((part, chapter), []), key=lambda x: x['section'])
+    secs = sorted(secs_by_region.get(cid, []), key=lambda x: x['section'])
     if secs:
         noscript_toc_parts.append('<ul>')
         for s in secs:
@@ -808,9 +854,14 @@ noscript_toc_html = '\n'.join(noscript_toc_parts)
 indicator_level = 'sections' if layout.get('section_indicator') else 'paragraphs'
 
 ch_paras: dict[str, list[int]] = {}
+# Fallback ranges for regions whose paragraphs are ALL hidden-numbered
+# (QVH's Preliminary Note): without them the region's bar renders zero segs —
+# an invisible, unclickable sliver in the rail. The hidden numbers still
+# anchor real `para-{n}` elements, so ranging over them keeps the bar live.
+ch_paras_hidden: dict[str, list[int]] = {}
 for idx, p in enumerate(paragraphs):
-    if not p.get('hide_number', False):
-        ch_paras.setdefault(para_ch_id[para_id_by_index[idx]], []).append(p['number'])
+    target = ch_paras if not p.get('hide_number', False) else ch_paras_hidden
+    target.setdefault(para_ch_id[para_id_by_index[idx]], []).append(p['number'])
 
 # Map each section id → its (first, last) paragraph range so we can
 # build section-mode segs without re-walking paragraphs.
@@ -850,11 +901,9 @@ def seg_notches(seg_para_list, seg_subs):
 
 
 for ch in indicator_chapters:
-    paras = sorted(ch_paras.get(ch['id'], []))
-    ch_secs = [s for s in sections_for_drawer
-               if part_chapter_to_cid.get((s['part'], s['chapter'])) == ch['id']]
-    ch_subs = [s for s in subs_for_drawer
-               if part_chapter_to_cid.get((s['part'], s['chapter'])) == ch['id']]
+    paras = sorted(ch_paras.get(ch['id']) or ch_paras_hidden.get(ch['id'], []))
+    ch_secs = [s for s in sections_for_drawer if s['cid'] == ch['id']]
+    ch_subs = [s for s in subs_for_drawer if s['cid'] == ch['id']]
 
     if indicator_level == 'sections' and ch_secs:
         # Include any chapter opening before its first named section, then
@@ -969,12 +1018,13 @@ page = f"""<!DOCTYPE html>
 </script>
 </head>
 <body class="doc-{args.doc}{layout_classes}">
+<a class="skip-link" href="#main">Skip to content</a>
 <noscript>
 <p class="noscript-banner noscript-screen">Non-interactive render, you might want to enable JavaScript.<a href="https://circulars.forthrast.com">circulars.forthrast.com</a></p>
 <p class="noscript-banner noscript-print">Printed from circulars.forthrast.com</p>
 </noscript>
-<div id="doc-title-corner">{e(doc_name)}</div>
-<div id="sticky-bar">
+<div id="doc-title-corner" aria-hidden="true" title="Back to top">{e(doc_name)}</div>
+<div id="sticky-bar" aria-hidden="true">
   <span id="sticky-text">
     <span id="sticky-line">
       <span id="sticky-num"></span>
@@ -984,14 +1034,14 @@ page = f"""<!DOCTYPE html>
   </span>
 </div>
 
-<div id="bar-actions">
+<nav id="bar-actions" aria-label="Reader controls">
   <button id="action-home" aria-label="Home" title="Home"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 15" width="12" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"><path d="M7,1 L13,7 L13,14 L9,14 L9,9 L5,9 L5,14 L1,14 L1,7 Z"/></svg></button>
-  <button id="action-info" aria-label="About this document" title="About">i</button>
-  <button id="action-prefs" aria-label="Reader settings" title="Reader settings"><span class="a-small">a</span>A</button>
-  <button id="fn-tab" aria-label="Notes &amp; contents" title="Notes &amp; contents" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 9" width="14" height="9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="0" y1="1.5" x2="14" y2="1.5"/><line x1="5" y1="4.5" x2="14" y2="4.5"/><line x1="9" y1="7.5" x2="14" y2="7.5"/></svg></button>
-</div>
+  <button id="action-info" aria-label="About this document" title="About" aria-expanded="false" aria-controls="info-panel">i</button>
+  <button id="action-prefs" aria-label="Reader settings" title="Reader settings" aria-expanded="false" aria-controls="prefs-panel"><span class="a-small">a</span>A</button>
+  <button id="fn-tab" aria-label="Notes &amp; contents" title="Notes &amp; contents" aria-expanded="false" aria-controls="fn-drawer"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 9" width="14" height="9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="0" y1="1.5" x2="14" y2="1.5"/><line x1="5" y1="4.5" x2="14" y2="4.5"/><line x1="9" y1="7.5" x2="14" y2="7.5"/></svg></button>
+</nav>
 
-<div id="info-panel" hidden>
+<div id="info-panel" role="dialog" aria-label="About this edition" tabindex="-1" hidden>
   <p class="panel-title">About this edition</p>
   <p>Generated via templater scripts from Vatican HTML.</p>
   {f'<p><a href="{e(doc_source)}" target="_blank" rel="noopener">Original Vatican document</a></p>' if doc_source else ''}
@@ -1000,7 +1050,7 @@ page = f"""<!DOCTYPE html>
   GitHub: <a href="https://github.com/forthrast-com/va_beautifier" target="_blank" rel="noopener">@forthrast-com</a></p>
 </div>
 
-<div id="prefs-panel" hidden>
+<div id="prefs-panel" role="dialog" aria-label="Reader settings" hidden>
   <div class="pref-row">
     <span class="pref-label">Theme</span>
     <div class="pref-segments">
@@ -1012,9 +1062,9 @@ page = f"""<!DOCTYPE html>
   <div class="pref-row">
     <span class="pref-label">Size</span>
     <div class="pref-segments">
-      <button class="size-s" data-pref="size" data-value="small"  title="Small">A</button>
-      <button class="size-m" data-pref="size" data-value="medium" title="Medium">A</button>
-      <button class="size-l" data-pref="size" data-value="large"  title="Large">A</button>
+      <button class="size-s" data-pref="size" data-value="small"  aria-label="Small text" title="Small">A</button>
+      <button class="size-m" data-pref="size" data-value="medium" aria-label="Medium text" title="Medium">A</button>
+      <button class="size-l" data-pref="size" data-value="large"  aria-label="Large text" title="Large">A</button>
     </div>
   </div>
   <div class="pref-row">
@@ -1026,9 +1076,10 @@ page = f"""<!DOCTYPE html>
   </div>
 </div>
 
+<main id="main" tabindex="-1">
 {title_block}
 <noscript>
-<nav class="noscript-toc">
+<nav class="noscript-toc" aria-label="Contents">
   <h2>Contents</h2>
   {noscript_toc_html}
 </nav>
@@ -1038,15 +1089,18 @@ page = f"""<!DOCTYPE html>
 {end_matter_html}
 
 <noscript>
-<section class="noscript-fn">
+<section class="noscript-fn" aria-label="Notes">
   <h2>Notes</h2>
   {fn_drawer_html}
 </section>
 </noscript>
+</main>
 
-<nav id="ch-indicator"></nav>
+<div id="ch-indicator" aria-hidden="true"></div>
 
-<aside id="fn-drawer">
+<div id="sr-status" class="sr-only" role="status"></div>
+
+<aside id="fn-drawer" aria-label="Notes &amp; contents">
   <div id="fn-content">
     <div class="drawer-tabs" role="tablist" aria-label="Drawer view">
       <button class="drawer-view-tab active" type="button" role="tab" aria-controls="drawer-toc"       aria-selected="true"  data-drawer-view="toc">Contents</button>

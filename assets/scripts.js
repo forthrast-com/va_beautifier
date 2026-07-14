@@ -19,7 +19,7 @@ const stickyLabel = document.getElementById('sticky-label');
 const stickySub   = document.getElementById('sticky-sub');
 const stickyEls   = Array.from(document.querySelectorAll('[data-sticky]'));
 const stickyContextEls = Array.from(
-  document.querySelectorAll('[data-sticky], h4.section-title')
+  document.querySelectorAll('[data-sticky], .section-title')
 );
 let currentParaNum = '';
 function updateSticky() {
@@ -40,7 +40,7 @@ function updateSticky() {
       let currentSub = '';
       for (const el of stickyContextEls) {
         if (el.getBoundingClientRect().top > barEdge) break;
-        currentSub = el.matches('h4.section-title') ? el.textContent : '';
+        currentSub = el.matches('.section-title') ? el.textContent : '';
       }
       stickySub.textContent = currentSub;
     } else {
@@ -56,6 +56,18 @@ function updateSticky() {
     stickyNum.textContent   = '';
     stickySub.textContent   = '';
   }
+}
+
+// ── screen-reader announcements ──
+// One polite live region for state changes that otherwise happen silently
+// (bookmarks, reader prefs). Clear-then-set so repeating the same message
+// still fires an announcement.
+const srStatus = document.getElementById('sr-status');
+let srTimer = 0;
+function announce(msg) {
+  srStatus.textContent = '';
+  clearTimeout(srTimer);
+  srTimer = setTimeout(() => { srStatus.textContent = msg; }, 50);
 }
 
 function scrollToEl(el, smooth) {
@@ -215,6 +227,14 @@ function publishTitleClearance() {
   const titleRight = docTitleCorner.getBoundingClientRect().right;
   document.documentElement.style.setProperty('--title-clearance', titleRight + 16 + 'px');
 }
+// Masthead convention: clicking the corner title re-homes to the top of the
+// document and clears the hash. Mouse-only (the element is aria-hidden and
+// unfocusable); keyboard users have the skip link and the Home key.
+docTitleCorner.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'instant' : 'smooth' });
+  history.replaceState(null, '', location.pathname);
+});
+
 publishBarH();
 publishTitleClearance();
 if ('ResizeObserver' in window) {
@@ -320,13 +340,32 @@ try {
   if (Array.isArray(stored)) bookmarks = stored.filter(id => tocByTarget.has(id));
 } catch (e) {}
 
-function setDrawerOpen(open) {
+// Whichever element opened the drawer (the toggle or an in-text footnote
+// ref) gets focus back when Escape closes it.
+let drawerOpener = null;
+
+function setDrawerOpen(open, opener) {
   drawer.classList.toggle('open', open);
   tab.setAttribute('aria-expanded', String(open));
+  drawerOpener = open ? (opener || tab) : null;
 }
 
 tab.addEventListener('click', () => {
-  setDrawerOpen(!drawer.classList.contains('open'));
+  const opening = !drawer.classList.contains('open');
+  setDrawerOpen(opening);
+  // Keyboard users shouldn't have to traverse half the document to reach
+  // the panel they just opened: focus lands on the active view tab.
+  if (opening) {
+    const activeTab = drawerTabs.find(b => b.classList.contains('active'));
+    (activeTab || drawerTabs[0]).focus();
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || !drawer.classList.contains('open')) return;
+  const opener = drawerOpener;
+  setDrawerOpen(false);
+  if (opener) opener.focus();
 });
 
 let textTapStart = null;
@@ -373,13 +412,16 @@ function saveBookmarks() {
 }
 
 function toggleBookmark(target) {
-  if (bookmarks.includes(target)) {
+  const removing = bookmarks.includes(target);
+  if (removing) {
     bookmarks = bookmarks.filter(id => id !== target);
   } else {
     bookmarks.push(target);
   }
   saveBookmarks();
   renderBookmarks();
+  const label = tocByTarget.get(target)?.dataset.label || '';
+  announce(removing ? `Bookmark removed: ${label}` : `Bookmarked: ${label}`);
 }
 
 function wireBookmarkButton(button) {
@@ -436,6 +478,10 @@ function selectFn(id) {
     const divisor = window.matchMedia('(max-width: 900px)').matches ? 4.5 : 3;
     notesPanel.scrollTop += rect.top - cRect.top - notesPanel.clientHeight / divisor;
   }
+  // Move focus to the note so SR/keyboard users land on what they asked
+  // for; preventScroll keeps the panel maths above authoritative.
+  target.setAttribute('tabindex', '-1');
+  target.focus({preventScroll: true});
 }
 
 document.querySelectorAll('.fn-ch-link').forEach(a => {
@@ -463,7 +509,7 @@ document.querySelectorAll('.sec-nav-link, .sub-nav-link').forEach(a => {
 document.querySelectorAll('sup a').forEach(a => {
   a.addEventListener('click', e => {
     e.preventDefault();
-    setDrawerOpen(true);
+    setDrawerOpen(true, a);
     showDrawerView('footnotes');
     selectFn(a.getAttribute('href').slice(1));
   });
@@ -471,6 +517,43 @@ document.querySelectorAll('sup a').forEach(a => {
 
 const home = document.getElementById('action-home');
 if (home) home.addEventListener('click', () => window.location.assign('index.html'));
+
+// ── corner panels: shared open/close plumbing ──
+// Both popovers sync their trigger's aria-expanded, close on outside click
+// or Escape (returning focus to the trigger when focus was inside), and
+// move focus into the panel on open — the panel itself when it's prose
+// (info, tabindex="-1"), else its first control.
+function setPanelOpen(trig, panel, open) {
+  panel.hidden = !open;
+  trig.setAttribute('aria-expanded', String(open));
+}
+
+function wirePanel(trig, panel, closeOther) {
+  trig.addEventListener('click', e => {
+    e.stopPropagation();
+    const opening = panel.hidden;
+    setPanelOpen(trig, panel, opening);
+    if (opening) {
+      closeOther();
+      const focusTarget = panel.matches('[tabindex]')
+        ? panel
+        : (panel.querySelector('button, a') || panel);
+      focusTarget.focus();
+    }
+  });
+  document.addEventListener('click', e => {
+    if (!panel.hidden && !panel.contains(e.target) && !trig.contains(e.target)) {
+      setPanelOpen(trig, panel, false);
+    }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !panel.hidden) {
+      const inside = panel.contains(document.activeElement);
+      setPanelOpen(trig, panel, false);
+      if (inside) trig.focus();
+    }
+  });
+}
 
 // ── reader prefs ──
 // Theme + paragraph size, written as data-attributes on <html> so the CSS
@@ -503,7 +586,9 @@ if (home) home.addEventListener('click', () => window.location.assign('index.htm
       if (b.dataset.pref === 'theme' && !actual) actual = 'auto';
       if (b.dataset.pref === 'font'  && !actual) actual = 'serif';
       if (b.dataset.pref === 'size'  && !actual) actual = 'medium';
-      b.classList.toggle('active', expected === actual);
+      const active = expected === actual;
+      b.classList.toggle('active', active);
+      b.setAttribute('aria-pressed', String(active));
     });
   }
 
@@ -512,22 +597,13 @@ if (home) home.addEventListener('click', () => window.location.assign('index.htm
       prefs[b.dataset.pref] = b.dataset.value;
       localStorage.setItem(KEY, JSON.stringify(prefs));
       apply();
+      announce(`${b.dataset.pref} set to ${b.dataset.value}`);
     });
   });
 
-  trig.addEventListener('click', e => {
-    e.stopPropagation();
-    panel.hidden = !panel.hidden;
-    if (!panel.hidden && info) info.hidden = true;
-  });
-  document.addEventListener('click', e => {
-    if (!panel.hidden && !panel.contains(e.target) && !trig.contains(e.target)) {
-      panel.hidden = true;
-    }
-  });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && !panel.hidden) panel.hidden = true;
-  });
+  wirePanel(trig, panel, () => info && setPanelOpen(
+    document.getElementById('action-info'), info, false
+  ));
 
   apply();
 })();
@@ -539,17 +615,7 @@ if (home) home.addEventListener('click', () => window.location.assign('index.htm
   const prefs = document.getElementById('prefs-panel');
   if (!trig || !panel) return;
 
-  trig.addEventListener('click', e => {
-    e.stopPropagation();
-    panel.hidden = !panel.hidden;
-    if (!panel.hidden && prefs) prefs.hidden = true;
-  });
-  document.addEventListener('click', e => {
-    if (!panel.hidden && !panel.contains(e.target) && !trig.contains(e.target)) {
-      panel.hidden = true;
-    }
-  });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && !panel.hidden) panel.hidden = true;
-  });
+  wirePanel(trig, panel, () => prefs && setPanelOpen(
+    document.getElementById('action-prefs'), prefs, false
+  ));
 })();

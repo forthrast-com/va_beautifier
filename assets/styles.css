@@ -26,8 +26,12 @@
     --fg:           #1a1a1a;
     --fg-dim:       #555;      /* italic captions */
     --fg-dim-bar:   #555;      /* sticky bar / corner title — overridden in dark to stay neutral */
-    --fg-dimmer:    #888;      /* uppercase muted labels */
-    --fg-faint:     #aaa;      /* faint chrome (para-num, dim segs) */
+    /* Muted text floors 4.5:1 (WCAG 1.4.3) on the *worst* tinted surface
+       across the whole hue wheel (drawer/bar at hue ~237), not just the
+       page bg — para-nums and drawer labels are content, not decoration.
+       Boundary maths: scratch/contrast_solve.py. */
+    --fg-dimmer:    #5c5c5c;   /* uppercase muted labels */
+    --fg-faint:     #666;      /* faint chrome (para-num, dim segs) */
 
     /* rules */
     --rule:         hsl(var(--hue), 16%, 82%);
@@ -42,7 +46,7 @@
        through compound expressions — see the recipe note further down). */
     --hue: 42;     /* fallback if no inline override; warm gold */
 
-    --accent:        hsl(calc(var(--hue) - 10),  36%, 35%);    /* footnote refs, hover */
+    --accent:        hsl(calc(var(--hue) - 10),  36%, 32%);    /* footnote refs, hover — L capped at 32% for 4.5:1 at every hue */
     --accent-strong: hsl(calc(var(--hue) +  5),  71%, 42%);    /* active indicator seg */
     --accent-darker: hsl(calc(var(--hue) -  5),  80%, 20%);    /* cur-para indicator */
     --display:       hsl(calc(var(--hue) - 12), 100%, 20%);    /* title block, prayer headers */
@@ -79,14 +83,14 @@
     --fg:           #e8e0d0;
     --fg-dim:       #b8b0a0;
     --fg-dim-bar:   hsl(0, 0%, 70%);   /* bar/corner text — neutral so a coloured hue doesn't gild the chrome */
-    --fg-dimmer:    #8a8275;
-    --fg-faint:     #5a5550;
+    --fg-dimmer:    #aaa196;   /* 4.5:1 floor on the dark drawer/bar surfaces at any hue */
+    --fg-faint:     #a49b8b;
 
     --rule:         hsl(var(--hue), 12%, 25%);
     --rule-soft:    hsl(var(--hue), 14%, 32%);
     --rule-tint:    hsl(var(--hue), 24%, 42%);
 
-    --accent:        hsl(calc(var(--hue) -  7), 42%, 63%);
+    --accent:        hsl(calc(var(--hue) -  7), 42%, 68%);
     --accent-strong: hsl(calc(var(--hue) -  8), 55%, 70%);
     --accent-darker: hsl(calc(var(--hue) -  6), 90%, 88%);
     --display:       hsl(calc(var(--hue) - 10), 55%, 61%);
@@ -114,14 +118,14 @@
         --fg:           #e8e0d0;
         --fg-dim:       #b8b0a0;
         --fg-dim-bar:   hsl(0, 0%, 70%);
-        --fg-dimmer:    #8a8275;
-        --fg-faint:     #5a5550;
+        --fg-dimmer:    #aaa196;
+        --fg-faint:     #a49b8b;
 
         --rule:         hsl(var(--hue), 12%, 25%);
         --rule-soft:    hsl(var(--hue), 14%, 32%);
         --rule-tint:    hsl(var(--hue), 24%, 42%);
 
-        --accent:        hsl(calc(var(--hue) -  7), 42%, 63%);
+        --accent:        hsl(calc(var(--hue) -  7), 42%, 68%);
         --accent-strong: hsl(calc(var(--hue) -  8), 55%, 70%);
         --accent-darker: hsl(calc(var(--hue) -  6), 90%, 88%);
         --display:       hsl(calc(var(--hue) - 10), 55%, 61%);
@@ -194,9 +198,12 @@ h1, h2, h3, h4 { font-family: var(--font-display); }
     font-size: 2.05rem;
     line-height: 1.15;
     color: var(--fg-dim-bar);
-    pointer-events: none;
+    /* Clickable masthead: jumps back to the top (wired in scripts.js).
+       Mouse-only affordance — stays aria-hidden and unfocusable. */
+    cursor: pointer;
     white-space: nowrap;
 }
+#doc-title-corner:hover { color: var(--fg); }
 
 /* ── sticky heading bar ─────────────────────────────────────────────────── */
 /* padding-left puts the bar's first child (#sticky-text) at the body's
@@ -277,14 +284,18 @@ h1, h2, h3, h4 { font-family: var(--font-display); }
 }
 
 /* ── document structure ─────────────────────────────────────────────────── */
-h1.part-num      { font-size: 1rem; margin: 3rem 0 .25rem; } /* caps/tracking shared with drawer part rows — see .part-group */
-h1.part-title    { font-size: 1.6rem; margin: 1.5rem 0 1rem; }
+/* Class selectors, not tag-qualified: heading levels are context-dependent
+   (a sub-heading is h2 in LS's preamble but h4 inside a chapter section, and
+   the "Part I"/"Chapter N" eyebrows demote to <p> when a real title follows),
+   so each class pins its own font/weight instead of leaning on tag defaults. */
+.part-num        { font-family: var(--font-display); font-weight: 600; font-size: 1rem; margin: 3rem 0 .25rem; } /* caps/tracking shared with drawer part rows — see .part-group */
+.part-title      { font-family: var(--font-display); font-weight: bold; font-size: 1.6rem; margin: 1.5rem 0 1rem; }
 .part-subtitle   { font-family: var(--font-display); font-size: 1.05rem; color: var(--fg-dim); margin: -.25rem 0 1.5rem; }
-h2.chapter-num   { font-size: .9rem; text-transform: uppercase; letter-spacing: .15em; color: var(--fg-dimmer); margin: 2.5rem 0 .2rem; }
-h3.chapter-title { font-size: 1.3rem; margin: 0 0 1rem; }
+.chapter-num     { font-family: var(--font-display); font-weight: bold; font-size: .9rem; text-transform: uppercase; letter-spacing: .15em; color: var(--fg-dimmer); margin: 2.5rem 0 .2rem; }
+.chapter-title   { font-family: var(--font-display); font-weight: bold; font-size: 1.3rem; margin: 0 0 1rem; }
 .chapter-subtitle { font-family: var(--font-display); font-size: 1.05rem; color: var(--fg-dim); margin: -.65rem 0 1rem; }
-h4.section-title { font-size: 1rem; font-style: italic; color: var(--fg-dim); margin: 2rem 0 .75rem; }
-h5.sub-heading   { font-size: 1rem; font-style: italic; font-weight: normal; color: var(--fg); margin: 1.75rem 0 .4rem; }
+.section-title   { font-family: var(--font-display); font-weight: bold; font-size: 1rem; font-style: italic; color: var(--fg-dim); margin: 2rem 0 .75rem; }
+.sub-heading     { font-family: var(--font-body); font-size: 1rem; font-style: italic; font-weight: normal; color: var(--fg); margin: 1.75rem 0 .4rem; }
 .paragraph       { margin: 1.25rem 0; }
 .para-num        { font-weight: bold; }
 .para-num::after { content: '.'; }
@@ -486,7 +497,7 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
    and the drawer/no-JS part rows (VD, DCE, GeS). Each context keeps its own
    size and spacing — the body heading rides the text column's gutter split,
    the drawer row is ruled off from the group above. */
-h1.part-num, .part-group, .ntoc-part > a { text-transform: uppercase; letter-spacing: .15em; color: var(--fg-dimmer); font-weight: 600; }
+.part-num, .part-group, .ntoc-part > a { text-transform: uppercase; letter-spacing: .15em; color: var(--fg-dimmer); font-weight: 600; }
 .part-group                     { margin-top: 2rem; padding-top: .9rem; border-top: 1px solid var(--rule-tint); }
 .fn-list                        { list-style: none; margin-left: 0; padding-left: 0; font-size: 1rem; line-height: 1.55; }
 .fn-item {
@@ -847,10 +858,10 @@ blockquote.document-quote.scripture-quote footer {
    `data-ch-num` via attr(). The title text stands alone — no inline
    'II. ' prefix doubling up with the gutter numeral or the sticky
    bar. */
-.doc-antiqua_et_nova h3.chapter-title {
+.doc-antiqua_et_nova .chapter-title {
     position: relative;
 }
-.doc-antiqua_et_nova h3.chapter-title::before {
+.doc-antiqua_et_nova .chapter-title::before {
     content: attr(data-ch-num);
     position: absolute;
     right: calc(100% + 2rem);
@@ -866,8 +877,8 @@ blockquote.document-quote.scripture-quote footer {
 
 /* MH uses a third visible level below chapters: section headings are the
    document's subheads; italic headings nested inside them are sub-subheads. */
-.doc-magnifica_humanitas h3.chapter-title,
-.doc-quo_vadis_humanitas h3.chapter-title {
+.doc-magnifica_humanitas .chapter-title,
+.doc-quo_vadis_humanitas .chapter-title {
     font-size: 1.55rem;
     line-height: 1.25;
 }
@@ -875,15 +886,15 @@ blockquote.document-quote.scripture-quote footer {
 .doc-quo_vadis_humanitas .chapter-subtitle {
     font-size: 1.12rem;
 }
-.doc-magnifica_humanitas h4.section-title,
-.doc-quo_vadis_humanitas h4.section-title {
+.doc-magnifica_humanitas .section-title,
+.doc-quo_vadis_humanitas .section-title {
     font-size: 1.18rem;
     font-style: normal;
     font-weight: 600;
     color: var(--fg);
 }
-.doc-magnifica_humanitas h5.sub-heading,
-.doc-quo_vadis_humanitas h5.sub-heading {
+.doc-magnifica_humanitas .sub-heading,
+.doc-quo_vadis_humanitas .sub-heading {
     font-size: 1.1rem;
     color: var(--fg-dim);
 }
@@ -908,7 +919,7 @@ blockquote.document-quote.scripture-quote footer {
     .layout-mobile-inline .paragraph p:first-of-type { display: inline; margin-top: 0; }
 
     /* AeN chapter heading: no gutter, prefix the Roman numeral inline. */
-    .doc-antiqua_et_nova h3.chapter-title::before {
+    .doc-antiqua_et_nova .chapter-title::before {
         content: attr(data-ch-num) '. ';
         position: static;
         color: inherit;
@@ -982,6 +993,34 @@ blockquote.document-quote.scripture-quote footer {
 /* Bookmark toggles are JS-backed; the noscript Notes fallback reuses the
    footnote-drawer markup, so hide the dead buttons there. */
 .noscript-fn .bookmark-toggle   { display: none; }
+
+/* ── accessibility utilities ────────────────────────────────────────────── */
+/* Off-screen but SR-readable; used by the #sr-status live region. */
+.sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+/* Hidden until keyboard focus lands on it, then a small card above the bar. */
+.skip-link {
+    position: fixed;
+    top: .5rem; left: 50%;
+    transform: translate(-50%, calc(-100% - 1rem));
+    z-index: 100;
+    background: var(--bg);
+    color: var(--accent);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: .45rem .9rem;
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: .9rem;
+    text-decoration: none;
+}
+.skip-link:focus { transform: translate(-50%, 0); }
 
 /* Honour the OS-level "reduce motion" preference. Catches the drawer
    `.3s ease` transition, hover transitions, and the smooth-scroll on
