@@ -3,7 +3,7 @@
 //
 // Loaded + inlined by make_html.py with two substitutions:
 //   __INDICATOR_JSON__   the JSON array of chapter descriptors for the indicator
-//   __DOC_NAME__         the JSON-encoded display name (e.g. "Laudato Si'")
+//   __DOC_SLUG__         the JSON-encoded document slug (e.g. "laudato_si")
 // ─────────────────────────────────────────────────────────────────────────
 
 // Honour the OS-level "reduce motion" preference. Sampled once at boot —
@@ -129,7 +129,9 @@ function updateIndicator() {
     else break;
   }
   currentParaNum = curPara || '';
-  const chIdx = paraToChIdx[curPara] ?? 0;
+  // Duplicate paragraph numbers mint ids like `para-5-2`; fall back to the
+  // numeric prefix so the lookup still lands in the right chapter.
+  const chIdx = paraToChIdx[curPara] ?? paraToChIdx[parseInt(curPara)] ?? 0;
   const activePart = chapters[chIdx]?.part;
   bars.forEach((b, i) => {
     const isActive = i === chIdx;
@@ -256,10 +258,13 @@ const bookmarkList = document.getElementById('bookmark-list');
 const bookmarksEmpty = document.querySelector('.bookmarks-empty');
 const tocItems = Array.from(document.querySelectorAll('#drawer-toc .toc-item'));
 const tocByTarget = new Map(tocItems.map(item => [item.dataset.target, item]));
-const BOOKMARK_KEY = 'va_reader_bookmarks:' + document.body.className;
+// Keyed by document slug so bookmarks survive layout-flag changes (the old
+// key used body.className, which shifts whenever a layout class is added).
+const BOOKMARK_KEY = 'va_reader_bookmarks:' + __DOC_SLUG__;
 let bookmarks = [];
 try {
-  const stored = JSON.parse(localStorage.getItem(BOOKMARK_KEY) || '[]');
+  const legacy = localStorage.getItem('va_reader_bookmarks:' + document.body.className);
+  const stored = JSON.parse(localStorage.getItem(BOOKMARK_KEY) || legacy || '[]');
   if (Array.isArray(stored)) bookmarks = stored.filter(id => tocByTarget.has(id));
 } catch (e) {}
 
@@ -351,14 +356,20 @@ function renderBookmarks() {
     bookmarkList.appendChild(item);
   }
   bookmarksEmpty.hidden = bookmarks.length > 0;
-  document.querySelectorAll('#drawer-toc .bookmark-toggle').forEach(button => {
+  // Contents and footnotes views share heading targets, so a toggle in
+  // either panel reflects (and flips) the same saved state.
+  document.querySelectorAll(
+    '#drawer-toc .bookmark-toggle, #drawer-footnotes .bookmark-toggle'
+  ).forEach(button => {
     const saved = bookmarks.includes(button.dataset.bookmarkTarget);
     button.classList.toggle('saved', saved);
     button.setAttribute('aria-pressed', saved ? 'true' : 'false');
   });
 }
 
-tocItems.forEach(item => wireBookmarkButton(item.querySelector('.bookmark-toggle')));
+document.querySelectorAll(
+  '#drawer-toc .bookmark-toggle, #drawer-footnotes .bookmark-toggle'
+).forEach(wireBookmarkButton);
 renderBookmarks();
 
 function selectFn(id) {

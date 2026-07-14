@@ -10,6 +10,7 @@ from core import (
     ch_order_label,
     inline_markup_to_html,
     int_to_roman,
+    is_unnumbered_chapter,
     read_toml,
     title_case,
 )
@@ -93,8 +94,8 @@ def chapter_group_label(part, chapter, title):
     "Chapter N: " prefix."""
     if part == 0 and chapter == 0:
         return title or 'Preamble'
-    is_unnumbered = title and chapter_style != 'roman' and (
-        BARE_CHAPTERS or title.strip().lower() == 'conclusion'
+    is_unnumbered = title and is_unnumbered_chapter(
+        title, chapter_style=chapter_style, bare_chapters=BARE_CHAPTERS
     )
     if is_unnumbered:
         return title
@@ -256,8 +257,9 @@ if doc_desc or doc_name or doc_desc_post:
     is_modern = IS_LONG
     # Documents whose pre-title `desc` lists distinct issuing bodies
     # (Antiqua et nova — two co-signing dicasteries) want each line on
-    # its own row instead of flowed as a single title phrase.
-    stack_desc_pre = args.doc in {'antiqua_et_nova'}
+    # its own row instead of flowed as a single title phrase; they
+    # declare the `stacked_desc` layout flag.
+    stack_desc_pre = bool(layout.get('stacked_desc'))
     title_block = (
         '<div class="doc-title">'
         + _desc_block(doc_desc, 'doc-desc doc-desc-pre',
@@ -465,9 +467,9 @@ for idx, p in enumerate(paragraphs):
         # only 'CONCLUSION', not 'CHAPTER SIX' — suppress the "Chapter N"
         # prefix so the rendered heading matches the source. The id then
         # rides on the title <h3> instead of the (omitted) chapter-num <h2>.
-        is_unnumbered = chapter_style != 'roman' and (
-            p['chapter_title'].strip().lower() == 'conclusion'
-            or BARE_CHAPTERS
+        is_unnumbered = is_unnumbered_chapter(
+            p['chapter_title'], chapter_style=chapter_style,
+            bare_chapters=BARE_CHAPTERS,
         )
         if chapter_style == 'roman':
             # Roman-numeral docs (AeN): chapter number lives in the
@@ -646,13 +648,6 @@ def fn_item_html(part, chapter, fn):
     fn_id = 'fn-' + footnote_key(*key)
     return f'<li id="{fn_id}" class="fn-item">{num}{body}</li>'
 
-# Per-doc drawer style. 'chapter' = chapter group headings + flat footnote
-# list (no section/sub nav lines). 'full' = chapter + section + sub-heading
-# navigation interleaved with footnotes (the default; LS now uses this too
-# since the vertical-bar hierarchy makes the three levels scannable).
-DOC_DRAWER_STYLE = {}
-drawer_style = DOC_DRAWER_STYLE.get(args.doc, 'full')
-
 def toc_item(tag, cls, link_cls, target, label):
     return (
         f'<{tag} class="{cls} toc-item" data-target="{target}" data-label="{e(label)}">'
@@ -686,34 +681,21 @@ for (part, chapter), ch_label in ch_order:
     cid = part_chapter_to_cid.get((part, chapter), '')
     group_label = chapter_group_label(part, chapter, ch_label)
 
-    # Part-0/chapter-0 regions without an authored title now get a generated
-    # Preamble heading, so their sections can stay nested under that root.
-    unrooted = False
-    item_cls = 'sec-nav-item unrooted' if unrooted else 'sec-nav-item'
-
-    if not unrooted:
-        toc_items.append(toc_item('h3', 'fn-group', 'fn-ch-link', cid, group_label))
+    toc_items.append(toc_item('h3', 'fn-group', 'fn-ch-link', cid, group_label))
 
     for sb in subs_by_chsec.get((part, chapter, 0), []):
         toc_items.append(toc_item('p', 'sub-nav-item', 'sub-nav-link', sb['id'], sb['label']))
     for s in sorted(secs, key=lambda x: x['section']):
-        toc_items.append(toc_item('p', item_cls, 'sec-nav-link', s['id'], s['label']))
+        toc_items.append(toc_item('p', 'sec-nav-item', 'sec-nav-link', s['id'], s['label']))
         for sb in subs_by_chsec.get((part, chapter, s['section']), []):
             toc_items.append(toc_item('p', 'sub-nav-item', 'sub-nav-link', sb['id'], sb['label']))
 
     if not secs and not fns and not ch_subs:
         continue
-    if not unrooted:
-        drawer_items.append(f'<h3 class="fn-group"><a href="#{cid}" class="fn-ch-link">{e(group_label)}</a></h3>')
-
-    if drawer_style == 'chapter':
-        # Flat list of footnotes for this chapter, in number order.
-        if fns:
-            drawer_items.append('<ol class="fn-list">')
-            for fn in sorted(fns, key=lambda x: x['number']):
-                drawer_items.append(fn_item_html(part, chapter, fn))
-            drawer_items.append('</ol>')
-        continue
+    # Footnote-view heading rows carry the same bookmark toggle as their
+    # contents-tab counterparts (same target ids, so saved state stays in
+    # sync); the fn-items themselves stay toggle-free.
+    drawer_items.append(toc_item('h3', 'fn-group', 'fn-ch-link', cid, group_label))
 
     # Group footnotes by section. Section 0 holds anything before the
     # first numbered section (or all of a chapter that has no sections).
@@ -735,8 +717,7 @@ for (part, chapter), ch_label in ch_order:
             continue
 
         if s:
-            sec_cls = 'sec-nav-item unrooted' if unrooted else 'sec-nav-item'
-            drawer_items.append(f'<p class="{sec_cls}"><a class="sec-nav-link" href="#{s["id"]}">{e(s["label"])}</a></p>')
+            drawer_items.append(toc_item('p', 'sec-nav-item', 'sec-nav-link', s['id'], s['label']))
 
         # Bucket the section's footnotes by which sub-heading (if any)
         # the citing paragraph fell under.
@@ -755,7 +736,7 @@ for (part, chapter), ch_label in ch_order:
 
         # Then each sub-heading as a nav link, followed by its footnotes.
         for sb in sec_subs:
-            drawer_items.append(f'<p class="sub-nav-item"><a class="sub-nav-link" href="#{sb["id"]}">{e(sb["label"])}</a></p>')
+            drawer_items.append(toc_item('p', 'sub-nav-item', 'sub-nav-link', sb['id'], sb['label']))
             sub_fns = fns_by_sub.get(sb['id'], [])
             if sub_fns:
                 drawer_items.append('<ol class="fn-list">')
@@ -819,16 +800,12 @@ noscript_toc_parts.append('</ul>')
 noscript_toc_html = '\n'.join(noscript_toc_parts)
 
 # Per-chapter indicator segments. By default each para is its own seg
-# ('paragraphs' mode); for long docs that's too dense, so we can switch
-# to 'sections' where each section is a single seg covering its para
-# range. The cur-para JS test (curPara within [first, last]) is the same
-# either way — JS doesn't know or care which mode.
-DOC_INDICATOR_LEVEL = {
-    'laudato_si': 'sections',   # 246 paras across 36 sections — much cleaner
-    'magnifica_humanitas': 'sections',
-    'verbum_domini': 'sections',
-}
-indicator_level = DOC_INDICATOR_LEVEL.get(args.doc, 'paragraphs')
+# ('paragraphs' mode); for long docs that's too dense, so the
+# `section_indicator` layout flag switches to 'sections', where each
+# section is a single seg covering its para range (LS: 246 paras across
+# 36 sections — much cleaner). The cur-para JS test (curPara within
+# [first, last]) is the same either way — JS doesn't know or care.
+indicator_level = 'sections' if layout.get('section_indicator') else 'paragraphs'
 
 ch_paras: dict[str, list[int]] = {}
 for idx, p in enumerate(paragraphs):
@@ -933,7 +910,7 @@ indicator_json = json.dumps(indicator_chapters)
 
 JS = (JS_TEMPLATE
       .replace('__INDICATOR_JSON__', indicator_json)
-      .replace('__DOC_NAME__', json.dumps(doc_name)))
+      .replace('__DOC_SLUG__', json.dumps(args.doc)))
 
 page = f"""<!DOCTYPE html>
 <html lang="en" class="no-js" style="--hue: {doc_hue}">

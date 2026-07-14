@@ -101,8 +101,8 @@ class MakeHtmlGoldenTests(unittest.TestCase):
 
     def test_js_placeholders_are_substituted(self):
         self.assertNotIn('__INDICATOR_JSON__', self.html)
-        self.assertNotIn('__DOC_NAME__', self.html)
-        self.assertIn('"Fixture & Co"', self.html)
+        self.assertNotIn('__DOC_SLUG__', self.html)
+        self.assertIn(f'"{SLUG}"', self.html)
 
     def test_generated_preamble_labels_nav_but_not_the_body(self):
         # The fixture opens with unnumbered part-0/chapter-0 prose and no

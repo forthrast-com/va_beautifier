@@ -448,8 +448,6 @@ h1.part-num, .part-group, .ntoc-part > a { text-transform: uppercase; letter-spa
      section:  italic + bar at first indent
      sub:      bar at second indent, no other ornament  */
 .sec-nav-item                   { margin: .5rem 0 .25rem 0; padding-left: .75rem; border-left: 2px solid var(--rule-tint); line-height: 1.25; }
-.sec-nav-item.unrooted          { padding-left: 0; border-left: 0; margin-top: .9rem; }
-.sec-nav-item.unrooted .sec-nav-link { color: var(--fg); font-style: normal; font-size: .95rem; font-weight: 500; }
 .sec-nav-link                   { color: var(--fg-dim); text-decoration: none; font-size: .85rem; font-style: italic; line-height: 1.25; }
 .sec-nav-link:hover             { color: var(--fg); text-decoration: underline; }
 .sub-nav-item                   { margin: .25rem 0 .15rem 0; padding-left: .75rem; border-left: 2px solid var(--rule); line-height: 1.2; }
@@ -731,13 +729,9 @@ blockquote.document-quote.scripture-quote footer {
 }
 
 /* The per-doc base hue lives as `<html style="--hue: …">` in the rendered
-   page (see DOC_HUES in make_html.py). Current palettes:
-
-     warm gold (default)     H = 42       Gaudium et Spes (and any new doc)
-     botanical green         H = 140      Laudato Si'
-     red                     H = 8        Dilexit Nos (when it lands)
-
-   Pick a hue, set it in DOC_HUES, the recipe above does the rest. */
+   page. Each extractor declares `hue` in its return dict; it rides the TOML
+   and make_html inlines it. Pick a hue in the extractor (warm gold 42 is
+   the legacy-TOML fallback) and the recipe above does the rest. */
 
 /* ────────────────────────────────────────────────────────────────────────
    Long structured documents: gutter numbers and height-capped indicator
@@ -936,6 +930,9 @@ blockquote.document-quote.scripture-quote footer {
     margin: 0 0 .5rem;
 }
 .noscript-fn .fn-item.fn-active { background: none; margin: 0; padding: 0; }
+/* Bookmark toggles are JS-backed; the noscript Notes fallback reuses the
+   footnote-drawer markup, so hide the dead buttons there. */
+.noscript-fn .bookmark-toggle   { display: none; }
 
 /* Honour the OS-level "reduce motion" preference. Catches the drawer
    `.3s ease` transition, hover transitions, and the smooth-scroll on

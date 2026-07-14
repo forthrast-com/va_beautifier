@@ -328,6 +328,19 @@ def is_promulgation(text):
     return text.startswith(PROMULGATION_PREFIXES)
 
 
+def is_unnumbered_chapter(title, *, chapter_style='', bare_chapters=False):
+    """True when a chapter heading renders title-only, no `Chapter N` prefix.
+
+    Sources label the trailing conclusion `CONCLUSION`, never `CHAPTER
+    SEVEN`; bare-chapter docs (SS, DCE) have no chapter numbering at all.
+    Roman-style docs (AeN) always keep their numeral. Shared by the web and
+    book renderers so the two surfaces cannot drift on which chapters are
+    bare."""
+    if chapter_style == 'roman':
+        return False
+    return bare_chapters or title.strip().lower() == 'conclusion'
+
+
 def is_centred(tag):
     """True when a source paragraph is centred by attribute or inline style.
 
@@ -653,7 +666,7 @@ _ROMAN = re.compile(
 )
 
 
-def title_case(s, *, cap_last=True, small_words=False):
+def title_case(s, *, small_words=False):
     """Dumb title case: capitalise every word, force small words ("of",
     "the", "in"…) to lowercase, and preserve Roman numerals.
 
@@ -662,11 +675,7 @@ def title_case(s, *, cap_last=True, small_words=False):
     titles like "A Dynamic Approach Faithful to the Gospel" keep their
     leading article. With `small_words=True`, small words stay lowercase
     everywhere, suitable for fragments like "of the Holy Father" sitting
-    inside a centred multi-line subtitle.
-
-    `cap_last` is accepted for back-compat but is a no-op — trailing
-    small words always stay lowercase."""
-    del cap_last  # always treated as dumb-title-case
+    inside a centred multi-line subtitle."""
     words = s.split()
     result = []
     for i, word in enumerate(words):
@@ -677,13 +686,19 @@ def title_case(s, *, cap_last=True, small_words=False):
             result.append(word)
             continue
         lo = word.lower()
-        if "'" in lo or '’' in lo:
+        if lo in _SMALL and (small_words or i > 0):
+            result.append(lo)
+        elif "'" in lo or '’' in lo:
             sep = "'" if "'" in lo else '’'
             parts = lo.split(sep)
             parts[0] = parts[0].capitalize()
+            # A single-letter lead is an elided particle (O'BRIEN,
+            # L'OSSERVATORE): capitalise what follows the apostrophe.
+            # Longer leads are possessives or contractions (GOD'S,
+            # ISN'T) whose tails stay lowercase.
+            if len(parts[0]) == 1 and len(parts) > 1:
+                parts[1] = parts[1].capitalize()
             result.append(sep.join(parts))
-        elif lo in _SMALL and (small_words or i > 0):
-            result.append(lo)
         else:
             result.append(lo.capitalize())
     return ' '.join(result)
@@ -745,17 +760,21 @@ DEFAULT_COLLECTION = 'The Circulars (Vatican documents)'
 # serialised order. Each truthy flag also becomes a `layout-<flag>` body class
 # (underscores → hyphens) so styles.css can target it once instead of
 # enumerating slugs.
-#   long             — gutter-style paragraph numbers + soft-anchor layout
-#   bare_sections    — named topical sections render without a "Section N:" prefix
-#   bare_chapters    — chapters render title-only (source has no "CHAPTER N")
-#   mobile_inline    — gutter numbers fall back to inline "5." on narrow screens
-#   capped_indicator — scroll indicator divides into height-capped chapter segments
+#   long              — gutter-style paragraph numbers + soft-anchor layout
+#   bare_sections     — named topical sections render without a "Section N:" prefix
+#   bare_chapters     — chapters render title-only (source has no "CHAPTER N")
+#   mobile_inline     — gutter numbers fall back to inline "5." on narrow screens
+#   capped_indicator  — scroll indicator divides into height-capped chapter segments
+#   section_indicator — indicator segments cover section ranges, not single paragraphs
+#   stacked_desc      — pre-title desc lines each get their own row (AeN's two dicasteries)
 LAYOUT_FLAGS = (
     'long',
     'bare_sections',
     'bare_chapters',
     'mobile_inline',
     'capped_indicator',
+    'section_indicator',
+    'stacked_desc',
 )
 
 

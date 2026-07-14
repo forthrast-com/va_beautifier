@@ -219,7 +219,8 @@ def file_size(path):
     for unit in ('KB', 'MB', 'GB'):
         size /= 1024
         if size < 1024 or unit == 'GB':
-            return f'{size:.0f} {unit}'
+            # Floor at 1 so a sub-kilobyte artefact reads "1 KB", not "0 KB".
+            return f'{max(size, 1):.0f} {unit}'
     return ''
 
 

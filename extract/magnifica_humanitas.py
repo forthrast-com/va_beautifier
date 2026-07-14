@@ -170,7 +170,8 @@ def extract():
         'desc_post': desc_post,
         'promulgation': promulgation,
         'signature': signature,
-        'layout': {'long': True, 'bare_sections': True, 'mobile_inline': True, 'capped_indicator': True},
+        'layout': {'long': True, 'bare_sections': True, 'mobile_inline': True,
+                   'capped_indicator': True, 'section_indicator': True},
         'paragraphs': paragraphs,
         'footnotes': footnotes,
     }

@@ -27,6 +27,7 @@ from core import (
     INLINE_STRONG_EM_RE,
     inline_markup_to_html,
     int_to_roman,
+    is_unnumbered_chapter,
     read_toml,
 )
 from project import BUILD, DOWNLOADS, ROOT
@@ -200,9 +201,9 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
         # Chapter heading. Force a fresh page on the PDF side so chapters
         # land at the top of a recto — the EPUB writer ignores raw typst.
         if ch_title and chapter != prev['chapter']:
-            unnumbered = (
-                ch_title.strip().lower() in ('conclusion', 'preface', 'introduction')
-                or bare_chapters
+            unnumbered = is_unnumbered_chapter(
+                ch_title, chapter_style=chapter_style,
+                bare_chapters=bare_chapters,
             )
             if chapter_style == 'roman':
                 label = f'{int_to_roman(chapter)}. {ch_title}'
@@ -399,11 +400,16 @@ def _typ_str(s):
     return '"' + s.replace('\\', '\\\\').replace('"', '\\"') + '"'
 
 
+# Everything typst treats as live markup in content mode: escapes (\),
+# code (#), refs/labels (@, <>), emphasis (* _), maths ($), verse breaks
+# (~), raw (`), comments (//), and content brackets ([ ]). Quotes are left
+# alone — smart-quote substitution is wanted.
+_TYP_CONTENT_SPECIALS = re.compile(r'[\\#\[\]*_$@~`<>/]')
+
+
 def _typ_content(s):
-    """Quote a Python string for typst content (inside `[...]` brackets).
-    Backslash, code markers and brackets are meaningful inside content."""
-    return (s.replace('\\', '\\\\').replace('#', '\\#')
-            .replace('[', '\\[').replace(']', '\\]'))
+    """Quote a Python string for typst content (inside `[...]` brackets)."""
+    return _TYP_CONTENT_SPECIALS.sub(lambda m: '\\' + m.group(0), s)
 
 
 def _typ_inline(s, *, preserve_breaks=False):

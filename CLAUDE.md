@@ -71,7 +71,7 @@ The TOML is the canonical intermediate. Downstream renderers consume TOML — ne
   `build/<hyphenated-slug>-book.typ` with a muted document-hue accent. Owns
   paper geometry, running heads, heading shows, footnote styling, and TOC
   heading. Title pages and colophons come from the include-before-body files.
-- `assets/styles.css`, `assets/scripts.js` — read by `make_html.py` and inlined into the output. The JS has two placeholders, `__INDICATOR_JSON__` and `__DOC_NAME__`, substituted at render time. Edit these files directly; the output is still self-contained.
+- `assets/styles.css`, `assets/scripts.js` — read by `make_html.py` and inlined into the output. The JS has two placeholders, `__INDICATOR_JSON__` and `__DOC_SLUG__`, substituted at render time. Edit these files directly; the output is still self-contained.
 - `Makefile` — the build entrypoint. `make` builds books, every reader, and the
   catalogue; `make books` stops after EPUB/PDF; `make <slug>` builds one reader
   and `make <slug>-books` one document's EPUB/PDFs (generated aliases; `make
@@ -102,7 +102,8 @@ or personal voice shown in the catalogue and colophon. The colophon adds
 
 An optional `[layout]` table carries per-document rendering flags
 (`long`, `bare_sections`, `bare_chapters`, `mobile_inline`,
-`capped_indicator`; canonical order in `core.LAYOUT_FLAGS`). Only truthy
+`capped_indicator`, `section_indicator`, `stacked_desc`; canonical order
+in `core.LAYOUT_FLAGS`). Only truthy
 flags are serialised; a doc with none (GeS) omits the table. See Renderer
 conventions for what each flag drives.
 
@@ -244,6 +245,10 @@ Doc-scoped CSS lives under `.doc-<slug>` selectors. Long structured documents sh
   - `bare_chapters` — title-only chapters, no `Chapter N:` prefix, for sources with no chapter numbering (SS, DCE); replaced `make_html`/`make_book.BARE_CHAPTER_DOCS`. Drawer contents and no-JS TOC labels follow the same bare rendering via `make_html.chapter_group_label`, which also strips the prefix from a trailing `Conclusion` chapter to match the body's `is_unnumbered` path.
   - `mobile_inline` — narrow-viewport fallback to inline `5.` numbering (`.layout-mobile-inline`; LS/MH/AeN/QVH/SC).
   - `capped_indicator` — height-capped, chapter-segmented scroll indicator (`.layout-capped-indicator`; the above plus VD).
+  - `section_indicator` — indicator segments cover section ranges instead of one per paragraph (LS/MH/VD); replaced `make_html.DOC_INDICATOR_LEVEL`.
+  - `stacked_desc` — each pre-title `desc` line renders on its own row, for fronts that list distinct issuing bodies (AeN's two dicasteries); replaced a slug test in `make_html`.
+
+The web/book agreement on which chapters render title-only (trailing `Conclusion`, bare-chapter docs, never roman-style) lives in `core.is_unnumbered_chapter`, shared by both renderers.
 
 Genuinely bespoke per-doc CSS still uses `.doc-<slug>` (AeN's gutter chapter numeral, MH/QVH's third heading tier). Adding a standard long doc now needs **no** edit to `make_html`, `make_book`, or `styles.css` — only the `layout` dict in its extractor.
 
