@@ -764,15 +764,16 @@ DEFAULT_COLLECTION = 'The Circulars (Vatican documents)'
 #   bare_sections     — named topical sections render without a "Section N:" prefix
 #   bare_chapters     — chapters render title-only (source has no "CHAPTER N")
 #   mobile_inline     — gutter numbers fall back to inline "5." on narrow screens
-#   capped_indicator  — scroll indicator divides into height-capped chapter segments
 #   section_indicator — indicator segments cover section ranges, not single paragraphs
 #   stacked_desc      — pre-title desc lines each get their own row (AeN's two dicasteries)
+# (capped_indicator was retired 2026-07: the full-height indicator is now
+# universal, so the flag stopped meaning anything. Old TOMLs carrying it
+# are ignored harmlessly until rebuilt.)
 LAYOUT_FLAGS = (
     'long',
     'bare_sections',
     'bare_chapters',
     'mobile_inline',
-    'capped_indicator',
     'section_indicator',
     'stacked_desc',
 )

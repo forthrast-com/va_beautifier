@@ -102,7 +102,7 @@ or personal voice shown in the catalogue and colophon. The colophon adds
 
 An optional `[layout]` table carries per-document rendering flags
 (`long`, `bare_sections`, `bare_chapters`, `mobile_inline`,
-`capped_indicator`, `section_indicator`, `stacked_desc`; canonical order
+`section_indicator`, `stacked_desc`; canonical order
 in `core.LAYOUT_FLAGS`). Only truthy
 flags are serialised; a doc with none (GeS) omits the table. See Renderer
 conventions for what each flag drives.
@@ -237,15 +237,16 @@ HTML output is a single self-contained file (CSS + JS inlined, no external asset
 - sub-heading: generated `sub-{n}`
 - appendix: `appendix-{n}`
 
-Doc-scoped CSS lives under `.doc-<slug>` selectors. Long structured documents share gutter-style paragraph numbers and a height-capped scroll indicator. Only the current paragraph's number pins below the sticky bar; following numbers remain static beside their first lines. GeS keeps the original inline `5. *Latin heading* body` layout via the default rules + `.para-num::after { content: '.' }`.
+Doc-scoped CSS lives under `.doc-<slug>` selectors. Long structured documents share gutter-style paragraph numbers. Only the current paragraph's number pins below the sticky bar; following numbers remain static beside their first lines. GeS keeps the original inline `5. *Latin heading* body` layout via the default rules + `.para-num::after { content: '.' }`.
+
+**Scroll indicator (universal).** The rail is full-height for every document — it fills the area below the sticky bar, bars flex-grow by paragraph count, segs share their bar equally (the old `capped_indicator` flag is retired; the cap-vs-natural distinction no longer exists). In `section_indicator` mode each seg is a section range; sub-headings inside a section are emitted as `notches` (fractions) on its seg, drawn as hairline ticks across the seg's right third and **visible only on the active bar** (at 5px idle they'd be grit — the bar discloses texture as it widens). The current-position marker splits lanes in a notched seg: an unbroken stripe down the left two-thirds marks the current section, and a band slides notch-to-notch in the right third marking the current sub-heading; unnotched segs keep the plain whole-seg `cur-para` fill. A chapter with *no* numbered sections but authored sub-headings promotes each sub to its own seg (the `ch_subs` branch — LS's introduction, FT ch 2).
 
 **Layout flags (the `[layout]` TOML table).** Per-document rendering choices that used to live as hand-maintained slug sets scattered across `make_html`, `make_book`, and `styles.css` are now declared once per document. The extractor returns a `layout` dict; `core.write_toml` serialises it to a `[layout]` table (canonical flag order in `core.LAYOUT_FLAGS`); the renderers read `data['layout']` and `make_html` also stamps each truthy flag as a `layout-<flag>` body class (underscores → hyphens). `styles.css` targets those classes once instead of enumerating slugs. The flags:
   - `long` — gutter paragraph numbers + section-level sticky bar (`.layout-long`); replaced `make_html.LONG_DOCS`.
   - `bare_sections` — named topical sections, no `Section N:` prefix; replaced `make_html.BARE_SECTION_DOCS`.
   - `bare_chapters` — title-only chapters, no `Chapter N:` prefix, for sources with no chapter numbering (SS, DCE); replaced `make_html`/`make_book.BARE_CHAPTER_DOCS`. Drawer contents and no-JS TOC labels follow the same bare rendering via `make_html.chapter_group_label`, which also strips the prefix from a trailing `Conclusion` chapter to match the body's `is_unnumbered` path.
   - `mobile_inline` — narrow-viewport fallback to inline `5.` numbering (`.layout-mobile-inline`; LS/MH/AeN/QVH/SC).
-  - `capped_indicator` — height-capped, chapter-segmented scroll indicator (`.layout-capped-indicator`; the above plus VD).
-  - `section_indicator` — indicator segments cover section ranges instead of one per paragraph (LS/MH/VD); replaced `make_html.DOC_INDICATOR_LEVEL`.
+  - `section_indicator` — indicator segments cover section ranges instead of one per paragraph, with sub-heading notches (LS/MH/VD/FT); replaced `make_html.DOC_INDICATOR_LEVEL`.
   - `stacked_desc` — each pre-title `desc` line renders on its own row, for fronts that list distinct issuing bodies (AeN's two dicasteries); replaced a slug test in `make_html`.
 
 The web/book agreement on which chapters render title-only (trailing `Conclusion`, bare-chapter docs, never roman-style) lives in `core.is_unnumbered_chapter`, shared by both renderers.

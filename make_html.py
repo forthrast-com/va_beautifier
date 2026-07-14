@@ -826,6 +826,29 @@ for idx, p in enumerate(paragraphs):
     if sid:
         sub_paras[sid].append(p['number'])
 
+def seg_notches(seg_para_list, seg_subs):
+    """Sub-heading boundaries inside a seg: `{f, target}` per sub start.
+
+    `f` is the fraction in (0, 1) where the sub begins; `target` its anchor
+    id. The renderer draws ticks at each fraction (visible on the active
+    bar), slides the current-position band between them, and routes clicks
+    on the active bar to the interval's sub anchor. A sub starting on the
+    seg's first paragraph contributes nothing — that boundary is the seg
+    edge itself, and the seg's own target already points there.
+    """
+    ordered = sorted(seg_para_list)
+    index_of = {n: i for i, n in enumerate(ordered)}
+    notches = {}
+    for sub in seg_subs:
+        sp = sub_paras.get(sub['id'], [])
+        start = min(sp) if sp else None
+        idx = index_of.get(start)
+        if idx:
+            notches.setdefault(round(idx / len(ordered), 4), sub['id'])
+    return [{'f': f, 'target': target}
+            for f, target in sorted(notches.items())]
+
+
 for ch in indicator_chapters:
     paras = sorted(ch_paras.get(ch['id'], []))
     ch_secs = [s for s in sections_for_drawer
@@ -835,24 +858,36 @@ for ch in indicator_chapters:
 
     if indicator_level == 'sections' and ch_secs:
         # Include any chapter opening before its first named section, then
-        # one segment per section in document order.
+        # one segment per section in document order. Sub-headings inside a
+        # section become notch fractions on its seg.
         ch['segs'] = []
         first_sec_para = min(
             min(sec_paras[s['id']]) for s in ch_secs if sec_paras.get(s['id'])
         )
         leading = [p for p in paras if p < first_sec_para]
         if leading:
-            ch['segs'].append({
+            seg = {
                 'first': min(leading), 'last': max(leading),
                 'target': ch['id'], 'label': ch['label'],
-            })
+            }
+            notches = seg_notches(
+                leading, [sb for sb in ch_subs if sb['section'] == 0])
+            if notches:
+                seg['notches'] = notches
+            ch['segs'].append(seg)
         for s in sorted(ch_secs, key=lambda x: x['section']):
             sp = sec_paras.get(s['id'], [])
             if sp:
-                ch['segs'].append({
+                seg = {
                     'first': min(sp), 'last': max(sp),
                     'target': s['id'], 'label': s['label'],
-                })
+                }
+                notches = seg_notches(
+                    sp, [sb for sb in ch_subs
+                         if sb['section'] == s['section']])
+                if notches:
+                    seg['notches'] = notches
+                ch['segs'].append(seg)
     elif indicator_level == 'sections' and ch_subs:
         # LS's introduction is divided by authored italic headings rather
         # than numbered sections. Reflect that structure when it is the

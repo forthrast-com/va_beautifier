@@ -153,8 +153,7 @@ def extract():
         'promulgation': '\n\n'.join(promulgation_stanzas),
         'signature': signature,
         'signatories': signatories,
-        'layout': {'long': True, 'mobile_inline': True, 'capped_indicator': True,
-                   'stacked_desc': True},
+        'layout': {'long': True, 'mobile_inline': True, 'stacked_desc': True},
         'paragraphs': paragraphs,
         'footnotes': footnotes,
     }

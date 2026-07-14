@@ -98,9 +98,40 @@ chapters.forEach(ch => {
       seg.dataset.last  = s.last;
     }
     seg.title = s.label;
+    // Sub-heading notches: tick marks at each sub start (visible only on
+    // the active bar) plus the split-lane current marker — a full-height
+    // stripe on the left two-thirds for "this section", a band sliding
+    // notch-to-notch on the right third for "this sub". Each notch carries
+    // its sub anchor so clicks on the active bar land interval-precise.
+    if (s.notches && s.notches.length) {
+      s.notches.forEach(n => {
+        const notch = document.createElement('i');
+        notch.className = 'ch-notch';
+        notch.style.top = (n.f * 100) + '%';
+        seg.appendChild(notch);
+      });
+      seg._bounds = [0, ...s.notches.map(n => n.f), 1];
+      seg._targets = [s.target, ...s.notches.map(n => n.target)];
+      seg._edge = document.createElement('i');
+      seg._edge.className = 'ch-curedge';
+      seg._band = document.createElement('i');
+      seg._band.className = 'ch-curband';
+      seg.append(seg._edge, seg._band);
+    }
     seg.addEventListener('click', e => {
       e.stopPropagation();
-      scrollToEl(document.getElementById(s.target), true);
+      let target = s.target;
+      // On the active (widened) bar the notch grid is visible, so honour
+      // it: route the click to the sub-interval it landed in. Idle bars
+      // keep section-level targets — you can't aim at what you can't see.
+      if (seg._bounds && bar.classList.contains('active')) {
+        const rect = seg.getBoundingClientRect();
+        const lf = (e.clientY - rect.top) / rect.height;
+        let j = 0;
+        while (j < seg._bounds.length - 2 && lf >= seg._bounds[j + 1]) j++;
+        target = seg._targets[j];
+      }
+      scrollToEl(document.getElementById(target), true);
     });
     bar.appendChild(seg);
   });
@@ -137,12 +168,33 @@ function updateIndicator() {
     const isActive = i === chIdx;
     b.classList.toggle('active', isActive);
     b.classList.toggle('part-active', !isActive && chapters[i].part === activePart);
+    // Fisheye: the active bar takes ~1.8× its proportional height so its
+    // segs (and notches) get real room; the others compress to make way.
+    // flex-grow interpolates, so the CSS transition animates the shift.
+    b.style.flexGrow = (chapters[i].paras.length || 1) * (isActive ? 1.8 : 1);
     const cp = parseInt(curPara);
     b.querySelectorAll('.ch-seg').forEach(s => {
       const selected = s.dataset.key
         ? s.dataset.key === curPara
         : cp >= parseInt(s.dataset.first) && cp <= parseInt(s.dataset.last);
-      s.classList.toggle('cur-para', isActive && selected);
+      if (s._bounds) {
+        // Notched seg: the split-lane marker replaces whole-seg cur-para.
+        const on = isActive && selected;
+        s._edge.classList.toggle('on', on);
+        s._band.classList.toggle('on', on);
+        if (on) {
+          const first = parseInt(s.dataset.first);
+          const span = parseInt(s.dataset.last) - first + 1;
+          const lf = (cp - first) / span;
+          const bounds = s._bounds;
+          let j = 0;
+          while (j < bounds.length - 2 && lf >= bounds[j + 1]) j++;
+          s._band.style.top = (bounds[j] * 100) + '%';
+          s._band.style.height = ((bounds[j + 1] - bounds[j]) * 100) + '%';
+        }
+      } else {
+        s.classList.toggle('cur-para', isActive && selected);
+      }
     });
   });
   updateSticky();

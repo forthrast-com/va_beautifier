@@ -290,7 +290,7 @@ def extract():
         'desc': desc,
         'desc_post': '',
         'promulgation': title_case(promulgation),
-        'layout': {'long': True, 'mobile_inline': True, 'capped_indicator': True},
+        'layout': {'long': True, 'mobile_inline': True},
         'paragraphs': paragraphs,
         'footnotes': footnotes,
         'appendices': appendices,

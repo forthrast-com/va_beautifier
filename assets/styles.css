@@ -52,6 +52,13 @@
     --scripture-cite: #665b4a;
     --scripture-rule: rgb(0 0 0 / 8%);
 
+    /* scroll-indicator rail. Its own trio rather than borrowing chrome
+       colours, so dark mode can push contrast without brightening every
+       hairline rule on the page. */
+    --seg-idle:   var(--rule-soft);
+    --seg-active: var(--accent-strong);
+    --seg-cur:    var(--accent-darker);
+
     /* sizing */
     --para-size:    1.2rem;
 }
@@ -88,6 +95,12 @@
     --scripture-fg:   #eee7d8;
     --scripture-cite: var(--accent);
     --scripture-rule: hsl(var(--hue), 14%, 30%);
+
+    /* rail: idle segs lifted well off the page, active seg pulled down a
+       touch so the near-white current marker keeps clear separation */
+    --seg-idle:   hsl(var(--hue), 18%, 40%);
+    --seg-active: hsl(calc(var(--hue) - 8), 48%, 60%);
+    --seg-cur:    hsl(calc(var(--hue) - 6), 96%, 93%);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -117,6 +130,10 @@
         --scripture-fg:   #eee7d8;
         --scripture-cite: var(--accent);
         --scripture-rule: hsl(var(--hue), 14%, 30%);
+
+        --seg-idle:   hsl(var(--hue), 18%, 40%);
+        --seg-active: hsl(calc(var(--hue) - 8), 48%, 60%);
+        --seg-cur:    hsl(calc(var(--hue) - 6), 96%, 93%);
     }
 }
 
@@ -283,10 +300,16 @@ a.ext-link       { color: inherit; text-decoration: underline; text-decoration-c
 a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 
 /* ── chapter scroll indicator ───────────────────────────────────────────── */
+/* Full-height for every document: the rail fills the area below the sticky
+   bar, bars flex-grow by paragraph count, segs share their bar equally.
+   (Formerly the per-doc `capped_indicator` layout flag; universal since the
+   cap-vs-natural distinction earned nothing.) Explicit height, not
+   max-height — flex children with basis 0 collapse to nothing without it. */
 #ch-indicator {
     position: fixed;
     left: 1.25rem;
-    top: 50%;
+    height: calc(95vh - var(--bar-h, 4rem));
+    top: calc(50% + var(--bar-h, 4rem) / 2);
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
@@ -296,11 +319,16 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .ch-part-gap                    { height: 10px; }
 .ch-bar {
     width: 5px;
+    flex: 1 1 0;
+    min-height: 8px;
     display: flex;
     flex-direction: column;
     gap: 1px;
     cursor: pointer;
-    transition: width .2s ease;
+    /* flex-grow is set inline by JS (paragraph count, ×1.8 when active —
+       the fisheye); it interpolates, so the transition animates the
+       vertical growth alongside the width change. */
+    transition: width .2s ease, flex-grow .25s ease;
     overflow: hidden;
     border-radius: 3px;
 }
@@ -308,13 +336,45 @@ a.ext-link:hover { color: var(--accent); text-decoration-color: var(--accent); }
 .ch-bar.part-active             { width: 9px; }
 .ch-bar.active                  { width: 13px; }
 .ch-seg {
-    height: 6px;
-    background: var(--rule-soft);
-    flex-shrink: 0;
+    flex: 1;
+    min-height: 1px;
+    position: relative;
+    background: var(--seg-idle);
     transition: background .2s ease;
 }
-.ch-bar.active .ch-seg          { background: var(--accent-strong); }
-.ch-bar.active .ch-seg.cur-para { background: var(--accent-darker); }
+.ch-bar.active .ch-seg          { background: var(--seg-active); }
+.ch-bar.active .ch-seg.cur-para { background: var(--seg-cur); }
+/* Sub-heading notches: hairline ticks cutting the seg's right third at each
+   sub-heading start. Rendered in every seg that has sub-structure but only
+   *visible* on the active bar — at 5px idle they'd be grit; the bar
+   discloses its texture as it widens. */
+.ch-notch {
+    position: absolute;
+    left: 66.6%;
+    right: 0;
+    height: 1px;
+    background: var(--bg);
+    opacity: 0;
+    transition: opacity .2s ease;
+}
+.ch-bar.active .ch-notch        { opacity: 1; }
+/* Split-lane current marker inside a notched seg: an unbroken stripe down
+   the left two-thirds marks the whole current section; the band slides
+   notch-to-notch in the right third marking the current sub-heading.
+   Unnotched segs keep the plain whole-seg .cur-para treatment. */
+.ch-curedge,
+.ch-curband {
+    position: absolute;
+    background: var(--seg-cur);
+    opacity: 0;
+    transition: opacity .2s ease;
+}
+.ch-curedge                     { left: 0; top: 0; bottom: 0; width: 66.6%; }
+.ch-curband                     { left: 66.6%; right: 0;
+                                  transition: top .15s ease, height .15s ease,
+                                              opacity .2s ease; }
+.ch-bar.active .ch-curedge.on,
+.ch-bar.active .ch-curband.on   { opacity: 1; }
 
 /* ── footnote drawer ────────────────────────────────────────────────────── */
 /* Drawer sits below the sticky bar (geometrically AND in z-order) so the
@@ -742,13 +802,11 @@ blockquote.document-quote.scripture-quote footer {
    its extractor rather than being added to a list here:
      .layout-long             gutter para numbers + vertical rule (all long docs)
      .layout-mobile-inline    narrow-viewport fallback to inline `5.` prefix
-     .layout-capped-indicator height-capped, chapter-segmented scroll indicator
 
    LS has no per-paragraph Latin micro-summary; on wide viewports the para
    number lives in the left margin alongside a vertical rule (both hang
    off to the left so body text keeps its normal column). On narrow
-   viewports the layout reverts to the inline `5.` prefix. The indicator
-   is height-capped because LS is ~2.6× as long as GeS.
+   viewports the layout reverts to the inline `5.` prefix.
    ──────────────────────────────────────────────────────────────────────── */
 
 .layout-long .paragraph      { position: relative; margin: 1.75rem 0; }
@@ -861,15 +919,6 @@ blockquote.document-quote.scripture-quote footer {
     }
 }
 
-/* Indicator: explicit height (not max-height — flex children with basis 0
-   collapse to nothing without it). Centred in the area below the sticky
-   bar, not the full viewport. */
-.layout-capped-indicator #ch-indicator {
-    height: calc(95vh - var(--bar-h, 4rem));
-    top:    calc(50% + var(--bar-h, 4rem) / 2);
-}
-.layout-capped-indicator .ch-bar { flex: 1 1 0; min-height: 8px; height: auto; }
-.layout-capped-indicator .ch-seg { flex: 1; height: auto; min-height: 1px; }
 
 /* ── no-JS: hide non-functional fixed chrome ────────────────────────────── */
 .no-js #sticky-bar,
