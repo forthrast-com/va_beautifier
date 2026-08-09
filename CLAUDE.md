@@ -508,6 +508,18 @@ check vacuous everywhere else, because a mistyped marker usually lands in a
 *different* chapter from the number's rightful cite — which is exactly how
 MH's hid.
 
+**The Latin edition is the arbiter for a marker dispute.** GeS ships both
+languages, and the Latin numbers its notes *continuously* where the English
+restarts per chapter — so a constant offset aligns them and any disagreement
+in marker count localises the defect precisely. It settled two in II.2:
+§62's `(16)` was a typo for `(15)` (English note 15 *is* the Lumen gentium
+IV.37 citation the Latin carries as (138), on the identical sentence), and
+§57 had lost its `(3)` outright — the Latin has four cites there to the
+English's three, and places the missing one mid-clause at "terrae
+subiiciendae (126)". Both repaired in the extractor; the second mattered
+because an uncited note never reaches the books, so Gen 1:28 was absent from
+the EPUB and all three PDFs.
+
 **A note nothing cites is nearly always a mis-read marker, not a decorative
 note.** LN looked like it had a genuinely uncited note 20 until the two
 cites of `[19]` were compared: §3's fits note 19 (*Gaudium et Spes* 39),

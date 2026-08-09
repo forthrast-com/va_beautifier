@@ -22,6 +22,7 @@ from core import (
     paragraph_record,
     parse_num,
     parse_footnote,
+    repair,
     roman_to_int,
     title_case,
 )
@@ -222,6 +223,37 @@ def _extract_latin_headings():
 def extract():
     body_html, notes_html = load_split(EN_SRC)
     body_html = body_html[body_html.find('<hr />'):]
+
+    # §62's closing marker is typed (16) in a chapter whose note block stops
+    # at 15 — the document's only cite with no note, while note 15 is the
+    # only note with no cite. Note 15 is "Dogmatic Constitution on the
+    # Church, Chapter IV, n. 37", and the Latin edition (which numbers
+    # continuously) carries exactly that citation as (138), attached to the
+    # identical sentence: "iusta libertas inquirendi, cogitandi necnon
+    # mentem suam in humilitate et fortitudine aperiendi in iis in quibus
+    # peritia gaudent (138)". So (16) is a typo for (15), not a lost note.
+    body_html = repair(
+        body_html,
+        'they enjoy competence.(16)',
+        'they enjoy competence.(15)',
+        what='GeS §62 cite mistyped as (16)',
+    )
+
+    # §57 lost its (3) marker outright: the Latin carries four cites here
+    # (125–128) against the English's three, and at the constant offset of
+    # 123 the survivors line up exactly — EN (2) = LA (125) "Col. 3:2",
+    # EN (4) = LA (127) "Prov. 8:30-31". The gap is EN note 3, "Cf. Gen.
+    # 1:28", which the Latin places mid-clause: "terrae subiiciendae (126)
+    # creationisque perficiendae". Restored at the matching English point,
+    # after the punctuation per this document's house style. Without it the
+    # note is cited nowhere, and an uncited note never reaches the books —
+    # Gen 1:28 was absent from the EPUB and all three PDFs.
+    body_html = repair(
+        body_html,
+        'that he should subdue the earth, perfect creation',
+        'that he should subdue the earth,(3) perfect creation',
+        what='GeS §57 dropped its (3) cite',
+    )
 
     desc, promulgation = _extract_frontmatter(body_html)
     paragraphs = _walk_body(make_soup(body_html))
