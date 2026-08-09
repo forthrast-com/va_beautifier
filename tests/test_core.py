@@ -135,6 +135,25 @@ class TextHelperTests(unittest.TestCase):
         for number in (1, 4, 9, 14, 42):
             self.assertEqual(roman_to_int(int_to_roman(number)), number)
 
+    def test_title_case_capitalises_through_opening_punctuation(self):
+        # str.capitalize() uppercases position zero and lowercases the rest,
+        # so a quoted or parenthesised word was never capitalised at all.
+        # Vatican titles quote heavily: FT shipped a section heading reading
+        # 'Beyond a World of “associates”'.
+        self.assertEqual(
+            title_case('"THEOLOGY OF LIBERATION"', small_words=True),
+            '"Theology of Liberation"',
+        )
+        self.assertEqual(
+            title_case('BEYOND A WORLD OF “ASSOCIATES”'),
+            'Beyond a World of “Associates”',
+        )
+        self.assertEqual(
+            title_case('(THEOLOGY OF LIBERATION)'), '(Theology of Liberation)')
+        # Elided particles and numerals keep their existing handling.
+        self.assertEqual(title_case("L'OSSERVATORE ROMANO"), "L'Osservatore Romano")
+        self.assertEqual(title_case('POPE LEO XIV'), 'Pope Leo XIV')
+
     def test_title_case_distinguishes_words_from_canonical_roman_numerals(self):
         self.assertEqual(
             title_case('CIVIC AND POLITICAL LOVE'),

@@ -520,6 +520,17 @@ failure is asymmetric: `make_book` only emits notes something points at, so
 an uncited note silently vanishes from the EPUB/PDFs while still appearing
 in the web drawer.
 
+`tests/test_site_artifacts.py` derives `DOCS` from
+`gen_doc_rules.implemented_docs()` and asserts it is non-empty. It used to
+scrape a `DOCS :=` assignment out of the Makefile; when `DOCS` moved into
+the generated `build/docs.mk` the scrape silently returned `()`, and since
+every check in that file is a loop over it, the whole artefact QA became a
+no-op that still reported OK — for however long, hiding a stale `<p
+class="doc-name">` assertion (the title became an `h1` in the a11y work) and
+a document whose catalogue `type` was not a valid tile kind. **A per-item
+loop with an empty collection passes.** When a check iterates a discovered
+list, assert the list is non-empty in the same breath.
+
 The Nix dev shell installs the tracked `.githooks/pre-commit` hook for the
 clone. It runs `make check`: fetch implemented snapshots, run the full suite,
 build incrementally with `-j8`, then require the site-artifact QA. GitHub

@@ -114,6 +114,11 @@ def linkify_footnotes(text, part, chapter, footnote_ref_ids=None):
     def replace(m):
         n = m.group(1)
         target = next(ref_ids, f'fn-{part}-{chapter}-{n}')
+        if not target:
+            # Explicitly unresolvable (see footnote_ref_ids_by_index): the
+            # source cites a note it never defines. Show the numeral, but
+            # don't offer a link that goes nowhere.
+            return f'<sup class="fn-unresolved">{n}</sup>'
         return f'<sup><a href="#{target}" aria-label="Footnote {n}">{n}</a></sup>'
     return CANONICAL_FOOTNOTE_REF.sub(replace, text)
 
@@ -413,7 +418,12 @@ for idx, p in enumerate(paragraphs):
                 position = min(skipped_uncited + fn_ref_seen[context_key], len(candidates))
                 key = candidates[position - 1]
         else:
-            key = (p['part'], p['chapter'], int(r), 0)
+            # No note is defined at this scope. Minting an id anyway
+            # produced a link to nothing — GeS §62 cites (16) in a chapter
+            # whose source note block stops at 15. Signal "unresolvable"
+            # with an empty id so the marker renders without an anchor.
+            footnote_ref_ids_by_index[idx].append('')
+            continue
         footnote_ref_ids_by_index[idx].append('fn-' + footnote_key(*key))
         fn_para.setdefault(key, para_id_by_index[idx])
 

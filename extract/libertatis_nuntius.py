@@ -271,11 +271,18 @@ def extract():
         'pontificate': 'John Paul II',
         'date': DATE,
         'identifier': IDENTIFIER,
-        'type': 'instruction',
+        # A CDF instruction is the same species of document as Antiqua et
+        # nova: a dicastery exercising the Pope's authority without speaking
+        # in his voice. Same tile kind and authority rank.
+        'type': 'curia_note',
         'subtitle': (
-            'On certain aspects of the "Theology of Liberation"'
+            'Instruction on Certain Aspects of the "Theology of Liberation"'
         ),
         'desc': DESC,
+        # The source's own title, under the Latin incipit — the two lines
+        # are the source's, split on its `<br/>`.
+        'desc_post': 'INSTRUCTION ON CERTAIN ASPECTS OF THE\n'
+                     '"THEOLOGY OF LIBERATION"',
         # The instruction is cited by Roman chapter numeral plus its
         # chapter-scoped paragraph number ("Libertatis Nuntius VII, 9"), so
         # the numerals belong on the page. The trailing Conclusion still

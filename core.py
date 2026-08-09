@@ -706,6 +706,20 @@ _ROMAN = re.compile(
 )
 
 
+def _capitalise_first_letter(word):
+    """Uppercase the first *letter*, not the first character.
+
+    `str.capitalize()` uppercases position zero and lowercases the rest, so
+    a word opening with punctuation is never capitalised at all:
+    `'"THEOLOGY'` came back `'"theology'`, and the same for parenthesised
+    or smart-quoted openings. Vatican titles quote a great deal.
+    """
+    for i, ch in enumerate(word):
+        if ch.isalpha():
+            return word[:i] + ch.upper() + word[i + 1:]
+    return word
+
+
 def title_case(s, *, small_words=False):
     """Dumb title case: capitalise every word, force small words ("of",
     "the", "in"…) to lowercase, and preserve Roman numerals.
@@ -740,7 +754,7 @@ def title_case(s, *, small_words=False):
                 parts[1] = parts[1].capitalize()
             result.append(sep.join(parts))
         else:
-            result.append(lo.capitalize())
+            result.append(_capitalise_first_letter(lo))
     return ' '.join(result)
 
 

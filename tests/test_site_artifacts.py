@@ -7,8 +7,9 @@ import zipfile
 from html import escape
 
 from core import is_unnumbered_chapter
+from gen_doc_rules import implemented_docs
 import make_index
-from project import BUILD, DOWNLOADS, ROOT, SITE
+from project import BUILD, DOWNLOADS, SITE
 
 
 STRICT = os.environ.get('VA_REQUIRE_SITE_ARTIFACTS') == '1'
@@ -17,22 +18,24 @@ STRICT = os.environ.get('VA_REQUIRE_SITE_ARTIFACTS') == '1'
 FOOTNOTE_REF_RE = re.compile(r'(?<!\d)\((\d{1,3})\)')
 
 
-def _makefile_docs():
-    lines = (ROOT / 'Makefile').read_text(encoding='utf-8').splitlines()
-    chunks = []
-    in_docs = False
-    for line in lines:
-        if line.startswith('DOCS'):
-            in_docs = True
-            chunks.append(line.split(':=', 1)[1])
-        elif in_docs and line.startswith((' ', '\t')):
-            chunks.append(line)
-        elif in_docs:
-            break
-    return tuple(' '.join(chunks).replace('\\', '').split())
+def _implemented_docs():
+    """Every implemented slug, from the manifest the build itself derives from.
+
+    This used to scrape a `DOCS :=` assignment out of the Makefile. `DOCS`
+    later moved into the generated `build/docs.mk`, so the scrape silently
+    started returning `()` — and since every check below is a loop over it,
+    the whole artefact QA quietly became a no-op that still reported OK.
+    Read the same source `gen_doc_rules` writes the Makefile fragment from,
+    so the list cannot go stale again, and assert it is non-empty so the
+    next such break fails instead of passing vacuously.
+    """
+    slugs = tuple(slug for slug, _sources in implemented_docs())
+    if not slugs:
+        raise AssertionError('no implemented documents discovered')
+    return slugs
 
 
-DOCS = _makefile_docs()
+DOCS = _implemented_docs()
 
 
 def _required_paths():
@@ -50,7 +53,7 @@ def _required_paths():
 
 
 def _rel(path):
-    return str(path.relative_to(ROOT))
+    return str(path)
 
 
 def _load_toml(slug):
@@ -116,6 +119,22 @@ class GeneratedSiteArtifactTests(unittest.TestCase):
                     self.assertTrue(data.get('kind_long'))
                 else:
                     self.assertTrue(data.get('subtitle'))
+
+    def test_no_footnote_cite_links_to_a_missing_note(self):
+        """Every `#fn-…` anchor must have an element to land on.
+
+        GeS §62 cites (16) in a chapter whose source note block stops at 15;
+        the renderer minted an id for it anyway and shipped a link to
+        nothing. Unresolvable cites now render as a bare numeral, so any
+        surviving `#fn-` href must resolve.
+        """
+        href = re.compile(r'href="#(fn-[^"]+)"')
+        for slug in DOCS:
+            with self.subTest(doc=slug):
+                html = (SITE / f'{slug}.html').read_text(encoding='utf-8')
+                ids = set(re.findall(r'id="(fn-[^"]+)"', html))
+                dangling = sorted({t for t in href.findall(html) if t not in ids})
+                self.assertEqual(dangling, [], 'footnote links with no target')
 
     def test_indicator_marks_exactly_one_place_per_reading_element(self):
         """Simulate the scroll indicator's "you are here" resolution.
@@ -233,8 +252,11 @@ class GeneratedSiteArtifactTests(unittest.TestCase):
                 # (from the [layout] TOML table) may follow, so don't anchor on
                 # the closing quote.
                 self.assertIn(f'<body class="doc-{slug}', html)
+                # The doc title is the page's single h1 (a11y, 2026-07).
+                # This asserted a <p> until the DOCS list was repaired and
+                # the check actually started running again.
                 self.assertIn(
-                    f'<p class="doc-name">{escape(data["name"])}</p>',
+                    f'<h1 class="doc-name">{escape(data["name"])}</h1>',
                     html,
                 )
                 self.assertIn('id="fn-drawer"', html)
