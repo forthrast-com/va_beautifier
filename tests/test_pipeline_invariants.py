@@ -64,6 +64,25 @@ REQUIRED_METADATA = (
     'name', 'hue', 'source_url', 'issued_by', 'date', 'identifier', 'desc',
 )
 
+# Holes in the vatican.va snapshots themselves. Everywhere else a failing
+# invariant means the walker dropped something and the fix is in the
+# extractor; here the text is simply not on the page, so there is nothing to
+# recover and nothing to repair. Recording the defect keeps the invariant
+# live — a *second* gap in the same chapter still fails — instead of
+# switching the check off for the document. Each entry earns its place by
+# being checked against the source by hand.
+#
+#   libertatis_nuntius — chapter VI runs 1, 2, 3, 4, 5, **7**, 8, 9, 10.
+#     The missing ¶6 is simply not in the snapshot. (Its neighbour defect,
+#     the same chapter's mis-typed `[19]` marker, *is* repairable and is
+#     fixed in the extractor rather than recorded here.)
+KNOWN_SOURCE_DEFECTS = {
+    'libertatis_nuntius': {
+        # (part, chapter, number) that legitimately never appears
+        'paragraph_gap': {(0, 6, 6)},
+    },
+}
+
 
 def _load_all():
     """slug → extracted dict, or None where the source snapshot is absent
@@ -135,14 +154,33 @@ class PipelineInvariantTests(unittest.TestCase):
 
     def test_visible_paragraph_numbering_is_continuous(self):
         def check(slug, data):
-            nums = [p['number'] for p in data['paragraphs']
-                    if not p.get('hide_number')]
-            self.assertTrue(nums, 'no visible paragraphs')
-            self.assertEqual(nums[0], 1, 'first visible paragraph is not §1')
-            for prev, cur in zip(nums, nums[1:]):
+            gaps = KNOWN_SOURCE_DEFECTS.get(slug, {}).get('paragraph_gap', set())
+            visible = [p for p in data['paragraphs'] if not p.get('hide_number')]
+            self.assertTrue(visible, 'no visible paragraphs')
+
+            def run_is_continuous(nums, where, part=0, chapter=0):
                 self.assertEqual(
-                    cur, prev + 1,
-                    f'paragraph numbering jumps §{prev} → §{cur}')
+                    nums[0], 1, f'{where}: first visible paragraph is not §1')
+                for prev, cur in zip(nums, nums[1:]):
+                    expected = prev + 1
+                    while (part, chapter, expected) in gaps:
+                        expected += 1  # documented hole in the source
+                    self.assertEqual(
+                        cur, expected,
+                        f'{where}: paragraph numbering jumps §{prev} → §{cur}')
+
+            if data.get('layout', {}).get('chapter_numbering'):
+                # Numbers are chapter-scoped, so continuity is too: each
+                # chapter must open at §1 and run unbroken to its own end.
+                runs = {}
+                for p in visible:
+                    runs.setdefault((p['part'], p['chapter']), []).append(
+                        p['number'])
+                for (part, chapter), nums in runs.items():
+                    run_is_continuous(
+                        nums, f'part {part} chapter {chapter}', part, chapter)
+            else:
+                run_is_continuous([p['number'] for p in visible], 'document')
         self.for_each_doc(check)
 
     def test_no_folded_paragraph_markers_in_continuations(self):
@@ -171,11 +209,14 @@ class PipelineInvariantTests(unittest.TestCase):
             self.assertEqual(
                 all_cited - defined, set(),
                 'cites with no definition (broken links)')
+            uncited_ok = KNOWN_SOURCE_DEFECTS.get(slug, {}).get(
+                'uncited_note', set())
             for note in data['footnotes']:
                 part_cites = cited_by_part.get(note['part'], set())
                 self.assertTrue(
                     note['number'] in part_cites
-                    or note['number'] in all_cited,
+                    or note['number'] in all_cited
+                    or note['number'] in uncited_ok,
                     f'fn {note["number"]} (part {note["part"]}) is never '
                     f'cited — dropped cite marker?')
         self.for_each_doc(check)

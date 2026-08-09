@@ -217,6 +217,19 @@ Three templates encountered so far:
     from the heading's inline next-siblings. A bracketing table of contents
     (titled `INDEX` at each end) is skipped by walking from the centred
     `INTRODUCTION` to the first footnote definition.
+- **1984 CDF flat** (*Libertatis Nuntius*) — flatter than old-flat: no
+  `<main>`, no `<center>`, no named anchors at all, just 180 sibling `<p>`
+  whose `align` attribute is the only structural signal, so the walk keys on
+  `is_centred` + child shape throughout. Chapter heads are centred bold with
+  the numeral and title split across a `<br/>` (`I<br/>AN INSPIRATION`) —
+  read with `br_text` and split on the line, because `^[IVX]+` would
+  cheerfully eat the `I` of a title. Chapter IX alone spells its numeral
+  `IX.`. Body cites are bare `[N]`; definitions follow a centred bold
+  `Footnotes` heading as `(N) …` paragraphs. **Paragraph numbers restart at 1
+  in each chapter** — see `chapter_numbering` under Layout flags. The body is
+  wrapped in `<!--INIZIO TESTO-->` / `<!--FINE TESTO-->` comments, which is
+  what turned up the `clean_text` bug where `Comment` (a `NavigableString`
+  subclass) rendered as prose.
 - **Curia Word export** (*Antiqua et nova*, *Quo vadis, humanitas?*) —
   content is a stream of styled `<p>` tags with named anchors for footnotes.
   Major divisions and subsection titles are recovered from
@@ -261,6 +274,21 @@ group — regression-tested in `test_make_html`.
 
 Doc-scoped CSS lives under `.doc-<slug>` selectors. Long structured documents share gutter-style paragraph numbers. Only the current paragraph's number pins below the sticky bar; following numbers remain static beside their first lines. GeS keeps the original inline `5. *Latin heading* body` layout via the default rules + `.para-num::after { content: '.' }`.
 
+**The indicator's scalar is the paragraph *ordinal*, not its number.**
+`ch_paras` / `sec_paras` / `sub_paras`, every seg's `first`/`last`, and the
+JS `readingKey` all key on position in `paragraphs[]` (stamped on each
+element as `data-ord`). Ordinals are monotonic by construction, so ranges
+stay disjoint even under `chapter_numbering` where numeric ranges would
+overlap and light up several bars at once. Only the paragraphs-mode seg
+labels need the authored number, and they look it up by ordinal. This also
+retired two latent bugs: paragraphs-mode segs used to synthesise
+`target: para-{n}`, which pointed at the wrong element wherever a
+collision-suffixed id existed (FeR's hidden "Blessing" §1), and QVH's
+hidden preliminary note only worked because its sentinel numbers `-1..-3`
+happened to sort correctly. `scratch/indicator_coverage.py` simulates the
+selection logic over every built reader and asserts each element resolves to
+exactly one bar and one seg.
+
 **Scroll indicator (universal).** The rail is full-height for every document — it fills the area below the sticky bar, bars flex-grow by paragraph count, segs share their bar equally (the old `capped_indicator` flag is retired; the cap-vs-natural distinction no longer exists). In `section_indicator` mode each seg is a section range; sub-headings inside a section are emitted as `notches` (fractions) on its seg, drawn as hairline ticks across the seg's right third and **visible only on the active bar** (at 5px idle they'd be grit — the bar discloses texture as it widens). The current-position marker splits lanes in a notched seg: an unbroken stripe down the left two-thirds marks the current section, and a band slides notch-to-notch in the right third marking the current sub-heading; unnotched segs keep the plain whole-seg `cur-para` fill. A chapter with *no* numbered sections but authored sub-headings promotes each sub to its own seg (the `ch_subs` branch — LS's introduction, FT ch 2).
 
 **Layout flags (the `[layout]` TOML table).** Per-document rendering choices that used to live as hand-maintained slug sets scattered across `make_html`, `make_book`, and `styles.css` are now declared once per document. The extractor returns a `layout` dict; `core.write_toml` serialises it to a `[layout]` table (canonical flag order in `core.LAYOUT_FLAGS`); the renderers read `data['layout']` and `make_html` also stamps each truthy flag as a `layout-<flag>` body class (underscores → hyphens). `styles.css` targets those classes once instead of enumerating slugs. The flags:
@@ -270,8 +298,9 @@ Doc-scoped CSS lives under `.doc-<slug>` selectors. Long structured documents sh
   - `mobile_inline` — narrow-viewport fallback to inline `5.` numbering (`.layout-mobile-inline`; LS/MH/AeN/QVH/SC).
   - `section_indicator` — indicator segments cover section ranges instead of one per paragraph, with sub-heading notches (LS/MH/VD/FT/QVH); replaced `make_html.DOC_INDICATOR_LEVEL`. A region whose paragraphs are *all* hidden-numbered (QVH's Preliminary Note) falls back to one whole-region seg ranged over the hidden numbers, so its bar stays visible and live.
   - `stacked_desc` — each pre-title `desc` line renders on its own row, for fronts that list distinct issuing bodies (AeN's two dicasteries); replaced a slug test in `make_html`.
+  - `chapter_numbering` — paragraph numbers restart at 1 in every chapter (LN: I.1–9, II.1–4, … XI.1–18), which is how such documents are cited. The odd flag out: it declares a fact about the source, not a rendering taste. Anchors become `para-{chapter}-{number}` instead of falling into the generic duplicate-number suffix path (which would spell chapter II ¶1 `para-1-2` — opaque in a bookmark), and `test_visible_paragraph_numbering_is_continuous` checks each chapter's own run rather than one global sequence.
 
-The web/book agreement on which chapters render title-only (trailing `Conclusion`, bare-chapter docs, never roman-style) lives in `core.is_unnumbered_chapter`, shared by both renderers.
+The web/book agreement on which chapters render title-only lives in `core.is_unnumbered_chapter`, shared by both renderers: a trailing `Conclusion` (exact title match) and bare-chapter docs. The `Conclusion` case holds **even under roman style** — a document cited by chapter numeral (LN's `VII, 9`) still doesn't call its conclusion `XII.` — while roman style otherwise always numbers, including an `I. Introduction`. The exact-title match is what keeps that narrow: AeN's closing `Concluding Reflections` is a numbered chapter and keeps its numeral. A bare chapter also emits no `data-ch-num`, or the sticky bar reads "XII Conclusion" over a body heading of plain "Conclusion".
 
 Genuinely bespoke per-doc CSS still uses `.doc-<slug>` (AeN's gutter chapter numeral, MH/QVH's third heading tier). Adding a standard long doc now needs **no** edit to `make_html`, `make_book`, or `styles.css` — only the `layout` dict in its extractor.
 
@@ -430,6 +459,27 @@ metadata) swept over every implemented document discovered from the
 manifest — a new extractor inherits every lesson with no registration.
 Pin document-specific facts in `test_extractors.py`; encode a new *class*
 of defect as another invariant there instead.
+
+`KNOWN_SOURCE_DEFECTS` is the escape hatch for holes in the vatican.va
+snapshots themselves. Everywhere else a failing invariant means the walker
+dropped something and the fix belongs in the extractor; occasionally the
+text is simply not on the page (LN's chapter VI runs 1–5 then jumps to 7).
+Recording the specific defect keeps the invariant live — a *second* gap in
+the same chapter still fails — instead of switching the check off for the
+document. Verify against the source by hand before adding an entry; the
+default assumption for a failing invariant is still "the walker is wrong".
+
+**A note nothing cites is nearly always a mis-read marker, not a decorative
+note.** LN looked like it had a genuinely uncited note 20 until the two
+cites of `[19]` were compared: §3's fits note 19 (*Gaudium et Spes* 39),
+while §5's sits on "the Conference of 'Puebla'" and note 20 is the Puebla
+Final Document's paragraph ranges for the option for the poor and for the
+young — exactly what §5's next sentence describes. The snapshot had simply
+typed `[20]` as `[19]`, giving the document its only backward-running
+marker. Repaired in the extractor, not exempted. Worth the care because the
+failure is asymmetric: `make_book` only emits notes something points at, so
+an uncited note silently vanishes from the EPUB/PDFs while still appearing
+in the web drawer.
 
 The Nix dev shell installs the tracked `.githooks/pre-commit` hook for the
 clone. It runs `make check`: fetch implemented snapshots, run the full suite,

@@ -1,5 +1,6 @@
 import unittest
 
+from core import CANONICAL_FOOTNOTE_REF
 from extract import (
     antiqua_et_nova,
     caritas_in_veritate,
@@ -9,6 +10,7 @@ from extract import (
     fratelli_tutti,
     gaudium_et_spes,
     laudato_si,
+    libertatis_nuntius,
     lumen_fidei,
     magnifica_humanitas,
     quo_vadis_humanitas,
@@ -509,6 +511,81 @@ class ExtractorRegressionTests(unittest.TestCase):
         for number, citation in expected_scripture.items():
             self.assertIn(f'> — {citation}', paragraphs[number]['text'])
             self.assertNotRegex(paragraphs[number]['text'], r'> [“"]')
+
+    @needs_sources(libertatis_nuntius.EN_SRC)
+    def test_libertatis_nuntius_numbers_paragraphs_per_chapter(self):
+        data = libertatis_nuntius.extract()
+
+        self.assertEqual(len(data['paragraphs']), 124)
+        self.assertEqual(len(data['footnotes']), 35)
+        self.assertEqual(data['hue'], 320)
+        self.assertEqual(data['pontificate'], 'John Paul II')
+        self.assertTrue(data['layout']['chapter_numbering'])
+
+        by_chapter = {}
+        for p in data['paragraphs']:
+            by_chapter.setdefault(p['chapter'], []).append(p['number'])
+        # Eleven Roman chapters plus the unnumbered preface (0) and the
+        # trailing Conclusion (12), each restarting its own count at 1.
+        self.assertEqual(sorted(by_chapter), list(range(13)))
+        for chapter, numbers in by_chapter.items():
+            self.assertEqual(numbers[0], 1, f'chapter {chapter} opens at §1')
+        self.assertEqual(len(by_chapter[1]), 9)
+        self.assertEqual(len(by_chapter[11]), 18)
+
+        # The preface and the Conclusion are numberless in the source; they
+        # still anchor, with the numbers kept off the page.
+        self.assertTrue(all(p['hide_number'] for p in data['paragraphs']
+                            if p['chapter'] in (0, 12)))
+        self.assertTrue(all(not p.get('hide_number') for p in data['paragraphs']
+                            if p['chapter'] not in (0, 12)))
+
+        # Chapter heads split numeral from title on a <br/>; chapter IX
+        # alone spells its numeral with a trailing stop.
+        titles = {p['chapter']: p['chapter_title'] for p in data['paragraphs']}
+        self.assertEqual(titles[1], 'An Inspiration')
+        self.assertEqual(titles[9], 'The Theological Application of This Core')
+        self.assertEqual(titles[12], 'Conclusion')
+
+        # Source defect, pinned so a future snapshot refresh shows up as a
+        # test change rather than silently altering the text: chapter VI has
+        # no ¶6 at all, jumping §5 → §7.
+        self.assertEqual(by_chapter[6], [1, 2, 3, 4, 5, 7, 8, 9, 10])
+
+        # The snapshot types chapter VI §5's Puebla marker as `[19]`, a
+        # number already spent at §3 — the document's only backward-running
+        # marker, and the reason note 20 (the Puebla Final Document's ranges
+        # for the option for the poor and for the young, which is exactly
+        # what the next sentence describes) appeared uncited. Repaired at
+        # load, so every note 1–35 is cited exactly where it belongs.
+        cited = {
+            int(n) for p in data['paragraphs']
+            for n in CANONICAL_FOOTNOTE_REF.findall(p['text'])
+        }
+        self.assertEqual(cited, set(range(1, 36)))
+        puebla = next(p for p in data['paragraphs']
+                      if p['chapter'] == 6 and p['number'] == 5)
+        self.assertIn("Conference of 'Puebla'(20)", puebla['text'])
+        self.assertNotIn('(19)', puebla['text'])
+        note_20 = next(f for f in data['footnotes'] if f['number'] == 20)
+        self.assertEqual(note_20['chapter'], 6)
+        self.assertEqual(note_20['text'], 'Cf. n. 1134–1165 and n. 1166–1205.')
+
+        # `<!--INIZIO TESTO-->` wraps the body on these 1984 pages; comments
+        # must not render as prose (they once prefixed the first paragraph).
+        self.assertTrue(data['paragraphs'][0]['text'].startswith(
+            'The Gospel of Jesus Christ is a message of freedom'))
+        for p in data['paragraphs']:
+            self.assertNotIn('INIZIO TESTO', p['text'])
+            self.assertNotIn('FINE TESTO', p['text'])
+
+        # Two signatories; Bovone's role runs over two <br/> lines.
+        self.assertEqual(data['signatories'], [
+            {'name': 'Joseph Cardinal Ratzinger', 'role': 'Prefect'},
+            {'name': 'Alberto Bovone',
+             'role': 'Titular Archbishop of Caesarea in Numidia, Secretary'},
+        ])
+        self.assertIn('Feast of the Transfiguration', data['promulgation'])
 
 
 if __name__ == '__main__':

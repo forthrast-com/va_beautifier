@@ -161,6 +161,14 @@ SOURCES_MANIFEST = (
         'Quo vadis, humanitas? (English)',
     ),
     Source(
+        'libertatis_nuntius_en',
+        'theology_of_liberation_en.html',
+        'https://www.vatican.va/roman_curia/congregations/cfaith/documents/'
+        'rc_con_cfaith_doc_19840806_theology-liberation_en.html',
+        'implemented',
+        'Libertatis Nuntius (English)',
+    ),
+    Source(
         'francis_g7_ai_en',
         'francis_g7_ai_en.html',
         'https://www.vatican.va/content/francesco/en/speeches/2024/june/'

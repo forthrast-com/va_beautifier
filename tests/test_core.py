@@ -20,6 +20,7 @@ from core import (
     int_to_roman,
     is_centred,
     is_promulgation,
+    is_unnumbered_chapter,
     normalise_footnote_refs,
     normalise_footnote_text,
     numbered_paragraph,
@@ -228,6 +229,40 @@ class FootnoteTests(unittest.TestCase):
 
         self.assertEqual(assigned[0]['part'], 2)
         self.assertEqual(assigned[0]['section'], 4)
+
+    def test_scope_miss_keeps_the_scope_the_source_gave_it(self):
+        # Under preserve_scope a note is often cited from outside its own
+        # part/chapter (two GeS notes are). The scoped lookup misses, and the
+        # note must keep its own scope rather than being re-homed.
+        paragraphs = [
+            paragraph_record(1, 'Cited (1).', part=1, chapter=1, section=5),
+            paragraph_record(2, 'Cited (2).', part=1, chapter=1, section=5),
+        ]
+        notes = [
+            {'part': 1, 'chapter': 1, 'number': 1, 'text': 'In scope.'},
+            {'part': 2, 'chapter': 2, 'number': 2, 'text': 'Cited elsewhere.'},
+        ]
+
+        assigned = assign_footnote_context(notes, paragraphs, preserve_scope=True)
+
+        self.assertEqual(assigned[1]['part'], 2)
+        self.assertEqual(assigned[1]['chapter'], 2)
+        self.assertEqual(assigned[1]['section'], 0)
+
+    def test_conclusion_stays_bare_under_roman_chapter_style(self):
+        # A document cited by chapter numeral (LN's "VII, 9") still doesn't
+        # call its conclusion "XII." — and the web and book renderers share
+        # this helper precisely so they cannot disagree about it.
+        self.assertTrue(is_unnumbered_chapter(
+            'Conclusion', chapter_style='roman'))
+        self.assertTrue(is_unnumbered_chapter('Conclusion'))
+        # AeN's closing chapter is a numbered chapter, not a bare conclusion.
+        self.assertFalse(is_unnumbered_chapter(
+            'Concluding Reflections', chapter_style='roman'))
+        # Roman style otherwise always numbers, including an introduction.
+        self.assertFalse(is_unnumbered_chapter(
+            'Introduction', chapter_style='roman'))
+        self.assertTrue(is_unnumbered_chapter('Anything', bare_chapters=True))
 
 
 class TomlTests(unittest.TestCase):

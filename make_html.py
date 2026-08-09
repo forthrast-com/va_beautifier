@@ -357,20 +357,28 @@ def next_cid():
 para_ch_id: dict[str, str] = {}
 
 para_id_by_index: dict[int, str] = {}
-para_number_counts = Counter(p['number'] for p in paragraphs)
-para_number_seen = Counter()
-visible_para_seen = Counter()
-for idx, p in enumerate(paragraphs):
-    number = p['number']
-    para_number_seen[number] += 1
-    if para_number_counts[number] == 1:
-        para_id = f'para-{number}'
-    elif not p.get('hide_number', False) and visible_para_seen[number] == 0:
-        para_id = f'para-{number}'
-        visible_para_seen[number] += 1
-    else:
-        para_id = f'para-{number}-{para_number_seen[number]}'
-    para_id_by_index[idx] = para_id
+# Sources that restart numbering each chapter make `number` chapter-scoped, so
+# the anchor is too — `para-7-9` reads back as "chapter VII, §9", which is how
+# such documents are actually cited. Everything else keeps the bare
+# `para-{n}`, with a suffix only where numbers genuinely collide.
+if layout.get('chapter_numbering'):
+    for idx, p in enumerate(paragraphs):
+        para_id_by_index[idx] = f'para-{p["chapter"]}-{p["number"]}'
+else:
+    para_number_counts = Counter(p['number'] for p in paragraphs)
+    para_number_seen = Counter()
+    visible_para_seen = Counter()
+    for idx, p in enumerate(paragraphs):
+        number = p['number']
+        para_number_seen[number] += 1
+        if para_number_counts[number] == 1:
+            para_id = f'para-{number}'
+        elif not p.get('hide_number', False) and visible_para_seen[number] == 0:
+            para_id = f'para-{number}'
+            visible_para_seen[number] += 1
+        else:
+            para_id = f'para-{number}-{para_number_seen[number]}'
+        para_id_by_index[idx] = para_id
 
 fn_occurrences = Counter((fn['part'], fn['chapter'], fn['number']) for fn in footnotes)
 fn_seen = Counter()
@@ -477,11 +485,6 @@ for idx, p in enumerate(paragraphs):
 
     if chapter != seen_chapter and p['chapter'] != 0:
         cid = next_cid()
-        label = chapter_full_label(p['chapter'], p['chapter_title']) if chapter_style == 'roman' else p['chapter_title'] or (
-            f'Part {int_to_roman(p["part"])}, Ch. {p["chapter"]}' if p['part']
-            else f'Chapter {p["chapter"]}'
-        )
-        indicator_chapters.append({'id': cid, 'label': label, 'spacer': False, 'part': p['part']})
         # The conclusion is structurally a chapter but the source labels it
         # only 'CONCLUSION', not 'CHAPTER SIX' — suppress the "Chapter N"
         # prefix so the rendered heading matches the source. The id then
@@ -490,6 +493,16 @@ for idx, p in enumerate(paragraphs):
             p['chapter_title'], chapter_style=chapter_style,
             bare_chapters=BARE_CHAPTERS,
         )
+        if is_unnumbered:
+            label = p['chapter_title']
+        elif chapter_style == 'roman':
+            label = chapter_full_label(p['chapter'], p['chapter_title'])
+        else:
+            label = p['chapter_title'] or (
+                f'Part {int_to_roman(p["part"])}, Ch. {p["chapter"]}'
+                if p['part'] else f'Chapter {p["chapter"]}'
+            )
+        indicator_chapters.append({'id': cid, 'label': label, 'spacer': False, 'part': p['part']})
         ch_tag = f'h{(part_heading_level or 1) + 1}'
         if chapter_style == 'roman':
             # Roman-numeral docs (AeN): chapter number lives in the
@@ -497,10 +510,16 @@ for idx, p in enumerate(paragraphs):
             # ::before), so the heading text is just the title.
             # The sticky bar reads both attrs and renders 'II  Title'
             # without the inline prefix doubling the numeral up.
-            ch_num = int_to_roman(p['chapter'])
+            # `data-ch-num` is what the sticky bar renders beside the title,
+            # so a bare chapter must not carry one — otherwise the bar reads
+            # "XII Conclusion" over a body heading of plain "Conclusion".
+            num_attr = (
+                '' if is_unnumbered
+                else f'data-ch-num="{int_to_roman(p["chapter"])}" '
+            )
             html_parts.append(
                 h(ch_tag, 'chapter-title', p['chapter_title'])
-                .replace(f'<{ch_tag} ', f'<{ch_tag} id="{cid}" data-sticky data-ch-num="{ch_num}" ')
+                .replace(f'<{ch_tag} ', f'<{ch_tag} id="{cid}" data-sticky {num_attr}')
             )
             if p.get('chapter_subtitle', ''):
                 html_parts.append(subtitle_html(
@@ -516,9 +535,11 @@ for idx, p in enumerate(paragraphs):
             if p['chapter_title']:
                 ch_num = f'{int_to_roman(p["part"])}.{p["chapter"]}' if p['part'] else f'{p["chapter"]}'
                 id_attr = f'id="{cid}" ' if is_unnumbered else ''
+                # As above: a bare chapter shows no number in the sticky bar.
+                num_attr = '' if is_unnumbered else f'data-ch-num="{ch_num}" '
                 html_parts.append(
                     h(ch_tag, 'chapter-title', p['chapter_title'])
-                    .replace(f'<{ch_tag} ', f'<{ch_tag} {id_attr}data-sticky data-ch-num="{ch_num}" ')
+                    .replace(f'<{ch_tag} ', f'<{ch_tag} {id_attr}data-sticky {num_attr}')
                 )
                 if p.get('chapter_subtitle', ''):
                     html_parts.append(subtitle_html(
@@ -605,7 +626,8 @@ for idx, p in enumerate(paragraphs):
 
     visible_num = '' if p.get('hide_number', False) else f'<span class="para-num">{num}</span>'
     html_parts.append(
-        f'<div class="paragraph" id="{para_id}" data-para-num="{num}" data-sub-text="{e(sub_text)}">'
+        f'<div class="paragraph" id="{para_id}" data-ord="{idx}"'
+        f' data-para-num="{num}" data-sub-text="{e(sub_text)}">'
         f'{visible_num}'
         + (f' <em class="heading-la">{e(head)}</em>' if head else '')
         + f'\n{body}'
@@ -853,29 +875,36 @@ noscript_toc_html = '\n'.join(noscript_toc_parts)
 # [first, last]) is the same either way — JS doesn't know or care.
 indicator_level = 'sections' if layout.get('section_indicator') else 'paragraphs'
 
+# Every range below is expressed in **paragraph ordinals** (position in
+# `paragraphs`), not paragraph numbers. Ordinals are monotonic by
+# construction, so `min`/`max`/`<` mean document order even when the source
+# restarts numbering inside each chapter (Libertatis Nuntius: I.1–9, II.1–4,
+# …), where numeric ranges would overlap and the "current" test would light
+# up several bars at once. Only the paragraphs-mode seg labels need the
+# authored number back, and they look it up by ordinal.
 ch_paras: dict[str, list[int]] = {}
 # Fallback ranges for regions whose paragraphs are ALL hidden-numbered
 # (QVH's Preliminary Note): without them the region's bar renders zero segs —
-# an invisible, unclickable sliver in the rail. The hidden numbers still
-# anchor real `para-{n}` elements, so ranging over them keeps the bar live.
+# an invisible, unclickable sliver in the rail. Those paragraphs still anchor
+# real elements, so ranging over their ordinals keeps the bar live.
 ch_paras_hidden: dict[str, list[int]] = {}
 for idx, p in enumerate(paragraphs):
     target = ch_paras if not p.get('hide_number', False) else ch_paras_hidden
-    target.setdefault(para_ch_id[para_id_by_index[idx]], []).append(p['number'])
+    target.setdefault(para_ch_id[para_id_by_index[idx]], []).append(idx)
 
 # Map each section id → its (first, last) paragraph range so we can
 # build section-mode segs without re-walking paragraphs.
 sec_paras: dict[str, list[int]] = defaultdict(list)
-for p in paragraphs:
+for idx, p in enumerate(paragraphs):
     if p['section']:
         sid = f'sec-{p["part"]}-{p["chapter"]}-{p["section"]}'
-        sec_paras[sid].append(p['number'])
+        sec_paras[sid].append(idx)
 
 sub_paras: dict[str, list[int]] = defaultdict(list)
 for idx, p in enumerate(paragraphs):
     sid = para_to_sub_id.get(para_id_by_index[idx], '')
     if sid:
-        sub_paras[sid].append(p['number'])
+        sub_paras[sid].append(idx)
 
 def seg_notches(seg_para_list, seg_subs):
     """Sub-heading boundaries inside a seg: `{f, target}` per sub start.
@@ -964,11 +993,13 @@ for ch in indicator_chapters:
             'target': ch['id'], 'label': ch['label'],
         }]
     else:
-        # paragraphs mode — one seg per paragraph (the GeS default)
+        # paragraphs mode — one seg per paragraph (the GeS default).
+        # `paras` holds ordinals; recover the anchor and authored number.
         ch['segs'] = [{
-            'first': p, 'last': p,
-            'target': f'para-{p}', 'label': f'§{p}',
-        } for p in paras]
+            'first': o, 'last': o,
+            'target': para_id_by_index[o],
+            'label': f'§{paragraphs[o]["number"]}',
+        } for o in paras]
 
     # JS still wants ch.paras for the para → chapter index lookup
     ch['paras'] = paras

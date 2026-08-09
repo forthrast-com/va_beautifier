@@ -54,7 +54,7 @@ import re
 import tomllib
 from pathlib import Path
 
-from bs4 import BeautifulSoup, NavigableString
+from bs4 import BeautifulSoup, Comment, NavigableString
 
 
 # ── text helpers ─────────────────────────────────────────────────────────────
@@ -94,6 +94,12 @@ def clean_text(element, *, preserve_formatting=False):
     the extractor's `[N]` → `(N)` normalisation still sees it.
     """
     def render(node):
+        # `Comment` subclasses `NavigableString`, so an unguarded isinstance
+        # check renders markup comments as prose: the 1984 CDF pages wrap the
+        # body in `<!--INIZIO TESTO-->` / `<!--FINE TESTO-->`, which surfaced
+        # as a literal "INIZIO TESTO " prefix on the first paragraph.
+        if isinstance(node, Comment):
+            return ''
         if isinstance(node, NavigableString):
             return str(node)
         name = getattr(node, 'name', None)
@@ -333,12 +339,20 @@ def is_unnumbered_chapter(title, *, chapter_style='', bare_chapters=False):
 
     Sources label the trailing conclusion `CONCLUSION`, never `CHAPTER
     SEVEN`; bare-chapter docs (SS, DCE) have no chapter numbering at all.
-    Roman-style docs (AeN) always keep their numeral. Shared by the web and
-    book renderers so the two surfaces cannot drift on which chapters are
-    bare."""
+    Shared by the web and book renderers so the two surfaces cannot drift on
+    which chapters are bare.
+
+    A titled `Conclusion` stays bare even under roman style — a document
+    whose chapters are cited by numeral (LN's `VII, 9`) still doesn't call
+    its conclusion `XII.`. The exact-title match is what keeps this narrow:
+    AeN's closing chapter is `Concluding Reflections`, which is a numbered
+    chapter and keeps its numeral. Roman style otherwise always numbers,
+    including an `I. Introduction`."""
+    if title.strip().lower() == 'conclusion':
+        return True
     if chapter_style == 'roman':
         return False
-    return bare_chapters or title.strip().lower() == 'conclusion'
+    return bare_chapters
 
 
 def is_centred(tag):
@@ -766,9 +780,20 @@ DEFAULT_COLLECTION = 'The Circulars (Vatican documents)'
 #   mobile_inline     — gutter numbers fall back to inline "5." on narrow screens
 #   section_indicator — indicator segments cover section ranges, not single paragraphs
 #   stacked_desc      — pre-title desc lines each get their own row (AeN's two dicasteries)
+#   chapter_numbering — paragraph numbers restart at 1 in each chapter
 # (capped_indicator was retired 2026-07: the full-height indicator is now
 # universal, so the flag stopped meaning anything. Old TOMLs carrying it
 # are ignored harmlessly until rebuilt.)
+#
+# `chapter_numbering` is the odd one out: it declares a fact about the source
+# rather than a rendering taste. Libertatis Nuntius numbers its paragraphs
+# I.1–9, II.1–4, … and is cited that way in the literature, so `number` is
+# only unique within a chapter. Two things read it — `make_html` mints
+# `para-{chapter}-{number}` anchors instead of falling into the generic
+# duplicate-number suffix path (which would spell chapter II ¶1 `para-1-2`,
+# opaque in a bookmark or a shared link), and the numbering-continuity
+# invariant checks each chapter restarts at 1 rather than demanding one
+# global run. Leave it off and nothing changes for any other document.
 LAYOUT_FLAGS = (
     'long',
     'bare_sections',
@@ -776,6 +801,7 @@ LAYOUT_FLAGS = (
     'mobile_inline',
     'section_indicator',
     'stacked_desc',
+    'chapter_numbering',
 )
 
 

@@ -21,7 +21,9 @@ const stickyEls   = Array.from(document.querySelectorAll('[data-sticky]'));
 const stickyContextEls = Array.from(
   document.querySelectorAll('[data-sticky], .section-title')
 );
-let currentParaNum = '';
+// The paragraph the indicator currently considers "here" — held as the
+// element itself so the sticky bar never has to rebuild an id from a number.
+let currentParaEl = null;
 function updateSticky() {
   let current = null;
   for (const el of stickyEls) {
@@ -44,10 +46,7 @@ function updateSticky() {
       }
       stickySub.textContent = currentSub;
     } else {
-      const para = currentParaNum
-        ? document.getElementById('para-' + currentParaNum)
-        : null;
-      stickySub.textContent = para?.dataset?.subText || '';
+      stickySub.textContent = currentParaEl?.dataset?.subText || '';
     }
   } else {
     // Top of doc / no chapter context — leave the bar blank.
@@ -159,22 +158,25 @@ const paraToChIdx = {};
 chapters.forEach((ch, i) => ch.paras.forEach(pn => paraToChIdx[pn] = i));
 
 // Collect numbered paragraphs and non-paragraph appendices in reading order.
+// A paragraph's reading key is its **ordinal** (`data-ord`), not its printed
+// number: ordinals are monotonic even where a document restarts numbering per
+// chapter, so seg ranges stay disjoint. Appendices sit outside `paragraphs[]`
+// and key on their own id.
 const paraEls = Array.from(document.querySelectorAll('.paragraph, .appendix'));
 function readingKey(el) {
-  return el.classList.contains('appendix') ? el.id : el.id.replace('para-', '');
+  return el.classList.contains('appendix') ? el.id : el.dataset.ord;
 }
 
 function updateIndicator() {
   const threshold = window.innerHeight * 0.35;
-  let curPara = paraEls[0] ? readingKey(paraEls[0]) : '';
+  let cur = paraEls[0] || null;
   for (const el of paraEls) {
-    if (el.getBoundingClientRect().top <= threshold) curPara = readingKey(el);
+    if (el.getBoundingClientRect().top <= threshold) cur = el;
     else break;
   }
-  currentParaNum = curPara || '';
-  // Duplicate paragraph numbers mint ids like `para-5-2`; fall back to the
-  // numeric prefix so the lookup still lands in the right chapter.
-  const chIdx = paraToChIdx[curPara] ?? paraToChIdx[parseInt(curPara)] ?? 0;
+  const curPara = cur ? readingKey(cur) : '';
+  currentParaEl = cur;
+  const chIdx = paraToChIdx[curPara] ?? 0;
   const activePart = chapters[chIdx]?.part;
   bars.forEach((b, i) => {
     const isActive = i === chIdx;

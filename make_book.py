@@ -205,10 +205,16 @@ def emit_markdown(data, slug, *, paper='a5', template_slug=None):
                 ch_title, chapter_style=chapter_style,
                 bare_chapters=bare_chapters,
             )
-            if chapter_style == 'roman':
+            if unnumbered:
+                # Checked before the style branch, or a roman-style document
+                # prints `XII. Conclusion` in the book while the web renders
+                # a bare `Conclusion` — precisely the drift the shared
+                # `is_unnumbered_chapter` exists to prevent.
+                label = ch_title
+            elif chapter_style == 'roman':
                 label = f'{int_to_roman(chapter)}. {ch_title}'
             else:
-                label = ch_title if unnumbered or chapter == 0 else f'Chapter {chapter}: {ch_title}'
+                label = ch_title if chapter == 0 else f'Chapter {chapter}: {ch_title}'
             # VD's part openers carry a part epigraph plus the first section
             # heading on the same authored opener page; suppress the chapter
             # pagebreak there so the stack stays together.

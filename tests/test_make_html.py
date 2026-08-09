@@ -281,10 +281,10 @@ class MakeHtmlCollisionTests(unittest.TestCase):
         )
 
         self.assertIn('id="para-1-1"', html)
-        self.assertIn('id="para-1" data-para-num="1"', html)
+        self.assertIn('id="para-1" ', html)
         self.assertLess(
             html.index('id="para-1-1"'),
-            html.index('id="para-1" data-para-num="1"'),
+            html.index('id="para-1" '),
         )
 
     def test_title_split_regions_keep_their_own_sections(self):
