@@ -1,3 +1,4 @@
+import json
 import os
 import re
 import tomllib
@@ -5,6 +6,7 @@ import unittest
 import zipfile
 from html import escape
 
+from core import is_unnumbered_chapter
 import make_index
 from project import BUILD, DOWNLOADS, ROOT, SITE
 
@@ -114,6 +116,112 @@ class GeneratedSiteArtifactTests(unittest.TestCase):
                     self.assertTrue(data.get('kind_long'))
                 else:
                     self.assertTrue(data.get('subtitle'))
+
+    def test_indicator_marks_exactly_one_place_per_reading_element(self):
+        """Simulate the scroll indicator's "you are here" resolution.
+
+        `assets/scripts.js` picks the active bar with
+        `paraToChIdx[readingKey(el)]` and lights a seg when
+        `seg.key === key` or `first <= key <= last`. Both must resolve to
+        exactly one bar and one seg for every scrollable element, or the
+        rail marks two places at once (or none). Keying on paragraph
+        *numbers* used to make that fragile — a document whose numbering
+        restarts each chapter has overlapping ranges — so the seg ranges are
+        paragraph ordinals, and this pins the property that motivated the
+        change.
+        """
+        para_el = re.compile(
+            r'<div class="paragraph" id="([^"]+)" data-ord="(\d+)"')
+        appendix_el = re.compile(r'<[^>]*class="appendix"[^>]*id="([^"]+)"')
+        indicator = re.compile(r'^const chapters = (\[.*?\]);$', re.M)
+
+        for slug in DOCS:
+            with self.subTest(doc=slug):
+                html = (SITE / f'{slug}.html').read_text(encoding='utf-8')
+                match = indicator.search(html)
+                self.assertIsNotNone(match, 'no indicator JSON in reader')
+                chapters = json.loads(match.group(1))
+
+                bar_of = {}
+                for index, chapter in enumerate(chapters):
+                    for key in chapter['paras']:
+                        self.assertNotIn(
+                            str(key), bar_of,
+                            f'reading key {key!r} claimed by two bars')
+                        bar_of[str(key)] = index
+
+                elements = [(m.group(1), m.group(2))
+                            for m in para_el.finditer(html)]
+                elements += [(m.group(1), m.group(1))
+                             for m in appendix_el.finditer(html)]
+                self.assertTrue(elements, 'no reading elements found')
+
+                for element_id, key in elements:
+                    bar = bar_of.get(key)
+                    self.assertIsNotNone(
+                        bar, f'{element_id}: key {key!r} maps to no bar')
+                    lit = [
+                        seg for seg in chapters[bar].get('segs', ())
+                        if (seg['key'] == key if 'key' in seg
+                            else seg['first'] <= int(key) <= seg['last'])
+                    ]
+                    self.assertEqual(
+                        len(lit), 1,
+                        f'{element_id}: {len(lit)} segs light up on its own '
+                        f'bar {bar} — expected exactly one')
+
+    def test_web_and_book_agree_on_title_only_chapters(self):
+        """Both renderers must honour `core.is_unnumbered_chapter`.
+
+        It exists precisely so the two surfaces cannot disagree about which
+        chapters render title-only — and they disagreed anyway, because both
+        callers branched on `chapter_style` *before* consulting it, so a
+        roman-style document printed `XII. Conclusion` in the book against a
+        bare `Conclusion` on the web. Compare each surface against the
+        shared helper rather than against each other, so a failure names the
+        renderer that drifted.
+        """
+        for slug in DOCS:
+            with self.subTest(doc=slug):
+                data = _load_toml(slug)
+                chapter_style = data.get('chapter_style', '')
+                bare_chapters = bool(data.get('layout', {}).get('bare_chapters'))
+
+                titles = {}
+                for p in data['paragraphs']:
+                    if p.get('chapter') and p.get('chapter_title'):
+                        titles.setdefault(p['chapter'], p['chapter_title'])
+                expected = {
+                    title for title in titles.values()
+                    if is_unnumbered_chapter(
+                        title, chapter_style=chapter_style,
+                        bare_chapters=bare_chapters)
+                }
+
+                # Web: a title-only chapter carries no `data-ch-num`, which
+                # is what the sticky bar renders beside the heading.
+                html = (SITE / f'{slug}.html').read_text(encoding='utf-8')
+                web_bare = {
+                    escape(title) for title in titles.values()
+                    if f'class="chapter-title">{escape(title)}<' in html
+                    and f'data-ch-num="{escape(title)}"' not in html
+                    and re.search(
+                        r'<h\d[^>]*data-sticky(?![^>]*data-ch-num)[^>]*'
+                        r'class="chapter-title">' + re.escape(escape(title)),
+                        html)
+                }
+                self.assertEqual(
+                    web_bare, {escape(t) for t in expected},
+                    'reader disagrees with core.is_unnumbered_chapter')
+
+                # Book: the `## ` heading is the bare title, with no
+                # `Chapter N: ` or roman `N. ` prefix.
+                markdown = (BUILD / f'{slug}.md').read_text(encoding='utf-8')
+                headings = set(re.findall(r'^## (.*)$', markdown, re.M))
+                book_bare = {t for t in titles.values() if t in headings}
+                self.assertEqual(
+                    book_bare, expected,
+                    'book disagrees with core.is_unnumbered_chapter')
 
     def test_reader_html_has_navigation_and_no_known_markup_leaks(self):
         for slug in DOCS:

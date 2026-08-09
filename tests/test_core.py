@@ -27,6 +27,7 @@ from core import (
     paragraph_record,
     parse_footnote,
     read_toml,
+    repair,
     roman_to_int,
     title_case,
     write_toml,
@@ -117,6 +118,18 @@ class TextHelperTests(unittest.TestCase):
         )
 
         self.assertEqual(text, 'Creation(46) and hope(47).')
+
+    def test_repair_applies_and_refuses_to_no_op(self):
+        self.assertEqual(repair('a 81. b', '81.', '87.'), 'a 87. b')
+        # The point of the helper: a snapshot that no longer contains the
+        # defect must fail, not silently skip the fix and reintroduce the
+        # bug the repair exists to prevent.
+        with self.assertRaises(ValueError):
+            repair('already fixed', '81.', '87.')
+        # Wrong multiplicity is equally suspect — the repair was written
+        # against one known occurrence.
+        with self.assertRaises(ValueError):
+            repair('81. and 81.', '81.', '87.')
 
     def test_roman_helpers_round_trip(self):
         for number in (1, 4, 9, 14, 42):

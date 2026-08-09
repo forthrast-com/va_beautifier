@@ -48,8 +48,22 @@ def _heading_text(p):
     return text.replace('R esponsibility', 'Responsibility')
 
 
+# §82's Populorum Progressio citation carries a stray, anchorless
+# `<sup>[10]</sup>` nested inside the superscript holding the real,
+# anchored `[110]` — Word-export residue, most likely left behind when the
+# marker was renumbered from 10 to 110. It rendered as a second footnote
+# link to note 10, a note already (and correctly) cited back at §20. Found
+# by the repeat-citation invariant, which is exactly its shape: one number
+# cited from two paragraphs.
+NOTE_MARKER_REPAIRS = (
+    ('<a name="_ftnref110" href="#_ftn110" class=" cleaner">[110]</a> '
+     '<sup>[10]</sup>',
+     '<a name="_ftnref110" href="#_ftn110" class=" cleaner">[110]</a>'),
+)
+
+
 def extract():
-    soup, main = load_main(EN_SRC)
+    soup, main = load_main(EN_SRC, repairs=NOTE_MARKER_REPAIRS)
     ps = main.find_all('p')
     first_body_idx = next(
         (i for i, p in enumerate(ps) if RE_PARA.match(clean_text(p))), None

@@ -140,6 +140,32 @@ def clean_text(element, *, preserve_formatting=False):
     return text.strip()
 
 
+def repair(text, old, new, *, count=1, what=''):
+    """Patch a known defect in a source snapshot, loudly.
+
+    `sources/` is gitignored and unversioned, so every load-time repair is a
+    string match against a moving target. Plain `str.replace` is a silent
+    no-op when the target moves — and these repairs exist precisely because
+    the un-repaired text triggers a real bug, so a silent no-op reintroduces
+    it. SC's `81.` → `87.` is the sharpest case: without it the walker's
+    strictly-increasing guard folds ¶87 into ¶86, marker and all, and
+    nothing in the pipeline would say so.
+
+    Raises when the pattern is absent or does not occur exactly `count`
+    times, so a refreshed snapshot fails the build instead of quietly
+    changing the text.
+    """
+    found = text.count(old)
+    if found != count:
+        raise ValueError(
+            f'source repair no longer applies{f" ({what})" if what else ""}: '
+            f'expected {count} occurrence(s) of {old[:70]!r}, found {found}. '
+            f'The snapshot may have been refreshed — re-check the defect '
+            f'against the source before deleting or adjusting this repair.'
+        )
+    return text.replace(old, new, count)
+
+
 def flatten_ws(text):
     """Collapse every run of whitespace — *including* newlines — to one space.
 

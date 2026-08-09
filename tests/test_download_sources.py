@@ -87,5 +87,41 @@ class DownloadTests(unittest.TestCase):
             urlopen.assert_not_called()
 
 
+class SnapshotPinTests(unittest.TestCase):
+    def test_every_implemented_source_is_pinned(self):
+        unpinned = [
+            source.key
+            for source in download_sources.selected_sources([], 'implemented')
+            if not source.sha256
+        ]
+        self.assertEqual(
+            unpinned, [],
+            'implemented sources must pin the snapshot their extractor was '
+            'written against — run `download_sources.py --hashes`')
+
+    def test_local_snapshots_match_their_pins(self):
+        """A refreshed page changes what every walker and `core.repair` sees.
+
+        `sources/` is gitignored, so drift otherwise shows up as an
+        inexplicable extractor regression somewhere downstream. Absent
+        snapshots skip — a fresh clone has none.
+        """
+        checked = 0
+        for source in download_sources.selected_sources([], 'implemented'):
+            if not (download_sources.SOURCES / source.filename).exists():
+                continue
+            checked += 1
+            with self.subTest(source=source.key):
+                actual = download_sources.drift(source)
+                self.assertIsNone(
+                    actual,
+                    f'{source.filename} no longer matches its pin '
+                    f'(expected {source.sha256}, got {actual}). Re-check the '
+                    f'extractor and its repairs against the new page before '
+                    f'updating the pin.')
+        if not checked:
+            self.skipTest('no snapshots present — run download_sources.py')
+
+
 if __name__ == '__main__':
     unittest.main()

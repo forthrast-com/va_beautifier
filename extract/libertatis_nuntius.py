@@ -24,11 +24,12 @@ Shape — a fourth variant, flatter than anything else implemented:
     (centred) and Bovone (right-aligned), each a bold name over an italic
     role. Both become `signatories[]`.
 
-Two defects in the snapshot are recorded rather than repaired, because the
-text simply isn't on the page (see `KNOWN_SOURCE_DEFECTS` in
-`tests/test_pipeline_invariants.py`): chapter VI runs 1–5 then jumps to 7,
-and note 20 is defined but never cited — §5 of that same chapter skips
-[19] → [21] across exactly the seam where ¶6 went missing.
+Two defects in the snapshot, handled differently because only one is
+recoverable. Chapter VI runs 1–5 then jumps to 7: the missing ¶6 is simply
+not on the page, so it is recorded in `KNOWN_SOURCE_DEFECTS`
+(`tests/test_pipeline_invariants.py`) rather than invented. The same
+chapter's §5 types its Puebla marker as `[19]`, a number already spent at
+§3 — that one *is* recoverable and is repaired at load; see `extract()`.
 """
 
 import re
@@ -42,6 +43,7 @@ from core import (
     is_centred,
     make_soup,
     paragraph_record,
+    repair,
     roman_to_int,
     title_case,
 )
@@ -238,8 +240,10 @@ def extract():
     # which is precisely what the next sentence goes on to describe; note 19
     # (Gaudium et Spes 39 / Quadragesimo Anno) has nothing to do with
     # Puebla. Repaired at load so the walker sees the marker the text means.
-    raw = raw.replace("Conference of 'Puebla' [19]",
-                      "Conference of 'Puebla' [20]", 1)
+    raw = repair(raw,
+                 "Conference of 'Puebla' [19]",
+                 "Conference of 'Puebla' [20]",
+                 what='LN ch VI §5 Puebla marker mistyped as [19]')
 
     soup = make_soup(raw)
     tags = soup.find_all('p')

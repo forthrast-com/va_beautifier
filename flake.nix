@@ -29,6 +29,12 @@
               pkgs.pandoc
               pkgs.typst
               pkgs.libertinus
+              # Only for `tools/agent-browser`, which QAs the built readers in
+              # a real browser. Nothing in the build or test path needs node —
+              # but the flake shell replaces PATH wholesale, so without it
+              # there is no node *and* no `nix-shell` to fetch one, and
+              # browser QA becomes a yak shave from inside the dev shell.
+              pkgs.nodejs
             ];
             shellHook = ''
               if [[ -z "''${CI:-}" ]] && git rev-parse --git-dir >/dev/null 2>&1; then

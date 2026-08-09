@@ -197,6 +197,50 @@ class PipelineInvariantTests(unittest.TestCase):
                         f'a swallowed paragraph?')
         self.for_each_doc(check)
 
+    def test_no_note_is_cited_from_two_paragraphs(self):
+        """In a globally-numbered document, a note number used twice is a
+        mistyped marker rather than a reused citation.
+
+        Measured across the corpus: of the fourteen documents that number
+        notes globally, exactly one had a repeat, and it was a defect (MH's
+        §82 carried a stray anchorless `<sup>[10]</sup>` nested inside the
+        superscript holding the real `[110]`). LN's `[19]`-for-`[20]` was
+        the same shape. The paired signature — one number cited twice while
+        another note is uncited — is all but diagnostic.
+
+        The check applies only where note numbers identify a note on their
+        own. GeS renumbers per chapter (167 notes across 34 numbers) and so
+        cites a given number from many paragraphs by design; scoping the key
+        to its chapter would make the check vacuous for every other
+        document, since a mistyped marker usually lands in a *different*
+        chapter from the number's rightful cite — which is precisely how MH
+        hid. So GeS opts out on a property read from its own data, not a
+        slug list, and keeps the coverage of the scope-aware resolution
+        invariant below.
+        """
+        def check(slug, data):
+            notes = data['footnotes']
+            if len({n['number'] for n in notes}) != len(notes):
+                self.skipTest('notes are renumbered per scope, not global')
+            citers = {}
+            for p in data['paragraphs']:
+                for n in set(CANONICAL_FOOTNOTE_REF.findall(p['text'])):
+                    citers.setdefault(int(n), []).append(p)
+            for number, paragraphs in sorted(citers.items()):
+                if len(paragraphs) < 2:
+                    continue
+                context = []
+                for p in paragraphs:
+                    i = p['text'].find(f'({number})')
+                    context.append(
+                        f'§{p["number"]} '
+                        f'{p["text"][max(0, i - 60):i + 5]!r}')
+                self.fail(
+                    f'note {number} is cited from '
+                    f'{len(paragraphs)} paragraphs — a mistyped marker? '
+                    + ' … '.join(context))
+        self.for_each_doc(check)
+
     def test_footnote_cites_and_definitions_resolve(self):
         def check(slug, data):
             cited_by_part = {}

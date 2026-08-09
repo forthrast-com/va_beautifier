@@ -12,6 +12,7 @@ from core import (
     encyclical_split,
     is_centred,
     make_soup,
+    repair,
     split_around_title,
 )
 
@@ -29,10 +30,20 @@ RE_CHAPTER_WORD = re.compile(r'^CHAPTER\s+([A-Z]+)$')
 RE_FOOTNOTE_ANCHOR = re.compile(r'^_(ftn|edn)(ref)?\d+$')
 
 
-def load_main(path, *, drop_chrome=False):
-    """Parse a UTF-8 modern page; return `(soup, main-or-body)`."""
+def load_main(path, *, drop_chrome=False, repairs=()):
+    """Parse a UTF-8 modern page; return `(soup, main-or-body)`.
+
+    `repairs` is a sequence of `(old, new)` markup fixes applied before
+    parsing, for defects that are easier to state as raw markup than to
+    unpick from the tree. Each goes through `core.repair`, so a snapshot
+    that no longer contains the defect fails loudly rather than silently
+    skipping the fix.
+    """
     with open(path, encoding='utf-8') as f:
-        soup = make_soup(f.read())
+        raw = f.read()
+    for old, new in repairs:
+        raw = repair(raw, old, new, what=path.name)
+    soup = make_soup(raw)
     if drop_chrome:
         for tag in soup(CHROME):
             tag.decompose()

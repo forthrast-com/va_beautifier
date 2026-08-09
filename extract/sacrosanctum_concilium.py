@@ -36,6 +36,7 @@ from core import (
     paragraph_record,
     parse_footnote,
     parse_num,
+    repair,
     roman_to_int,
     title_case,
 )
@@ -261,10 +262,11 @@ def extract():
     # The snapshot mislabels ¶87 as "81." (the office-reform decree between
     # ¶86 and ¶88). Without the repair the walker's strictly-increasing
     # guard folds it into ¶86 as continuation prose, stray marker and all.
-    body_html = body_html.replace(
+    body_html = repair(
+        body_html,
         '<p>81. In order that the divine office may be better',
         '<p>87. In order that the divine office may be better',
-        1,
+        what='SC ¶87 mis-numbered as 81',
     )
 
     # Source placement is decorative; promulgation is end matter in the

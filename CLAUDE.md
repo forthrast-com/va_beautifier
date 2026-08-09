@@ -136,6 +136,25 @@ source manifest and local status; omit `--list` to fetch missing sources.
 `--category queued` selects pending extractor inputs, while
 `--category reference` selects captured contextual documents.
 
+**Snapshots are pinned by sha256.** `sources/` is gitignored, so without a
+pin every walker — and every load-time repair — is string-matched against an
+unversioned moving target, and a quietly refreshed page surfaces as an
+inexplicable extractor regression somewhere downstream. Each implemented
+`Source` carries the digest its extractor was written against; `--list`
+reports `pinned` / `DRIFTED`, a fetch that no longer matches says so, and
+`tests/test_download_sources.py` fails on drift (skipping when the snapshot
+is absent, as on a fresh clone). `--hashes` prints current digests to paste
+in after deliberately taking an upstream change — re-check the extractor and
+its repairs first.
+
+**Repairs must fail loudly.** Use `core.repair(text, old, new)` rather than
+`str.replace` for load-time defect fixes: it raises when the pattern is
+absent or matches the wrong number of times. A silent no-op reintroduces
+exactly the bug the repair exists to prevent — SC's `81.` → `87.` is the
+sharpest case, where losing the repair silently folds ¶87 into ¶86, marker
+and all. `extract/_modern.load_main` takes a `repairs=` sequence for defects
+easier to state as raw markup than to unpick from the parsed tree (MH).
+
 ## Template variation
 
 Three templates encountered so far:
@@ -442,9 +461,19 @@ If revisiting:
 
 ## Environment
 
-`flake.nix` provides Python 3.12 + beautifulsoup4, GNU make, pandoc, and
-typst. Use the Nix shell for project commands; do not rely on tools
-installed in the ambient shell. A tracked `.envrc` (`use flake`) loads the
+`flake.nix` provides Python 3.12 + beautifulsoup4, GNU make, pandoc, typst,
+and nodejs. Use the Nix shell for project commands; do not rely on tools
+installed in the ambient shell.
+
+`nodejs` is there only for `tools/agent-browser`, which drives the built
+readers in a real browser (system Chrome; nothing is downloaded, and the
+npm CLI installs per-user into `~/.npm-global` on first run). Nothing in the
+build or test path needs it — but the flake shell replaces PATH wholesale,
+so without it there is neither node nor a `nix-shell` to fetch one, and
+browser QA turns into a yak shave from inside the dev shell. **Look at the
+pages**: the structural tests cannot see chapter eyebrows numbered in the
+wrong system, or a sticky bar reading "XII Conclusion" over a body heading
+of plain "Conclusion". Three such bugs shipped with a green suite. A tracked `.envrc` (`use flake`) loads the
 shell via direnv/nix-direnv; without direnv, prefix commands with
 `nix develop --command`. Build everything:
 `nix develop --command make`. Build one book:
@@ -468,6 +497,17 @@ Recording the specific defect keeps the invariant live — a *second* gap in
 the same chapter still fails — instead of switching the check off for the
 document. Verify against the source by hand before adding an entry; the
 default assumption for a failing invariant is still "the walker is wrong".
+
+**A note cited from two paragraphs is a mistyped marker.** Of the fourteen
+documents that number notes globally, not one legitimately reuses a cite —
+so `test_no_note_is_cited_from_two_paragraphs` is a very sharp instrument,
+and it found MH's stray `<sup>[10]</sup>` unprompted. It applies only where
+a note number identifies a note on its own: GeS renumbers per chapter (167
+notes across 34 numbers) and opts out on that property read from its own
+data, not a slug list. Scoping the key to chapter instead would make the
+check vacuous everywhere else, because a mistyped marker usually lands in a
+*different* chapter from the number's rightful cite — which is exactly how
+MH's hid.
 
 **A note nothing cites is nearly always a mis-read marker, not a decorative
 note.** LN looked like it had a genuinely uncited note 20 until the two

@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# agent-browser, for QAing the built readers in a real browser.
+#
+# The tests and the site-artifact QA cover structure; they cannot see a
+# sticky bar showing "XII Conclusion" over a body heading of plain
+# "Conclusion", or chapter eyebrows numbered in the wrong system. Three such
+# bugs shipped green. Hence: look at the pages.
+#
+#   tools/agent-browser open "file://$PWD/site/laudato_si.html"
+#   tools/agent-browser snapshot -i
+#   tools/agent-browser screenshot scratch/ls.png
+#   tools/agent-browser close
+#
+# `nodejs` comes from the flake dev shell. The CLI itself is an npm package
+# rather than a nixpkgs one, so it is installed per-user on first run into
+# ~/.npm-global (a persistent prefix — the default prefix is the read-only
+# nix store). It drives the system Chrome; no browser is downloaded.
+set -euo pipefail
+
+prefix="${AGENT_BROWSER_PREFIX:-$HOME/.npm-global}"
+bin="$prefix/bin/agent-browser"
+
+if ! command -v node >/dev/null 2>&1; then
+    echo "tools/agent-browser: no node on PATH." >&2
+    echo "  Run inside the dev shell: nix develop --command $0 $*" >&2
+    exit 1
+fi
+
+if [[ ! -x "$bin" ]]; then
+    echo "tools/agent-browser: installing agent-browser into $prefix …" >&2
+    npm install -g agent-browser --prefix "$prefix" >&2
+    # npm >= 11 defers install scripts, and agent-browser's postinstall is
+    # what fetches the native binary — so run it explicitly rather than
+    # leaving a wrapper with nothing behind it.
+    ( cd "$prefix/lib/node_modules/agent-browser" && node scripts/postinstall.js >&2 )
+fi
+
+exec "$bin" "$@"
