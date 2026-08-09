@@ -118,7 +118,10 @@ def linkify_footnotes(text, part, chapter, footnote_ref_ids=None):
             # Explicitly unresolvable (see footnote_ref_ids_by_index): the
             # source cites a note it never defines. Show the numeral, but
             # don't offer a link that goes nowhere.
-            return f'<sup class="fn-unresolved">{n}</sup>'
+            # Inner span, not a class on the <sup>: `sup a` sizing compounds
+            # with the browser's own `sup { font-size: smaller }`, so styling
+            # the sup directly renders visibly larger than a real marker.
+            return f'<sup><span class="fn-unresolved">{n}</span></sup>'
         return f'<sup><a href="#{target}" aria-label="Footnote {n}">{n}</a></sup>'
     return CANONICAL_FOOTNOTE_REF.sub(replace, text)
 

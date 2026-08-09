@@ -303,6 +303,12 @@ h1, h2, h3, h4 { font-family: var(--font-display); }
 .paragraph p     { margin-top: .6rem; }
 sup a            { color: var(--accent); text-decoration: none; font-size: .75em; }
 sup a:hover      { text-decoration: underline; }
+/* A cite whose note the source never defines (GeS §62 cites 16 in a chapter
+   with 15 notes). It carries no anchor, so it would otherwise render at full
+   body size and colour — reading as a stray numeral glued to the word rather
+   than as a reference. Match the linked marker's metrics; stay muted, since
+   there is nothing to click. */
+sup .fn-unresolved { color: var(--fg-dim); font-size: .75em; }
 
 /* External hyperlinks preserved from source (vatican.va doc cross-refs).
    Subtle by default — thin coloured underline, accent on hover — so they
