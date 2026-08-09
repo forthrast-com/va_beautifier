@@ -248,6 +248,33 @@ def list_sources(sources):
         )
 
 
+def verify(sources):
+    """Report snapshots that no longer match their pin. Returns a count.
+
+    Exists as a CLI mode, not just a test, because CI never runs the test
+    suite — it fetches, builds, and deploys. Without this the first thing a
+    changed page does there is raise from `core.repair` in the middle of
+    `make`, which reads as a mystery build failure rather than "vatican.va
+    edited the document".
+    """
+    drifted = 0
+    for source in sources:
+        actual = drift(source)
+        if actual:
+            drifted += 1
+            print(f'DRIFT {source.key}: {source.filename}')
+            print(f'      pinned {source.sha256}')
+            print(f'      actual {actual}')
+    if drifted:
+        print(
+            f'\n{drifted} snapshot(s) differ from the manifest. The '
+            f'extractors and their `core.repair` patterns were written '
+            f'against the pinned bytes — re-check them against the new page, '
+            f'then record the new digests with --hashes.'
+        )
+    return drifted
+
+
 def print_hashes(sources):
     """Emit `key  sha256` for present snapshots, to paste into the manifest."""
     for source in sources:
@@ -261,8 +288,16 @@ def print_hashes(sources):
 def download(source, *, force=False, dry_run=False):
     target = SOURCES / source.filename
     if target.exists() and not force:
-        print(f'skip  {source.key}: {target.name} already exists')
-        return
+        # A present-but-wrong file is not a hit. CI restores the sources
+        # cache through a prefix `restore-key`, so after a pin is updated it
+        # holds the *previous* snapshot; skipping on mere existence would
+        # then wedge the build on a stale file it could simply re-fetch.
+        # Treat the pin, not the filename, as the identity of the snapshot.
+        if not drift(source):
+            print(f'skip  {source.key}: {target.name} already exists')
+            return
+        print(f'stale {source.key}: {target.name} differs from its pin, '
+              f're-fetching')
     if dry_run:
         print(f'fetch {source.key}: {source.url} -> {target.name}')
         return
@@ -308,6 +343,10 @@ def main():
         help='print sha256 of present snapshots, to paste into the manifest',
     )
     parser.add_argument(
+        '--verify', action='store_true',
+        help='exit non-zero when a local snapshot differs from its pin',
+    )
+    parser.add_argument(
         '--dry-run', action='store_true',
         help='show downloads without making network requests or writing files',
     )
@@ -328,6 +367,8 @@ def main():
     if args.hashes:
         print_hashes(sources)
         return
+    if args.verify:
+        raise SystemExit(1 if verify(sources) else 0)
     if args.list:
         list_sources(sources)
         return

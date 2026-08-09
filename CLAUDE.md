@@ -147,6 +147,16 @@ is absent, as on a fresh clone). `--hashes` prints current digests to paste
 in after deliberately taking an upstream change — re-check the extractor and
 its repairs first.
 
+Two consequences worth knowing. **The pin, not the filename, is the identity
+of a snapshot**: a fetch re-downloads a present-but-drifted file instead of
+skipping it, because CI restores `sources/` through a prefix `restore-key`
+and would otherwise wedge on the previous snapshot for a run after a pin
+update. And **CI verifies pins explicitly** (`--verify`, before Nix
+installs), because the deploy workflow never runs the test suite — without
+that step the first symptom of an upstream edit is `core.repair` raising
+from the middle of `make`, which reads as a mystery build failure rather
+than "vatican.va edited the document".
+
 **Repairs must fail loudly.** Use `core.repair(text, old, new)` rather than
 `str.replace` for load-time defect fixes: it raises when the pattern is
 absent or matches the wrong number of times. A silent no-op reintroduces

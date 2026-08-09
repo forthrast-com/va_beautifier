@@ -99,6 +99,38 @@ class SnapshotPinTests(unittest.TestCase):
             'implemented sources must pin the snapshot their extractor was '
             'written against — run `download_sources.py --hashes`')
 
+    def test_stale_pinned_file_is_refetched_rather_than_skipped(self):
+        """CI restores `sources/` through a prefix restore-key, so after a
+        pin is updated the cache holds the previous snapshot. Skipping on
+        mere existence would wedge the build on a stale file it could just
+        re-fetch — the pin, not the filename, identifies the snapshot."""
+        import hashlib
+        body = b'<html>fresh</html>'
+        source = download_sources.Source(
+            'sample', 'sample.html', 'https://example.test/sample',
+            'implemented', 'Sample',
+            sha256=hashlib.sha256(body).hexdigest(),
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / source.filename
+            target.write_bytes(b'<html>stale cache</html>')
+            with patch.object(download_sources, 'SOURCES', Path(directory)):
+                response = FakeResponse()
+                response.read = lambda: body
+                with patch.object(download_sources, 'urlopen',
+                                  return_value=response) as urlopen:
+                    with redirect_stdout(io.StringIO()):
+                        download_sources.download(source)
+                    urlopen.assert_called_once()
+                self.assertEqual(target.read_bytes(), body)
+                self.assertIsNone(download_sources.drift(source))
+
+                # And a file that already matches is left alone.
+                with patch.object(download_sources, 'urlopen') as urlopen:
+                    with redirect_stdout(io.StringIO()):
+                        download_sources.download(source)
+                    urlopen.assert_not_called()
+
     def test_local_snapshots_match_their_pins(self):
         """A refreshed page changes what every walker and `core.repair` sees.
 
