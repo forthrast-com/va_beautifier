@@ -548,6 +548,22 @@ clone. It runs `make check`: fetch implemented snapshots, run the full suite,
 build incrementally with `-j8`, then require the site-artifact QA. GitHub
 Actions only rebuilds and deploys; it does not repeat the local test gate.
 
+`tools/marker_parity.py` compares English footnote-marker *counts* against
+the Latin edition's, aligning by paragraph number (shared) rather than note
+number (not — English restarts per chapter, Latin runs continuously). SC
+agrees on all 130 paragraphs and LS on all but §246 (structural: the English
+lifts the closing prayers into appendices). GeS reports ten unadjudicated
+candidates. It catches dropped or spurious markers, not mis-numbered ones —
+that shape belongs to the repeat-citation and cite/definition invariants.
+
+`tools/qa_readers.py` drives `tools/reader_probe.js` over every built reader
+at desktop light, desktop dark, and 390px, checking duplicate ids, dangling
+internal links, heading-level skips, sticky-bar/body agreement, horizontal
+overflow, contrast, and indicator health. It needs the dev shell's node (see
+`tools/agent-browser`). **Run it after renderer or CSS changes**: the
+structural tests read the HTML as text, and every bug this session that
+shipped green was one only a laid-out page reveals.
+
 `tools/audit_structure.py [slug …]` prints the human-side complement: each
 built TOML as a part › chapter › section tree with paragraph ranges — the
 view to eyeball when writing a new extractor.
