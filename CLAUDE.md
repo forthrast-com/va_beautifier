@@ -136,26 +136,6 @@ source manifest and local status; omit `--list` to fetch missing sources.
 `--category queued` selects pending extractor inputs, while
 `--category reference` selects captured contextual documents.
 
-**Snapshots are pinned by sha256.** `sources/` is gitignored, so without a
-pin every walker — and every load-time repair — is string-matched against an
-unversioned moving target, and a quietly refreshed page surfaces as an
-inexplicable extractor regression somewhere downstream. Each implemented
-`Source` carries the digest its extractor was written against; `--list`
-reports `pinned` / `DRIFTED`, a fetch that no longer matches says so, and
-`tests/test_download_sources.py` fails on drift (skipping when the snapshot
-is absent, as on a fresh clone). `--hashes` prints current digests to paste
-in after deliberately taking an upstream change — re-check the extractor and
-its repairs first.
-
-Two consequences worth knowing. **The pin, not the filename, is the identity
-of a snapshot**: a fetch re-downloads a present-but-drifted file instead of
-skipping it, because CI restores `sources/` through a prefix `restore-key`
-and would otherwise wedge on the previous snapshot for a run after a pin
-update. And **CI verifies pins explicitly** (`--verify`, before Nix
-installs), because the deploy workflow never runs the test suite — without
-that step the first symptom of an upstream edit is `core.repair` raising
-from the middle of `make`, which reads as a mystery build failure rather
-than "vatican.va edited the document".
 
 **Repairs must fail loudly.** Use `core.repair(text, old, new)` rather than
 `str.replace` for load-time defect fixes: it raises when the pattern is
@@ -164,6 +144,15 @@ exactly the bug the repair exists to prevent — SC's `81.` → `87.` is the
 sharpest case, where losing the repair silently folds ¶87 into ¶86, marker
 and all. `extract/_modern.load_main` takes a `repairs=` sequence for defects
 easier to state as raw markup than to unpick from the parsed tree (MH).
+
+This is deliberately the *only* guard on snapshot drift. Pinning each source
+by sha256 was tried and reverted (2026-08): vatican.va reflows and re-edits
+pages continuously — four of eighteen had already drifted, all cosmetically
+(SC's was whitespace plus fixing "preach the the gospel"), and none of it
+touched what the walkers key on. A digest cannot tell a reflow from a
+structural change, so it fails the deploy on changes that do not matter,
+which is worse than useless. If a change *does* matter, the walker or a
+repair breaks loudly on its own.
 
 ## Template variation
 

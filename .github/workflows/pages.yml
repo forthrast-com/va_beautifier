@@ -32,12 +32,6 @@ jobs:
             vatican-sources-
       - name: Fetch sources
         run: python3 download_sources.py --category implemented
-      # CI does not run the test suite, so nothing else here would notice a
-      # vatican.va edit. Left unchecked, the first symptom is `core.repair`
-      # raising from the middle of `make` — a mystery build failure rather
-      # than "the document changed upstream". Fails fast, before Nix.
-      - name: Verify source snapshots match their pins
-        run: python3 download_sources.py --verify --category implemented
       - name: Install Nix
         uses: cachix/install-nix-action@v31
         with:
