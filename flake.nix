@@ -35,6 +35,9 @@
               # there is no node *and* no `nix-shell` to fetch one, and
               # browser QA becomes a yak shave from inside the dev shell.
               pkgs.nodejs
+              # pdftotext, for the one Latin edition published only as a
+              # PDF (Verbum Domini) — see tools/marker_parity.py.
+              pkgs.poppler-utils
             ];
             shellHook = ''
               if [[ -z "''${CI:-}" ]] && git rev-parse --git-dir >/dev/null 2>&1; then

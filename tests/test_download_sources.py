@@ -42,6 +42,7 @@ class ManifestTests(unittest.TestCase):
                 'spe_salvi_la',
                 'caritas_in_veritate_la',
                 'fratelli_tutti_la',
+                'verbum_domini_la',
             },
         )
         self.assertTrue({

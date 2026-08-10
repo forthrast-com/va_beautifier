@@ -217,6 +217,14 @@ SOURCES_MANIFEST = (
         'Fratelli tutti (Latin)',
     ),
     Source(
+        'verbum_domini_la',
+        'verbum_domini_la.pdf',
+        'https://www.vatican.va/content/dam/benedict-xvi/pdf/apost_exhortations/'
+        'documents/hf_ben-xvi_exh_20100930_verbum-domini_lt.pdf',
+        'reference',
+        'Verbum Domini (Latin, PDF — the only Latin edition published)',
+    ),
+    Source(
         'francis_g7_ai_en',
         'francis_g7_ai_en.html',
         'https://www.vatican.va/content/francesco/en/speeches/2024/june/'

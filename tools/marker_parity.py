@@ -22,12 +22,15 @@ matched and the defect was a wrong *number* — that shape is caught by
 resolution check instead. The three together cover the marker bug classes
 seen so far.
 
-Coverage: nine documents ship a Latin twin. Six were added 2026-08 as
-`reference` sources (FeR, LF, DCE, SS, CiV, FT). Verbum Domini's Latin page
-is a 34 KB stub with no body; Ecclesia in Oceania and Magnifica Humanitas
-404; the Curia notes (AeN, QVH, LN) have no Latin edition.
+Coverage: ten documents ship a Latin twin. Seven were added 2026-08 as
+`reference` sources (FeR, LF, DCE, SS, CiV, FT, VD). Verbum Domini's is
+published *only* as a 150pp PDF — the HTML path at the usual `/la/` URL is a
+34 KB stub with no body — so it needs `pdftotext` and the PDF reader below.
+Ecclesia in Oceania and Magnifica Humanitas 404; the Curia notes (AeN, QVH,
+LN) have no Latin edition.
 
-Known-good: SC (130/130), CiV (79/79), plus GeS and LS below.
+Known-good: VD (124/124, over 382 citations — the largest apparatus in the
+collection), SC (130/130), CiV (79/79), plus GeS and LS below.
 
 Not yet usable: **Lumen Fidei and Fratelli tutti report nonsense** — the
 paragraph splitter below is tuned to the old-flat pages, and on those two it
@@ -59,7 +62,9 @@ Usage: python3 tools/marker_parity.py [slug …]
 """
 
 import re
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -75,6 +80,48 @@ LATIN_MARKER = re.compile(r'\((\d{1,3})\)')  # after marked_text normalisation
 # "57 ." / "57." opens a Latin paragraph; the space before the stop is the
 # vatican.va typesetting, not a typo.
 LATIN_PARA = re.compile(r'(?<![\d.\-–])(\d{1,3})\s*\.\s')
+
+
+# Verbum Domini's Latin exists only as a 150pp PDF. `pdftotext -layout`
+# recovers its paragraph run and citations intact, but the markers arrive as
+# bare digits welded to the preceding word ("revelationis5") — and so do page
+# ranges ("385-422") and years. What separates them is that the markers run
+# 1, 2, 3 … in strict document order, so accepting only the next expected
+# number rejects essentially every incidental numeral. That constraint alone
+# took the result from 93 false disagreements to none.
+PDF_PARA = re.compile(r'^\s{0,6}(\d{1,3})\.\s+(?=[A-Z«])', re.M)
+PDF_MARKER = re.compile(r'(?<=\S)(\d{1,3})(?=\s|$)', re.M)
+
+
+def pdf_text(path):
+    with tempfile.TemporaryDirectory() as tmp:
+        out = Path(tmp) / 'text.txt'
+        subprocess.run(['pdftotext', '-layout', str(path), str(out)],
+                       check=True, capture_output=True)
+        return out.read_text(encoding='utf-8')
+
+
+def pdf_paragraph_markers(path):
+    text = pdf_text(path)
+    spans, expected = [], 1
+    for m in PDF_PARA.finditer(text):
+        if int(m.group(1)) != expected:
+            continue
+        spans.append((expected, m.end()))
+        expected += 1
+    counts = {n: 0 for n, _ in spans}
+    bounds = [start for _, start in spans] + [len(text)]
+    nxt = 1
+    for i, (n, start) in enumerate(spans):
+        # Page-foot note definitions stand alone on their line; drop them so
+        # their numbers are not counted a second time.
+        body = re.sub(r'^\s{2,}\d{1,3}\s*$', '', text[start:bounds[i + 1]],
+                      flags=re.M)
+        for m in PDF_MARKER.finditer(body):
+            if int(m.group(1)) == nxt:
+                counts[n] += 1
+                nxt += 1
+    return counts
 
 
 def decoded(path):
@@ -177,7 +224,8 @@ def main():
             print(f'{slug}: {source.filename} missing — skipped')
             continue
 
-        la = latin_paragraph_markers(path)
+        la = (pdf_paragraph_markers(path) if path.suffix == '.pdf'
+              else latin_paragraph_markers(path))
         data = read_toml(toml)
         print(f'\n=== {slug} ===')
         mismatches = []
