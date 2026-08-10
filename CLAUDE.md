@@ -508,6 +508,21 @@ check vacuous everywhere else, because a mistyped marker usually lands in a
 *different* chapter from the number's rightful cite — which is exactly how
 MH's hid.
 
+**GeS's footnote markers are now fully adjudicated (2026-08).** Seven
+repairs in `extract/gaudium_et_spes.py`, each evidenced by the Latin's
+position *and* by the note's own content: four dropped markers (§§18, 57,
+64, 75) and three mis-numbered ones (§14's (6)-for-(5), §48's (6)-for-(5),
+§52's (13)-for-(15)), plus §62's (16)-for-(15). Every note in every scope is
+now cited exactly once and every cite resolves — the sole remaining
+duplicate is the legitimate Preface/Introduction collision at (0, 0), two
+distinct note 2s the renderer disambiguates by occurrence.
+
+The two detectors are complementary and neither suffices alone. A *count*
+disagreement against the Latin finds a **dropped** marker; a note that no
+paragraph cites finds a **mis-numbered** one, which leaves the count intact
+and so is invisible to the first. GeS's mislabels all lived in chapters
+where counts matched perfectly.
+
 **The Latin edition is the arbiter for a marker dispute.** GeS ships both
 languages, and the Latin numbers its notes *continuously* where the English
 restarts per chapter — so a constant offset aligns them and any disagreement

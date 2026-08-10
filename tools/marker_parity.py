@@ -22,13 +22,23 @@ matched and the defect was a wrong *number* — that shape is caught by
 resolution check instead. The three together cover the marker bug classes
 seen so far.
 
-Status: validated on SC (all 130 paragraphs agree) and LS (one hit, §246,
-which is structural — the English lifts the closing prayers into appendices
-so its final paragraph is shorter than the Latin's span). GeS reports ten
-candidates that have **not** been adjudicated; each wants the same
-paragraph-by-paragraph reading against the Latin that settled §57 and §62,
-and a count disagreement is a lead, not a verdict — the English and Latin
-occasionally punctuate a shared citation differently.
+Status: SC agrees on all 130 paragraphs; LS on all but §246 (structural —
+the English lifts the closing prayers into appendices). GeS's ten candidates
+were adjudicated one by one against the Latin: four were real dropped
+markers (§§14, 18, 64, 75) and are repaired in the extractor; six are not
+defects and are expected to keep reporting —
+
+  §3          the English merges two Latin notes into one ("John 18:37;
+              Matt. 20:28; Mark 10:45" against the Latin's (2) and (3)),
+  §78, 92, 93 part II chapter 5, where the English edition carries four
+              notes against the Latin's many — a translation difference,
+  §81, §82    the same, plus a split artefact: the Latin 81/82 boundary
+              lands early here, so (168) is filed under §82 though it sits
+              on §81's "safeguards" clause.
+
+A count disagreement is a lead, not a verdict. It also cannot see a marker
+that is present but *mis-numbered* — GeS had three of those (§14, §48, §52),
+found instead by looking for notes that no paragraph cites.
 
 Usage: python3 tools/marker_parity.py [slug …]
 """

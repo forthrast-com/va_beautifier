@@ -255,6 +255,77 @@ def extract():
         what='GeS §57 dropped its (3) cite',
     )
 
+    # §14 carries two faults that explain each other. Its first marker is
+    # typed (6) — "1 Cor. 6:13-20", which is about the *body* — while
+    # sitting on "raise their voice in free praise of the Creator", where
+    # note 5 ("Dan. 3:57-90", the Benedicite, all creation praising God)
+    # belongs and which is otherwise cited nowhere. The clause 1 Cor. 6
+    # actually serves, "man glorify God in his body", carries no marker at
+    # all. The Latin has all three in order — (13) Dan at "vocem
+    # attollant", (14) I Cor at "glorificet in corpore suo", (15) at "corda
+    # scrutatur" — against the English's two.
+    body_html = repair(
+        body_html,
+        'praise of the Creator.(6)',
+        'praise of the Creator.(5)',
+        what='GeS §14 first cite mislabelled (6) for (5)',
+    )
+    body_html = repair(
+        body_html,
+        'glorify God in his body and forbid it',
+        'glorify God in his body(6) and forbid it',
+        what='GeS §14 dropped its (6) cite',
+    )
+
+    # §18 loses the cite for note 15, "1 Cor. 15:56-57" — "the sting of
+    # death is sin … thanks be to God, who gives us the victory". The Latin
+    # marks it (23) at "ad vitam resurgens adeptus est".
+    body_html = repair(
+        body_html,
+        'He freed man from death.',
+        'He freed man from death.(15)',
+        what='GeS §18 dropped its (15) cite',
+    )
+
+    # §64 loses the cite for note 2 (Quadragesimo Anno) on the quoted phrase
+    # it supports; the Latin marks it (140) at "intra fines ordinis moralis".
+    body_html = repair(
+        body_html,
+        "moral order,&quot; so that God's plan",
+        "moral order,&quot;(2) so that God's plan",
+        what='GeS §64 dropped its (2) cite',
+    )
+
+    # Part II chapter 1 mislabels two markers rather than losing them, so
+    # the marker *count* matches the Latin and only the orphaned notes give
+    # it away — §48 cites (6) twice and §52 repeats (13), while notes 5 and
+    # 15 are cited nowhere. Both are settled by content: §48's first (6)
+    # sits on "He loved the Church and handed Himself over on her behalf",
+    # which is note 5, "Eph. 5:25", verbatim; §52's on "redeeming the
+    # present time", which is note 15, "Eph. 5:16".
+    body_html = repair(
+        body_html,
+        'handed Himself over on her behalf,(6)',
+        'handed Himself over on her behalf,(5)',
+        what='GeS §48 cite mislabelled (6) for (5)',
+    )
+    body_html = repair(
+        body_html,
+        'redeeming the present time(13)',
+        'redeeming the present time(15)',
+        what='GeS §52 cite mislabelled (13) for (15)',
+    )
+
+    # §75 loses the cite for note 7 (Mater et Magistra, on socialization).
+    # The Latin marks it (161) immediately after "socializationem", so it is
+    # placed on the term rather than at the end of the sentence.
+    body_html = repair(
+        body_html,
+        'between socialization and the autonomy',
+        'between socialization(7) and the autonomy',
+        what='GeS §75 dropped its (7) cite',
+    )
+
     desc, promulgation = _extract_frontmatter(body_html)
     paragraphs = _walk_body(make_soup(body_html))
     footnotes = assign_footnote_context(
