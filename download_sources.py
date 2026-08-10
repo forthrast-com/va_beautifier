@@ -169,6 +169,54 @@ SOURCES_MANIFEST = (
         'Libertatis Nuntius (English)',
     ),
     Source(
+        'fides_et_ratio_la',
+        'fides_et_ratio_la.html',
+        'https://www.vatican.va/content/john-paul-ii/la/encyclicals/documents/'
+        'hf_jp-ii_enc_14091998_fides-et-ratio.html',
+        'reference',
+        'Fides et Ratio (Latin)',
+    ),
+    Source(
+        'lumen_fidei_la',
+        'lumen_fidei_la.html',
+        'https://www.vatican.va/content/francesco/la/encyclicals/documents/'
+        'papa-francesco_20130629_enciclica-lumen-fidei.html',
+        'reference',
+        'Lumen Fidei (Latin)',
+    ),
+    Source(
+        'deus_caritas_est_la',
+        'deus_caritas_est_la.html',
+        'https://www.vatican.va/content/benedict-xvi/la/encyclicals/documents/'
+        'hf_ben-xvi_enc_20051225_deus-caritas-est.html',
+        'reference',
+        'Deus Caritas Est (Latin)',
+    ),
+    Source(
+        'spe_salvi_la',
+        'spe_salvi_la.html',
+        'https://www.vatican.va/content/benedict-xvi/la/encyclicals/documents/'
+        'hf_ben-xvi_enc_20071130_spe-salvi.html',
+        'reference',
+        'Spe Salvi (Latin)',
+    ),
+    Source(
+        'caritas_in_veritate_la',
+        'caritas_in_veritate_la.html',
+        'https://www.vatican.va/content/benedict-xvi/la/encyclicals/documents/'
+        'hf_ben-xvi_enc_20090629_caritas-in-veritate.html',
+        'reference',
+        'Caritas in Veritate (Latin)',
+    ),
+    Source(
+        'fratelli_tutti_la',
+        'fratelli_tutti_la.html',
+        'https://www.vatican.va/content/francesco/la/encyclicals/documents/'
+        'papa-francesco_20201003_enciclica-fratelli-tutti.html',
+        'reference',
+        'Fratelli tutti (Latin)',
+    ),
+    Source(
         'francis_g7_ai_en',
         'francis_g7_ai_en.html',
         'https://www.vatican.va/content/francesco/en/speeches/2024/june/'

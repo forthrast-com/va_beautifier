@@ -29,9 +29,20 @@ class ManifestTests(unittest.TestCase):
             {source.key for source in queued},
             set(),
         )
+        # Reference holds contextual captures plus the Latin editions
+        # pulled purely as a second witness for tools/marker_parity.py —
+        # no extractor consumes them, so they are not `implemented`.
         self.assertEqual(
             {source.key for source in reference},
-            {'francis_g7_ai_en'},
+            {
+                'francis_g7_ai_en',
+                'fides_et_ratio_la',
+                'lumen_fidei_la',
+                'deus_caritas_est_la',
+                'spe_salvi_la',
+                'caritas_in_veritate_la',
+                'fratelli_tutti_la',
+            },
         )
         self.assertTrue({
             'antiqua_et_nova_en',

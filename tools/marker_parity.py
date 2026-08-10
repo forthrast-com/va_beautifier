@@ -22,6 +22,21 @@ matched and the defect was a wrong *number* — that shape is caught by
 resolution check instead. The three together cover the marker bug classes
 seen so far.
 
+Coverage: nine documents ship a Latin twin. Six were added 2026-08 as
+`reference` sources (FeR, LF, DCE, SS, CiV, FT). Verbum Domini's Latin page
+is a 34 KB stub with no body; Ecclesia in Oceania and Magnifica Humanitas
+404; the Curia notes (AeN, QVH, LN) have no Latin edition.
+
+Known-good: SC (130/130), CiV (79/79), plus GeS and LS below.
+
+Not yet usable: **Lumen Fidei and Fratelli tutti report nonsense** — the
+paragraph splitter below is tuned to the old-flat pages, and on those two it
+loses the sequence early (LF at §1, FT at §80), so the last span swallows
+the rest of the document. Their reports are tool failures, not findings.
+DCE, FeR and SS produce small candidate lists that have **not** been
+adjudicated; treat them as leads only, and note DCE's §42 is its last
+paragraph and so hits the same notes-block leak.
+
 Status: SC agrees on all 130 paragraphs; LS on all but §246 (structural —
 the English lifts the closing prayers into appendices). GeS's ten candidates
 were adjudicated one by one against the Latin: four were real dropped
@@ -56,7 +71,7 @@ from project import BUILD, SOURCES
 # The Latin editions carry the same dialect split as the English ones: the
 # old-flat pages (GeS, SC) mark cites "(N)" in latin-1, the modern ones (LS)
 # use "[N]" inside anchors and are UTF-8. Accept both forms.
-LATIN_MARKER = re.compile(r'[(\[](\d{1,3})[)\]]')
+LATIN_MARKER = re.compile(r'\((\d{1,3})\)')  # after marked_text normalisation
 # "57 ." / "57." opens a Latin paragraph; the space before the stop is the
 # vatican.va typesetting, not a typo.
 LATIN_PARA = re.compile(r'(?<![\d.\-–])(\d{1,3})\s*\.\s')
@@ -72,22 +87,47 @@ def decoded(path):
 
 
 def latin_sources():
-    """slug → Latin snapshot path, for the documents that ship one."""
+    """slug → Latin snapshot, for the documents that ship one.
+
+    Category is not a filter here: GeS's Latin is an extractor input and so
+    `implemented`, while the editions pulled purely for this cross-check are
+    `reference`. Both are equally usable as a second witness.
+    """
     out = {}
     for source in SOURCES_MANIFEST:
-        if source.category != 'implemented':
-            continue
         if source.key.endswith(('_lt', '_la')):
-            slug = source.key.rsplit('_', 1)[0]
-            out[slug] = source
+            out[source.key.rsplit('_', 1)[0]] = source
     return out
+
+
+def marked_text(raw):
+    """Tag-stripped text with every footnote marker normalised to "(N)".
+
+    Three marker dialects across the Latin editions, and getting this wrong
+    is how a first pass "found" 105 defects in LS that were really just
+    bracket-blindness:
+
+      (N)                 old flat (GeS, SC)
+      [<a …>N</a>]        modern bracketed (LS, CiV) — note the brackets sit
+                          *outside* the anchor, so stripping tags to spaces
+                          leaves "[ N ]" and a naive `\\[\\d+\\]` misses it
+      <sup><a …></a>N</sup>   bare superscript (FeR) — no delimiters at all,
+                          so it can only be recognised before tags are lost
+    """
+    # Bare-superscript markers first, while the markup still exists.
+    raw = re.sub(r'<sup>\s*(?:<a[^>]*>\s*</a>\s*)?(\d{1,3})\s*</sup>',
+                 r'(\1)', raw)
+    text = re.sub(r'<[^>]+>', ' ', raw)
+    text = re.sub(r'\s+', ' ', text)
+    # Re-close brackets the tag strip pulled apart: "[ 12 ]" → "(12)".
+    return re.sub(r'[(\[]\s*(\d{1,3})\s*[)\]]', r'(\1)', text)
 
 
 def latin_paragraph_markers(path):
     """§N → marker count, read from a Latin snapshot's body."""
     raw = decoded(path)
     body = raw.split('NOTAE')[0].split('NOTES')[0]
-    text = re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', body))
+    text = marked_text(body)
 
     # Only accept the *next* expected paragraph number. Citations are full of
     # incidental numerals ("AAS 57 (1965), pp. 42-43. Cf. …"), and a greedy
